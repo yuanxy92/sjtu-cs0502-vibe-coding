@@ -1,0 +1,3 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><title>PeerDrop starter</title>
+<body><h1>同学快传 / PeerDrop</h1><p>这是项目界面参考，不包含传输、加密、签名认证或 SHA-256 校验功能。请根据 STUDENT_TASKS.md 与 AI coding agent 自行实现。</p><section><h2>发送文件</h2><input type="file"><input placeholder="接收端 IP:端口"><button>发送</button><p>待实现：生成随机文件密钥、加密文件、用接收端 RSA 公钥保护文件密钥，并进行 RSA 签名。</p></section><section><h2>接收文件</h2><p>等待接收请求</p><button>验证签名并接收</button><p>待实现：验证发送端签名、恢复文件密钥、解密文件、比较 SHA-256 并保存。</p></section></body></html>

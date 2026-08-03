@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="上海交大闵行校区数据结构寻路实验的学生起步可视化" />
+    <title>校园路径实验室 · CS0502 起步版</title>
+    <link rel="stylesheet" href="styles.css?v=1" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>校园路径实验室</h1>
+          <p>上海交大闵行校区 · 数据结构课程学生起步可视化</p>
+        </div>
+        <button id="reset-view" class="text-button" type="button">重置视图</button>
+      </header>
+
+      <section class="workspace" aria-label="校园地图工作区">
+        <aside class="sidebar">
+          <section class="control-group" aria-labelledby="selection-title">
+            <h2 id="selection-title">地点选择</h2>
+            <label for="place-query">地点查找（学生任务）</label>
+            <div class="query-row"><input id="place-query" type="search" placeholder="输入地点名称，例如：图书" /><button id="search-places" type="button">查找</button></div>
+            <label for="search-algorithm">查找算法（学生任务）</label>
+            <select id="search-algorithm">
+              <option value="array">数组顺序查找：支持包含匹配</option>
+              <option value="linked_list">链表顺序查找：支持包含匹配</option>
+              <option value="binary">二分查找：名称前缀</option>
+              <option value="bst">二叉搜索树：精确名称</option>
+              <option value="hash">哈希表：精确名称（加分）</option>
+            </select>
+            <p id="query-status" class="query-status">查找功能尚未实现</p>
+            <div id="search-results" class="search-results" aria-live="polite"></div>
+            <label for="start-select">起点</label>
+            <select id="start-select"></select>
+            <label for="end-select">终点</label>
+            <select id="end-select"></select>
+            <label for="algorithm-select">寻路算法（学生任务）</label>
+            <select id="algorithm-select">
+              <option value="bfs">BFS：最少边数</option>
+              <option value="dijkstra">Dijkstra：最短距离</option>
+              <option value="astar">A*：加分</option>
+            </select>
+            <button id="run-route" class="primary-button" type="button">运行寻路</button>
+            <button id="clear-selection" class="secondary-button" type="button">清除选择</button>
+          </section>
+
+          <section class="metrics" aria-labelledby="data-title">
+            <h2 id="data-title">地图数据</h2>
+            <dl>
+              <div><dt>图节点</dt><dd id="node-count">—</dd></div>
+              <div><dt>道路边</dt><dd id="edge-count">—</dd></div>
+              <div><dt>命名地点</dt><dd id="poi-count">—</dd></div>
+              <div><dt>当前选择</dt><dd id="selection-status">未选择</dd></div>
+              <div><dt>演示路径</dt><dd id="route-status">未计算</dd></div>
+            </dl>
+          </section>
+
+          <p class="help-text">滚轮缩放；按住鼠标拖动地图；单击命名地点可依次设为起点、终点。</p>
+        </aside>
+
+        <section class="map-panel" aria-label="校园步行图">
+          <canvas id="map-canvas" aria-label="上海交大闵行校区步行道路图"></canvas>
+          <div class="north-arrow" aria-label="北向上"><span>北</span><i></i></div>
+          <div id="hover-label" class="hover-label" hidden></div>
+          <div id="loading" class="loading">正在读取本地地图数据…</div>
+        </section>
+      </section>
+
+      <footer class="legend">
+        <span><i class="line road"></i>可通行道路</span>
+        <span><i class="dot start"></i>起点</span>
+        <span><i class="dot end"></i>终点</span>
+        <span><i class="dot poi"></i>命名地点</span>
+        <span>教学快照，不作为真实导航依据</span>
+        <span class="attribution">© OpenStreetMap contributors</span>
+      </footer>
+    </main>
+    <script defer src="map-data.js?v=2"></script>
+    <script defer src="student-tasks.js"></script>
+    <script defer src="app.js?v=11"></script>
+  </body>
+</html>
