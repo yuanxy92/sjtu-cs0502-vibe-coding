@@ -43,6 +43,20 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
 </script>
 <script>
 (function(){
+  const previousSelect=select;
+  select=function(operation){
+    clearInterval(timer);
+    frames=[];
+    pos=0;
+    $('progress').style.width='0';
+    previousSelect(operation);
+    $('run').textContent=stepMode?'下一步 →':'播放演示 →';
+    render(frame(nodes,'已切换操作：'+info[operation][1]));
+  };
+})();
+</script>
+<script>
+(function(){
   const previousBuild=build;
   build=function(operation,index,value){
     const result=previousBuild(operation,index,value);
