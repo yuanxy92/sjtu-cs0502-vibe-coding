@@ -27,9 +27,10 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
     if(operation==='insert-before'||operation==='insert-after'){
       let newSlot=null;
       result.forEach(step=>{
-        if(typeof step.tag==='string'&&step.tag.indexOf('分配两个单元：')===0){
-          newSlot=step.targetSlots&&step.targetSlots[0];
-          if(newSlot!==undefined)step.iSlot=newSlot;
+        const isAllocation=step.targetSlots&&step.targetSlots.length===2&&step.changedSlots&&step.changedSlots.length===2;
+        if(isAllocation){
+          newSlot=step.targetSlots[0];
+          step.iSlot=newSlot;
         }else if(newSlot!==null&&newSlot!==undefined&&typeof step.tag==='string'&&/新结点 next|前驱 next|插入完成/.test(step.tag)){
           step.iSlot=newSlot;
           step.activeSlots=[newSlot];
