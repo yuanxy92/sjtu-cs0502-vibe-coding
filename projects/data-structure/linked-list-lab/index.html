@@ -46,18 +46,22 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
   const previousBuild=build;
   build=function(operation,index,value){
     const result=previousBuild(operation,index,value);
-    if(operation==='delete'){
-      const targetSlot=result[0]&&result[0].iSlot;
-      const predecessorStep=result.find(step=>typeof step.tag==='string'&&step.tag.indexOf('前驱 next')===0);
-      const predecessorSlot=predecessorStep?predecessorStep.iSlot:null;
-      if(targetSlot!==null&&targetSlot!==undefined){
-        result.forEach(step=>{
-          step.jSlot=predecessorSlot;
-          if(typeof step.tag==='string'&&step.tag.indexOf('前驱 next')===0)step.iSlot=targetSlot;
-        });
-      }
+    if(operation!=='delete')return result;
+    const targetSlot=result[0]&&result[0].iSlot;
+    const targetIndex=targetSlot===null||targetSlot===undefined?-1:nodes.findIndex(node=>node.slot===targetSlot);
+    if(targetIndex<0)return result;
+    const predecessorSlot=targetIndex>0?nodes[targetIndex-1].slot:null;
+    const walkFrames=[];
+    for(let stepIndex=0;stepIndex<=targetIndex;stepIndex++){
+      const stepNode=nodes[stepIndex];
+      walkFrames.push(frame(nodes,'删除前，i 沿 next 到第 '+stepIndex+' 个结点',{iSlot:stepNode.slot,jSlot:stepIndex===targetIndex?predecessorSlot:null,activeSlots:[stepNode.slot],nextFocusSlots:stepIndex<targetIndex?[stepNode.slot]:[]}));
     }
-    return result;
+    const operationFrames=result.slice(1);
+    operationFrames.forEach(step=>{
+      step.jSlot=predecessorSlot;
+      if(typeof step.tag==='string'&&step.tag.indexOf('前驱 next')===0)step.iSlot=targetSlot;
+    });
+    return walkFrames.concat(operationFrames);
   };
 })();
 </script>
