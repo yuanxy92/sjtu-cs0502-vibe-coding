@@ -43,6 +43,22 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
 </script>
 <script>
 (function(){
+  const pointerOnlyStyle=document.createElement('style');
+  pointerOnlyStyle.textContent='.pointer-i strong,.pointer-j strong{display:none}';
+  document.head.appendChild(pointerOnlyStyle);
+  const previousBuild=build;
+  build=function(operation,index,value){
+    if(operation==='insert-after'){
+      const result=previousBuild('insert-before',index+1,value);
+      result.forEach(step=>{if(typeof step.tag==='string')step.tag=step.tag.replaceAll('插入前','插入后')});
+      return result;
+    }
+    return previousBuild(operation,index,value);
+  };
+})();
+</script>
+<script>
+(function(){
   const previousSelect=select;
   select=function(operation){
     clearInterval(timer);
