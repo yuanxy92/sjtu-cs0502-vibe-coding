@@ -41,3 +41,23 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
   };
 })();
 </script>
+<script>
+(function(){
+  const previousBuild=build;
+  build=function(operation,index,value){
+    const result=previousBuild(operation,index,value);
+    if(operation==='delete'){
+      const targetSlot=result[0]&&result[0].iSlot;
+      const predecessorStep=result.find(step=>typeof step.tag==='string'&&step.tag.indexOf('前驱 next')===0);
+      const predecessorSlot=predecessorStep?predecessorStep.iSlot:null;
+      if(targetSlot!==null&&targetSlot!==undefined){
+        result.forEach(step=>{
+          step.jSlot=predecessorSlot;
+          if(typeof step.tag==='string'&&step.tag.indexOf('前驱 next')===0)step.iSlot=targetSlot;
+        });
+      }
+    }
+    return result;
+  };
+})();
+</script>
