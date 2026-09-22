@@ -43,6 +43,23 @@ document.querySelectorAll('.op').forEach(b=>b.onclick=()=>select(b.dataset.op));
 </script>
 <script>
 (function(){
+  const positionStyle=document.createElement('style');
+  positionStyle.textContent='.link-item .link-position{width:100%;text-align:center;color:#7b8f99;font:700 13px/1.1 ui-monospace,monospace;letter-spacing:.02em}';
+  document.head.appendChild(positionStyle);
+  const previousDrawLinks=drawLinks;
+  drawLinks=function(state){
+    previousDrawLinks(state);
+    document.querySelectorAll('#linkChain .link-item:not(.link-head)').forEach((item,index)=>{
+      const label=document.createElement('div');
+      label.className='link-position';
+      label.textContent='position '+index;
+      item.insertBefore(label,item.firstChild);
+    });
+  };
+})();
+</script>
+<script>
+(function(){
   const pointerOnlyStyle=document.createElement('style');
   pointerOnlyStyle.textContent='.pointer-i strong,.pointer-j strong{display:none}';
   document.head.appendChild(pointerOnlyStyle);
