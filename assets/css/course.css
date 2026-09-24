@@ -666,7 +666,7 @@ body {
   place-items: center;
   border-radius: 8px;
   color: #fff;
-  background: var(--course-ink);
+  background: var(--course-cyan-dark);
   transition-property: transform, background-color;
   transition-duration: 220ms;
   transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
