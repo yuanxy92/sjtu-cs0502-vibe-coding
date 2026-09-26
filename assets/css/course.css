@@ -717,7 +717,15 @@ body {
 }
 
 .course-project-note i {
-  margin-top: 4px;
+  display: inline-flex;
+  flex: 0 0 1.35rem;
+  width: 1.35rem;
+  height: 1.58em;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  font-size: 1.14rem;
+  line-height: 1.58;
   color: var(--course-cyan-dark);
 }
 
