@@ -12,6 +12,7 @@ Students learn computer science by directing AI coding agents to build, test, in
 - `assets/` — course-only CSS, JavaScript, images, and icon runtime; these have no dependency on the OpticAI Lab homepage.
 - `projects/turing-machine/` — three independently generated Turing Machine examples.
 - `projects/data-structure/` — Campus Path Lab starter materials and an intentionally incomplete visualization.
+- `projects/algorithm-exploration-lab/` — classroom visualizer for DFS, BFS, Dijkstra, and A*.
 - `projects/peer-drop/` — PeerDrop starter materials, interface reference, and local-network setup guide.
 - `projects/ai-project/` — choose-one-of-three AI project brief and student materials.
 

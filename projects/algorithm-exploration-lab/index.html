@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="配合图探索与最短路径课程使用的交互式算法实验台。" />
+    <title>算法探索实验室 · CS0502</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./index.html" aria-label="算法探索实验室首页"><span class="brand-mark">G</span><span>算法探索实验室</span></a>
+        <p class="topbar-note">在实践中理解算法，让思考看得见</p>
+      </header>
+
+      <main>
+        <section id="graph-section" class="lesson-section">
+          <div class="lesson-heading"><div><h1>图探索</h1><p>同一张图，换一种探索规则，会发生什么？</p></div><div class="lesson-meta"><span>课件 05</span><span class="meta-dot"></span><span>图表示 · DFS · BFS</span></div></div>
+          <div class="example-strip" role="tablist" aria-label="选择图示例">
+            <button class="example-tab is-selected" data-graph="explore" role="tab" aria-selected="true" type="button"><span class="tab-icon">◉</span><span><strong>图探索</strong><small>A 到 F · 无向图</small></span></button>
+            <button class="example-tab" data-graph="shortest" role="tab" aria-selected="false" type="button"><span class="tab-icon">⌁</span><span><strong>最短路径</strong><small>S 到 t · 带权有向图</small></span></button>
+            <div class="strip-note"><span class="live-dot"></span>课件例题 · 可逐步操作</div>
+          </div>
+
+          <div class="workspace">
+            <section class="graph-column" aria-label="图算法演示">
+              <div class="graph-card">
+                <div class="graph-heading"><div><h2 id="graph-title">图探索：从 A 出发</h2><p id="graph-subtitle">沿一条路径不断深入，遇到尽头再回溯</p></div><div class="legend" aria-label="图例"><span><i class="key-dot current"></i>当前</span><span><i class="key-dot visited"></i>已访问</span><span><i class="key-dot frontier"></i>待访问</span><span><i class="key-line"></i>边权</span></div></div>
+                <div id="step-spotlight" class="step-spotlight"><span id="step-operation" class="step-operation">准备开始</span><div><strong id="spotlight-action">选择起点，点击下一步开始</strong><p id="spotlight-explain">每一步的节点、边和数据结构状态都会同步更新。</p></div></div>
+                <div id="graph-canvas" class="graph-canvas" aria-label="算法执行图示"></div>
+                <div class="player-bar"><button id="prev-step" class="player-button" type="button" aria-label="上一步">◂ <span>上一步</span></button><button id="play-button" class="player-button player-primary" type="button">▶ <span>播放</span></button><button id="next-step" class="player-button" type="button">下一步 <span>▸</span></button><button id="reset-steps" class="player-button" type="button">↺ <span>重置</span></button><div id="step-track" class="step-track" aria-label="演示进度"></div><span id="step-count" class="step-count">步骤 0 / 0</span></div>
+              </div>
+              <div class="detail-row">
+                <section class="detail-panel trace-panel"><div class="panel-heading"><h3>执行记录</h3><span id="trace-caption" class="panel-caption">每一步都能回看</span></div><ol id="trace-list" class="trace-list" aria-live="polite"></ol></section>
+                <section class="detail-panel data-panel"><div class="panel-heading"><h3 id="data-title">递归栈</h3><span id="data-caption" class="panel-caption">栈顶在右侧</span></div><div id="frontier-view" class="frontier-view"></div><div class="distance-table-wrap"><table class="distance-table"><thead id="distance-head"></thead><tbody id="distance-body"></tbody></table></div></section>
+              </div>
+            </section>
+
+            <aside class="inspector" aria-label="算法控制与解释">
+              <div class="inspector-heading"><h2>算法控制</h2><button id="edit-graph" class="icon-button" type="button" aria-label="编辑当前图">＋</button></div>
+              <div id="algorithm-picker" class="algorithm-picker" role="group" aria-label="选择算法"><button data-algorithm="dfs" class="is-selected" type="button">DFS</button><button data-algorithm="bfs" type="button">BFS</button><button data-algorithm="dijkstra" type="button">Dijkstra</button><button data-algorithm="astar" hidden type="button">A*</button></div>
+              <div class="inspector-block step-block"><div class="block-heading"><h3>当前步骤</h3><strong id="current-step-label">准备开始</strong></div><dl class="step-details"><div><dt>访问点</dt><dd id="current-node">—</dd></div><div><dt>本步操作</dt><dd id="current-action">从起点开始探索</dd></div></dl></div>
+              <div class="inspector-block frontier-block"><div class="block-heading"><h3 id="frontier-title">数据结构 · 栈</h3><span id="frontier-order" class="subtle">后进先出</span></div><div id="inspector-frontier" class="inspector-frontier"></div><div id="stack-operation" class="stack-operation" hidden></div></div>
+              <div class="inspector-block explanation-block"><div class="block-heading"><h3>这一步为什么？</h3><span id="line-number" class="subtle">伪代码 1–2</span></div><p id="explanation">选择一个起点，点击“下一步”观察算法如何展开。</p><div id="code-snippet" class="code-snippet"></div></div>
+              <div class="inspector-bottom"><span>有向 · 无向 · 带权</span><button id="show-adjacency" class="text-link" type="button">查看邻接表 ↗</button></div>
+            </aside>
+          </div>
+
+          <section class="comparison-section"><div class="comparison-heading"><div><h2>同一张图，不同的搜索规则</h2><p>遍历次序会受邻居访问顺序影响；BFS 的距离按边数计算。</p></div><button id="compare-button" class="outline-button" type="button">比较算法 <span>→</span></button></div><div id="comparison-row" class="comparison-row"></div></section>
+
+        </section>
+
+
+
+
+      </main>
+      <footer class="app-footer"><span>CS0502 · 计算机科学导论</span><span>配合 2026 秋季课程课件使用</span><a href="../data-structure/README.md">校园寻路项目 ↗</a></footer>
+    </div>
+
+    <dialog id="info-dialog" class="info-dialog"><div class="dialog-head"><h2 id="dialog-title">图算法信息</h2><button class="icon-button" id="close-dialog" type="button" aria-label="关闭">×</button></div><div id="dialog-body" class="dialog-body"></div></dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
