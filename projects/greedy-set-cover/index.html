@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="用校园 Wi-Fi 覆盖问题交互体验贪心集合覆盖算法。" />
+    <title>路由器覆盖实验 · CS0502</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="../../index.html#course-tutorials"><span class="brand-mark">G</span><span>算法探索实验室</span></a>
+        <span class="course-mark">CS0502 · 计算机科学导论</span>
+      </header>
+
+      <section class="lesson-heading">
+        <div><h1>路由器覆盖实验</h1><p>用贪心算法设计校园 Wi-Fi 覆盖方案</p></div>
+        <div class="lesson-meta"><span>贪心算法</span><i></i><span>集合覆盖</span></div>
+      </section>
+
+      <section class="challenge-bar" aria-label="问题规则">
+        <span class="challenge-mark" aria-hidden="true">⌁</span>
+        <p>八台路由器各有不同覆盖范围与部署成本。请覆盖全部校园区域，同时控制设备数量或总预算。</p>
+        <span class="zone-total"><strong>12</strong> 个区域 · 8 台候选路由器</span>
+      </section>
+
+      <div class="workspace">
+        <section class="map-card" aria-labelledby="map-title">
+          <div class="map-heading">
+            <div><h2 id="map-title">校园区域</h2><p>选中的路由器会高亮它能覆盖的区域</p></div>
+            <div class="map-legend"><span><i class="legend-dot covered"></i>已覆盖</span><span><i class="legend-dot uncovered"></i>未覆盖</span></div>
+          </div>
+          <div class="campus-map-frame"><svg class="campus-map" id="campus-map" viewBox="0 0 1000 620" role="img" aria-label="校园地图，包含十二个区域和八台候选路由器"></svg></div>
+          <div class="map-footer"><span id="map-status" aria-live="polite">选择路由器，看看它们能覆盖哪些区域。</span><span class="coverage-count" id="coverage-count">0 / 12</span></div>
+        </section>
+
+        <aside class="control-column" aria-label="路由器和算法操作">
+          <section class="control-card router-card">
+            <div class="panel-heading"><div><h2>候选路由器</h2><p>“点/区”按完整覆盖范围均摊；算法每轮重算新增区域</p></div><span class="panel-index">8 台</span></div>
+            <div class="router-list" id="router-list"></div>
+            <div class="selection-summary"><span id="selection-summary-label">你的方案</span><strong id="selection-summary">尚未选择</strong></div>
+          </section>
+          <section class="control-card greedy-card">
+            <div class="panel-heading"><div><h2>贪心演示</h2><p id="greedy-rule">每轮选择新增覆盖最多的路由器</p></div><span class="panel-index">02</span></div>
+            <label class="objective-control" for="objective">优化目标
+              <select id="objective"><option value="count">最少台数</option><option value="cost">最低总成本</option></select>
+            </label>
+            <div class="greedy-current" id="greedy-current" aria-live="polite"><span class="current-number">—</span><span><strong>准备开始</strong><small>先猜猜贪心会怎么选</small></span></div>
+            <div class="greedy-controls">
+              <button class="button button-secondary" id="greedy-prev" type="button" aria-label="上一步">←</button>
+              <button class="button button-primary" id="greedy-next" type="button">下一步 <span aria-hidden="true">→</span></button>
+              <button class="button button-secondary" id="greedy-reset" type="button">重置</button>
+            </div>
+            <div class="step-meter"><span id="step-progress"></span></div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="results" aria-label="覆盖结果对比">
+        <div class="results-heading"><div><h2>看看不同选择的结果</h2><p id="comparison-hint">覆盖数量相同时，平局选择会影响最终设备数和总成本。</p></div><span class="result-rule">成本以演示点数计</span></div>
+        <div class="result-grid">
+          <article class="result-panel student-result"><div class="result-panel-heading"><h3>你的方案</h3><span id="student-badge" class="result-tag">待选择</span></div><p id="student-result">点击右侧路由器，组成你的覆盖方案。</p><div class="result-metric"><div><strong id="student-covered">0 / 12</strong><span>覆盖区域</span></div><div><strong id="student-count">0</strong><span>台路由器</span></div><div><strong id="student-cost">0</strong><span>总成本点</span></div></div></article>
+          <article class="result-panel greedy-result"><div class="result-panel-heading"><h3>贪心算法</h3><span id="greedy-badge" class="result-tag">待演示</span></div><p id="greedy-result">按当前目标逐步选择。先试试并列时优先选 R2。</p><div class="result-metric"><div><strong id="greedy-covered">0 / 12</strong><span>覆盖区域</span></div><div><strong id="greedy-count">0</strong><span>台路由器</span></div><div><strong id="greedy-cost">0</strong><span>总成本点</span></div></div></article>
+          <article class="result-panel best-result"><div class="result-panel-heading"><h3>穷举最优基准</h3><span class="result-tag result-tag-good">精确验证</span></div><p id="optimal-summary">对 8 台候选路由器的所有组合穷举，得到当前目标的最优值。</p><p class="optimal-router-list" id="optimal-routers">R1、R3、R6</p><div class="result-metric"><div><strong id="optimal-covered">12 / 12</strong><span>覆盖区域</span></div><div><strong id="optimal-count">3</strong><span>台路由器</span></div><div><strong id="optimal-cost">12</strong><span>总成本点</span></div></div></article>
+        </div>
+      </section>
+
+      <section class="decision-trace" aria-label="贪心决策记录">
+        <div class="trace-heading"><h2>贪心决策记录</h2><span id="trace-rule">每次都看新增覆盖数量</span></div>
+        <div class="trace-table-wrap"><table><thead><tr><th>步骤</th><th>选择</th><th>新增覆盖</th><th id="efficiency-heading">新增覆盖数</th><th>累计成本</th><th>尚未覆盖</th></tr></thead><tbody id="trace-body"><tr class="empty-row"><td colspan="6">点击“下一步”开始演示。</td></tr></tbody></table></div>
+      </section>
+
+      <footer class="app-footer"><span>CS0502 · 计算机科学导论</span><span>贪心集合覆盖</span><a href="../../index.html#course-tutorials">返回课程页面 ↗</a></footer>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
