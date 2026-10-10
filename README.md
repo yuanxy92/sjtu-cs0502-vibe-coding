@@ -25,6 +25,10 @@ Students learn computer science by directing AI coding agents to build, test, in
 
 See the course site for current requirements, downloadable materials, and tutorial videos.
 
+## Classroom projection readability
+
+Course pages are designed for students viewing a classroom projector from a distance. Keep primary instructions and explanations at 20px or larger, and labels, tables, controls, and other supporting text at 18px or larger. Use wrapping, scrolling, or taller panels to fit content; never shrink text to fit more on screen.
+
 ## Run locally
 
 This repository is a static site. Clone it and open `index.html` in a browser, or serve it with any local static-file server. No build process or package installation is required.

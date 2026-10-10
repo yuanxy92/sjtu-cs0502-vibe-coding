@@ -44,3 +44,20 @@ button,input{font-family:inherit}button{font-size:inherit}
 @keyframes edge-step{0%{stroke-width:6;opacity:.65}100%{stroke-width:4;opacity:1}}
 @media(max-width:560px){.step-spotlight{grid-template-columns:1fr;gap:7px;padding:10px 12px}.step-operation{justify-self:start;min-height:34px}.step-spotlight strong{font-size:17px}.step-spotlight p{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.step-spotlight.is-changing,.stack-operation,.frontier-chip.is-pushing,.frontier-chip.is-popping,.frontier-chip.is-returning,.frontier-chip.is-advancing,.frontier-chip.is-updated,.graph-node.is-current .node-circle,.edge-line.is-considered{animation:none}}
+
+/* Projector-first typography: keep every classroom label legible from the back row. */
+.topbar-note,.lesson-meta,.example-tab small,.strip-note,.graph-heading p,.legend,.edge-weight,.node-distance,.step-count,.panel-caption,.trace-item .trace-index,.subtle,.step-details dt,.empty-state,.stack-operation small,.step-spotlight p,.comparison-heading p,.comparison-card p,.app-footer,.time-ruler,.field-label,.field-label input,.comparison-subtitle{font-size:18px}
+.player-button,.algorithm-picker button,.node-pill,.outline-button,.small-button,.text-link,.step-operation,.stack-operation strong{font-size:20px}
+.panel-heading h3,.block-heading h3,.comparison-card h3,.comparison-heading h2{font-size:22px}
+.block-heading strong,.step-details div,.explanation-block p,.inspector-bottom,.dialog-body,.adjacency-table,.edge-editor{font-size:19px}
+.trace-item,.frontier-chip,.distance-table{font-size:22px}
+.trace-item{gap:8px;padding:8px 11px}
+.frontier-view,.inspector-frontier{gap:8px;min-height:40px}
+.frontier-chip{min-width:36px;padding:8px 10px}
+.distance-table th,.distance-table td{padding:9px 7px}
+.detail-panel{min-height:164px}
+.code-snippet{font-size:18px}
+.step-spotlight strong{font-size:22px}
+.stack-operation{padding:12px 14px}
+.stack-operation-symbol{flex-basis:42px;height:42px;font-size:29px}
+@media(max-width:560px){.player-button{font-size:18px}.lesson-heading p{font-size:18px}.comparison-heading h2{font-size:20px}.step-spotlight strong{font-size:20px}.step-spotlight p{font-size:18px}}
