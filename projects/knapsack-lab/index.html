@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="交互体验 0/1 背包问题：比较按性价比贪心与动态规划，逐步验证最优解。" />
+    <title>背包问题实验室 · CS0502</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="../../index.html#course-tutorials" aria-label="返回 CS0502 课程页面">
+          <span class="brand-mark">CS</span>
+          <span>计算机科学导论</span>
+        </a>
+        <span class="course-mark">CS0502 · 算法探索实验室</span>
+      </header>
+
+      <section class="lesson-heading" aria-labelledby="lesson-title">
+        <div>
+          <h1 id="lesson-title">背包问题实验室</h1>
+          <p>比较按性价比贪心与动态规划，看看局部选择为何会错过最优解。</p>
+        </div>
+        <a class="back-link" href="../../index.html#course-tutorials">返回课程页面 <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <section class="problem-rule" aria-label="题目条件">
+        <span class="rule-symbol" aria-hidden="true">◇</span>
+        <p>口袋最多装 <strong>10 kg</strong>，洞穴中有 <strong>4 件宝物</strong>；每件宝物不可拆分，最多选一次。</p>
+        <span class="rule-tag">0/1 背包</span>
+      </section>
+
+      <div class="workbench">
+        <section class="panel items-panel" aria-labelledby="items-title">
+          <div class="panel-heading">
+            <div><h2 id="items-title">洞穴里的宝物</h2><p>贪心按性价比从高到低考虑；并列时按表格顺序。</p></div>
+            <span class="panel-index">4 件</span>
+          </div>
+          <div class="item-table-wrap">
+            <table class="item-table">
+              <thead><tr><th scope="col">宝物</th><th scope="col">重量</th><th scope="col">价值</th><th scope="col">性价比<br><span>价值 / kg</span></th></tr></thead>
+              <tbody id="item-rows"></tbody>
+            </table>
+          </div>
+          <div class="ratio-note" id="ratio-note">
+            <span class="ratio-note-mark" aria-hidden="true">i</span>
+            <p>国王的古董和皇后的妆盒性价比并列最高，演示时先考虑表格中排在前面的宝物。</p>
+          </div>
+        </section>
+
+        <section class="panel bag-panel" aria-labelledby="bag-title">
+          <div class="panel-heading">
+            <div><h2 id="bag-title">背包状态</h2><p id="bag-subtitle">算法选择的宝物会显示在这里。</p></div>
+            <span class="capacity-label">容量 <strong>10 kg</strong></span>
+          </div>
+          <div class="capacity-meter" role="progressbar" aria-label="背包已用重量" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+            <span id="capacity-fill"></span>
+          </div>
+          <div class="capacity-readout"><strong id="weight-total">0</strong><span>/ 10 kg</span><span class="readout-divider"></span><strong class="value-readout" id="value-total">0</strong><span>价值</span></div>
+          <div class="bag-contents" id="bag-contents" aria-live="polite"><p class="bag-empty">尚未放入宝物。点击「下一步」开始演示。</p></div>
+          <p class="bag-explanation" id="bag-explanation" aria-live="polite">先比较单位重量的价值，再观察剩余容量如何影响选择。</p>
+        </section>
+      </div>
+
+      <section class="algorithm-workspace" aria-labelledby="algorithm-title">
+        <div class="algorithm-toolbar">
+          <div class="algorithm-tabs" role="tablist" aria-label="算法模式">
+            <button class="algorithm-tab is-active" type="button" role="tab" id="tab-greedy" aria-controls="greedy-panel" aria-selected="true" data-mode="greedy">按性价比贪心</button>
+            <button class="algorithm-tab" type="button" role="tab" id="tab-dp" aria-controls="dp-panel" aria-selected="false" data-mode="dp">动态规划</button>
+          </div>
+          <div class="step-controls" aria-label="演示步骤控制">
+            <button class="control-button control-quiet" id="step-prev" type="button" aria-label="上一步" disabled>← <span>上一步</span></button>
+            <button class="control-button control-primary" id="step-next" type="button">下一步 <span aria-hidden="true">→</span></button>
+            <button class="control-button control-quiet" id="step-play" type="button"><span class="play-icon" aria-hidden="true">▶</span> 自动播放</button>
+            <button class="control-button control-quiet" id="step-reset" type="button"><span aria-hidden="true">↻</span> 重置</button>
+          </div>
+        </div>
+
+        <section class="algorithm-panel greedy-panel" id="greedy-panel" role="tabpanel" aria-labelledby="tab-greedy">
+          <div class="algorithm-panel-heading">
+            <div><h2 id="algorithm-title">贪心：每次选当前性价比最高的宝物</h2><p>宝物不可拆分；放不下时跳过，继续检查下一件。</p></div>
+            <span class="step-counter" id="step-counter">0 / 4 步</span>
+          </div>
+          <ol class="greedy-sequence" id="greedy-sequence"></ol>
+          <div class="step-explanation" id="step-explanation" aria-live="polite">准备开始：算法将从性价比最高的宝物开始逐件检查。</div>
+        </section>
+
+        <section class="algorithm-panel dp-panel" id="dp-panel" role="tabpanel" aria-labelledby="tab-dp" hidden>
+          <div class="algorithm-panel-heading dp-heading">
+            <div><h2>动态规划表：处理前 i 件宝物、容量为 c 时的最大价值</h2><p>每格比较「不选当前宝物」与「选当前宝物」两种情况。</p></div>
+            <span class="step-counter" id="dp-counter">0 / 44 格</span>
+          </div>
+          <div class="recurrence" aria-label="动态规划转移公式">
+            <span>dp[i][c] =</span>
+            <span>dp[i−1][c]，若 wᵢ &gt; c</span>
+            <span>max(dp[i−1][c], vᵢ + dp[i−1][c−wᵢ])，否则</span>
+          </div>
+          <p class="dp-table-hint">表格可左右滑动查看容量 0–10 kg</p>
+          <div class="dp-table-wrap" tabindex="0" aria-label="动态规划表，可横向滚动">
+            <table class="dp-table" id="dp-table"></table>
+          </div>
+          <div class="step-explanation" id="dp-explanation" aria-live="polite">先从第 1 件宝物开始，逐格填写容量 0 到 10 对应的最优价值。</div>
+          <div class="dp-result" id="dp-result" hidden></div>
+        </section>
+      </section>
+
+      <section class="result-comparison" id="result-comparison" aria-live="polite" hidden>
+        <div class="comparison-intro"><span class="comparison-mark" aria-hidden="true">↗</span><div><h2>局部最优不等于全局最优</h2><p id="comparison-explanation">按性价比贪心留下 1 kg 空间，皇冠放不进去；动态规划找到了价值更高的组合。</p></div></div>
+        <div class="comparison-values">
+          <div><span>性价比贪心</span><strong id="greedy-result-value">175</strong><small>价值点</small></div>
+          <span class="comparison-arrow" aria-hidden="true">→</span>
+          <div class="optimal-value"><span>动态规划最优解</span><strong id="dp-result-value">191</strong><small>价值点 · 多 16 点</small></div>
+        </div>
+        <p class="optimal-composition" id="optimal-composition">最优组合：国王的古董 + 皇后的妆盒 + 教皇的皇冠（10 kg）</p>
+      </section>
+
+      <footer class="app-footer"><span>CS0502 · 计算机科学导论</span><span>算法探索 · 0/1 背包</span><a href="../../index.html#course-tutorials">返回课程页面 ↑</a></footer>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
