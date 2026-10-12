@@ -283,6 +283,8 @@ h1, h2, h3 { text-wrap: balance; }
 .dp-table td.is-base { color: #80909e; background: #fbfcfd; }
 .dp-table td.is-decision { color: var(--teal-dark); background: #eaf5f4; font-weight: 750; }
 .dp-heading { margin-bottom: 0; }
+.algorithm-panel-heading .dp-definition { margin: 10px 0 8px; padding: 10px 13px; border-left: 4px solid var(--teal); border-radius: 0 6px 6px 0; color: #35586d; background: #f2f8f9; font-size: 20px; line-height: 1.55; }
+.dp-step-note { margin-top: 8px !important; }
 .dp-result { margin-top: 11px; padding: 12px 14px; border-radius: 6px; color: #315f5d; background: #eaf6f3; font-size: 18px; line-height: 1.55; }
 .dp-result strong { color: var(--teal-dark); font-size: 20px; font-variant-numeric: tabular-nums; }
 

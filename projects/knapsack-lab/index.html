@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="交互体验 0/1 背包问题：比较按性价比贪心与动态规划，逐步验证最优解。" />
     <title>背包问题实验室 · CS0502</title>
-    <link rel="stylesheet" href="styles.css?v=classroom-20261012" />
+    <link rel="stylesheet" href="styles.css?v=classroom-dp-definition-20261012" />
   </head>
   <body>
     <main class="app-shell">
@@ -89,7 +89,11 @@
 
         <section class="algorithm-panel dp-panel" id="dp-panel" role="tabpanel" aria-labelledby="tab-dp" hidden>
           <div class="algorithm-panel-heading dp-heading">
-            <div><h2>动态规划表：处理前 i 件宝物、容量为 c 时的最大价值</h2><p>每格比较「不选当前宝物」与「选当前宝物」两种情况。</p></div>
+            <div>
+              <h2>动态规划表：状态定义 dp[i][c]</h2>
+              <p class="dp-definition"><strong>dp[i][c]</strong> 表示：只从宝物表格前 i 件中选取、总重量不超过 c kg 时，能获得的最大价值。<strong>i</strong> 是已考虑的宝物件数（0–4）；<strong>c</strong> 是背包容量上限（0–10 kg）。</p>
+              <p class="dp-step-note">填每一格时，比较「不选当前宝物」与「选当前宝物」两种情况。</p>
+            </div>
             <span class="step-counter" id="dp-counter">0 / 44 格</span>
           </div>
           <div class="recurrence" aria-label="动态规划转移公式">
