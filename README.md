@@ -14,6 +14,7 @@ Students learn computer science by directing AI coding agents to build, test, in
 - `projects/data-structure/` — Campus Path Lab starter materials and an intentionally incomplete visualization.
 - `projects/algorithm-exploration-lab/` — classroom visualizer for DFS, BFS, Dijkstra, and A*.
 - `projects/round-robin-lab/` — offline CPU Round Robin simulator with animated queue transitions, the complete Chinese requirements document, and acceptance checks.
+- `projects/deadlock-lab/` — offline locks and deadlock simulator with a simple animated print-room example, atomic-operation comparison, two-lock deadlock, teacher guide, and model checks.
 - `projects/peer-drop/` — PeerDrop starter materials, interface reference, and local-network setup guide.
 - `projects/ai-project/` — choose-one-of-three AI project brief and student materials.
 

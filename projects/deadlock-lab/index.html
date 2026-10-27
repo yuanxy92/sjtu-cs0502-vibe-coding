@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>锁与死锁实验室</title>
+<style>
+:root{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:20px;line-height:1.45;color:#102344;background:#fff;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;--blue:#2563eb;--teal:#0f766e;--line:#d6deea;--muted:#53647c;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0}button,select{font:inherit;color:inherit}button,select,summary{cursor:pointer}button{min-height:44px;padding:8px 19px;border:1px solid #bac8da;border-radius:6px;background:#fff;font-weight:650;transition:background-color .15s,transform .15s}button:hover:not(:disabled){background:#eff5ff;border-color:#6c96e8}button:active:not(:disabled){transform:scale(.96)}button:disabled{cursor:not-allowed;background:#f0f3f7;color:#8c99ab;border-color:#e1e7f0}.primary,button.selected{background:var(--blue);border-color:var(--blue);color:#fff}.primary:hover:not(:disabled),button.selected:hover{background:#1d4ed8}button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}h1,h2,h3,p{margin:0}h1{font-size:38px;line-height:1.2;letter-spacing:-.025em;text-wrap:balance}h2,h3{font-size:21px}.app{max-width:1560px;margin:auto;padding:24px 28px}.subtitle{color:var(--muted);margin-top:7px}.tabs{display:flex;border-bottom:1px solid var(--line);margin-top:22px;gap:4px}.tabs button{border:0;border-radius:6px 6px 0 0;padding:12px 23px;background:#f0f3f7}.tabs button[aria-selected=true]{background:var(--blue);color:#fff}.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:16px 0}.mode-switch{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-right:16px}.mode-switch button{font-size:20px;padding:8px 13px}.playback{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.speed{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:18px}.speed select{padding:6px 8px;border:1px solid #bac8da;border-radius:5px;background:#fff;min-height:42px}.outcome{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 17px;border:1px solid #c7d7ef;border-radius:6px;background:#f0f6ff;min-height:65px}.outcome strong{display:block;font-size:23px}.outcome p{font-size:20px;margin-top:2px}.outcome.danger{border-color:#f1a5ab;background:#fff1f2;color:#991b1b}.outcome.success{border-color:#a6d5c3;background:#effaf4;color:#116149}.outcome button{white-space:nowrap;flex-shrink:0}.step-count{font-size:18px;color:var(--muted);margin-left:8px;white-space:nowrap}.world{margin:14px 0 16px}.graph-scroll{overflow-x:auto}.graph{display:block;width:100%;min-width:1000px;height:280px}.graph .node-title{font-size:27px;font-weight:750}.graph .node-detail{font-size:21px}.graph .edge-label{font-size:21px;font-weight:650;paint-order:stroke;stroke:#fff;stroke-width:8px;stroke-linejoin:round}.graph .edge{stroke-width:4;fill:none}.graph .request{stroke:#b91c1c;stroke-dasharray:10 7}.graph .p1{fill:var(--blue)}.graph .p2{fill:var(--teal)}.graph .resource{fill:#fff4db;stroke:#d8a43c;stroke-width:1.5}.graph text{font-family:inherit}.graph-legend{font-size:18px;color:var(--muted);text-align:center;margin-top:-3px}.graph .node rect{transition:fill .2s,stroke .2s}.actors{display:grid;grid-template-columns:1fr 1fr;gap:18px}.actor{border:1px solid var(--line);border-radius:7px;overflow:hidden;min-width:0;--actor:var(--blue)}.actor.p2{--actor:var(--teal)}.actor-header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:color-mix(in srgb,var(--actor) 9%,white);padding:9px 15px;color:var(--actor)}.actor-header h2{font-size:23px}.actor-status{font-size:18px;font-weight:600}.code{list-style:none;padding:10px 12px 5px;margin:0;counter-reset:line}.code li{counter-increment:line;display:flex;align-items:baseline;gap:12px;border-radius:4px;padding:3px 9px;font-size:20px;min-height:34px;overflow-wrap:anywhere}.code li::before{content:counter(line);flex:0 0 20px;color:#8190a5;font-size:18px}.code li.active{background:#edf4ff;color:var(--blue);font-weight:650}.code li.waiting{background:#fff0f1;color:#b91c1c}.code li.past{color:#6c7d91}.code code{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,"PingFang SC",monospace;white-space:pre-wrap}.actor-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 15px 12px}.actor-info{font-size:18px;color:var(--muted);overflow-wrap:anywhere}.actor-bottom button{color:var(--actor);border-color:var(--actor);white-space:nowrap}.actor-bottom button:disabled{border-color:#d9e0e9;color:#8795a8}.conditions{border:1px solid var(--line);border-radius:6px;margin-top:15px;padding:11px 16px}.conditions h3{margin-bottom:8px}.condition-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.condition{font-size:18px;color:var(--muted);padding-left:14px;border-left:1px solid var(--line)}.condition:first-child{padding-left:0;border-left:0}.condition strong{font-size:20px;display:block;margin-bottom:3px;color:#607188}.condition.met strong{color:#185dae}.condition.cycle.met strong{color:#b91c1c}.takeaway{margin-top:14px;padding:11px 15px;border:1px solid #c8dafa;border-radius:5px;background:#f4f8ff;font-size:20px}.explain-toggle{margin-top:14px;border:1px solid var(--line);border-radius:6px;padding:11px 15px}.explain-toggle summary{font-size:20px;font-weight:650}.log{list-style:none;margin:9px 0 0;padding:0;max-height:220px;overflow:auto}.log li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px;border-top:1px solid #e5eaf1;padding:7px 0;font-size:18px}.log li span:first-child{color:var(--muted)}.footer{margin-top:13px;color:var(--muted);font-size:18px;display:flex;justify-content:space-between;gap:12px}.footer a{color:var(--blue)}.lock-world{display:grid;grid-template-columns:230px minmax(280px,1.3fr) minmax(260px,1fr);gap:24px;align-items:center;min-height:218px;padding:16px 12px}.lock-variable{text-align:center;border:1px solid #d3dceb;border-radius:7px;padding:15px 12px;background:#f7f9fc}.lock-variable strong{display:block;font-size:42px;margin:4px 0;color:#102344}.lock-variable span{font-size:18px;color:var(--muted)}.critical-zone{border:2px dashed #b5c8e5;border-radius:7px;min-height:170px;padding:15px;text-align:center}.critical-zone.conflict{border-color:#dc2626;background:#fff4f5}.occupants{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;min-height:65px;align-items:center;margin:12px 0 6px}.process-chip{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;border-radius:5px;padding:9px 18px;font-size:27px;font-weight:750}.process-chip.p2{background:var(--teal)}.critical-zone p{font-size:18px;color:var(--muted)}.atomic-picture{font-size:20px;line-height:1.65}.atomic-picture strong{display:block;font-size:21px}.operations{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:9px}.operation{padding:7px 11px;border:1px solid #b5c8e5;border-radius:5px;background:#f5f8ff;white-space:nowrap}.operations.atomic{border:2px solid var(--teal);border-radius:6px;padding:9px;gap:7px;max-width:330px}.operations.atomic .operation{border:0;background:none;padding:0}.muted{color:var(--muted);font-size:18px}.hidden,[hidden]{display:none!important}
+.app{padding-top:20px}.tabs{margin-top:16px}.tabs button{padding-top:10px;padding-bottom:10px}.toolbar{padding-top:12px;padding-bottom:12px}.world{margin-top:10px;margin-bottom:12px}.graph{height:250px}.graph .edge-label,.graph .node-detail{font-size:23px}.actor-header{padding-top:7px;padding-bottom:7px;line-height:1.3}.code{padding-top:8px;padding-bottom:4px}.code li{line-height:1.3;min-height:30px;padding-top:1px;padding-bottom:1px}.actor-bottom{padding-top:5px;padding-bottom:10px}
+@media(max-width:1100px){.app{padding:22px 18px}.mode-switch{margin-right:0}.speed{margin-left:0}.lock-world{grid-template-columns:200px minmax(0,1fr)}.atomic-picture{grid-column:1/-1}.condition-grid{grid-template-columns:1fr 1fr}.condition:nth-child(3){border-left:0;padding-left:0}.actor-bottom{align-items:flex-start;flex-direction:column}}
+@media(max-width:700px){.app{padding:18px 12px}h1{font-size:30px}.tabs{flex-direction:column;gap:5px}.tabs button{text-align:left;border-radius:5px;font-size:20px;padding:10px 12px}.mode-switch{width:100%}.mode-switch button{flex:1 1 auto;font-size:18px}.playback{width:100%}.playback button{flex:1;padding:8px 10px}.outcome{align-items:flex-start;flex-direction:column;gap:9px}.outcome strong{font-size:21px}.lock-world{grid-template-columns:minmax(0,1fr);padding:8px 0;gap:14px}.atomic-picture{grid-column:auto}.actors{grid-template-columns:minmax(0,1fr);gap:14px}.actor-header{flex-wrap:wrap}.actor-bottom{flex-direction:row;align-items:center}.condition-grid{grid-template-columns:minmax(0,1fr);gap:12px}.condition{border-left:0;border-top:1px solid #e4e9f0;padding:9px 0 0}.condition:first-child{border-top:0;padding-top:0}.footer{flex-direction:column;gap:4px}.code li{font-size:20px;padding-left:4px;padding-right:4px;gap:8px}.actor-info{font-size:18px}.toolbar{padding:12px 0}.takeaway{line-height:1.6}.graph-legend{text-align:left}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.lock-lesson{display:grid;gap:12px}.printer-story{font-size:20px;color:var(--muted)}.memory-row{display:grid;grid-template-columns:minmax(0,1fr) 210px minmax(0,1fr);gap:16px;align-items:stretch}.reader-card{border:1px solid #c6d5ef;border-top:4px solid var(--blue);border-radius:7px;padding:10px 15px;min-width:0;background:#fff}.reader-card.p2{border-color:#b8d9d4;border-top-color:var(--teal)}.reader-header{display:flex;align-items:center;justify-content:space-between;gap:10px}.reader-header h2{color:var(--blue);font-size:21px}.reader-card.p2 h2{color:var(--teal)}.reader-header button{font-size:18px;min-height:40px;padding:5px 12px}.read-snapshot{display:flex;align-items:baseline;gap:14px;margin:6px 0}.read-snapshot span{font-size:18px;color:var(--muted)}.read-snapshot strong{font-size:36px;line-height:1.1}.reader-note{font-size:20px;min-height:52px;line-height:1.35}.reader-card.stale{border-color:#d99b20;background:#fffaf0}.reader-card.stale .reader-note{color:#9a4b05;font-weight:650}.private-note{font-size:18px;color:var(--muted);margin-top:4px}.shared-sign{padding:12px 10px;display:flex;flex-direction:column;justify-content:center}.shared-sign strong{font-size:42px;line-height:1.15}.shared-sign h2{font-size:20px}.shared-sign p{font-size:18px;color:var(--muted);margin-top:5px}.causal-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:stretch}.causal-row .atomic-picture{border:1px solid var(--line);border-radius:6px;padding:11px 14px;line-height:1.4}.causal-row .operations{margin-top:7px;margin-bottom:7px}.causal-row .operations.atomic{max-width:none;display:inline-flex}.switch-gap{color:#b45309;font-size:20px;font-weight:700;border:1px dashed #d99b20;background:#fff9eb;padding:5px 10px;border-radius:4px}.causal-row .critical-zone{min-height:0;padding:10px 14px}.causal-row .critical-zone h2{font-size:21px}.causal-row .occupants{min-height:47px;margin:7px 0 4px}.causal-row .process-chip{padding:5px 16px;font-size:25px}.causal-row .critical-zone p{font-size:20px}.trace-section{border-top:1px solid var(--line);padding-top:10px}.trace-section h3{font-size:20px;margin-bottom:7px}.trace-scroll{overflow-x:auto;padding-bottom:5px}.trace-table{border-collapse:separate;border-spacing:5px;width:100%;text-align:center;font-size:20px}.trace-table th{font-size:18px;color:var(--muted);font-weight:600}.trace-table th:first-child{position:sticky;left:0;background:#fff;z-index:1;min-width:45px}.trace-table td{min-width:112px;max-width:180px;height:56px;padding:6px 7px;border:1px solid #e4e9f2;border-radius:5px;background:#f7f9fc}.trace-table td.has-action{background:#edf4ff;border-color:#c8d8fa;color:var(--blue)}.trace-table tr.p2 td.has-action{background:#edf9f5;border-color:#b9dcd4;color:var(--teal)}.trace-table td.atomic-cell{border:2px solid currentColor}.trace-table td.latest{box-shadow:0 0 0 2px #d5dfef}.trace-table td strong{display:block;font-size:20px;white-space:nowrap}.trace-table td small{display:block;font-size:18px;color:var(--muted);margin-top:2px}.trace-table td.empty{color:#8b97a7}.trace-hint{font-size:18px;color:var(--muted);margin-top:3px}.code-toggle{margin:0 0 12px}.outcome.warning{background:#fff9eb;border-color:#e6be66;color:#854d0e}
+@media(max-width:1050px){.memory-row{grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);gap:10px}.reader-card{padding:9px 11px}.reader-header{flex-wrap:wrap}.reader-note{min-height:80px}.causal-row{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.memory-row{grid-template-columns:minmax(0,1fr)}.shared-sign{grid-row:1}.reader-note{min-height:0}.reader-header{flex-wrap:nowrap}.read-snapshot strong{font-size:34px}.causal-row{gap:12px}.causal-row .operations{align-items:stretch}.operation,.switch-gap{white-space:normal}.trace-section h3{line-height:1.5}}
+.lock-lesson{grid-template-columns:minmax(0,1fr)}.trace-section{min-width:0}
+@media(max-width:650px){#experiment[aria-labelledby="tab-lock"] #nextBtn{flex:1 0 100%}}
+.shared-sign{background:#f1faf6;border-color:#b5d7c5}.shared-sign #signState{color:#0f766e}.shared-sign.is-occupied{background:#fff5ea;border-color:#e1b77d}.shared-sign.is-occupied #signState{color:#9a4b05}
+
+/* Classroom view: one action, one sign, two people. Details stay folded. */
+.room-scene{display:grid;grid-template-columns:minmax(0,1fr) 210px minmax(0,1fr);gap:24px;align-items:stretch;margin:18px 0 10px}
+.outside,.room-scene .critical-zone{min-height:300px;padding:20px 15px;text-align:center;border-radius:12px}
+.outside{background:#f7f9fc}.outside h2{color:var(--muted)}.room-scene .critical-zone{background:#f4f8ff;border:2px solid #b5c8e5}.room-scene .critical-zone.conflict{background:#fff1f2;border-color:#dc2626}
+.room-scene h2{font-size:24px}.room-scene h2 small{font-weight:500;font-size:18px;color:var(--muted);margin-left:8px}
+.room-scene .shared-sign{align-self:center;min-height:155px;border-width:2px;border-radius:12px;padding:18px 8px}.room-scene .shared-sign h2{font-size:19px}.room-scene .shared-sign strong{font-size:52px;margin-top:10px}
+.people-area{display:flex;justify-content:center;align-items:flex-start;gap:18px;min-height:190px;margin:25px 0 0;flex-wrap:nowrap}
+.person{position:relative;text-align:center;flex:0 1 145px;min-width:0;--person:var(--blue);z-index:1}.person.p2{--person:var(--teal)}
+.speech{font-size:21px;white-space:nowrap;background:#fff;padding:9px 7px;border-radius:10px;border:1px solid #d6deea;margin-bottom:18px;min-height:50px}.person.stale .speech{background:#fff5de;border-color:#e2b259}.speech strong{color:var(--person)}
+.person-icon{position:relative;width:62px;height:87px;margin:auto}.person-head{display:block;position:absolute;width:30px;height:30px;left:16px;top:0;border-radius:50%;background:var(--person)}.person-body{display:block;position:absolute;width:58px;height:49px;left:2px;top:38px;border-radius:23px 23px 9px 9px;background:var(--person)}.person-name{display:block;color:var(--person);font-size:22px;margin-top:8px}.person.departed{opacity:.42}
+.lesson-point{font-size:23px;text-align:center;padding:14px 10px}.printer-story{text-align:center;font-size:21px;margin-top:8px}.manual-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}.explain-toggle .atomic-picture{margin-top:15px}.explain-toggle .actors{margin-top:15px}.explain-toggle .trace-section{margin-top:15px}
+#experiment[aria-labelledby="tab-lock"] .speed{display:none}#experiment[aria-labelledby="tab-lock"] .step-count{display:inline}#experiment[aria-labelledby="tab-lock"] .toolbar{justify-content:space-between}#experiment[aria-labelledby="tab-lock"] .outcome{min-height:108px;align-items:center}#experiment[aria-labelledby="tab-lock"] .outcome strong{font-size:29px}#experiment[aria-labelledby="tab-lock"] .outcome p{font-size:21px;margin-top:6px}
+@media(max-width:1050px){.room-scene{grid-template-columns:minmax(0,1fr) 160px minmax(0,1fr);gap:12px}.people-area{gap:8px}.speech{font-size:18px}.room-scene .shared-sign h2{font-size:17px}}
+@media(max-width:700px){.room-scene{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:8px}.room-scene .shared-sign{grid-column:1/-1;grid-row:1;min-height:0;display:flex;flex-direction:row;gap:18px;align-items:center;padding:10px}.room-scene .shared-sign strong{font-size:36px;margin:0}.outside,.room-scene .critical-zone{padding:14px 6px;min-height:255px}.room-scene h2{font-size:21px}.room-scene h2 small{display:block;margin:0}.people-area{flex-wrap:wrap;margin-top:16px;gap:14px}.person{flex-basis:115px}.speech{font-size:18px;padding:6px 3px;min-height:40px;margin-bottom:12px}.person-icon{transform:scale(.8);height:72px;transform-origin:top center}.person-name{font-size:20px;margin-top:0}.printer-story{font-size:18px}.lesson-point{font-size:20px;text-align:left;padding:8px 0}#experiment[aria-labelledby="tab-lock"] .outcome strong{font-size:23px}#experiment[aria-labelledby="tab-lock"] .outcome p{font-size:19px}.mode-switch>span{display:none}}
+
+</style>
+</head>
+<body>
+<main class="app">
+ <header><h1>锁与死锁实验室</h1><p class="subtitle">先用打印室理解锁，再看两把锁如何互相等住。</p></header>
+ <div class="tabs" role="tablist" aria-label="实验场景"><button id="tab-lock" role="tab" aria-selected="true" aria-controls="experiment" data-scene="lock">① 锁为什么需要原子操作</button><button id="tab-deadlock" role="tab" aria-selected="false" aria-controls="experiment" data-scene="deadlock">② 两把锁怎样形成死锁</button></div>
+ <section id="experiment" role="tabpanel" aria-labelledby="tab-lock">
+  <div class="toolbar"><div class="mode-switch" aria-label="实验方案"><span>演示方式：</span><button id="mode1" type="button"></button><button id="mode2" type="button"></button></div><div class="playback"><button id="nextBtn" class="primary" type="button">下一步</button><button id="playBtn" type="button">自动演示</button><button id="resetBtn" type="button">重置</button></div><label class="speed">播放间隔 <select id="speed"><option value="1600">1600 ms</option><option value="900" selected>900 ms</option><option value="400">400 ms</option></select><span id="stepCount" class="step-count">第 0 步</span></label></div>
+  <div id="outcome" class="outcome" role="status" aria-live="polite"><div><strong id="outcomeTitle"></strong><p id="outcomeText"></p></div><button id="fixBtn" type="button" hidden></button></div>
+  <div class="world">
+   <div class="lock-lesson" id="lockWorld">
+    <p class="printer-story">打印室一次只能进一个人。出门后，把牌子翻回“无人”。</p>
+    <div class="room-scene">
+     <section class="outside"><h2>门外</h2><div id="outsidePeople" class="people-area"><section id="readerP1" data-reader="P1"></section><section id="readerP2" data-reader="P2"></section></div></section>
+     <div class="lock-variable shared-sign"><h2>打印室门口的牌子</h2><strong id="signState">无人</strong></div>
+     <section class="critical-zone" id="criticalZone"><h2>打印室 <small>限 1 人</small></h2><div class="occupants people-area" id="occupants"></div></section>
+    </div>
+    <p class="lesson-point" id="simplePoint"></p>
+   </div>
+   <div id="graphWorld" hidden><div class="graph-scroll" tabindex="0" role="region" aria-label="可左右滚动的锁与进程关系图"><svg class="graph" id="graph" viewBox="0 0 1000 280" role="img" aria-label="锁与进程的持有、请求关系"></svg></div><p class="graph-legend">实线：锁 → 持有者；红色虚线：进程 → 正在请求的锁。</p></div>
+  </div>
+  <details id="lockDetails" class="explain-toggle"><summary>查看原理、代码与执行记录</summary>
+   <p class="muted">“无人”对应锁变量 L = 0，“有人”对应 L = 1。当前 <span id="lockValue">L = 0</span>。小蓝是 P1，小绿是 P2。</p>
+   <div class="atomic-picture" id="atomicPicture"></div>
+   <div class="manual-controls"><span>自行选择执行顺序：</span><button type="button" data-manual="P1">推进小蓝（P1）</button><button type="button" data-manual="P2">推进小绿（P2）</button></div>
+   <section class="trace-section"><h3>执行顺序</h3><div class="trace-scroll" tabindex="0" role="region" aria-label="两进程执行顺序"><table class="trace-table" id="lockTrace"></table></div><p class="trace-hint" id="traceHint"></p></section>
+   <div class="actors" id="lockCode"></div>
+   <ol class="log" id="lockLog"></ol>
+  </details>
+  <div class="actors" id="actors"></div>
+  <section class="conditions" id="conditions" hidden><h3>死锁的四个必要条件（本例中，每把锁都只有一份）</h3><div class="condition-grid" id="conditionGrid"></div></section>
+  <p class="takeaway" id="takeaway"></p>
+  <details id="deadlockDetails" class="explain-toggle"><summary>查看执行记录与课堂提问</summary><p class="muted" id="question" style="margin-top:9px"></p><ol class="log" id="log"></ol></details>
+ </section>
+ <footer class="footer"><span>教学伪代码 · 两个进程交替执行 · 切换场景或方案会重置</span><a href="README.md">教师演示说明</a></footer>
+</main>
+<script id="lab-engine">
+(() => {
+ 'use strict';
+ function create(scene='lock',mode=scene==='lock'?'split':'opposite') {
+  if(!['lock','deadlock'].includes(scene)||!(scene==='lock'?['split','atomic']:['opposite','ordered']).includes(mode))throw new Error('Unknown experiment');
+  return {scene,mode,actors:['P1','P2'].map(id=>({id,pc:0,read:null,status:'ready',held:[],waiting:null})),lock:0,claims:[],locks:{A:null,B:null},steps:0,turn:'P1',history:[],deadlocked:false,hadViolation:false,done:false};
+ }
+ const order=(s,id)=>s.mode==='opposite'&&id==='P2'?['B','A']:['A','B'];
+ function program(s,id) {
+  if(s.scene==='lock')return s.mode==='split'?['if (L == 0)  // 读锁并判断','L = 1       // 单独置位','进入临界区','离开临界区；L = 0']:['if (atomic_exchange(L, 1) == 0)','进入临界区','离开临界区；L = 0'];
+  const [a,b]=order(s,id);return [`lock(${a})`,`lock(${b})`,'使用两项资源',`unlock(${b})`,`unlock(${a})`];
+ }
+ function cycle(s) {
+  const [a,b]=s.actors;
+  return Boolean(a.waiting&&b.waiting&&s.locks[a.waiting]===b.id&&s.locks[b.waiting]===a.id);
+ }
+ function conditions(s){return {mutual:true,holdWait:s.actors.some(p=>p.waiting&&p.held.length>0),noPreempt:true,circular:cycle(s)}}
+ function edges(s){
+  const list=[];for(const name of ['A','B'])if(s.locks[name])list.push({from:name,to:s.locks[name],kind:'held'});
+  for(const p of s.actors)if(p.waiting)list.push({from:p.id,to:p.waiting,kind:'request'});
+  return list;
+ }
+ function step(s,id) {
+  const p=s.actors.find(p=>p.id===id);
+  if(!p||s.done||s.deadlocked||s.hadViolation||p.status==='done'||p.status==='waiting')return s;
+  let text='',kind='step',op=null;const before=s.lock;
+  if(s.scene==='lock') {
+   if(p.pc===0){
+    op=s.mode==='atomic'?'exchange':'read';
+    const old=s.lock;p.read=old;
+    if(s.mode==='atomic')s.lock=1;
+    if(old===0){p.pc=1;p.status='ready';if(s.mode==='atomic')s.claims.push(id);}
+    else p.status='spinning';
+    text=s.mode==='atomic'?`原子交换：读取旧值 ${old}，同时把 L 写为 1。${old===0?'抢锁成功。':'抢锁失败，留在此行重试。'}`:`读到 L = ${old}。${old===0?'判断空闲，准备下一步置位；此刻尚未写锁。':'锁被占用，留在此行重试。'}`;
+   } else if(s.mode==='split'&&p.pc===1){
+    op='write';
+    s.lock=1;s.claims.push(id);p.pc=2;p.status='ready';text='依据刚才读到的 0，把 L 写成 1；没有重新检查。';
+   } else if(p.pc===(s.mode==='split'?2:1)){
+    op='enter';
+    p.pc++;p.status='critical';text='进入临界区。';kind='enter';
+   } else {
+    op='release';
+    p.pc++;p.status='done';s.lock=0;s.claims=s.claims.filter(owner=>owner!==id);text='离开临界区，把 L 写为 0，释放锁。';kind='release';
+   }
+   s.hadViolation=s.actors.filter(a=>a.status==='critical').length>1;
+  } else {
+   const locks=order(s,id);
+   if(p.pc<2){
+    const name=locks[p.pc],owner=s.locks[name];
+    if(owner===null){s.locks[name]=id;p.held.push(name);p.pc++;p.status='ready';text=`原子获取锁 ${name} 成功；${id} 现在持有 ${p.held.join('、')}。`;kind='acquire';}
+    else {p.status='waiting';p.waiting=name;text=`请求锁 ${name}，但它由 ${owner} 持有。${id} 阻塞，仍保留已持有的锁。`;kind='wait';}
+   } else if(p.pc===2){p.pc++;text='已经拿到两把锁，可以使用资源。';kind='work';}
+   else {
+    const name=locks[p.pc===3?1:0];
+    if(s.locks[name]!==id)throw new Error('Only the owner may unlock');
+    s.locks[name]=null;p.held=p.held.filter(held=>held!==name);p.pc++;p.status=p.pc===5?'done':'ready';
+    const woke=[];
+    for(const waiter of s.actors)if(waiter.waiting===name){waiter.waiting=null;waiter.status='ready';woke.push(waiter.id);}
+    text=`主动释放锁 ${name}。${woke.length?`${woke.join('、')} 被唤醒，可以重试获取；锁不会自动转交。`:''}`;kind='release';
+   }
+   s.deadlocked=cycle(s);
+  }
+  s.steps++;s.turn=id==='P1'?'P2':'P1';s.done=s.actors.every(a=>a.status==='done');
+  s.history.push({n:s.steps,id,text,kind,...(s.scene==='lock'?{op,before,after:s.lock,observed:p.read}:{})});return s;
+ }
+ function nextActor(s){
+  if(s.done||s.deadlocked||s.hadViolation)return null;
+  const choices=[s.turn,s.turn==='P1'?'P2':'P1'];
+  return choices.find(id=>{const p=s.actors.find(p=>p.id===id);return p.status!=='waiting'&&p.status!=='done'})||null;
+ }
+ function next(s){const id=nextActor(s);return id?step(s,id):s}
+ globalThis.LockLab={create,program,conditions,edges,step,next,nextActor};
+})();
+</script>
+<script id="lab-interface">
+(() => {
+ 'use strict';
+ const $=id=>document.getElementById(id), L=LockLab;
+ let state=L.create(),timer=null,playing=false;
+ const modes={lock:[['split','分两步：先看，再翻'],['atomic','合成一步（原子操作）']],deadlock:[['opposite','相反顺序（可复现死锁）'],['ordered','统一顺序（可完成）']]};
+ const colors={P1:'#2563eb',P2:'#0f766e'};
+ const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n};
+ function stop(){if(timer!==null)clearTimeout(timer);timer=null;playing=false}
+ function reset(scene=state.scene,mode=state.mode){stop();state=L.create(scene,mode);render()}
+ const terminal=()=>state.done||state.deadlocked||state.hadViolation;
+ function schedule(){if(playing&&!terminal())timer=setTimeout(()=>{timer=null;advance();schedule()},Number($('speed').value))}
+ function advance(id){
+  const positions=new Map(state.actors.map(p=>[p.id,$(`reader${p.id}`).getBoundingClientRect()]));
+  const old=state.steps;id?L.step(state,id):L.next(state);
+  if(terminal())stop();render();
+  if(state.steps!==old&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+   const actor=document.querySelector(`[data-${state.scene==='lock'?'reader':'actor'}="${state.history.at(-1).id}"]`);
+   if(state.scene==='lock'){for(const p of state.actors){const node=$(`reader${p.id}`),before=positions.get(p.id),after=node.getBoundingClientRect();if(before.width&&after.width&&(before.x!==after.x||before.y!==after.y))node.animate([{transform:`translate(${before.x-after.x}px,${before.y-after.y}px)`},{transform:'translate(0,0)'}],{duration:500,easing:'ease-in-out'});}}else actor?.animate([{opacity:.65},{opacity:1}],{duration:230});
+  }
+ }
+ function banner(){
+  if(state.hadViolation)return {style:'danger',title:'两人都进入了打印室：互斥失效',text:'两人先后看到“无人”，随后都把牌子设成“有人”。第二人仍按先前的判断进入；演示暂停在此，便于观察。'};
+  if(state.deadlocked)return {style:'danger',title:'两个进程互相等待，已发生死锁',text:'P1 持有 A 等待 B；P2 持有 B 等待 A。谁都执行不到后面的 unlock。'};
+  if(state.done)return {style:'success',title:'两个进程均已完成',text:state.scene==='lock'?(state.mode==='atomic'?'两人先后进入打印室，没有同时闯入。关键是看到“无人”的同一步，牌子已经设为“有人”。':'这次没有同时进入；分开看与改，换一种交错顺序仍可能失败。'):'两把锁都已释放。统一顺序可以破坏循环等待；相反顺序并不意味着每次都会死锁。'};
+  if(state.scene==='lock'){
+   if(state.mode==='split'){
+    const stale=state.actors.find(p=>p.pc===1&&p.read===0&&state.lock===1);
+    if(stale)return {style:'warning',title:`关键时刻：牌子已是“有人”，${stale.id} 还记着“无人”`,text:`${stale.id} 下一步仍会根据先前的“无人”翻牌，并以为自己也能进去。问题就在“看牌”与“翻牌”之间可插入别人。`};
+    if(state.claims.length===2)return {style:'warning',title:'牌子显示“有人”，两人却都以为自己可以进去',text:'把“有人”再次设成“有人”，不会撤销第二人之前作出的判断。再看两人能否都进去。'};
+    if(state.actors.every(p=>p.read===0)&&state.steps===2)return {style:'',title:'两人都看到了“无人”，但还没有人翻牌',text:'P1 看完还没有翻牌，P2 就插进来也看了一眼；两人都记住了“无人”。'};
+    return {style:'',title:'先看牌子，再翻牌子：两步之间可以插进另一个人',text:state.steps?'看左右两人之前看见了什么，再看中间牌子现在显示什么；它们不一定相同。':'先让 P1 看，再让 P2 看。点击“下一步”会替你安排这个交错顺序。'};
+   }
+   const loser=state.actors.find(p=>p.status==='spinning'&&p.read===1);
+   if(loser&&state.lock===1)return {style:'',title:`${loser.id} 看到“有人”，不能进入打印室`,text:'前一人看到“无人”的同时，牌子已在同一步设成“有人”；后一人不能在中间插进来，也看到那个“无人”。'};
+   if(state.lock===0&&state.actors.some(p=>p.status==='done')){
+    const candidate=state.actors.find(p=>p.status!=='done');
+    return {style:'',title:'牌子已翻回“无人”，下一人可以重新看',text:candidate?.read===1?'刚才看到的“有人”是历史记录；再试时会重新看已经翻回“无人”的牌子。':`${candidate?.id} 还没看牌子；下一次会根据此刻的“无人”重新判断。`};
+   }
+   if(state.steps===0)return {style:'',title:'把“看牌子＋设成有人”合成一个不可被插入的动作',text:'仍让 P1 先试、P2 后试：第一人看到“无人”，第二人看到“有人”。先比较前两步。'};
+   const winner=state.actors.find(p=>state.claims.includes(p.id));
+   if(winner&&state.actors.some(p=>p.status==='done'))return {style:'',title:`${winner.id} 在牌子翻回“无人”后，获得进入资格`,text:`两次“无人”来自不同轮：前一人已走出并翻回“无人”，现在只准 ${winner.id} 进入。`};
+   return {style:'',title:`${winner?.id||'进程'} 看到“无人”的同时，已把牌子设成“有人”`,text:'牌子现在显示“有人”。出门翻回“无人”之前，另一人来会看到“有人”，不能进入。'};
+  }
+  const waiting=state.actors.find(p=>p.status==='waiting');
+  if(waiting)return {style:'',title:`${waiting.id} 在等待，但还没有死锁`,text:'另一个进程仍可推进。只有相互等待形成环路，才会一起卡住。'};
+  if(state.actors.every(p=>p.pc===1&&p.held.length===1))return {style:'',title:'两人各拿到一把锁',text:'先停一下：下一次 P1 请求另一把锁，再让 P2 请求另一把，会发生什么？'};
+  return {style:'',title:'每把锁的获取都是原子的，两把锁仍要分两次申请',text:state.mode==='opposite'?'点击“下一步”交替推进，或自行安排 P1、P2 的执行顺序；是否死锁取决于实际交错。':'两人都先拿 A、再拿 B。先拿不到 A 的进程等待，但不会拿着 B 来等 A。'};
+ }
+ function actionLabel(p){
+  if(p.status==='done')return '已完成';
+  if(p.pc===0)return state.mode==='split'?'看牌子':'看并设成“有人”';
+  if(state.mode==='split'&&p.pc===1)return '翻成“有人”';
+  if(p.pc===(state.mode==='split'?2:1))return '进入打印室';
+  return '出门，翻回“无人”';
+ }
+ const personName=id=>id==='P1'?'小蓝':'小绿';
+ function simpleBanner(){
+  if(state.hadViolation)return {style:'danger',title:'两个人都进来了！',text:'他们都按之前看到的“无人”行动，结果同时进入。'};
+  if(state.done)return {style:'success',title:'两个人先后用完了打印室',text:state.mode==='atomic'?'一个人出来后，另一个人才能进去。':'这次没有一起进去；换一种执行顺序，仍可能出问题。'};
+  if(!state.steps)return {style:'',title:state.mode==='split'?'两个人都想进打印室':'把“看牌＋翻牌”合成一步',text:state.mode==='split'?'看见“无人” → 翻成“有人” → 进门。':'这一步必须一口气完成，中途不能换另一个人来。'};
+  const e=state.history.at(-1),name=personName(e.id),free=e.observed===0,other=state.actors.find(p=>p.id!==e.id);
+  if(e.op==='read')return {style:'',title:`${name}看到“${free?'无人':'有人'}”`,text:free?(other.read===0&&other.status!=='done'?'两个人都看到“无人”，但谁也还没翻牌。':'还没翻牌，牌子仍然是“无人”。'):'有人在使用，先等一等。'};
+  if(e.op==='write')return {style:'warning',title:`${name}把牌子翻成“有人”`,text:state.claims.length===2?'两个人都觉得自己可以进门了。':other.read===0&&other.status!=='done'?'可另一个人之前也看到了“无人”！':'翻好了，接下来可以进门。'};
+  if(e.op==='exchange')return {style:'',title:free?`${name}看见“无人”，立即翻成“有人”`:`${name}看见“有人”，先等一等`,text:free?'看牌与翻牌之间，没有机会插进另一个人。':'前一个人已经翻牌了，这次不能进去。'};
+  if(e.op==='enter')return {style:'',title:`${name}进了打印室`,text:state.mode==='split'?(other.read===0&&other.status!=='done'?'另一个人也觉得自己可以进去……':'他按刚才看到的“无人”进门。'):'牌子显示“有人”，别人此时不能进去。'};
+  return {style:'',title:`${name}出门，把牌子翻回“无人”`,text:'现在另一个人可以重新看牌子了。'};
+ }
+ function drawReaders(){
+  for(const p of state.actors){
+   const card=$(`reader${p.id}`);card.replaceChildren();card.className=`person ${p.id==='P2'?'p2':''}`;
+   const stale=state.mode==='split'&&p.read===0&&state.lock===1&&p.pc<=2;
+   card.classList.toggle('stale',stale);
+   const bubble=el('div','speech');
+   if(p.status==='done')bubble.textContent='用完离开了';
+   else if(p.status==='critical')bubble.textContent='进来了';
+   else if(p.read===null)bubble.textContent='我想进去';
+   else{bubble.append(el('span','','我看到“'),el('strong','read-value',p.read===0?'无人':'有人'),el('span','','”'));}
+   const icon=el('div','person-icon');icon.setAttribute('aria-hidden','true');icon.append(el('i','person-head'),el('i','person-body'));
+   card.append(bubble,icon,el('strong','person-name',personName(p.id)));
+   const target=p.status==='critical'?$('occupants'):$('outsidePeople');target.append(card);
+   card.classList.toggle('departed',p.status==='done');
+  }
+ }
+ function drawTrace(){
+  const table=$('lockTrace');table.replaceChildren();
+  const header=el('tr');header.append(el('th','','进程'));
+  for(const e of state.history)header.append(el('th','',`第 ${e.n} 步`));
+  if(!state.history.length)header.append(el('th','','等待执行'));
+  const thead=el('thead');thead.append(header);table.append(thead);const body=el('tbody');
+  for(const p of state.actors){
+   const row=el('tr',p.id==='P2'?'p2':'p1'),name=el('th','',p.id);name.scope='row';row.append(name);
+   for(const e of state.history){
+    const cell=el('td',e.id===p.id?`has-action ${e.op==='exchange'?'atomic-cell':''} ${e.n===state.steps?'latest':''}`:'empty');
+    if(e.id===p.id){
+     cell.dataset.operation=e.op;
+     const title=e.op==='read'?`看到“${e.observed===0?'无人':'有人'}”`:e.op==='write'?'设成“有人”':e.op==='exchange'?(e.observed===0?'看无人＋设有人':'看有人＋保持有人'):e.op==='enter'?'进入打印室':'出门，翻回无人';
+     const detail=e.op==='read'?'还没有翻牌':e.op==='write'?'依据之前的“无人”':e.op==='exchange'?(e.observed===0?'0 → 1，获准进入':'1 → 1，不能进入'):e.op==='enter'?'进入临界区':'离开临界区';
+     cell.append(el('strong','',title),el('small','',detail));
+    }else cell.textContent='—';row.append(cell);
+   }
+   if(!state.history.length)row.append(el('td','empty','—'));body.append(row);
+  }
+  table.append(body);
+  $('traceHint').textContent=state.mode==='split'?'重点：两人可以先后都看到“无人”，之后才各自把牌子设成“有人”。':'带边框的一格就是一次原子动作：“看牌子＋设成有人”不会拆成两列。';
+ }
+ function drawSingle(){
+  drawReaders();drawTrace();
+  $('lockValue').textContent=`L = ${state.lock}`;
+  $('signState').textContent=state.lock===0?'无人':'有人';
+  $('signState').parentElement.classList.toggle('is-occupied',state.lock===1);
+  const critical=state.actors.filter(p=>p.status==='critical');$('criticalZone').classList.toggle('conflict',critical.length>1);
+  $('simplePoint').textContent=state.mode==='split'?'问题：看牌和翻牌之间，另一个人也可能看到“无人”。':'原子操作：看牌与翻成“有人”合成一步，中途不能插入别人。';
+  const box=$('atomicPicture');box.replaceChildren();
+  box.append(el('strong','',state.mode==='split'?'空隙在哪里？就在“看牌”与“翻牌”之间':'原子操作改了哪里？把这两件事包成一步'));
+  const ops=el('div',`operations ${state.mode==='atomic'?'atomic':''}`);
+  ops.append(el('span','operation','看牌子'),el('span',state.mode==='atomic'?'':'switch-gap',state.mode==='atomic'?'+':'⇄ 可插入另一个人'),el('span','operation','设成有人'));box.append(ops);
+  box.append(el('p','muted',state.mode==='atomic'?'第一人完成“看＋设成有人”后，第二人才有机会看这块牌子。':'第二人可以在这个空隙里，也看到“无人”。只把翻牌这个动作做得不可分割，仍然不够。'));
+ }
+ function svg(tag,attrs,text){const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v]of Object.entries(attrs||{}))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n}
+ function drawGraph(){
+  const graph=$('graph');graph.replaceChildren();
+  const defs=svg('defs');for(const [id,color]of Object.entries({...colors,request:'#b91c1c'})){
+   const marker=svg('marker',{id:`arrow-${id}`,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'});marker.append(svg('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:color}));defs.append(marker);
+  }graph.append(defs);
+  const pos={P1:[180,60],A:[780,60],P2:[780,220],B:[180,220]};
+  for(const e of L.edges(state)){
+   const [x0,y0]=pos[e.from],[x1,y1]=pos[e.to],horizontal=y0===y1,sign=horizontal?Math.sign(x1-x0):Math.sign(y1-y0);
+   const sx=x0+(horizontal?sign*91:0),sy=y0+(horizontal?0:sign*34),tx=x1-(horizontal?sign*91:0),ty=y1-(horizontal?0:sign*34);
+   const actor=e.kind==='held'?e.to:e.from,color=e.kind==='held'?colors[actor]:'#b91c1c';
+   const line=svg('path',{d:`M ${sx} ${sy} L ${tx} ${ty}`,class:`edge ${e.kind==='request'?'request':''}`,stroke:color,'marker-end':`url(#arrow-${e.kind==='request'?'request':actor})`});
+   line.dataset.from=e.from;line.dataset.to=e.to;line.dataset.kind=e.kind;graph.append(line);
+   graph.append(svg('text',{x:(sx+tx)/2+(horizontal?0:x0<500?-58:58),y:(sy+ty)/2+(horizontal?(y0<100?-12:25):6),'text-anchor':'middle',class:'edge-label',fill:color},e.kind==='held'?'持有':`请求 ${e.to}`));
+  }
+  for(const [id,[x,y]]of Object.entries(pos)){
+   const process=id.startsWith('P'),owner=process?null:state.locks[id],node=svg('g',{class:'node',transform:`translate(${x-90},${y-33})`});
+   node.append(svg('rect',{width:180,height:66,rx:7,class:process?(id==='P1'?'p1':'p2'):'resource'}));
+   node.append(svg('text',{x:90,y:29,'text-anchor':'middle',class:'node-title',fill:process?'#fff':'#5b3b00'},process?id:`锁 ${id}`));
+   const p=process?state.actors.find(p=>p.id===id):null;
+   const detail=process?(p.status==='waiting'?`等待 ${p.waiting}`:p.status==='done'?'已完成':p.held.length?`持有 ${p.held.join('、')}`:'可运行'):`${owner?'1 · '+owner+' 持有':'0 · 空闲'}`;
+   node.append(svg('text',{x:90,y:54,'text-anchor':'middle',class:'node-detail',fill:process?'#fff':'#5b3b00'},detail));graph.append(node);
+  }
+ }
+ function actorInfo(p){
+  if(state.scene==='lock')return p.status==='done'?'已释放锁并完成':`刚才读到：${p.read===null?'尚未读取':p.read}${p.status==='spinning'?' · 自旋重试':''}`;
+  return `${p.held.length?'持有 '+p.held.join('、'):'未持有锁'}${p.waiting?'；等待 '+p.waiting:''}`;
+ }
+ function renderActors(){
+  const root=$(state.scene==='lock'?'lockCode':'actors');root.replaceChildren();
+  $('actors').hidden=state.scene==='lock';
+  for(const p of state.actors){
+   const article=el('section',`actor ${p.id==='P2'?'p2':''}`);article.dataset.actor=p.id;
+   const head=el('header','actor-header');head.append(el('h2','',`${p.id}（进程 ${p.id.slice(1)}）`),el('span','actor-status',({ready:'可运行',critical:'临界区内',spinning:'正在重试',waiting:'阻塞等待',done:'已完成'})[p.status]));
+   const code=el('ol','code');for(const [i,line]of L.program(state,p.id).entries()){
+    const row=el('li',p.pc===i?(p.status==='waiting'?'active waiting':'active'):p.pc>i?'past':'');row.dataset.line=i;row.append(el('code','',line));code.append(row);
+   }
+   const bottom=el('div','actor-bottom'),button=el('button','',`推进 ${p.id}`);button.type='button';button.dataset.step=p.id;
+   button.disabled=playing||terminal()||p.status==='waiting'||p.status==='done';button.addEventListener('click',()=>advance(p.id));
+   bottom.append(el('span','actor-info',actorInfo(p)));if(state.scene==='deadlock')bottom.append(button);article.append(head,code,bottom);root.append(article);
+  }
+ }
+ function render(){
+  document.querySelectorAll('[data-scene]').forEach(button=>{button.setAttribute('aria-selected',String(button.dataset.scene===state.scene))});
+  $('experiment').setAttribute('aria-labelledby',`tab-${state.scene}`);
+  modes[state.scene].forEach(([mode,label],i)=>{const button=$(`mode${i+1}`);button.textContent=label;button.classList.toggle('selected',mode===state.mode);button.setAttribute('aria-pressed',String(mode===state.mode));});
+  $('stepCount').textContent=`第 ${state.steps} 步`;
+  $('nextBtn').disabled=terminal()||playing;$('playBtn').disabled=terminal();$('playBtn').textContent=playing?'暂停':'自动演示';
+  $('nextBtn').textContent='下一步';
+  $('lockDetails').hidden=state.scene!=='lock';$('deadlockDetails').hidden=state.scene==='lock';$('takeaway').hidden=state.scene==='lock';
+  document.querySelectorAll('[data-manual]').forEach(b=>{b.disabled=playing||terminal()||state.actors.find(p=>p.id===b.dataset.manual).status==='done'});
+  const info=state.scene==='lock'?simpleBanner():banner();$('outcome').className=`outcome ${info.style}`;$('outcomeTitle').textContent=info.title;$('outcomeText').textContent=info.text;
+  $('fixBtn').hidden=!state.hadViolation&&!state.deadlocked;$('fixBtn').textContent=state.scene==='lock'?'改用原子操作再试':'统一拿锁顺序再试';
+  $('lockWorld').hidden=state.scene!=='lock';$('graphWorld').hidden=state.scene!=='deadlock';$('conditions').hidden=state.scene!=='deadlock';
+  if(state.scene==='lock')drawSingle();else drawGraph();renderActors();
+  const conditions=L.conditions(state),descriptions={mutual:['互斥','每把锁同时只能由一个进程持有。'],holdWait:['占有并等待','拿着已有的锁，又在等另一把锁。'],noPreempt:['不可剥夺','模型只允许持有者主动释放锁。'],circular:['循环等待','P1 等 P2，P2 又等 P1。']};
+  const grid=$('conditionGrid');grid.replaceChildren();for(const [key,[title,detail]]of Object.entries(descriptions)){const node=el('div',`condition ${key==='circular'?'cycle':''} ${conditions[key]?'met':''}`);node.dataset.condition=key;node.append(el('strong','',`${conditions[key]?'✓':'○'} ${title}`),el('span','',detail));grid.append(node)}
+  $('takeaway').textContent=state.scene==='lock'?'原子操作保证“看牌子＋设成有人”的中间无法插入别人。只有看到原先是“无人”的那个人获准进入。':'这一幕讲“死锁”：单把锁的获取是原子的，但两把锁不是一次一起获得。统一先 A 后 B，可以破坏循环等待。';
+  $('question').textContent=state.scene==='lock'?'课堂提问：为什么两次都读到 0，却不能让两个人都进入？如果只把“写 1”做成原子操作，够不够？':'课堂提问：一个进程等待就是死锁吗？已拿着一把锁的进程，为什么不能执行后面的 unlock？统一先 A 后 B 破坏了哪个条件？';
+  const log=$(state.scene==='lock'?'lockLog':'log');log.replaceChildren();for(const entry of state.history.slice().reverse()){const row=el('li');row.append(el('span','',`第 ${entry.n} 步`),el('span','',`${entry.id}：${entry.text}`));log.append(row)}
+ }
+ document.querySelectorAll('[data-scene]').forEach(button=>button.addEventListener('click',()=>reset(button.dataset.scene,button.dataset.scene==='lock'?'split':'opposite')));
+ [$('mode1'),$('mode2')].forEach((button,i)=>button.addEventListener('click',()=>reset(state.scene,modes[state.scene][i][0])));
+ $('nextBtn').addEventListener('click',()=>advance());$('resetBtn').addEventListener('click',()=>reset());
+ $('playBtn').addEventListener('click',()=>{if(playing)stop();else if(!terminal()){playing=true;schedule()}render()});
+ $('speed').addEventListener('change',()=>{if(playing){clearTimeout(timer);timer=null;schedule()}});
+ $('fixBtn').addEventListener('click',()=>reset(state.scene,state.scene==='lock'?'atomic':'ordered'));
+ document.querySelectorAll('[data-manual]').forEach(b=>b.addEventListener('click',()=>advance(b.dataset.manual)));
+ render();
+})();
+</script>
+</body>
+</html>
