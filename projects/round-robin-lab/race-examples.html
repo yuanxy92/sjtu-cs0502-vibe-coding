@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="用计数器、抢票和转账三个交互例子，观察时间片轮转如何暴露共享数据的竞态条件，并对比加锁后的执行。">
+<title>轮转之后，为什么结果错了？</title>
+<style>
+:root{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#102344;background:#fff;font-size:24px;line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;--blue:#2563eb;--green:#0f766e;--line:#d6deea;--muted:#52627b;--surface:#f5f7fb;--red:#b42340}
+*{box-sizing:border-box}body{margin:0}button,select{font:inherit;color:inherit}button,select,summary{cursor:pointer}button{min-height:46px;padding:9px 19px;border:1px solid #bfccdf;border-radius:7px;background:#fff;font-weight:650;transition:background .15s,border-color .15s,transform .15s}button:hover:not(:disabled){background:#edf3ff;border-color:#82a4e8}button:active:not(:disabled){transform:translateY(1px)}button:disabled{cursor:not-allowed;background:#f3f5f8;color:#8793a5;border-color:#e0e6ef}.primary,button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}.primary:hover:not(:disabled),button[aria-pressed="true"]:hover{background:#1d4ed8}button:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #82a4e8;outline-offset:4px}select{min-height:46px;max-width:100%;padding:7px 32px 7px 12px;border:1px solid #bfccdf;border-radius:6px;background:#fff}a{color:var(--blue);text-underline-offset:4px}h1,h2,h3,p{margin:0}h1{font-size:clamp(34px,3.6vw,52px);line-height:1.25;letter-spacing:-.035em;text-wrap:balance}h2{font-size:29px}h3{font-size:25px}small{font-size:22px}.app{max-width:1540px;margin:auto;padding:20px 28px 24px}.back-link{display:inline-block;text-decoration:none;font-size:22px;font-weight:650}.heading{text-align:center;margin:0 0 20px}.subtitle{color:var(--muted);margin-top:7px}.examples{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}.example{border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;padding:12px 10px;font-size:25px;min-height:57px}.example:last-child{border-right:0}.example b{margin-right:9px;font-variant-numeric:tabular-nums}.scenario-description{margin:12px 0;color:#344967}.settings{display:flex;align-items:center;flex-wrap:wrap;gap:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#f8faff}.segmented{display:flex;border:1px solid #c8d4e5;border-radius:6px;overflow:hidden}.segmented button{border:0;border-radius:0;min-width:136px;padding:8px 16px}.quantum-setting{display:flex;align-items:center;gap:13px;padding-left:20px;border-left:1px solid #c8d4e5;font-weight:650}.step-count{margin-left:auto;font-weight:700;white-space:nowrap;padding:0 9px}.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1.03fr) minmax(0,1fr);gap:14px;margin:14px 0}.process{position:relative;border:1px solid var(--line);border-left:6px solid var(--process);border-radius:8px;padding:15px 18px;background:#fff;min-width:0;--process:var(--blue)}.process.b{--process:var(--green)}.process-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.process h2{color:var(--process);font-size:32px}.process-subtitle{font-size:22px;color:var(--muted);margin-top:2px}.status{font-size:22px;font-weight:650;color:var(--process);text-align:right;white-space:nowrap}.code{list-style:none;margin:0;padding:9px 5px;background:var(--surface);border:1px solid #e5ebf4;border-radius:6px;min-height:121px}.code li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:7px;padding:5px 7px;border:1px solid transparent;border-radius:4px;position:relative;line-height:1.45}.code .line-no{color:#728099;font-size:22px}.code code{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:23px;white-space:pre-wrap;overflow-wrap:anywhere}.code .next{border-color:var(--process);border-style:dashed}.code .executed{background:var(--process);color:#fff}.code .executed .line-no{color:#fff}.temporary{margin-top:13px;padding:11px 13px;background:var(--surface);border:1px solid #e5ebf4;border-radius:6px;min-height:53px;overflow-wrap:anywhere}.temporary strong{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.process-note{margin-top:10px;font-size:22px;color:var(--muted);min-height:27px}.shared{display:flex;flex-direction:column;padding:15px 20px;background:#edf4ff;border:1px solid #d3e2f8;border-radius:8px;text-align:center;min-width:0}.shared h2{font-size:29px;margin-bottom:10px}.values{background:#fff;border:1px solid #d3e2f8;border-radius:8px;min-height:103px;display:flex;align-items:center;justify-content:center;gap:14px;padding:10px}.big-value{font-size:78px;line-height:1.15;font-weight:780;letter-spacing:-.04em}.balance{display:flex;flex-direction:column;min-width:0;flex:1}.balance span{font-size:22px;color:var(--muted)}.balance strong{font-size:46px;line-height:1.2}.expected{margin-top:10px;padding:7px 10px;background:#f8fbff;border:1px solid #d7e5f9;border-radius:6px;font-weight:650}.expected strong{color:var(--blue);font-size:30px;margin-left:12px}.shared-extra{font-size:22px;margin-top:9px;min-height:27px}.shared-extra strong{color:var(--red)}.scheduling{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:auto;padding-top:14px}.schedule-item{padding:7px 10px;border:1px solid #cbdcf4;border-radius:6px;background:#f9fbff;font-size:22px;display:flex;align-items:center;gap:7px;min-height:44px}.process-chip{display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:30px;padding:1px 7px;border-radius:5px;background:var(--blue);color:#fff;font-weight:750}.process-chip.b{background:var(--green)}.lock-status{margin:9px 0 0;font-size:22px;color:var(--muted)}.narration{display:grid;grid-template-columns:124px minmax(0,1fr);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:12px}.narration-label{display:flex;align-items:center;justify-content:center;padding:14px 9px;background:var(--surface);font-weight:650;font-size:22px}.narration-copy{padding:12px 18px;min-height:83px}.narration-title{font-size:26px;font-weight:750;line-height:1.4}.narration-detail{color:var(--muted);font-size:22px;margin-top:4px}.narration[data-tone="danger"]{border-color:#e6a8b7}.narration[data-tone="danger"] .narration-label{background:#fff0f3;color:var(--red)}.narration[data-tone="danger"] .narration-title{color:var(--red)}.narration[data-tone="success"]{border-color:#a2d0c5}.narration[data-tone="success"] .narration-label{background:#edf8f4;color:var(--green)}.repair-button{margin-top:10px;font-size:22px;min-height:40px;padding:5px 12px}.timeline-area{display:flex;align-items:center;gap:18px;margin:12px 0 16px}.timeline-area h3{font-size:24px;white-space:nowrap}.timeline-scroll{overflow-x:auto;min-width:0;flex:1;padding:3px 2px 7px}.timeline{display:flex;gap:6px;min-width:100%}.time-cell{min-width:58px;flex:1 0 58px;max-width:150px;min-height:62px;padding:5px;border-color:#dce4ef;background:#f6f8fb;color:#6c7d96;font-size:22px;line-height:1.3}.time-cell strong{display:block;margin-top:3px}.time-cell.a.visited{background:#eaf1ff;color:#1d4ed8;border-color:#a8c2f6}.time-cell.b.visited{background:#e9f6f2;color:#0f766e;border-color:#aed8cb}.time-cell.current{outline:2px solid currentColor;outline-offset:0}.time-cell.blocked strong{font-size:22px}.timeline-key{font-size:22px;color:var(--muted);font-weight:400}.controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.speed-control{display:flex;align-items:center;gap:10px;margin-left:9px;font-size:22px;color:var(--muted)}.compare-toggle{margin-left:auto;color:var(--blue);border-color:#94b5ef}.comparison{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:8px;background:#fbfcff}.comparison[hidden]{display:none}.comparison-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.comparison-heading button{font-size:22px;padding:5px 12px;min-height:40px}.table-scroll{overflow:auto;margin-top:12px}table{width:100%;border-collapse:collapse;text-align:left;font-size:24px}th,td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--surface);font-size:22px}td small{display:block}.bad{color:var(--red);font-weight:700}.good{color:var(--green);font-weight:700}.comparison p{margin-top:14px;font-size:24px;color:#344967}.details{margin-top:22px;border-top:1px solid var(--line);padding-top:15px}.details summary{font-size:24px;font-weight:650}.details-content{max-width:1040px;padding:12px 0;color:#344967}.details-content p+p{margin-top:9px}.footer{display:flex;justify-content:space-between;gap:18px;color:var(--muted);font-size:22px;margin-top:18px}.legend{font-size:22px;color:var(--muted);margin:8px 0 0}.legend span{display:inline-block;margin-right:18px}.legend-line{display:inline-block;width:20px;height:15px;border:1px dashed var(--blue);vertical-align:-1px;margin-right:6px}.legend-filled{background:var(--blue);border-style:solid}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}button[data-pulse="true"]{animation:soft-pulse .4s ease-out}@keyframes soft-pulse{from{box-shadow:0 0 0 4px #2563eb24}to{box-shadow:0 0 0 0 #2563eb00}}
+@media(min-width:1600px){.app{padding-top:25px}.stage{gap:18px}.process,.shared{padding-top:20px;padding-bottom:20px}.code li{padding-top:8px;padding-bottom:8px}}
+@media(max-width:1100px){.app{padding:18px}.stage{grid-template-columns:minmax(0,1fr) minmax(245px,.9fr) minmax(0,1fr);gap:10px}.process{padding:13px 10px}.shared{padding:13px 12px}.code code{font-size:22px}.process-head{flex-wrap:wrap}.example{font-size:23px}.speed-control{margin-left:0}.compare-toggle{margin-left:0}.process h2{font-size:29px}.narration-title{font-size:25px}.schedule-item{padding:5px 7px}}
+@media(max-width:820px){.app{padding:18px 14px}.heading{text-align:left;margin-top:14px;margin-bottom:18px}h1{font-size:37px}.subtitle{font-size:24px}.examples{display:flex;flex-direction:column}.example{text-align:left;padding:10px 14px;min-height:49px;border-right:0;border-bottom:1px solid var(--line);font-size:24px}.example:last-child{border-bottom:0}.settings{gap:12px}.segmented{flex:1 1 auto}.segmented button{min-width:0;flex:1;padding:8px 12px}.quantum-setting{border:0;padding-left:0;gap:10px}.step-count{font-size:22px}.stage{grid-template-columns:minmax(0,1fr)}.shared{grid-row:1;padding:14px;min-height:0}.shared h2{font-size:28px}.values{min-height:85px}.big-value{font-size:56px}.shared-extra:empty{display:none}.scheduling{padding-top:10px;margin-top:0}.process{padding:14px 16px}.process-head{flex-wrap:nowrap}.code{min-height:0}.code code{font-size:23px}.process-note{min-height:0}.narration{grid-template-columns:minmax(0,1fr)}.narration-label{padding:7px 14px;justify-content:flex-start}.narration-copy{padding:12px 14px}.timeline-area{display:block}.timeline-area h3{margin-bottom:8px}.time-cell{flex-basis:58px}.controls button{flex:1 1 auto}.speed-control{flex-wrap:wrap;margin-top:3px}.compare-toggle{flex-basis:100%!important}.footer{flex-direction:column;gap:8px}.comparison{padding:14px}.comparison-heading{align-items:flex-start}.comparison-heading h2{font-size:26px}table{min-width:560px}.legend span{margin-right:10px}.process-subtitle{font-size:22px}}
+.code code{font-size:24px}.narration-copy{position:relative}.narration-copy:has(.repair-button:not([hidden])){padding-right:250px}.repair-button{position:absolute;right:16px;top:16px;margin-top:0}.time-cell{max-width:none}
+@media(max-width:820px){.narration-copy:has(.repair-button:not([hidden])){padding-right:14px}.repair-button{position:static;margin-top:10px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="app">
+  <a class="back-link" href="index.html">← 返回轮转模拟器</a>
+  <header class="heading"><h1>轮转之后，为什么结果错了？</h1><p class="subtitle">调度决定谁先运行，同步保证共享数据正确。</p></header>
+  <nav class="examples" aria-label="选择演示例子">
+    <button class="example" data-example="counter" aria-pressed="true"><b>01</b>计数器少加一次</button>
+    <button class="example" data-example="ticket" aria-pressed="false"><b>02</b>最后一张票卖了两次</button>
+    <button class="example" data-example="transfer" aria-pressed="false"><b>03</b>转账读到一半</button>
+  </nav>
+  <p class="scenario-description" id="description"></p>
+  <section class="settings" aria-label="运行方案">
+    <div class="segmented" role="group" aria-label="同步方式"><button id="unsafeBtn" aria-pressed="true">无锁</button><button id="lockedBtn" aria-pressed="false">加锁保护</button></div>
+    <label class="quantum-setting" for="quantum">时间片 q <select id="quantum"><option value="1">1 条指令</option><option value="2">2 条指令</option><option value="3">3 条指令</option><option value="4">4 条指令</option></select></label>
+    <span class="step-count" id="stepCount">步骤 0 / 6</span>
+  </section>
+  <section class="stage" aria-label="进程与共享数据">
+    <article class="process a" id="processA" aria-labelledby="headingA"></article>
+    <section class="shared" aria-labelledby="sharedHeading"><h2 id="sharedHeading">共享计数器</h2><div class="values" id="sharedValues"></div><div class="expected" id="expected"></div><p class="shared-extra" id="sharedExtra"></p><div class="scheduling" id="scheduling"></div><p class="lock-status" id="lockStatus" hidden></p></section>
+    <article class="process b" id="processB" aria-labelledby="headingB"></article>
+  </section>
+  <p class="legend"><span><i class="legend-line legend-filled" aria-hidden="true"></i>刚执行的指令</span><span><i class="legend-line" aria-hidden="true"></i>CPU 接下来执行</span></p>
+  <section class="narration" id="narration" role="status" aria-live="polite" aria-atomic="true"><div class="narration-label" id="eventLabel">当前步骤</div><div class="narration-copy"><p class="narration-title" id="eventTitle"></p><p class="narration-detail" id="eventDetail"></p><button class="repair-button" id="repairBtn" hidden>加锁后重新演示 →</button></div></section>
+  <section class="timeline-area" aria-labelledby="timelineHeading"><h3 id="timelineHeading">执行时间线<br><span class="timeline-key">每格一条指令</span></h3><div class="timeline-scroll" id="timelineScroll" tabindex="0" role="region" aria-label="可横向滚动的执行时间线"><div class="timeline" id="timeline"></div></div></section>
+  <div class="controls" aria-label="播放控制">
+    <button id="backBtn" disabled>上一步</button><button class="primary" id="stepBtn">下一步</button><button id="playBtn">▶ 自动播放</button><button id="resetBtn">↺ 重置</button>
+    <label class="speed-control" for="speed">播放间隔 <select id="speed"><option value="1600">1.6 秒</option><option value="900" selected>0.9 秒</option><option value="300">0.3 秒</option></select></label>
+    <button class="compare-toggle" id="compareBtn" aria-expanded="false" aria-controls="comparison">对比不同时间片</button>
+  </div>
+  <section class="comparison" id="comparison" aria-labelledby="comparisonHeading" hidden>
+    <div class="comparison-heading"><h2 id="comparisonHeading">同样的程序，换一个时间片</h2><button id="closeCompareBtn">收起</button></div>
+    <div class="table-scroll"><table><caption class="sr-only">各时间片下无锁与加锁的完整运行结果</caption><thead><tr><th scope="col">时间片</th><th scope="col">无锁：这次的结果</th><th scope="col">加锁保护</th><th scope="col">重新演示</th></tr></thead><tbody id="compareRows"></tbody></table></div>
+    <p>调大时间片可能碰巧避开错误。<strong>一次运行正确，不能证明程序安全。</strong>两个进程必须使用同一把锁，保护完整的检查与更新过程。</p>
+  </section>
+  <details class="details"><summary>课堂讨论与模型说明</summary><div class="details-content"><p id="discussion"></p><p>本页是轮转调度的扩展示例。两个进程都在 t = 0 就绪，A 先运行；每次“下一步”执行一条教学指令。时间片 q 决定一轮最多执行几条指令，播放间隔只决定动画快慢。</p><p>加锁使用不可分割的获取操作；获取失败的进程进入阻塞等待，释放后被唤醒并重试。时间线中的“等”表示一次获取失败的尝试，等待本身不继续消耗 CPU 指令。</p><p>这些伪代码用于观察交错顺序，不表示高级语言的一行代码就是一条机器指令。转账例子将“读取两账户总额”简化为一次快照读取；真实程序同样需要让读写双方遵守一致的同步约定。</p><p>思考：如果只给“写回”那一行加锁，之前读到的旧值还可靠吗？</p></div></details>
+  <footer class="footer"><span>单 CPU · 确定的教学调度 · 可离线打开</span><a href="../deadlock-lab/index.html">继续：锁与死锁实验室 →</a></footer>
+</main>
+<script id="races-engine">
+(() => {
+  'use strict';
+  const SCENARIOS = {
+    counter: {
+      title:'计数器少加一次', description:'两个进程各加 1，计数器应该从 0 变成 2。', sharedTitle:'共享计数器', expected:'期望结果', target:'2',
+      roles:['加 1','加 1'],
+      discussion:'两个进程读到了同一个旧值，分别算出的 1 不会自动合并。问题出在“读取—计算—写回”之间被插入了另一个进程。',
+      programs:[['readCounter','increment','writeCounter'],['readCounter','increment','writeCounter']]
+    },
+    ticket: {
+      title:'最后一张票卖了两次', description:'只剩 1 张票，A、B 各买 1 张，最多只能有 1 人购票成功。', sharedTitle:'剩余票数', expected:'最多购票成功', target:'1 人',
+      roles:['买票人 A','买票人 B'],
+      discussion:'“我刚才看见有票”不代表“现在仍然有票”。检查与出票必须作为一个完整过程保护；只锁出票操作，旧的判断仍然可能失效。',
+      programs:[['readStock','checkStock','issueTicket'],['readStock','checkStock','issueTicket']]
+    },
+    transfer: {
+      title:'转账读到一半', description:'A 将账户甲的 50 元转到账户乙，B 查看总额；转账前后总额都应为 200 元。', sharedTitle:'共享账户余额', expected:'B 应看到的总额', target:'200 元',
+      roles:['转账 50 元','查看总额'],
+      discussion:'转账尚未完成时，甲已扣款、乙还没收款。读进程也必须遵守同一把锁，才能避开这个中间状态；最终余额恢复正确，也不能撤回已经读走的错误结果。',
+      programs:[['debit','credit'],['observe']]
+    }
+  };
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function program(scenario, id, locked) {
+    const ops = SCENARIOS[scenario].programs[id === 'A' ? 0 : 1];
+    return locked ? ['acquire',...ops,'release'] : [...ops];
+  }
+  function code(op, id) {
+    const r = `r${id}`;
+    return ({acquire:'lock(mutex)',release:'unlock(mutex)',readCounter:`${r} = counter`,increment:`${r} = ${r} + 1`,writeCounter:`counter = ${r}`,readStock:`${r} = stock`,checkStock:`canBuy = (${r} > 0)`,issueTicket:`if canBuy: 出票\n  stock = ${r} - 1`,debit:'账户甲 = 账户甲 - 50',credit:'账户乙 = 账户乙 + 50',observe:'看到的总额 = 甲 + 乙'})[op];
+  }
+  function create(scenario='counter', quantum=1, locked=false) {
+    if (!Object.hasOwn(SCENARIOS,scenario)) throw new Error('未知例子');
+    if (!Number.isInteger(quantum) || quantum<1 || quantum>4) throw new Error('时间片必须为 1–4 的整数');
+    if (typeof locked !== 'boolean') throw new Error('同步方式必须为布尔值');
+    return {scenario,quantum,locked,time:0,running:'A',queue:['B'],sliceUsed:0,
+      processes:['A','B'].map((id,i)=>({id,pc:0,temp:null,canBuy:null,confirmed:false,status:i===0?'running':'ready'})),
+      shared:scenario==='counter'?{counter:0}:scenario==='ticket'?{stock:1}:{left:100,right:100},
+      lock:{owner:null,waiting:[]},observed:null,hazard:false,trace:[],done:false,result:null,
+      event:{process:null,line:null,kind:'initial',text:'初始状态：A 先运行，B 在就绪队列等待。',detail:locked?'获取同一把锁后，才能进入受保护的代码。':'先预测结果，再点“下一步”观察。'}};
+  }
+  function outcome(s) {
+    let ok,summary;
+    if(s.scenario==='counter') {ok=s.shared.counter===2;summary=`计数器 = ${s.shared.counter}，应为 2`;}
+    if(s.scenario==='ticket') {const count=s.processes.filter(p=>p.confirmed).length;ok=count===1;summary=`${count} 人购票成功，只有 1 张票`;}
+    if(s.scenario==='transfer') {ok=s.observed===200;summary=`B 看到 ${s.observed} 元，应为 200 元`;}
+    return {ok,summary,title:ok?(s.locked?'加锁后，结果正确。':'这次结果正确，程序仍缺少同步。'):'出现错误：'+summary+'。',
+      detail:ok?(s.locked?'两个进程用同一把锁保护完整操作，轮转不会破坏这个约定。':'当前时间片恰好避开了危险交错。试试 q = 1；增大时间片不能保证所有调度下都正确。'):SCENARIOS[s.scenario].discussion};
+  }
+  function step(previous) {
+    const s = clone(previous);
+    if(s.done) return s;
+    const p=s.processes.find(p=>p.id===s.running);
+    if(!p) throw new Error('无可运行进程');
+    const ops=program(s.scenario,p.id,s.locked),line=p.pc,op=ops[line];
+    let text='',detail='',blocked=false;
+    if(op==='acquire') {
+      if(s.lock.owner===null) {s.lock.owner=p.id;text=`${p.id} 获取锁，进入受保护的操作。`;detail='获取锁是不可分割的一步；只有持有者才能继续访问这组共享数据。';}
+      else {blocked=true;p.status='blocked';s.lock.waiting.push(p.id);text=`${p.id} 获取锁失败：锁由 ${s.lock.owner} 持有。`;detail=`${p.id} 进入阻塞等待，让出 CPU；它没有越过 lock，也没有继续读取共享数据。`;}
+    } else if(op==='release') {
+      if(s.lock.owner!==p.id) throw new Error('不能释放其他进程的锁');
+      s.lock.owner=null;text=`${p.id} 释放锁，受保护的操作已完成。`;
+      const id=s.lock.waiting.shift();
+      if(id) {s.processes.find(p=>p.id===id).status='ready';s.queue.push(id);detail=`唤醒 ${id} 并放入就绪队列；它获得 CPU 后会重新尝试获取锁。`;}
+      else detail='等待者可以在后续获得 CPU 时获取锁。';
+    } else if(op==='readCounter') {
+      p.temp=s.shared.counter;text=`${p.id} 读取计数器，把 ${p.temp} 记在自己的 r${p.id} 中。`;detail=`r${p.id} 是进程的临时值；别人改动计数器时，它不会自动跟着变。`;
+    } else if(op==='increment') {
+      const old=p.temp;p.temp++;text=`${p.id} 在自己的临时值上加 1：${old} → ${p.temp}。`;detail=`共享计数器仍为 ${s.shared.counter}，还没有写回。`;
+    } else if(op==='writeCounter') {
+      const old=s.shared.counter;s.shared.counter=p.temp;
+      if(old>=p.temp) s.hazard=true;
+      text=`${p.id} 把自己的 ${p.temp} 写回计数器：${old} → ${p.temp}。`;
+      detail=s.hazard?'写回的仍是 1，另一次加 1 的效果被覆盖了。':'一次加 1 完成；另一个进程之后应基于最新值继续。';
+    } else if(op==='readStock') {
+      p.temp=s.shared.stock;text=`${p.id} 查询余票，记下“剩 ${p.temp} 张”。`;detail='这是一份之前读到的值，之后不会自动刷新。';
+    } else if(op==='checkStock') {
+      p.canBuy=p.temp>0;text=`${p.id} 根据自己记下的 ${p.temp} 张票，判断${p.canBuy?'可以买票':'不能买票'}。`;detail='判断依赖刚才的读数，此时还没有重新检查共享余票。';
+    } else if(op==='issueTicket') {
+      if(p.canBuy) {p.confirmed=true;s.shared.stock=p.temp-1;text=`${p.id} 确认出票，按旧读数把余票写为 ${s.shared.stock}。`;}
+      else text=`${p.id} 没有买到票，不修改余票。`;
+      const count=s.processes.filter(p=>p.confirmed).length;
+      if(count>1) s.hazard=true;
+      detail=s.hazard?'两人都拿到了成功确认。余票显示 0，也掩盖不了超卖事实。':`目前 ${count} 人购票成功。`;
+    } else if(op==='debit') {
+      s.shared.left-=50;text='A 从账户甲扣除 50 元：100 → 50。';detail='账户乙还没有到账，此刻两个账户加起来只有 150 元。';
+    } else if(op==='credit') {
+      s.shared.right+=50;text='A 向账户乙存入 50 元：100 → 150，转账完成。';detail=s.hazard?'余额总额恢复为 200，但 B 已经读走了错误的 150。':'两个账户总额恢复为 200 元。';
+    } else if(op==='observe') {
+      s.observed=s.shared.left+s.shared.right;s.hazard=s.observed!==200;
+      text=`B 读取余额快照：${s.shared.left} + ${s.shared.right} = ${s.observed} 元。`;
+      detail=s.hazard?'B 读到了转账中间状态，少看见 50 元；之后转账完成也不会自动更正这次读数。':'B 读到的是完整转账前或转账后的总额。';
+    }
+    s.trace.push({time:s.time,process:p.id,line,op,blocked});
+    s.time++;s.sliceUsed++;
+    if(!blocked) p.pc++;
+    if(blocked || p.pc===ops.length) {
+      if(!blocked) p.status='done';
+      s.running=null;s.sliceUsed=0;
+    } else if(s.sliceUsed>=s.quantum) {
+      p.status='ready';s.queue.push(p.id);s.running=null;s.sliceUsed=0;
+    }
+    if(!s.running && s.queue.length) {s.running=s.queue.shift();s.processes.find(p=>p.id===s.running).status='running';}
+    s.done=s.processes.every(p=>p.status==='done');
+    if(s.done) s.result=outcome(s);
+    s.event={process:p.id,line,kind:blocked?'blocked':op,text,detail};
+    return s;
+  }
+  function run(scenario,quantum,locked) {
+    let s=create(scenario,quantum,locked);
+    while(!s.done) {s=step(s);if(s.time>40) throw new Error('模拟未能结束');}
+    return s;
+  }
+  function compare(scenario) {
+    return [1,2,3,4].map(quantum=>({quantum,unsafe:run(scenario,quantum,false).result,locked:run(scenario,quantum,true).result}));
+  }
+  globalThis.Races=Object.freeze({create,step,run,compare,program,code,scenarios:SCENARIOS});
+})();
+</script>
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id),R=globalThis.Races;
+  let scenario='counter',locked=false,quantum=1,frames=[],cursor=0,timer=null,playing=false;
+  const el=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;};
+  function stop(){playing=false;clearTimeout(timer);timer=null;}
+  function reset(){stop();cursor=0;frames=[R.create(scenario,quantum,locked)];while(!frames.at(-1).done)frames.push(R.step(frames.at(-1)));render();}
+  function chip(id){return el('span','process-chip'+(id==='B'?' b':''),id);}
+  function renderProcess(s,id){
+    const p=s.processes.find(p=>p.id===id),n=$('process'+id),info=R.scenarios[scenario];n.replaceChildren();
+    const head=el('div','process-head'),titles=el('div'),h=el('h2','',`进程 ${id}`);h.id='heading'+id;
+    titles.append(h,el('p','process-subtitle',info.roles[id==='A'?0:1]));
+    const status=({running:'CPU 正在执行',ready:'就绪队列等待',blocked:'阻塞：等待锁',done:'已完成'})[p.status];
+    head.append(titles,el('span','status',status));n.append(head);
+    const code=el('ol','code');
+    R.program(scenario,id,locked).forEach((op,line)=>{
+      const li=el('li');let label='';
+      if(s.running===id && p.pc===line){li.classList.add('next');label='，CPU 接下来执行';}
+      if(s.event.process===id && s.event.line===line){li.classList.add('executed');label+='，刚执行';}
+      li.append(el('span','line-no',String(line+1)),el('code','',R.code(op,id)),el('span','sr-only',label));code.append(li);
+    });n.append(code);
+    const temp=el('div','temporary');
+    if(scenario==='transfer'){temp.append(el('span','',id==='A'?'本次转账  ':'看到的总额  '),el('strong','',id==='A'?'50 元':s.observed===null?'—':s.observed+' 元'));}
+    else {temp.append(el('span','',scenario==='ticket'?'记下的余票  ':'临时变量  '),el('strong','',`r${id} = ${p.temp===null?'—':p.temp}`));}
+    n.append(temp);
+    const note=scenario==='ticket'?(p.confirmed?'✓ 已收到购票成功确认':p.canBuy===false?'判断：无票，购票失败':p.canBuy===true?'判断：有票，准备出票':'尚未作出购票判断'):scenario==='transfer'?(id==='A'?'完整转账包含扣款和入账两步。':'这次读数会保留，不随余额自动刷新。'):'临时值保存在自己的进程中。';
+    n.append(el('p','process-note',note));
+  }
+  function renderShared(s){
+    const info=R.scenarios[scenario];$('sharedHeading').textContent=info.sharedTitle;
+    const values=$('sharedValues');values.replaceChildren();
+    if(scenario==='transfer'){
+      for(const [label,key] of [['账户甲','left'],['账户乙','right']]){const b=el('div','balance');b.append(el('span','',label),el('strong','',String(s.shared[key])));values.append(b);}
+    } else values.append(el('strong','big-value',String(scenario==='counter'?s.shared.counter:s.shared.stock)));
+    $('expected').replaceChildren(el('span','',info.expected),el('strong','',info.target));
+    const extra=$('sharedExtra');extra.replaceChildren();
+    if(scenario==='ticket')extra.append(el('span','',`已确认购票：${s.processes.filter(p=>p.confirmed).length} 人`));
+    if(scenario==='transfer')extra.append(el('span','',`当前余额总额：${s.shared.left+s.shared.right} 元`));
+    if(scenario==='counter')extra.append(el('span','',s.hazard?'一次加 1 的效果已丢失':'两次加 1，都需要保留下来。'));
+    const scheduling=$('scheduling');scheduling.replaceChildren();
+    for(const [title,ids] of [['CPU →',s.running?[s.running]:[]],['就绪队列',s.queue]]){
+      const item=el('div','schedule-item');item.append(el('span','',title));if(!ids.length)item.append(el('span','',s.done?'已结束':'空'));else ids.forEach(id=>item.append(chip(id)));scheduling.append(item);
+    }
+    $('lockStatus').hidden=!locked;
+    $('lockStatus').textContent=`锁：${s.lock.owner?'由 '+s.lock.owner+' 持有':'空闲'}${s.lock.waiting.length?' · 等待 '+s.lock.waiting.join('、'):''}`;
+  }
+  function renderComparison(){
+    const rows=$('compareRows');rows.replaceChildren();
+    for(const row of R.compare(scenario)){
+      const tr=el('tr');tr.append(el('td','',`q = ${row.quantum}`));
+      for(const key of ['unsafe','locked']){const result=row[key],td=el('td');td.append(el('span',result.ok?'good':'bad',result.ok?(key==='unsafe'?'这次正确':'✓ 正确'):'✕ 出错'),el('small','',result.summary));tr.append(td);}
+      const td=el('td'),b=el('button','',`试 q = ${row.quantum}`);b.dataset.quantum=String(row.quantum);b.setAttribute('aria-label',`无锁模式演示时间片 ${row.quantum}`);td.append(b);tr.append(td);rows.append(tr);
+    }
+  }
+  function render(){
+    const focused=document.activeElement,focusedStep=focused?.dataset.step,focusedQuantum=focused?.dataset.quantum;
+    const s=frames[cursor],info=R.scenarios[scenario];
+    document.querySelectorAll('[data-example]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.example===scenario)));
+    $('unsafeBtn').setAttribute('aria-pressed',String(!locked));$('lockedBtn').setAttribute('aria-pressed',String(locked));
+    $('quantum').value=String(quantum);$('description').textContent=info.description;$('discussion').textContent=info.discussion;
+    $('stepCount').textContent=`步骤 ${cursor} / ${frames.length-1}`;
+    renderProcess(s,'A');renderProcess(s,'B');renderShared(s);
+    const result=s.result;$('narration').dataset.tone=s.hazard?'danger':result?.ok&&locked?'success':'';
+    $('eventLabel').textContent=s.done?'运行结果':'当前步骤';
+    $('eventTitle').textContent=s.done?result.title:s.event.text;
+    const next=s.done?'':s.running?` 接下来 CPU → ${s.running}${s.event.process&&s.event.process!==s.running?'（发生切换）':''}。`:'';
+    $('eventDetail').textContent=s.done?result.detail:s.event.detail+next;
+    $('repairBtn').hidden=!(s.done&&!locked);
+    $('backBtn').disabled=cursor===0;$('stepBtn').disabled=s.done;$('playBtn').disabled=s.done;
+    $('playBtn').textContent=playing?'Ⅱ 暂停':'▶ 自动播放';$('playBtn').setAttribute('aria-label',playing?'暂停自动播放':'自动播放');
+    const timeline=$('timeline');timeline.replaceChildren();
+    frames.slice(1).forEach((frame,i)=>{
+      const t=frame.trace.at(-1),visited=i<cursor,b=el('button','time-cell'+(visited?' '+t.process.toLowerCase()+' visited':'')+(t.blocked?' blocked':'')+(i+1===cursor?' current':''));
+      b.append(el('span','',String(i+1)),el('strong','',visited?t.process+(t.blocked?'·等':''):'—'));
+      b.dataset.step=String(i+1);b.setAttribute('aria-label',`跳至第 ${i+1} 步${visited?'，进程 '+t.process:''}`);
+      if(i+1===cursor)b.setAttribute('aria-current','step');timeline.append(b);
+    });
+    if(!$('comparison').hidden)renderComparison();
+    if(focusedStep)($('timeline').querySelector(`[data-step="${focusedStep}"]`)||$('stepBtn')).focus({preventScroll:true});
+    if(focusedQuantum)$('compareRows').querySelector(`[data-quantum="${focusedQuantum}"]`)?.focus({preventScroll:true});
+  }
+  function advance(){if(cursor<frames.length-1)cursor++;if(frames[cursor].done)stop();render();}
+  function schedule(){clearTimeout(timer);timer=setTimeout(()=>{if(!playing)return;advance();if(playing)schedule();},Number($('speed').value));}
+  function changeMode(value){locked=value;reset();}
+  $('stepBtn').addEventListener('click',()=>{stop();advance();});
+  $('backBtn').addEventListener('click',()=>{stop();if(cursor>0)cursor--;render();});
+  $('resetBtn').addEventListener('click',reset);
+  $('playBtn').addEventListener('click',()=>{if(playing){stop();render();}else if(!frames[cursor].done){playing=true;render();schedule();}});
+  $('speed').addEventListener('change',()=>{if(playing)schedule();});
+  $('unsafeBtn').addEventListener('click',()=>changeMode(false));$('lockedBtn').addEventListener('click',()=>changeMode(true));
+  $('repairBtn').addEventListener('click',()=>changeMode(true));
+  $('quantum').addEventListener('change',()=>{quantum=Number($('quantum').value);reset();});
+  document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>{scenario=b.dataset.example;reset();}));
+  $('timeline').addEventListener('click',e=>{const b=e.target.closest('button[data-step]');if(!b)return;stop();cursor=Number(b.dataset.step);render();});
+  function toggleComparison(show){$('comparison').hidden=!show;$('compareBtn').setAttribute('aria-expanded',String(show));$('compareBtn').textContent=show?'收起时间片对比':'对比不同时间片';if(show)renderComparison();}
+  $('compareBtn').addEventListener('click',()=>toggleComparison($('comparison').hidden));$('closeCompareBtn').addEventListener('click',()=>toggleComparison(false));
+  $('compareRows').addEventListener('click',e=>{const b=e.target.closest('button[data-quantum]');if(!b)return;quantum=Number(b.dataset.quantum);locked=false;reset();$('stepBtn').focus();});
+  document.addEventListener('keydown',e=>{if(e.target.closest('button,select,a,summary')||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowRight'){e.preventDefault();stop();advance();}if(e.key==='ArrowLeft'){e.preventDefault();stop();if(cursor>0)cursor--;render();}});
+  window.addEventListener('pagehide',stop);
+  reset();
+})();
+</script>
+</body>
+</html>
