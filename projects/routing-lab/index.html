@@ -88,6 +88,10 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
   .router-table-card{scroll-snap-align:start}
 }
 
+.packet-duration{font-size:20px;font-weight:650;color:var(--teal);white-space:nowrap;background:#edf8f7;border:1px solid #d2e9e6;border-radius:5px;padding:3px 10px}
+/* Path overlays must not block editing the links underneath them. */
+.route-trail,.route-preview,.control-packet,.data-packet{pointer-events:none}
+
 </style>
   
   
@@ -138,14 +142,14 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
       <p class="route-hint">点击任意表中的目的地，可查看从该路由器出发的路径。</p>
       <div class="next-note"><span class="round-icon" data-icon="chevron"></span><div><h3 id="nextTitle">下一步：发现直连设备</h3><p id="nextNote">先探测相邻路由器和本地终端，再开始交换链路通告。</p></div></div>
     </section>
-    <section class="packet-details panel" id="packetDetails" hidden><div class="panel-heading"><h2>数据包旅程</h2><span id="packetStatus"></span></div><div class="packet-information"><div class="packet-addresses" id="packetAddresses"></div><div id="packetPath" class="packet-path"></div></div><p id="packetReason" class="packet-reason" role="status" aria-live="polite"></p><p class="packet-footnote">每一跳都读取该路由器此刻的路由表；蓝色轨迹是已经走过的路径。</p></section>
+    <section class="packet-details panel" id="packetDetails" hidden><div class="panel-heading"><h2>数据包旅程</h2><span id="packetStatus"></span></div><div class="packet-information"><div class="packet-addresses" id="packetAddresses"></div><div id="packetPath" class="packet-path"></div><span id="packetDuration" class="packet-duration" title="直接相加当前路径上的链路数字">总耗时：0 ms</span></div><p id="packetReason" class="packet-reason" role="status" aria-live="polite"></p><p class="packet-footnote">每一跳都读取该路由器此刻的路由表；总耗时直接相加当前路径上的链路数字。</p></section>
 
   </section>
   <footer><span>教学算法仿真 · 本地运行 · 无需联网</span><span><button id="principleBtn" class="text-button">模型与原理</button><a href="https://www.rfc-editor.org/rfc/rfc2328.html" target="_blank" rel="noreferrer">RFC 2328 <span aria-hidden="true">↗</span></a></span></footer>
 </main>
 <dialog id="guideDialog" aria-labelledby="guideTitle"><div class="dialog-heading"><h2 id="guideTitle">让路由过程看得见</h2><button id="closeGuide" class="icon-button" aria-label="关闭教学指南">×</button></div><div class="guide-content">
   <p class="guide-lead">一张拓扑，三个问题：路由从哪里来，故障怎样传播，数据如何到达。</p>
-  <ol class="guide-steps"><li><strong>路由建立</strong><p>初始时每台路由器只知道本机，直连路由器和终端也尚未发现。点击轮次按钮可直接查看第 0、1、2、3 轮及收敛状态；第 0 轮仅知道本机，第 1 轮发现直连，后续轮次逐步建立远端路由。也可使用「下一轮」或「自动演示」。绿色小点代表控制报文；下方并排显示 R1–R5 的路由表，观察各表高亮的新记录。「自动演示」在收敛后暂停。</p></li><li><strong>故障与重收敛</strong><p>进入本环节时已是收敛后的第 0 轮。关闭 R2 或点击「R1–R2 延迟增大」，第 1 轮合并故障发生、直连状态更新和相邻路由器重新算路；第 2 轮起传播给更远的设备，逐步重新稳定。获知 R2 离线后，到 R2 的代价持续为 ∞，不能绕行连接到已离线设备。可随时回到“故障前”比较，点击「重新演示」恢复健康网络；收敛后 H1–H6 都仍然可以访问。按钮可再次点击恢复。延迟变化通过代价 1 → 8 表示，不按真实毫秒计时。点击任意链路可断开、恢复或调整代价；点击每张路由表表头的电源按钮可模拟对应设备故障或恢复。</p></li><li><strong>数据包转发</strong><p>建议选择 H1 → H6。取消「自动转发」后逐跳观察；途中可以制造故障。数据包始终按照当前设备的路由表转发，无路由、链路中断或 TTL 耗尽都会丢包。再次发送可以比较故障前后的路径。</p></li></ol>
+  <ol class="guide-steps"><li><strong>路由建立</strong><p>初始时每台路由器只知道本机，直连路由器和终端也尚未发现。点击轮次按钮可直接查看第 0、1、2、3 轮及收敛状态；第 0 轮仅知道本机，第 1 轮发现直连，后续轮次逐步建立远端路由。也可使用「下一轮」或「自动演示」。绿色小点代表控制报文；下方并排显示 R1–R5 的路由表，观察各表高亮的新记录。「自动演示」在收敛后暂停。</p></li><li><strong>故障与重收敛</strong><p>进入本环节时已是收敛后的第 0 轮。关闭 R2 或点击「R1–R2 延迟增大」，第 1 轮合并故障发生、直连状态更新和相邻路由器重新算路；第 2 轮起传播给更远的设备，逐步重新稳定。获知 R2 离线后，到 R2 的代价持续为 ∞，不能绕行连接到已离线设备。可随时回到“故障前”比较，点击「重新演示」恢复健康网络；收敛后 H1–H6 都仍然可以访问。按钮可再次点击恢复。延迟变化通过代价 1 → 8 表示，旅程中直接累加图中数字作为模拟耗时。点击任意链路可断开、恢复或调整代价；点击每张路由表表头的电源按钮可模拟对应设备故障或恢复。</p></li><li><strong>数据包转发</strong><p>建议选择 H1 → H6。取消「自动转发」后逐跳观察；途中可以制造故障。数据包始终按照当前设备的路由表转发，无路由、链路中断或 TTL 耗尽都会丢包。旅程旁的总耗时直接相加当前路径上的链路数字，终端接入不另计。再次发送可以比较故障前后的路径和耗时。</p></li></ol>
   <h3>Dijkstra 怎样建立路由表？</h3><p>每台路由器先产生带序号的本地链路通告（LSA），通过邻居逐轮传播。收到的通告组成该设备自己的网络地图，再以自己为起点运行 Dijkstra：反复选出尚未确定的节点中距离最小的一个，更新它相邻节点的候选距离。最终得到最短路径树，从中取出每个目的网络的下一跳，写入路由表。</p><p>链路代价为正数，符合 Dijkstra 的非负权要求。发生故障时先更新本地通告，再传播给其他设备；每台设备根据自己收到的信息重新计算，不会在故障发生瞬间就知道全网变化。</p>
   <h3>教学模型的边界</h3><p>这是链路状态与 Dijkstra 的教学模型，不是完整 OSPF 实现。每一轮是一组同步的控制报文交换，时间经过压缩，不对应真实协议定时器。02 的第 1 轮包含故障发生与相邻设备重新算路，第 2 轮起继续向远端传播；不可达使用无穷大表示。第一轮的直连探测是教学抽象，不对应完整 ARP 或 Hello 握手。LSA 采用完整数据库逐轮交换，省略完整邻居握手、区域、可靠泛洪确认、LSA 老化以及协议报文编码。</p><p>五台路由器的表同时并排显示在拓扑下方，目的地仅显示 H、R 编号，不显示 IP。为便于教学，路由表只按终端 H 和路由器 R 分组显示，R 行表示到对应路由器的距离，H 行表示经终端网关到达该终端的路径。终端到网关的局域网开销不计入图中链路代价；本机代价记为 0。同一局域网内的终端直接交付，TTL 不变；图中省略了交换机，网关故障不等于 LAN 故障。图中连线与代价是为演示冗余路径补全的示例，并非对附件拓扑的精确复原。</p><p>快捷键：<kbd>→</kbd> 下一轮，<kbd>←</kbd> 回退，<kbd>空格</kbd> 播放 / 暂停；数据包在单独的发送控件中逐跳操作。工具栏重建按钮保留当前拓扑并清空学到的路由；「重置实验」恢复全部默认设置。</p>
   <p class="guide-sources">协议参考：<a href="https://www.rfc-editor.org/rfc/rfc2328.html" target="_blank" rel="noreferrer">RFC 2328 · OSPF Version 2</a>。</p>
@@ -731,6 +735,13 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
     $('packetStatus').textContent = packet.status === 'delivered' ? '✓ 已送达' : packet.status === 'dropped' ? '× 已丢弃' : '正在转发';
     $('packetAddresses').innerHTML = `<span>源 <b>${packet.source.id}</b> · ${packet.source.ip}</span><span>目的 <b>${packet.destination.id}</b> · ${packet.destination.ip}</span><span>TTL <b>${packet.ttl}</b></span>`;
     $('packetPath').innerHTML = packet.path.map((id, i) => `${i ? '<span class="path-arrow">→</span>' : ''}<span class="path-node ${i === packet.path.length-1 ? 'current' : ''}">${id}</span>`).join('');
+    let duration = 0;
+    for (let i = 1; i < packet.path.length; i++) {
+      const from = packet.path[i - 1], to = packet.path[i];
+      const link = sim.links.find(e => (e.a === from && e.b === to) || (e.b === from && e.a === to));
+      if (link) duration += link.cost;
+    }
+    $('packetDuration').textContent = `总耗时：${duration} ms`;
     $('packetReason').textContent = packet.reason; $('packetReason').className = `packet-reason ${packet.status}`;
   }
   function render(animate = false) {
