@@ -430,18 +430,31 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
       this.update();
     }
     update() {
-      // Forecast on a separate model so showing the available rounds never
-      // advances the live network. An edit replaces only the current future.
+      // Forecast the full convergence before trimming its table-unchanged tail.
+      // Keep intermediate rounds if a later round still changes a table.
       for (const round of this.frames.keys()) if (round >= this.sim.round) this.frames.delete(round);
       this.frames.set(this.sim.round, this.sim.snapshot());
       const forecast = new RoutingSimulation();
       forecast.restore(this.sim.snapshot());
-      let steps = 0;
+      let steps = 0, lastVisibleRound = this.sim.round;
       while (!forecast.stable && steps < 80) {
         forecast.step(); steps++;
         this.frames.set(forecast.round, forecast.snapshot());
+        if (forecast.last.changes.length || forecast.last.hostChanges.length || forecast.last.phase === 'discovery')
+          lastVisibleRound = forecast.round;
       }
       if (!forecast.stable) throw new Error('Routing timeline did not converge');
+      if (lastVisibleRound < forecast.round) {
+        const visible = this.frames.get(lastVisibleRound);
+        const settled = forecast.snapshot();
+        // Finish hidden database synchronization without adding unchanged tables
+        // to the presentation. Retain this round's event and change highlights.
+        settled.round = lastVisibleRound;
+        settled.last = {...visible.last, stable: true};
+        for (const round of this.frames.keys()) if (round > lastVisibleRound) this.frames.delete(round);
+        this.frames.set(lastVisibleRound, settled);
+        if (this.sim.round === lastVisibleRound) this.sim.restore(settled);
+      }
     }
     select(round) {
       if (!Number.isInteger(round) || !this.frames.has(round)) throw new Error('Unknown round');
@@ -658,7 +671,7 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
   function renderTable() {
     const up = sim.isUp(selected), eventPending = sim.last.phase === 'event';
     $('routeTables').innerHTML = sim.routers.map(r => routeCard(r.id)).join('');
-    $('routeCaption').textContent = eventPending ? '相邻路由器已重新计算；远端将在后续轮次收到变化。' : sim.stable ? '路由已收敛。各表显示这一轮的下一跳与代价。' : sim.round === 0 ? '初始只知道本机，直连设备尚未发现。' : '各表同步显示当前轮次；浅绿色标出发生变化的记录。';
+    $('routeCaption').textContent = sim.stable ? '路由已收敛。各表显示这一轮的下一跳与代价。' : eventPending ? '相邻路由器已重新计算；远端将在后续轮次收到变化。' : sim.round === 0 ? '初始只知道本机，直连设备尚未发现。' : '各表同步显示当前轮次；浅绿色标出发生变化的记录。';
     $('linkInspector').hidden = !linkSelected;
     if (linkSelected) {
       const e = sim.links.find(e => e.id === linkSelected);
@@ -667,7 +680,7 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
       $('linkToggle').textContent = e.up ? '断开' : '恢复';
       $('linkToggle').className = e.up ? 'danger-outline' : '';
     }
-    if (eventPending) {
+    if (eventPending && !sim.stable) {
       $('nextTitle').textContent = '本地更新完成，继续向远端传播';
       $('nextNote').textContent = '相邻设备已按新状态重新算路；后续轮次继续传播，直至各表稳定。';
     } else if (!up) {
@@ -692,7 +705,7 @@ dialog{max-width:820px;width:calc(100% - 32px);border:1px solid var(--line);bord
     render();
   }
   function roundDescription(frame) {
-    return frame.phase === 'baseline' ? '故障前' : frame.round === 0 ? '开始状态' : frame.stable ? '已收敛' : frame.phase === 'discovery' ? '发现直连' : ['event', 'change'].includes(frame.phase) ? frame.event || '等待更新' : '更新路由';
+    return frame.phase === 'baseline' ? '故障前' : frame.round === 0 ? '开始状态' : frame.event ? `${frame.event}${frame.stable ? ' · 已收敛' : ''}` : frame.stable ? '已收敛' : frame.phase === 'discovery' ? '发现直连' : frame.phase === 'change' ? '本地更新' : '更新路由';
   }
 
   function renderRounds() {

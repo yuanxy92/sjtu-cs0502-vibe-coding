@@ -207,14 +207,19 @@ test('topology changes cannot discover direct connections before the discovery s
   converge(s); checkAll(s);
 });
 
-test('round selection previews every round without advancing the live simulation', () => {
+test('round selection ends at the last changing round without advancing the initial state', () => {
   const s = new RoutingSimulation(), initial = s.snapshot();
   const timeline = new RoundTimeline(s);
   assert.deepEqual(s.snapshot(), initial);
-  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4]);
+  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3]);
   const reference = new RoutingSimulation(), expected = [reference.snapshot()];
   while (!reference.stable) { reference.step(); expected.push(reference.snapshot()); }
-  for (const round of [4, 0, 2, 1, 3, 0]) {
+  timeline.select(3);
+  assert.equal(s.stable, true);
+  assert.deepEqual(s.tables, reference.tables);
+  assert.deepEqual(s.lsdb, reference.lsdb);
+  assert.deepEqual(s.last.changes, expected[3].last.changes);
+  for (const round of [0, 2, 1, 0]) {
     timeline.select(round); assert.deepEqual(s.snapshot(), expected[round]);
   }
   assert.equal(s.hostRoutes('R1').find(h => h.id === 'H1').cost, Infinity);
@@ -228,16 +233,17 @@ test('round selection previews every round without advancing the live simulation
 
 test('round selection rebuilds future frames after faults and preserves earlier rounds', () => {
   const s = new RoutingSimulation(), timeline = new RoundTimeline(s);
-  timeline.select(4); s.setRouter('R3', false); timeline.update();
-  assert.equal(s.round, 4);
+  const baselineRound = timeline.list().at(-1).round;
+  timeline.select(baselineRound); s.setRouter('R3', false); timeline.update();
+  assert.equal(s.round, baselineRound);
   assert.equal(s.tables.R1.R5.cost, 3);
   const last = timeline.list().at(-1);
-  assert.ok(last.round > 4 && last.stable);
+  assert.ok(last.round > baselineRound && last.stable);
   timeline.select(last.round);
   assert.equal(s.tables.R1.R5.cost, 5);
   assert.equal(s.tables.R1.R5.next, 'R4');
   timeline.select(0); assert.equal(s.isUp('R3'), true);
-  timeline.select(4); assert.equal(s.isUp('R3'), false);
+  timeline.select(baselineRound); assert.equal(s.isUp('R3'), false);
   timeline.select(1); s.setCost('R1-R2', 9); timeline.update();
   timeline.select(timeline.list().at(-1).round); checkAll(s);
   assert.equal(s.isUp('R3'), true, 'discarded future fault must not reappear');
@@ -331,6 +337,8 @@ for (const event of ['router failure', 'delay increase']) {
     assert.ok(s.last.messages.length > 0);
     if (event === 'router failure') assert.equal(s.tables.R5.R2.cost, Infinity);
     assert.ok(timeline.list().every(f => f.phase !== 'detection'));
+    assert.deepEqual(timeline.list().map(f => f.round), event === 'router failure' ? [0, 1, 2] : [0, 1, 2, 3]);
+    assert.equal(s.stable, event === 'router failure');
     timeline.select(timeline.list().at(-1).round); checkAll(s);
     assert.ok(s.hostRoutes('R1').every(h => h.cost < Infinity));
     timeline.select(1); assert.deepEqual(s.snapshot(), eventFrame);
@@ -376,11 +384,12 @@ test('offline router never becomes reachable again after its failure is learned'
     }
   }
   assert.ok(s.hostRoutes('R1').every(h => h.cost < Infinity));
+  const faultFinalRound = timeline.list().at(-1).round;
   timeline.applyEvent(() => s.setRouter('R2', true), 'R2 恢复');
   timeline.select(timeline.list().at(-1).round); checkAll(s);
   assert.equal(s.tables.R1.R2.cost, 1);
   assert.equal(s.tables.R5.R2.cost, 2);
-  timeline.select(3); assert.equal(s.tables.R1.R2.cost, Infinity);
+  timeline.select(faultFinalRound); assert.equal(s.tables.R1.R2.cost, Infinity);
 });
 
 test('direct API failure knowledge prevents stale LSAs from resurrecting a failed node', () => {
@@ -390,4 +399,35 @@ test('direct API failure knowledge prevents stale LSAs from resurrecting a faile
     s.step();
   }
   checkAll(s);
+});
+
+
+test('R4 failure ends in its first round and retains fully synchronized state for later events', () => {
+  const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
+  timeline.applyEvent(() => s.setRouter('R4', false), 'R4 故障');
+  assert.deepEqual(timeline.list().map(f => f.round), [0, 1]);
+  assert.equal(s.round, 1); assert.equal(s.stable, true);
+  assert.equal(s.last.event, 'R4 故障'); assert.ok(s.last.changes.length > 0);
+  checkAll(s);
+  for (const id of ['R1','R2','R3','R5']) assert.equal(s.hostRoutes(id).find(h => h.id === 'H3').cost, Infinity);
+  const settled = new RoutingSimulation(); settled.restore(s.snapshot());
+  assert.equal(settled.step().knowledge, 0);
+  timeline.select(0); assert.equal(s.isUp('R4'), true);
+  timeline.select(1); assert.equal(s.isUp('R4'), false); assert.equal(s.stable, true);
+  timeline.applyEvent(() => s.setRouter('R4', true), 'R4 恢复');
+  timeline.select(timeline.list().at(-1).round); checkAll(s);
+});
+
+test('a host-only route change remains visible even when router distances no longer change', () => {
+  const s = new RoutingSimulation({
+    routers: [{id:'R1',up:true,network:'192.168.1.0/24'},{id:'R2',up:true,network:'192.168.2.0/24'}],
+    hosts: [{id:'H1',router:'R2',ip:'192.168.2.10'}],
+    links: [{id:'R1-R2',a:'R1',b:'R2',cost:1,up:true}]
+  });
+  const timeline = new RoundTimeline(s);
+  assert.deepEqual(timeline.list().map(f => f.round), [0,1,2]);
+  timeline.select(1); assert.equal(s.hostRoutes('R1')[0].cost, Infinity);
+  timeline.select(2); assert.equal(s.last.changes.length,0);
+  assert.ok(s.last.hostChanges.length > 0); assert.equal(s.hostRoutes('R1')[0].cost,1);
+  assert.equal(s.stable,true);
 });

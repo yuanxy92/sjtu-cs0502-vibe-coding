@@ -272,18 +272,31 @@
       this.update();
     }
     update() {
-      // Forecast on a separate model so showing the available rounds never
-      // advances the live network. An edit replaces only the current future.
+      // Forecast the full convergence before trimming its table-unchanged tail.
+      // Keep intermediate rounds if a later round still changes a table.
       for (const round of this.frames.keys()) if (round >= this.sim.round) this.frames.delete(round);
       this.frames.set(this.sim.round, this.sim.snapshot());
       const forecast = new RoutingSimulation();
       forecast.restore(this.sim.snapshot());
-      let steps = 0;
+      let steps = 0, lastVisibleRound = this.sim.round;
       while (!forecast.stable && steps < 80) {
         forecast.step(); steps++;
         this.frames.set(forecast.round, forecast.snapshot());
+        if (forecast.last.changes.length || forecast.last.hostChanges.length || forecast.last.phase === 'discovery')
+          lastVisibleRound = forecast.round;
       }
       if (!forecast.stable) throw new Error('Routing timeline did not converge');
+      if (lastVisibleRound < forecast.round) {
+        const visible = this.frames.get(lastVisibleRound);
+        const settled = forecast.snapshot();
+        // Finish hidden database synchronization without adding unchanged tables
+        // to the presentation. Retain this round's event and change highlights.
+        settled.round = lastVisibleRound;
+        settled.last = {...visible.last, stable: true};
+        for (const round of this.frames.keys()) if (round > lastVisibleRound) this.frames.delete(round);
+        this.frames.set(lastVisibleRound, settled);
+        if (this.sim.round === lastVisibleRound) this.sim.restore(settled);
+      }
     }
     select(round) {
       if (!Number.isInteger(round) || !this.frames.has(round)) throw new Error('Unknown round');
