@@ -40,7 +40,6 @@
       this.infinity = Infinity;
       this.round = 0; this.stable = false; this.sequence = 0;
       this.tables = {}; this.lsdb = {};
-      this.pendingChanges = [];
       this.discovered = Object.fromEntries(this.routers.map(r => [r.id, false]));
       for (const r of this.routers) {
         this.tables[r.id] = this.emptyTable();
@@ -139,7 +138,6 @@
       return this.last;
     }
     step() {
-      if (this.pendingChanges.length) return this.detectChanges();
       const pending = this.routers.filter(r => r.up && !this.discovered[r.id]);
       if (pending.length) return this.discoverDirect(pending);
       const before = clone(this.tables), messages = []; let knowledge = 0;
@@ -163,68 +161,17 @@
       return this.last;
     }
     stageEvent(action, event) {
-      const before = this.snapshot();
-      const hostBefore = this.hostSnapshot();
-      let physical;
+      const before = this.snapshot(), hostBefore = this.hostSnapshot();
       try {
+        // One teaching round includes the event and the adjacent routers' SPF.
+        // Only later steps flood this new knowledge to other routers.
         action(this);
-        physical = {routers: clone(this.routers), links: clone(this.links)};
-      } finally {
-        // Defer SPF and flooding; only directly observed costs change below.
+      } catch (error) {
         this.restore(before);
+        throw error;
       }
-      for (const r of physical.routers) {
-        if (r.up !== this.isUp(r.id)) this.pendingChanges.push({type: 'router', id: r.id});
-      }
-      for (const e of physical.links) {
-        const previous = this.links.find(v => v.id === e.id);
-        if (e.up !== previous.up || e.cost !== previous.cost)
-          this.pendingChanges.push({type: 'link', id: e.id});
-      }
-      Object.assign(this, physical);
-      for (const e of this.links) {
-        const previous = before.links.find(v => v.id === e.id);
-        const wasUp = previous.up && before.routers.find(r => r.id === e.a).up && before.routers.find(r => r.id === e.b).up;
-        const nowUp = this.linkUp(e);
-        if (wasUp === nowUp && previous.cost === e.cost) continue;
-        for (const [from, to] of [[e.a, e.b], [e.b, e.a]]) {
-          if (!this.isUp(from) || !this.discovered[from]) continue;
-          const route = this.tables[from][to];
-          // Preserve existing indirect paths until the next SPF calculation.
-          if (route.next !== to && route.cost < Infinity && this.isUp(to)) continue;
-          this.tables[from][to] = nowUp ? {cost: e.cost, next: to} : {cost: Infinity, next: null};
-        }
-      }
-      this.round++; this.stable = false;
+      this.round = before.round + 1; this.stable = false;
       this.last = {changes: this.diff(before.tables, this.tables), hostChanges: this.hostDiff(hostBefore), messages: [], knowledge: 0, stable: false, phase: 'event', event};
-      return this.last;
-    }
-    detectChanges() {
-      const before = clone(this.tables), hostBefore = this.hostSnapshot();
-      const affected = new Set();
-      for (const change of this.pendingChanges) {
-        if (change.type === 'router') {
-          const id = change.id;
-          affected.add(id);
-          for (const e of this.links.filter(e => e.a === id || e.b === id)) {
-            affected.add(e.a); affected.add(e.b);
-          }
-          this.discovered[id] = false;
-          if (this.isUp(id)) {
-            this.tables[id] = this.emptyTable();
-            this.tables[id][id] = {cost: 0, next: id};
-            this.lsdb[id] = {};
-          }
-        } else {
-          const e = this.links.find(e => e.id === change.id);
-          affected.add(e.a); affected.add(e.b);
-        }
-      }
-      this.pendingChanges = [];
-      this.topologyChanged([...affected], hostBefore);
-      this.round++;
-      this.last.changes = this.diff(before, this.tables);
-      this.last.phase = 'detection';
       return this.last;
     }
     topologyChanged(affected, hostBefore = this.hostSnapshot()) {
@@ -271,7 +218,7 @@
     snapshot() {
       return clone({routers: this.routers, hosts: this.hosts, links: this.links,
         infinity: this.infinity, tables: this.tables, lsdb: this.lsdb, discovered: this.discovered, round: this.round, stable: this.stable,
-        sequence: this.sequence, pendingChanges: this.pendingChanges, last: this.last});
+        sequence: this.sequence, last: this.last});
     }
     restore(state) { Object.assign(this, clone(state)); }
   }

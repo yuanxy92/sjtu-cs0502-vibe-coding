@@ -299,38 +299,41 @@ test('fault and repair events append rounds while preserving the healthy baselin
 });
 
 for (const event of ['router failure', 'delay increase']) {
-  test(`${event}: event round updates direct costs; the next round recomputes paths`, () => {
+  test(`${event}: event round includes local recomputation; next round propagates it`, () => {
     const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
     const before = s.snapshot();
     timeline.applyEvent(() => event === 'router failure' ? s.setRouter('R2', false) : s.setCost('R1-R2', 8), event);
     assert.equal(s.round, 1);
     assert.equal(s.last.phase, 'event');
-    const expected = structuredClone(before.tables);
-    if (event === 'router failure') {
-      for (const id of ['R1', 'R3', 'R4']) expected[id].R2 = {cost: Infinity, next: null};
-    } else {
-      expected.R1.R2 = {cost: 8, next: 'R2'};
-      expected.R2.R1 = {cost: 8, next: 'R1'};
-    }
-    assert.deepEqual(s.tables, expected);
-    assert.deepEqual(s.lsdb, before.lsdb);
-    assert.deepEqual(s.discovered, before.discovered);
-    assert.equal(s.sequence, before.sequence);
-    assert.equal(s.last.changes.length, event === 'router failure' ? 3 : 2);
-    assert.deepEqual(s.last.hostChanges.map(c => [c.router, c.destination, c.after.cost]), event === 'router failure' ? [] : [['R2', 'H1', 8], ['R2', 'H2', 8]]);
-    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').next, 'R2');
-    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').cost, 3);
+    assert.deepEqual(s.tables.R1.R5, {cost: 5, next: 'R4'});
+    assert.deepEqual(s.tables.R5, before.tables.R5, 'remote R5 must wait for propagation');
+    assert.deepEqual(s.lsdb.R5, before.lsdb.R5);
+    assert.ok(s.lsdb.R1.R1.seq > before.lsdb.R1.R1.seq);
+    assert.ok(s.sequence > before.sequence);
+    assert.ok(s.last.changes.some(c => c.router === 'R1' && c.destination === 'R5'));
+    assert.deepEqual(s.last.messages, []);
+    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').next, 'R4');
+    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').cost, 5);
     if (event === 'router failure') {
       assert.equal(s.isUp('R2'), false);
-      const packet = new Packet(s, 'H1', 'H6'); packet.step(s); packet.step(s);
-      assert.equal(packet.status, 'dropped'); assert.match(packet.reason, /旧路由/);
-    } else assert.equal(s.links.find(e => e.id === 'R1-R2').cost, 8);
+      for (const id of ['R1', 'R3', 'R4']) assert.equal(s.tables[id].R2.cost, Infinity);
+    } else {
+      assert.equal(s.links.find(e => e.id === 'R1-R2').cost, 8);
+      assert.deepEqual(s.tables.R1.R2, {cost: 3, next: 'R4'});
+    }
+    const packet = new Packet(s, 'H1', 'H6');
+    while (packet.status === 'moving') packet.step(s);
+    assert.equal(packet.status, 'delivered');
+    assert.deepEqual(packet.path, ['H1', 'R1', 'R4', 'R5', 'H6']);
+    const eventFrame = s.snapshot();
     timeline.select(2);
-    assert.equal(s.last.phase, 'detection');
-    assert.equal(s.tables.R1.R5.next, 'R4');
+    assert.equal(s.last.phase, 'flood');
+    assert.ok(s.last.messages.length > 0);
+    if (event === 'router failure') assert.equal(s.tables.R5.R2.cost, Infinity);
+    assert.ok(timeline.list().every(f => f.phase !== 'detection'));
     timeline.select(timeline.list().at(-1).round); checkAll(s);
     assert.ok(s.hostRoutes('R1').every(h => h.cost < Infinity));
-    timeline.select(1); assert.deepEqual(s.tables, expected);
+    timeline.select(1); assert.deepEqual(s.snapshot(), eventFrame);
     timeline.select(0); assert.deepEqual(s.snapshot(), before);
   });
 }
@@ -340,19 +343,22 @@ test('invalid staged event leaves the original state intact', () => {
   assert.throws(() => timeline.applyEvent(() => s.setCost('R1-R2', 0), 'invalid'));
   assert.deepEqual(s.snapshot(), before);
   assert.deepEqual(timeline.list().map(f => f.round), [0]);
+  assert.throws(() => timeline.applyEvent(() => { s.setCost('R1-R2', 8); s.setCost('R1-R2', 0); }, 'partial invalid'));
+  assert.deepEqual(s.snapshot(), before);
+  assert.deepEqual(timeline.list().map(f => f.round), [0]);
 });
 
 
-test('a broken link becomes infinite before an alternate route to the live neighbor is computed', () => {
+test('a broken link reroutes locally in its event round without marking the live peer offline', () => {
   const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
   const before = s.snapshot();
   timeline.applyEvent(() => s.setLink('R1-R2', false), '链路断开');
-  assert.deepEqual(s.tables.R1.R2, {cost: Infinity, next: null});
-  assert.deepEqual(s.tables.R2.R1, {cost: Infinity, next: null});
-  assert.deepEqual(s.tables.R1.R5, before.tables.R1.R5);
-  assert.deepEqual(s.tables.R5, before.tables.R5);
-  timeline.select(2);
+  assert.equal(s.round, 1);
+  assert.equal(s.isUp('R2'), true);
   assert.deepEqual(s.tables.R1.R2, {cost: 3, next: 'R4'});
+  assert.deepEqual(s.tables.R2.R1, {cost: 3, next: 'R4'});
+  assert.deepEqual(s.tables.R1.R5, {cost: 5, next: 'R4'});
+  assert.deepEqual(s.tables.R5, before.tables.R5);
   timeline.select(timeline.list().at(-1).round); checkAll(s);
 });
 
@@ -362,10 +368,10 @@ test('offline router never becomes reachable again after its failure is learned'
   const learned = new Set(['R1', 'R3', 'R4']);
   for (const frame of timeline.list().filter(f => f.round > 0)) {
     timeline.select(frame.round);
-    if (frame.round >= 3) learned.add('R5');
+    if (frame.round >= 2) learned.add('R5');
     for (const id of learned) {
       assert.deepEqual(s.tables[id].R2, {cost: Infinity, next: null}, `${id}, round ${frame.round}`);
-      if (frame.round >= 2) for (const [destination, route] of Object.entries(s.tables[id]))
+      if (frame.round >= 1) for (const [destination, route] of Object.entries(s.tables[id]))
         assert.notEqual(route.next, 'R2', `${id} to ${destination} must not transit failed R2 in round ${frame.round}`);
     }
   }
