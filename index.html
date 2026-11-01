@@ -451,6 +451,66 @@
         </div>
       </div>
     </details>
+
+    <details class="course-project-card" id="routing-lab">
+      <summary class="course-project-card__toggle">
+        <span class="course-project-card__number">07</span>
+        <span class="course-project-card__main">
+          <span class="course-project-card__meta"><span data-language-heading="routing" data-zh="计算机网络 · 路由与转发" data-en="Computer networks · Routing and forwarding">Computer networks · Routing and forwarding</span></span>
+          <strong data-language-heading="routing" data-zh="网络路由实验室" data-en="Network Routing Lab">Network Routing Lab</strong>
+          <span class="course-project-card__summary" data-language-content="routing" data-language="zh" hidden>逐轮观察 Dijkstra 路由表建立、路由器故障后的重新收敛，以及数据包如何逐跳到达终端。</span>
+          <span class="course-project-card__summary" data-language-content="routing" data-language="en">Explore Dijkstra routing tables round by round, reconverge after a router failure, and follow packets from host to host.</span>
+        </span>
+        <span class="course-project-card__action" aria-hidden="true">
+          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="routing" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="routing" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+        </span>
+      </summary>
+      <div class="course-project-card__details">
+        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="routing" aria-label="Network routing lab language">
+          <button type="button" data-language="zh" aria-pressed="false">中文</button>
+          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+        </div>
+        <div class="course-project-note">
+          <i class="fas fa-network-wired" aria-hidden="true"></i>
+          <p data-language-content="routing" data-language="zh" hidden>课堂演示：从第 0 轮开始建表，模拟 R2 离线或 R1–R2 延迟增大，观察直连代价变化、后续改道与重新收敛。切换路由器查看终端 H 和路由器 R 的记录，再发送数据包比较路径。模拟器界面为中文，可离线使用。</p>
+          <p data-language-content="routing" data-language="en">Classroom demo: build tables from round zero, take R2 offline or increase the R1–R2 link cost, and observe direct-cost changes, rerouting, and convergence. Inspect host and router entries at each router, then send packets to compare paths. The simulator has a Chinese interface and runs offline.</p>
+        </div>
+        <div class="course-video-chapters" aria-label="Network routing simulator, offline download, and guide">
+          <a class="course-video-chapter" href="./projects/routing-lab/index.html">
+            <span class="course-video-chapter__number">↗</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="routing" data-language="zh" hidden>打开网络路由实验室</strong>
+              <strong data-language-content="routing" data-language="en">Open the Network Routing Lab</strong>
+              <small data-language-content="routing" data-language="zh" hidden>Dijkstra、轮次选择、终端与路由器路由表、故障改道和数据包逐跳转发</small>
+              <small data-language-content="routing" data-language="en">Dijkstra, round selection, host and router tables, failure recovery, and packet forwarding</small>
+            </span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a class="course-video-chapter" href="./projects/routing-lab/routing-lab-offline.zip" download>
+            <span class="course-video-chapter__number">↓</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="routing" data-language="zh" hidden>下载离线实验包（ZIP）</strong>
+              <strong data-language-content="routing" data-language="en">Download the Offline Lab (ZIP)</strong>
+              <small data-language-content="routing" data-language="zh" hidden>包含可独立打开的模拟器和中文使用说明，无需联网或安装依赖</small>
+              <small data-language-content="routing" data-language="en">A self-contained simulator and Chinese guide; no network connection or installation required</small>
+            </span>
+            <i class="fas fa-download" aria-hidden="true"></i>
+          </a>
+          <a class="course-video-chapter" href="./projects/routing-lab/README.md" download>
+            <span class="course-video-chapter__number">↓</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="routing" data-language="zh" hidden>下载课堂演示说明（Markdown）</strong>
+              <strong data-language-content="routing" data-language="en">Download the Classroom Guide (Markdown)</strong>
+              <small data-language-content="routing" data-language="zh" hidden>包含演示步骤、故障轮次、转发路径与教学模型边界</small>
+              <small data-language-content="routing" data-language="en">Demonstration steps, failure rounds, forwarding paths, and teaching-model limitations</small>
+            </span>
+            <i class="fas fa-download" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </details>
   </section>
 
   <section class="course-projects" id="course-projects" aria-labelledby="course-projects-title">
