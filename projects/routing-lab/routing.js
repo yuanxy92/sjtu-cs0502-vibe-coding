@@ -40,6 +40,8 @@
       this.infinity = Infinity;
       this.round = 0; this.stable = false; this.sequence = 0;
       this.tables = {}; this.lsdb = {};
+      this.expandCalculations = false;
+      this.spfPending = {}; this.calculationStep = 0;
       this.discovered = Object.fromEntries(this.routers.map(r => [r.id, false]));
       for (const r of this.routers) {
         this.tables[r.id] = this.emptyTable();
@@ -89,7 +91,7 @@
       const routerStates = [id, ...adjacent].map(peer => ({id: peer, up: this.isUp(peer)}));
       this.lsdb[id][id] = { origin: id, seq: ++this.sequence, routerStates, links: this.neighbors(id).map(({id, cost}) => ({ id, cost })) };
     }
-    computeDijkstra(id, database) {
+    computeDijkstra(id, database, onSettle) {
       const table = this.emptyTable();
       if (!this.isUp(id)) return table;
       table[id] = {cost: 0, next: id};
@@ -104,6 +106,7 @@
         const u = this.routers.filter(r => !done.has(r.id)).sort((a, b) => table[a.id].cost - table[b.id].cost || a.id.localeCompare(b.id))[0]?.id;
         if (!u || table[u].cost === Infinity) break;
         done.add(u);
+        if (onSettle) onSettle({destination: u, route: clone(table[u])});
         // Only the local database is consulted; no global topology shortcut.
         for (const e of database[u]?.links || []) {
           if (!table[e.id] || done.has(e.id) || unavailable(e.id)) continue;
@@ -113,6 +116,49 @@
         }
       }
       return table;
+    }
+    recalculate(id, hostBefore) {
+      if (!this.expandCalculations) {
+        this.tables[id] = this.computeDijkstra(id, this.lsdb[id]);
+        return;
+      }
+      const trace = [];
+      const final = this.computeDijkstra(id, this.lsdb[id], step => trace.push(step));
+      const changed = new Set(this.routers.filter(r => {
+        const before = this.tables[id][r.id], after = final[r.id];
+        return before.cost !== after.cost || before.next !== after.next;
+      }).map(r => r.id));
+      // A newly received gateway advertisement may unlock H rows even when
+      // its router distance was already known. Confirm those rows in SPF too.
+      for (const h of this.hosts) {
+        const before = hostBefore[id].find(v => v.id === h.id);
+        const after = this.discovered[id] && this.lsdb[id][h.router] ? final[h.router] : {cost: Infinity, next: null};
+        if (before.cost !== after.cost || before.next !== after.next) changed.add(h.router);
+      }
+      this.spfPending[id] = trace.filter(step => step.destination !== id && changed.has(step.destination));
+      for (const destination of changed) {
+        // Invalid routes disappear immediately; reachable replacements wait
+        // for their actual Dijkstra finalization, in increasing distance order.
+        this.tables[id][destination] = destination === id ? final[destination] : {cost: Infinity, next: null};
+      }
+    }
+    isRoutePending(id, destination) {
+      return !!this.spfPending[id]?.some(step => step.destination === destination);
+    }
+    calculationPending() { return Object.values(this.spfPending).some(steps => steps.length); }
+    calculationRound() {
+      const before = clone(this.tables), hostBefore = this.hostSnapshot(), calculations = [];
+      for (const r of this.routers) {
+        if (!r.up) { this.spfPending[r.id] = []; continue; }
+        const step = this.spfPending[r.id]?.shift();
+        if (!step) continue;
+        this.tables[r.id][step.destination] = clone(step.route);
+        calculations.push({router: r.id, destination: step.destination, ...step.route});
+      }
+      this.round++; this.calculationStep++; this.stable = false;
+      this.last = {changes: this.diff(before, this.tables), hostChanges: this.hostDiff(hostBefore),
+        messages: [], knowledge: 0, stable: false, phase: 'spf', calculations, calculationStep: this.calculationStep};
+      return this.last;
     }
     diff(before, after) {
       const changes = [];
@@ -140,6 +186,7 @@
     step() {
       const pending = this.routers.filter(r => r.up && !this.discovered[r.id]);
       if (pending.length) return this.discoverDirect(pending);
+      if (this.calculationPending()) return this.calculationRound();
       const before = clone(this.tables), messages = []; let knowledge = 0;
       const hostBefore = this.hostSnapshot();
       const previous = clone(this.lsdb), next = clone(previous);
@@ -153,18 +200,19 @@
         }
       }
       this.lsdb = next;
-      for (const r of this.routers) this.tables[r.id] = this.computeDijkstra(r.id, next[r.id]);
+      this.calculationStep = 0;
+      for (const r of this.routers) this.recalculate(r.id, hostBefore);
       this.round++;
       const changes = this.diff(before, this.tables);
-      this.stable = changes.length === 0 && knowledge === 0;
+      this.stable = changes.length === 0 && knowledge === 0 && !this.calculationPending();
       this.last = {changes, hostChanges: this.hostDiff(hostBefore), messages, knowledge, stable: this.stable, phase: 'flood'};
       return this.last;
     }
     stageEvent(action, event) {
       const before = this.snapshot(), hostBefore = this.hostSnapshot();
       try {
-        // One teaching round includes the event and the adjacent routers' SPF.
-        // Only later steps flood this new knowledge to other routers.
+        // The event updates local observations. Expanded SPF and remote
+        // propagation remain separate, replayable steps in the timeline.
         action(this);
       } catch (error) {
         this.restore(before);
@@ -177,9 +225,10 @@
     topologyChanged(affected, hostBefore = this.hostSnapshot()) {
       const before = clone(this.tables);
       this.stable = false;
+      this.calculationStep = 0;
       for (const id of new Set(affected)) {
         this.originate(id);
-        this.tables[id] = this.computeDijkstra(id, this.lsdb[id]);
+        this.recalculate(id, hostBefore);
       }
       this.last = {changes: this.diff(before, this.tables), hostChanges: this.hostDiff(hostBefore), messages: [], knowledge: 0, stable: false, phase: 'change'};
       return this.last;
@@ -193,6 +242,7 @@
       const hostBefore = this.hostSnapshot();
       r.up = up;
       this.discovered[id] = false;
+      this.spfPending[id] = [];
       if (up) {
         // A restarted router begins with its own knowledge, not its old memory.
         this.tables[id] = this.emptyTable(); this.tables[id][id] = {cost: 0, next: id};
@@ -218,7 +268,8 @@
     snapshot() {
       return clone({routers: this.routers, hosts: this.hosts, links: this.links,
         infinity: this.infinity, tables: this.tables, lsdb: this.lsdb, discovered: this.discovered, round: this.round, stable: this.stable,
-        sequence: this.sequence, last: this.last});
+        sequence: this.sequence, last: this.last, expandCalculations: this.expandCalculations,
+        spfPending: this.spfPending, calculationStep: this.calculationStep});
     }
     restore(state) { Object.assign(this, clone(state)); }
   }
@@ -268,6 +319,7 @@
   class RoundTimeline {
     constructor(sim) {
       this.sim = sim;
+      sim.expandCalculations = true;
       this.frames = new Map();
       this.update();
     }
@@ -297,7 +349,8 @@
     }
     list() {
       return [...this.frames.entries()].sort((a, b) => a[0] - b[0])
-        .map(([round, state]) => ({round, phase: state.last.phase, stable: state.stable, event: state.last.event}));
+        .map(([round, state]) => ({round, phase: state.last.phase, stable: state.stable, event: state.last.event,
+          calculationStep: state.last.calculationStep, calculations: state.last.calculations}));
     }
   }
   const api = { RoutingSimulation, createTopology, Packet, RoundTimeline };

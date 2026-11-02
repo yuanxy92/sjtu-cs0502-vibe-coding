@@ -207,18 +207,17 @@ test('topology changes cannot discover direct connections before the discovery s
   converge(s); checkAll(s);
 });
 
-test('round selection preserves the complete update process without advancing the initial state', () => {
-  const s = new RoutingSimulation(), initial = s.snapshot();
-  const timeline = new RoundTimeline(s);
+test('round selection preserves expanded update steps without advancing the initial state', () => {
+  const s = new RoutingSimulation(); s.expandCalculations = true;
+  const initial = s.snapshot(), timeline = new RoundTimeline(s);
   assert.deepEqual(s.snapshot(), initial);
-  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4]);
-  const reference = new RoutingSimulation(), expected = [reference.snapshot()];
-  while (!reference.stable) { reference.step(); expected.push(reference.snapshot()); }
-  timeline.select(4);
-  assert.equal(s.stable, true);
-  assert.deepEqual(s.tables, reference.tables);
-  assert.deepEqual(s.lsdb, reference.lsdb);
-  for (const round of [0, 3, 2, 4, 1, 0]) {
+  const model = new RoutingSimulation(); model.expandCalculations = true;
+  const expected = [model.snapshot()];
+  while (!model.stable) { model.step(); expected.push(model.snapshot()); }
+  const finalRound = expected.at(-1).round;
+  assert.ok(timeline.list().some(f => f.phase === 'spf'));
+  timeline.select(finalRound); assert.equal(s.stable, true); checkAll(s);
+  for (const round of [0, 3, 2, finalRound, 1, 0]) {
     timeline.select(round); assert.deepEqual(s.snapshot(), expected[round]);
   }
   assert.equal(s.hostRoutes('R1').find(h => h.id === 'H1').cost, Infinity);
@@ -304,41 +303,35 @@ test('fault and repair events append rounds while preserving the healthy baselin
 });
 
 for (const event of ['router failure', 'delay increase']) {
-  test(`${event}: event round includes local recomputation; next round propagates it`, () => {
+  test(`${event}: detect locally, calculate step by step, then propagate remotely`, () => {
     const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
     const before = s.snapshot();
     timeline.applyEvent(() => event === 'router failure' ? s.setRouter('R2', false) : s.setCost('R1-R2', 8), event);
-    assert.equal(s.round, 1);
-    assert.equal(s.last.phase, 'event');
-    assert.deepEqual(s.tables.R1.R5, {cost: 5, next: 'R4'});
+    assert.equal(s.round, 1); assert.equal(s.last.phase, 'event');
+    assert.equal(s.tables.R1.R5.cost, Infinity);
+    assert.equal(s.isRoutePending('R1', 'R5'), true);
     assert.deepEqual(s.tables.R5, before.tables.R5, 'remote R5 must wait for propagation');
     assert.deepEqual(s.lsdb.R5, before.lsdb.R5);
     assert.ok(s.lsdb.R1.R1.seq > before.lsdb.R1.R1.seq);
-    assert.ok(s.sequence > before.sequence);
-    assert.ok(s.last.changes.some(c => c.router === 'R1' && c.destination === 'R5'));
-    assert.deepEqual(s.last.messages, []);
-    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').next, 'R4');
-    assert.equal(s.hostRoutes('R1').find(h => h.id === 'H6').cost, 5);
     if (event === 'router failure') {
       assert.equal(s.isUp('R2'), false);
       for (const id of ['R1', 'R3', 'R4']) assert.equal(s.tables[id].R2.cost, Infinity);
-    } else {
-      assert.equal(s.links.find(e => e.id === 'R1-R2').cost, 8);
-      assert.deepEqual(s.tables.R1.R2, {cost: 3, next: 'R4'});
-    }
+    } else assert.equal(s.links.find(e => e.id === 'R1-R2').cost, 8);
+    const eventFrame = s.snapshot();
+    const flood = timeline.list().find(f => f.phase === 'flood');
+    assert.ok(flood.round > 2, 'local SPF steps must precede the first flood');
+    timeline.select(flood.round - 1);
+    assert.deepEqual(s.tables.R1.R5, {cost: 5, next: 'R4'});
+    assert.deepEqual(s.tables.R5, before.tables.R5);
     const packet = new Packet(s, 'H1', 'H6');
     while (packet.status === 'moving') packet.step(s);
     assert.equal(packet.status, 'delivered');
     assert.deepEqual(packet.path, ['H1', 'R1', 'R4', 'R5', 'H6']);
-    const eventFrame = s.snapshot();
-    timeline.select(2);
-    assert.equal(s.last.phase, 'flood');
+    timeline.select(flood.round);
     assert.ok(s.last.messages.length > 0);
     if (event === 'router failure') assert.equal(s.tables.R5.R2.cost, Infinity);
-    assert.ok(timeline.list().every(f => f.phase !== 'detection'));
-    assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4]);
-    assert.equal(s.stable, false);
     timeline.select(timeline.list().at(-1).round); checkAll(s);
+    assert.equal(s.stable, true);
     assert.ok(s.hostRoutes('R1').every(h => h.cost < Infinity));
     timeline.select(1); assert.deepEqual(s.snapshot(), eventFrame);
     timeline.select(0); assert.deepEqual(s.snapshot(), before);
@@ -356,12 +349,15 @@ test('invalid staged event leaves the original state intact', () => {
 });
 
 
-test('a broken link reroutes locally in its event round without marking the live peer offline', () => {
+test('a broken link calculates an alternate route without marking the live peer offline', () => {
   const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
   const before = s.snapshot();
   timeline.applyEvent(() => s.setLink('R1-R2', false), '链路断开');
   assert.equal(s.round, 1);
   assert.equal(s.isUp('R2'), true);
+  assert.equal(s.isRoutePending('R1', 'R2'), true);
+  const firstFlood = timeline.list().find(f => f.phase === 'flood');
+  timeline.select(firstFlood.round - 1);
   assert.deepEqual(s.tables.R1.R2, {cost: 3, next: 'R4'});
   assert.deepEqual(s.tables.R2.R1, {cost: 3, next: 'R4'});
   assert.deepEqual(s.tables.R1.R5, {cost: 5, next: 'R4'});
@@ -375,7 +371,7 @@ test('offline router never becomes reachable again after its failure is learned'
   const learned = new Set(['R1', 'R3', 'R4']);
   for (const frame of timeline.list().filter(f => f.round > 0)) {
     timeline.select(frame.round);
-    if (frame.round >= 2) learned.add('R5');
+    if (Object.values(s.lsdb.R5).some(lsa => lsa.routerStates?.some(v => v.id === 'R2' && !v.up))) learned.add('R5');
     for (const id of learned) {
       assert.deepEqual(s.tables[id].R2, {cost: Infinity, next: null}, `${id}, round ${frame.round}`);
       if (frame.round >= 1) for (const [destination, route] of Object.entries(s.tables[id]))
@@ -418,17 +414,95 @@ test('R4 failure retains the propagation process instead of immediately marking 
   timeline.select(timeline.list().at(-1).round); checkAll(s);
 });
 
-test('a host-only route change remains visible even when router distances no longer change', () => {
+test('new host information waits for its gateway path to be confirmed', () => {
   const s = new RoutingSimulation({
     routers: [{id:'R1',up:true,network:'192.168.1.0/24'},{id:'R2',up:true,network:'192.168.2.0/24'}],
     hosts: [{id:'H1',router:'R2',ip:'192.168.2.10'}],
     links: [{id:'R1-R2',a:'R1',b:'R2',cost:1,up:true}]
   });
   const timeline = new RoundTimeline(s);
-  assert.deepEqual(timeline.list().map(f => f.round), [0,1,2,3]);
+  assert.deepEqual(timeline.list().map(f => f.round), [0,1,2,3,4]);
   timeline.select(1); assert.equal(s.hostRoutes('R1')[0].cost, Infinity);
-  timeline.select(2); assert.equal(s.last.changes.length,0);
+  timeline.select(2); assert.equal(s.hostRoutes('R1')[0].cost, Infinity);
+  assert.equal(s.isRoutePending('R1', 'R2'), true);
+  timeline.select(3); assert.equal(s.last.phase, 'spf');
   assert.ok(s.last.hostChanges.length > 0); assert.equal(s.hostRoutes('R1')[0].cost,1);
   assert.equal(s.stable,false);
-  timeline.select(3); assert.equal(s.stable,true);
+  timeline.select(4); assert.equal(s.stable,true);
+});
+
+test('R1 recovery installs R3 hosts before R5 hosts during separate Dijkstra steps', () => {
+  const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
+  timeline.applyEvent(() => s.setRouter('R1', false), 'R1 故障');
+  timeline.select(timeline.list().at(-1).round);
+  timeline.applyEvent(() => s.setRouter('R1', true), 'R1 恢复');
+  const recoveryRound = s.round;
+  let r3Step, r5Step;
+  for (const frame of timeline.list().filter(f => f.round > recoveryRound)) {
+    timeline.select(frame.round);
+    const h4 = s.hostRoutes('R1').find(h => h.id === 'H4');
+    const h5 = s.hostRoutes('R1').find(h => h.id === 'H5');
+    const h6 = s.hostRoutes('R1').find(h => h.id === 'H6');
+    assert.equal(h4.cost, h5.cost);
+    if (h4.cost < Infinity && r3Step === undefined) {
+      r3Step = frame.round;
+      assert.equal(s.last.phase, 'spf');
+      assert.equal(h4.cost, 2);
+      assert.equal(h6.cost, Infinity, 'H6 must wait until R5 is settled');
+      assert.ok(s.last.calculations.some(c => c.router === 'R1' && c.destination === 'R3'));
+    }
+    if (h6.cost < Infinity && r5Step === undefined) {
+      r5Step = frame.round;
+      assert.equal(s.last.phase, 'spf');
+      assert.equal(h6.cost, 3);
+      assert.ok(s.last.calculations.some(c => c.router === 'R1' && c.destination === 'R5'));
+    }
+  }
+  assert.ok(r3Step < r5Step);
+  checkAll(s);
+});
+
+test('expanded calculations survive replay and a new failure during calculation', () => {
+  const s = new RoutingSimulation(), timeline = new RoundTimeline(s);
+  const frame = timeline.list().find(f => f.phase === 'spf');
+  assert.ok(frame, 'initial learning must include calculation steps');
+  timeline.select(frame.round);
+  const before = s.snapshot();
+  s.step(); const expected = s.snapshot();
+  s.restore(before); s.step(); assert.deepEqual(s.snapshot(), expected);
+  s.restore(before);
+  timeline.applyEvent(() => s.setRouter('R3', false), 'R3 故障');
+  for (const f of timeline.list().filter(f => f.round >= s.round)) {
+    timeline.select(f.round);
+    assert.equal(s.tables.R3.R3.cost, Infinity, 'pending work must not resurrect an offline router');
+  }
+  checkAll(s);
+});
+
+test('every router failure and recovery converges with one destination per local calculation step', () => {
+  for (const id of ['R1', 'R2', 'R3', 'R4', 'R5']) {
+    const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
+    for (const up of [false, true]) {
+      timeline.applyEvent(() => s.setRouter(id, up), `${id} ${up ? '恢复' : '故障'}`);
+      const eventRound = s.round;
+      let previous = s.snapshot();
+      const lastCost = new Map();
+      for (const frame of timeline.list().filter(f => f.round > eventRound)) {
+        timeline.select(frame.round);
+        if (s.last.phase === 'spf') {
+          assert.deepEqual(s.lsdb, previous.lsdb, 'calculation must not propagate new topology');
+          assert.deepEqual(s.last.messages, []);
+          for (const c of s.last.calculations) {
+            assert.ok(c.cost >= (lastCost.get(c.router) ?? 0), `${id}: ${c.router} must settle in distance order`);
+            lastCost.set(c.router, c.cost);
+            assert.ok(s.last.changes.filter(v => v.router === c.router).length <= 1);
+          }
+        } else lastCost.clear();
+        if (!s.isUp(id)) assert.ok(Object.values(s.tables[id]).every(route => route.cost === Infinity));
+        previous = s.snapshot();
+      }
+      assert.equal(s.stable, true); assert.equal(s.calculationPending(), false);
+      checkAll(s);
+    }
+  }
 });
