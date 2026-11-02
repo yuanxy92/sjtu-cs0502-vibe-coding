@@ -207,19 +207,18 @@ test('topology changes cannot discover direct connections before the discovery s
   converge(s); checkAll(s);
 });
 
-test('round selection ends at the last changing round without advancing the initial state', () => {
+test('round selection preserves the complete update process without advancing the initial state', () => {
   const s = new RoutingSimulation(), initial = s.snapshot();
   const timeline = new RoundTimeline(s);
   assert.deepEqual(s.snapshot(), initial);
-  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3]);
+  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4]);
   const reference = new RoutingSimulation(), expected = [reference.snapshot()];
   while (!reference.stable) { reference.step(); expected.push(reference.snapshot()); }
-  timeline.select(3);
+  timeline.select(4);
   assert.equal(s.stable, true);
   assert.deepEqual(s.tables, reference.tables);
   assert.deepEqual(s.lsdb, reference.lsdb);
-  assert.deepEqual(s.last.changes, expected[3].last.changes);
-  for (const round of [0, 2, 1, 0]) {
+  for (const round of [0, 3, 2, 4, 1, 0]) {
     timeline.select(round); assert.deepEqual(s.snapshot(), expected[round]);
   }
   assert.equal(s.hostRoutes('R1').find(h => h.id === 'H1').cost, Infinity);
@@ -337,8 +336,8 @@ for (const event of ['router failure', 'delay increase']) {
     assert.ok(s.last.messages.length > 0);
     if (event === 'router failure') assert.equal(s.tables.R5.R2.cost, Infinity);
     assert.ok(timeline.list().every(f => f.phase !== 'detection'));
-    assert.deepEqual(timeline.list().map(f => f.round), event === 'router failure' ? [0, 1, 2] : [0, 1, 2, 3]);
-    assert.equal(s.stable, event === 'router failure');
+    assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4]);
+    assert.equal(s.stable, false);
     timeline.select(timeline.list().at(-1).round); checkAll(s);
     assert.ok(s.hostRoutes('R1').every(h => h.cost < Infinity));
     timeline.select(1); assert.deepEqual(s.snapshot(), eventFrame);
@@ -402,18 +401,19 @@ test('direct API failure knowledge prevents stale LSAs from resurrecting a faile
 });
 
 
-test('R4 failure ends in its first round and retains fully synchronized state for later events', () => {
+test('R4 failure retains the propagation process instead of immediately marking the event converged', () => {
   const s = RoutingSimulation.converged(), timeline = new RoundTimeline(s);
   timeline.applyEvent(() => s.setRouter('R4', false), 'R4 故障');
-  assert.deepEqual(timeline.list().map(f => f.round), [0, 1]);
-  assert.equal(s.round, 1); assert.equal(s.stable, true);
+  assert.deepEqual(timeline.list().map(f => f.round), [0, 1, 2, 3, 4, 5]);
+  assert.equal(s.round, 1); assert.equal(s.stable, false);
   assert.equal(s.last.event, 'R4 故障'); assert.ok(s.last.changes.length > 0);
   checkAll(s);
   for (const id of ['R1','R2','R3','R5']) assert.equal(s.hostRoutes(id).find(h => h.id === 'H3').cost, Infinity);
+  timeline.select(timeline.list().at(-1).round);
   const settled = new RoutingSimulation(); settled.restore(s.snapshot());
   assert.equal(settled.step().knowledge, 0);
   timeline.select(0); assert.equal(s.isUp('R4'), true);
-  timeline.select(1); assert.equal(s.isUp('R4'), false); assert.equal(s.stable, true);
+  timeline.select(1); assert.equal(s.isUp('R4'), false); assert.equal(s.stable, false);
   timeline.applyEvent(() => s.setRouter('R4', true), 'R4 恢复');
   timeline.select(timeline.list().at(-1).round); checkAll(s);
 });
@@ -425,9 +425,10 @@ test('a host-only route change remains visible even when router distances no lon
     links: [{id:'R1-R2',a:'R1',b:'R2',cost:1,up:true}]
   });
   const timeline = new RoundTimeline(s);
-  assert.deepEqual(timeline.list().map(f => f.round), [0,1,2]);
+  assert.deepEqual(timeline.list().map(f => f.round), [0,1,2,3]);
   timeline.select(1); assert.equal(s.hostRoutes('R1')[0].cost, Infinity);
   timeline.select(2); assert.equal(s.last.changes.length,0);
   assert.ok(s.last.hostChanges.length > 0); assert.equal(s.hostRoutes('R1')[0].cost,1);
-  assert.equal(s.stable,true);
+  assert.equal(s.stable,false);
+  timeline.select(3); assert.equal(s.stable,true);
 });
