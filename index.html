@@ -471,6 +471,46 @@
         </div>
       </div>
     </details>
+
+    <details class="course-project-card" id="rsa-lab">
+      <summary class="course-project-card__toggle">
+        <span class="course-project-card__number">08</span>
+        <span class="course-project-card__main">
+          <span class="course-project-card__meta"><span data-language-heading="rsa" data-zh="信息安全 · 密码学" data-en="Information security · Cryptography">Information security · Cryptography</span></span>
+          <strong data-language-heading="rsa" data-zh="RSA 实验室" data-en="RSA Lab">RSA Lab</strong>
+          <span class="course-project-card__summary" data-language-content="rsa" data-language="zh" hidden>自选 p、q 造一对钥匙，逐步观察 N、φ(N)、E、D 的计算，再用公钥加密、私钥解密，并看 Eve 如何试除分解 N。</span>
+          <span class="course-project-card__summary" data-language-content="rsa" data-language="en">Choose p and q to build a key pair, follow N, φ(N), E, and D step by step, then encrypt and decrypt—and see how Eve attacks N by trial division.</span>
+        </span>
+        <span class="course-project-card__action" aria-hidden="true">
+          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="rsa" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="rsa" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+        </span>
+      </summary>
+      <div class="course-project-card__details">
+        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="rsa" aria-label="RSA lab language">
+          <button type="button" data-language="zh" aria-pressed="false">中文</button>
+          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+        </div>
+        <div class="course-project-note">
+          <i class="fas fa-key" aria-hidden="true"></i>
+          <p data-language-content="rsa" data-language="zh" hidden>课堂演示：两个课件实例与自选 p、q；逐步展示 φ(N) 计数、E 候选、扩展欧几里得求 D 和快速幂过程。灰掉的质数与 E 候选会凑出 E = D 或 gcd(E, φ(N)) ≠ 1，已被排除。切换文字模式可加密短句，Eve 环节对比不同 N 的试除次数。界面为中文，可离线使用。</p>
+          <p data-language-content="rsa" data-language="en">Classroom demo: two slide examples plus a custom p and q. Watch φ(N) counting, E candidates, the extended Euclidean steps for D, and square-and-multiply. Prime pairs and E values that would make E = D or gcd(E, φ(N)) ≠ 1 are disabled. Switch to text mode to encrypt short phrases, and compare trial-division effort across different N values. The simulator has a Chinese interface and runs offline.</p>
+        </div>
+        <div class="course-video-chapters" aria-label="RSA lab">
+          <a class="course-video-chapter" href="./projects/rsa-lab/index.html">
+            <span class="course-video-chapter__number">↗</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="rsa" data-language="zh" hidden>打开 RSA 实验室</strong>
+              <strong data-language-content="rsa" data-language="en">Open the RSA Lab</strong>
+              <small data-language-content="rsa" data-language="zh" hidden>五步造钥匙、自选 p 和 q、加密与解密、Eve 试除分解</small>
+              <small data-language-content="rsa" data-language="en">Five-step key generation, custom p and q, encryption and decryption, and Eve's trial division</small>
+            </span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </details>
   </section>
 
   <section class="course-projects" id="course-projects" aria-labelledby="course-projects-title">

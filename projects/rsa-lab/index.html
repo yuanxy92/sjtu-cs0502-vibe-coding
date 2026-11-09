@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>RSA 实验室</title>
+<style>
+:root{
+  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:22px;
+  line-height:1.45;
+  color:#102344;
+  background:#f6f8fc;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --teal:#0f766e;
+  --red:#b91c1c;
+  --amber:#b45309;
+  --green:#15803d;
+  --line:#d6deea;
+  --muted:#53647c;
+  --card:#fff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+button,select,summary{cursor:pointer}
+button{min-height:44px;padding:8px 18px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-weight:650;transition:background-color .15s,transform .15s}
+button:hover:not(:disabled){background:#eff5ff;border-color:#6c96e8}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{cursor:not-allowed;background:#f0f3f7;color:#8c99ab;border-color:#e1e7f0}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}
+.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.primary:hover:not(:disabled){background:var(--blue-dark)}
+h1,h2,h3,p{margin:0}
+h1{font-size:43px;line-height:1.15;letter-spacing:-.03em;text-wrap:balance}
+h2{font-size:26px;line-height:1.25}
+h3{font-size:22px}
+.app{max-width:1440px;margin:auto;padding:26px 30px 34px}
+.app-header{display:grid;gap:6px}
+.eyebrow{color:var(--blue);font-size:19px;font-weight:750;letter-spacing:.08em}
+.subtitle{color:var(--muted);font-size:23px}
+
+/* Presets */
+.presets{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px}
+.preset-label{font-size:19px;font-weight:750;color:var(--muted)}
+.preset-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.preset-btn{min-height:42px;padding:6px 15px;font-size:20px;border-radius:20px}
+.preset-buttons .preset-btn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.preset-buttons .preset-btn[aria-pressed="true"]:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.preset-note{font-size:19px;color:var(--muted)}
+.tabs{display:flex;gap:5px;border-bottom:1px solid var(--line);margin-top:18px}
+.tabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:#fff}
+.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px 0 13px}
+.playback{display:flex;gap:9px}
+.step-count{color:var(--muted);font-size:20px;margin-left:auto}
+.step-dots{display:flex;gap:7px;align-items:center}
+.step-dot{width:34px;height:34px;min-height:0;padding:0;border-radius:50%;font-size:18px;font-weight:750;color:var(--muted);background:#eef2f8;border:1px solid var(--line)}
+.step-dot[aria-current="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-dots .step-dot[aria-current="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-dots .step-dot[aria-current="true"]:hover{background:var(--blue-dark);border-color:var(--blue-dark);color:#fff}
+.step-dot.done{background:#dbeafe;border-color:#a9c6f5;color:var(--blue-dark)}
+.outcome{display:flex;align-items:center;min-height:86px;padding:14px 18px;border:1px solid #c7d7ef;border-radius:8px;background:#f0f6ff}
+.outcome strong{display:block;font-size:28px}
+.outcome p{font-size:22px;margin-top:3px}
+.outcome.success{border-color:#a6d5c3;background:#effaf4;color:#116149}
+.outcome.warning{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.outcome.danger{border-color:#f1a5ab;background:#fff1f2;color:#991b1b}
+.outcome.info{border-color:#c7d7ef;background:#f0f6ff;color:#17427a}
+
+/* Key generation */
+.keygen-wrap{display:grid;gap:16px;margin-top:16px}
+.keygen-stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:16px 18px;min-width:0}
+.panel h2{margin-bottom:8px}
+.panel .muted{font-size:19px}
+.prime-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.prime-card{display:grid;justify-items:center;gap:5px;border:2px solid #b8dcc8;border-radius:10px;background:#f4fbf7;padding:14px}
+.prime-card small{font-size:18px;color:#2f6b52;font-weight:650}
+.prime-select{font-family:var(--mono);font-size:41px;font-weight:750;line-height:1.1;color:#116149;background:#fff;border:2px solid #b8dcc8;border-radius:8px;padding:2px 12px;min-height:58px;text-align:center;text-align-last:center}
+.prime-select:hover{border-color:var(--green)}
+.prime-select:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}
+.prime-check{display:inline-flex;align-items:center;gap:5px;font-size:19px;font-weight:700;color:var(--green);white-space:nowrap}
+.prime-check svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.prime-secret{font-size:18px;color:var(--amber)}
+.multiply-sign{display:grid;place-items:center;font-size:37px;font-weight:750;color:var(--muted)}
+.dot-grid{display:grid;gap:3px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#f8fafd;justify-content:center}
+.dot{width:16px;height:16px;border-radius:3px;background:#93b4e6}
+.dot.numbered{display:grid;place-items:center;width:26px;height:26px;font-size:11px;line-height:1;color:#35506f;background:#dbe6f5}
+.dot.numbered.coprime{background:#99f6e4;color:#115e59;font-weight:750;box-shadow:inset 0 0 0 1px #5eead4}
+.dot.numbered.strike{background:#fee2e2;color:#991b1b}
+.dot.coprime{background:#5eead4}
+.dot.strike{background:#fecaca}
+.area-caption{font-size:19px;color:var(--muted);margin-top:8px}
+.formula-card{display:grid;gap:5px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:14px 18px}
+.formula{font-family:var(--mono);font-size:29px;font-weight:700;color:#17427a;white-space:normal;overflow-wrap:anywhere}
+.formula-sub{font-size:20px;color:var(--muted)}
+.formula-card.big .formula{font-size:41px}
+.formula .hl{color:var(--blue);background:#dbeafe;border-radius:4px;padding:0 5px}
+.formula .secret{color:var(--amber);background:#fff4d6;border-radius:4px;padding:0 5px}
+.candidate-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.candidate{display:grid;min-height:62px;min-width:86px;padding:7px 12px;border:2px solid var(--line);border-radius:8px;background:#fff;text-align:left}
+.candidate .cand-e{font-family:var(--mono);font-size:26px;font-weight:750;line-height:1.1}
+.candidate .cand-meta{font-size:18px;color:var(--muted)}
+.candidate[aria-pressed="true"]{border-color:var(--blue);background:#f0f6ff;box-shadow:0 0 0 3px #dbeafe}
+.candidate-list .candidate[aria-pressed="true"]:hover{border-color:var(--blue);background:#e7f0ff}
+.candidate[aria-pressed="true"] .cand-meta{color:var(--blue-dark)}
+.candidate:disabled{opacity:.45}
+.note{border-left:4px solid #e6be66;background:#fff9eb;padding:9px 13px;font-size:19px;color:#854d0e;border-radius:0 6px 6px 0;margin-top:10px}
+.note strong{display:block;font-size:20px}
+.note.blue{border-color:#93b4e6;background:#f0f6ff;color:#17427a}
+.note.green{border-color:#86c9a9;background:#f0fbf5;color:#116149}
+.gcd-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:20px}
+.gcd-pill{border:1px solid #b8dcc8;background:#f4fbf7;color:#116149;border-radius:20px;padding:4px 13px;font-family:var(--mono);font-weight:700}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table.trace{border-collapse:collapse;width:100%;font-size:20px}
+table.trace th,table.trace td{border-bottom:1px solid #e6ebf3;padding:7px 11px;text-align:left;white-space:nowrap}
+table.trace th{background:#f4f7fc;color:var(--muted);font-size:18px;font-weight:700}
+table.trace td{font-family:var(--mono)}
+table.trace tr:last-child td{border-bottom:0}
+table.trace tr.final td{background:#effaf4;color:#116149;font-weight:700}
+.key-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.key-card{border-radius:10px;padding:13px 15px;display:grid;gap:3px;border:2px solid}
+.key-card.public{border-color:#b8dcc8;background:#f4fbf7}
+.key-card.private{border-color:#e6c27e;background:#fff9eb}
+.key-card small{font-size:18px;font-weight:700;letter-spacing:.04em}
+.key-card.public small{color:#116149}
+.key-card.private small{color:var(--amber)}
+.key-card .key-pair{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:26px;font-weight:750}
+.key-card .key-tag{font-size:18px;font-family:system-ui,sans-serif;font-weight:650;color:var(--muted)}
+.key-card svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.key-card.public{color:#116149}
+.key-card.private{color:var(--amber)}
+.swap-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.swap-note{font-size:19px;color:var(--muted)}
+.strike-text{text-decoration:line-through;color:var(--red)}
+
+/* Crypto */
+.crypto-wrap{display:grid;gap:16px;margin-top:16px}
+.key-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 16px}
+.key-strip .strip-label{font-size:19px;font-weight:750;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:4px 12px;font-family:var(--mono);font-size:20px;font-weight:700;border:1px solid}
+.pill.public{color:#116149;border-color:#b8dcc8;background:#f4fbf7}
+.pill.private{color:var(--amber);border-color:#e6c27e;background:#fff9eb}
+.pill.secret{color:var(--red);border-color:#f1a5ab;background:#fff1f2}
+.pill.plain{color:var(--muted);border-color:var(--line);background:#f6f8fc;font-family:system-ui,sans-serif;font-weight:650}
+.crypto-input{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px 16px;display:grid;gap:10px}
+.input-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.input-head h2{font-size:24px}
+.mode-toggle{display:flex;gap:5px;margin-left:auto;padding:4px;border:1px solid var(--line);border-radius:8px;background:#edf1f7}
+.toggle-btn{border:0;background:transparent;min-height:38px;padding:5px 13px;font-size:19px;border-radius:5px}
+.toggle-btn.selected{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(16,35,68,.16)}
+.mode-toggle .toggle-btn.selected{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(16,35,68,.16)}
+.mode-toggle .toggle-btn.selected:hover{background:#fff;border-color:var(--line)}
+.input-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.field{display:grid;gap:3px;flex:1;min-width:220px}
+.field span{font-size:19px;color:var(--muted)}
+.field input{padding:9px 12px;border:1px solid #bac8da;border-radius:7px;font-size:24px;font-family:var(--mono);background:#fff}
+.field input:focus{border-color:var(--blue)}
+.field-hint{font-size:18px;color:var(--muted)}
+.input-error{font-size:19px;font-weight:650;color:var(--red)}
+.action-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr) 44px minmax(0,1fr);align-items:center;gap:8px}
+.flow-card{display:grid;justify-items:center;gap:4px;border:1px solid var(--line);border-radius:10px;background:#f8fafd;padding:14px 10px;min-height:140px;align-content:center;text-align:center}
+.flow-card.plain{border-color:#b8dcc8;background:#f4fbf7}
+.flow-card.cipher{border-color:#f0b5ba;background:#fff1f2}
+.flow-card.back{border-color:#c7d7ef;background:#f0f6ff}
+.flow-card small{font-size:18px;color:var(--muted);font-weight:650}
+.flow-value{font-family:var(--mono);font-size:37px;font-weight:750;line-height:1.05;word-break:break-all}
+.flow-card.plain .flow-value{color:#116149}
+.flow-card.cipher .flow-value{color:#991b1b}
+.flow-card.back .flow-value{color:#17427a}
+.flow-formula{font-family:var(--mono);font-size:18px;color:var(--muted)}
+.flow-arrow{display:grid;place-items:center;font-size:26px;color:var(--muted)}
+.flow-card .empty{font-size:30px;color:#a4b1c4;font-family:var(--mono)}
+details.trace-box{border:1px solid var(--line);border-radius:9px;background:#fff;padding:0;overflow:hidden}
+details.trace-box summary{padding:10px 15px;font-weight:700;font-size:20px;background:#f6f8fc;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+details.trace-box summary::-webkit-details-marker{display:none}
+details.trace-box summary:after{content:"+";font-size:24px;color:var(--muted)}
+details.trace-box[open] summary:after{content:"−"}
+details.trace-box .trace-inner{padding:10px 14px 14px}
+.det-note{border:1px solid #e6be66;border-radius:8px;background:#fff9eb;padding:10px 14px;font-size:19px;color:#854d0e}
+.det-note strong{color:#7c2d12}
+.eve-panel{border:2px dashed #f0b5ba;border-radius:10px;background:#fff8f8;padding:14px 17px;display:grid;gap:10px}
+.eve-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.eve-head h2{font-size:24px;color:var(--red)}
+.eve-head .eve-desc{font-size:19px;color:var(--muted);flex:1;min-width:220px}
+.eve-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.eve-stat{border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px 12px;display:grid;gap:1px}
+.eve-stat span{font-size:18px;color:var(--muted)}
+.eve-stat strong{font-family:var(--mono);font-size:26px}
+.scale{display:grid;gap:5px}
+.scale-row{display:grid;grid-template-columns:110px minmax(0,1fr) 100px;align-items:center;gap:9px;font-size:18px;color:var(--muted)}
+.scale-track{height:16px;border-radius:9px;background:#f1e4e4;overflow:hidden}
+.scale-fill{display:block;height:100%;border-radius:9px;background:#dc6b6b}
+.scale-fill.now{background:var(--red)}
+.eve-verdict{font-size:20px;font-weight:750;color:#991b1b}
+.eve-verdict.ok{color:#116149}
+.caveat{border:1px solid var(--line);border-radius:10px;background:#fff;padding:13px 17px;display:grid;gap:6px}
+.caveat h2{font-size:23px}
+.caveat ul{margin:0;padding-left:22px;display:grid;gap:3px;font-size:20px;color:var(--muted)}
+.caveat li strong{color:#102344}
+.next-card{border:1px solid #b8dcc8;border-radius:10px;background:#f4fbf7;padding:13px 17px;display:grid;gap:3px}
+.next-card strong{font-size:22px;color:#116149}
+.next-card p{font-size:20px;color:#365b4a}
+.next-card a{color:var(--teal);font-weight:750;font-size:20px}
+
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:19px;color:var(--muted)}
+.footer a{color:var(--blue)}
+.footer .muted{font-size:19px}
+.muted{color:var(--muted);font-size:19px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media(max-width:1100px){
+  .keygen-stage{grid-template-columns:1fr}
+  .flow{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr) 30px minmax(0,1fr)}
+  .flow-value{font-size:30px}
+  .eve-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .app{padding:18px 12px 26px}
+  h1{font-size:33px}
+  .subtitle{font-size:21px}
+  .presets{gap:7px}
+  .preset-note{flex-basis:100%}
+  .tabs{flex-direction:column;gap:5px;border-bottom:0}
+  .tabs button{border-radius:6px;text-align:left;padding:10px 12px}
+  .toolbar{gap:8px}
+  .step-count{margin-left:0}
+  .outcome strong{font-size:24px}
+  .outcome p{font-size:20px}
+  .prime-row{grid-template-columns:1fr}
+  .multiply-sign{font-size:26px}
+  .key-cards{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr;gap:6px}
+  .flow-arrow{transform:rotate(90deg);font-size:24px}
+  .flow-card{min-height:110px}
+  .eve-grid{grid-template-columns:1fr}
+  .scale-row{grid-template-columns:90px minmax(0,1fr) 70px}
+  .footer{flex-direction:column;gap:4px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app-header">
+    <p class="eyebrow">计算机科学导论 · 信息安全</p>
+    <h1>RSA 实验室</h1>
+    <p class="subtitle">两个质数造出一对钥匙：N 公开，φ(N) 保密；p、q 可以自己选。</p>
+  </header>
+
+  <nav class="presets" aria-label="课件实例">
+    <span class="preset-label">课件实例</span>
+    <div id="presetBar" class="preset-buttons"></div>
+    <span id="presetNote" class="preset-note"></span>
+  </nav>
+
+  <nav class="tabs" role="tablist" aria-label="实验阶段">
+    <button id="tab-keygen" role="tab" aria-selected="true" aria-controls="stage" data-tab="keygen">① 造钥匙</button>
+    <button id="tab-crypto" role="tab" aria-selected="false" aria-controls="stage" data-tab="crypto">② 加密、解密与 Eve</button>
+  </nav>
+
+  <section id="stage" role="tabpanel" aria-labelledby="tab-keygen">
+    <div id="toolbar" class="toolbar">
+      <div class="playback">
+        <button id="prevBtn" type="button">上一步</button>
+        <button id="nextBtn" class="primary" type="button">下一步</button>
+        <button id="resetBtn" type="button">重置</button>
+      </div>
+      <div id="stepDots" class="step-dots" role="group" aria-label="造钥匙步骤"></div>
+      <span id="stepCount" class="step-count"></span>
+    </div>
+
+    <div id="outcome" class="outcome info" role="status" aria-live="polite">
+      <div><strong id="outcomeTitle"></strong><p id="outcomeText"></p></div>
+    </div>
+
+    <div id="sceneRoot"></div>
+  </section>
+
+  <footer class="footer">
+    <p>课堂演示模型：数字很小，方便手算；真实的 RSA 使用 2048 位以上的大数。</p>
+    <p class="muted">对应 Slide11 第 68–75 页。</p>
+  </footer>
+</main>
+<script>
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.RSALab = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const ZERO = 0n, ONE = 1n, TWO = 2n;
+  const smallPrimes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+
+  function abs(n) { return n < ZERO ? -n : n; }
+  function mod(a, m) { const r = a % m; return r < ZERO ? r + m : r; }
+
+  function gcd(a, b) {
+    a = abs(a); b = abs(b);
+    while (b !== ZERO) { const t = b; b = a % b; a = t; }
+    return a;
+  }
+
+  function egcd(a, b) {
+    let oldR = a, r = b, oldS = ONE, s = ZERO, oldT = ZERO, t = ONE;
+    while (r !== ZERO) {
+      const q = oldR / r;
+      [oldR, r] = [r, oldR - q * r];
+      [oldS, s] = [s, oldS - q * s];
+      [oldT, t] = [t, oldT - q * t];
+    }
+    return { g: oldR, x: oldS, y: oldT };
+  }
+
+  function egcdTrace(a, b) {
+    let oldR = a, r = b, oldS = ONE, s = ZERO, oldT = ZERO, t = ONE;
+    const rows = [];
+    while (r !== ZERO) {
+      const q = oldR / r;
+      const remainder = oldR - q * r;
+      rows.push({ q, a: oldR, b: r, remainder, x: oldS, y: oldT });
+      [oldR, r] = [r, remainder];
+      [oldS, s] = [s, oldS - q * s];
+      [oldT, t] = [t, oldT - q * t];
+    }
+    return { g: oldR, x: oldS, y: oldT, rows };
+  }
+
+  function modInverse(a, m) {
+    const result = egcd(a, m);
+    if (result.g !== ONE) throw new Error('不存在乘法逆元：两个数不互质');
+    return mod(result.x, m);
+  }
+
+  function modPow(base, exp, modulus) {
+    if (modulus === ONE) return ZERO;
+    let b = mod(base, modulus), e = exp, result = ONE;
+    while (e > ZERO) {
+      if (e & ONE) result = (result * b) % modulus;
+      b = (b * b) % modulus;
+      e >>= ONE;
+    }
+    return result;
+  }
+
+  function bitLength(n) { return n > ZERO ? n.toString(2).length : 0; }
+
+  function isPrime(n) {
+    if (n < TWO) return false;
+    for (const p of [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n]) {
+      if (n === p) return true;
+      if (n % p === ZERO) return false;
+    }
+    let d = n - ONE, s = ZERO;
+    while (d % TWO === ZERO) { d /= TWO; s += ONE; }
+    const bases = n < 3317044064679887385961981n
+      ? [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n]
+      : [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n, 43n, 47n];
+    for (const a of bases) {
+      if (a % n === ZERO) continue;
+      let x = modPow(a, d, n);
+      if (x === ONE || x === n - ONE) continue;
+      let witness = true;
+      for (let r = ONE; r < s; r += ONE) {
+        x = (x * x) % n;
+        if (x === n - ONE) { witness = false; break; }
+      }
+      if (witness) return false;
+    }
+    return true;
+  }
+
+  function chooseE(phi, preferred) {
+    if (preferred != null) {
+      const candidate = BigInt(preferred);
+      if (candidate > ONE && candidate < phi && gcd(candidate, phi) === ONE) return candidate;
+    }
+    for (const candidate of [65537n, 3n, 5n, 7n, 11n, 13n, 17n, 19n]) {
+      if (candidate > ONE && candidate < phi && gcd(candidate, phi) === ONE) return candidate;
+    }
+    for (let e = 3n; e < phi; e += TWO) {
+      if (gcd(e, phi) === ONE) return e;
+    }
+    throw new Error('φ(N) 太小，找不到可用的 E');
+  }
+
+  function isSelfInverseExponent(e, phi) {
+    e = BigInt(e); phi = BigInt(phi);
+    return e > ONE && e < phi && gcd(e, phi) === ONE && (e * e) % phi === ONE;
+  }
+
+  function hasDistinctExponents(p, q) {
+    p = BigInt(p); q = BigInt(q);
+    if (p === q || !isPrime(p) || !isPrime(q)) return false;
+    const phi = (p - ONE) * (q - ONE);
+    for (let e = 3n; e < phi; e += TWO) {
+      if (gcd(e, phi) === ONE && !isSelfInverseExponent(e, phi)) return true;
+    }
+    return false;
+  }
+
+  function eCandidates(phi, limit) {
+    const out = [];
+    const max = limit || 12;
+    for (let e = 3n; e < phi && out.length < max; e += TWO) {
+      if (gcd(e, phi) === ONE) out.push({ e, prime: isPrime(e) });
+    }
+    return out;
+  }
+
+  function generateKeyPair(p, q, e) {
+    p = BigInt(p); q = BigInt(q); e = BigInt(e);
+    if (p === q) throw new Error('p 和 q 必须不同');
+    if (!isPrime(p) || !isPrime(q)) throw new Error('p 和 q 必须是质数');
+    const n = p * q;
+    const phi = (p - ONE) * (q - ONE);
+    if (e <= ONE || e >= phi) throw new Error('E 必须满足 1 < E < φ(N)');
+    if (gcd(e, phi) !== ONE) throw new Error('E 必须与 φ(N) 互质');
+    const d = modInverse(e, phi);
+    return { p, q, n, phi, e, d };
+  }
+
+  function encrypt(m, e, n) { return modPow(m, e, n); }
+  function decrypt(c, d, n) { return modPow(c, d, n); }
+
+  function squareMultiplyTrace(base, exp, modulus) {
+    const bits = exp.toString(2);
+    let result = ONE;
+    const steps = [];
+    for (const bit of bits) {
+      const before = result;
+      const afterSquare = (result * result) % modulus;
+      result = afterSquare;
+      const multiplied = bit === '1';
+      if (multiplied) result = (result * base) % modulus;
+      steps.push({ bit, before, afterSquare, after: result, multiplied });
+    }
+    return { value: result, bits, steps };
+  }
+
+  function factorTrial(n, limit) {
+    n = BigInt(n);
+    const max = BigInt(limit || 5000000);
+    if (n < 4n) return { p: null, q: null, steps: 0, exhausted: false };
+    if (n % TWO === ZERO) return { p: TWO, q: n / TWO, steps: 1, exhausted: false };
+    let d = 3n;
+    let steps = 0;
+    for (; d * d <= n && d <= max; d += TWO) {
+      steps += 1;
+      if (n % d === ZERO) return { p: d, q: n / d, steps, exhausted: false };
+    }
+    return { p: null, q: null, steps, exhausted: d * d <= n };
+  }
+
+  function maxBlockBytes(n) {
+    return Math.max(0, Math.floor((bitLength(n) - 1) / 8));
+  }
+
+  function encodeText(text, n) {
+    const bytes = new TextEncoder().encode(text);
+    const blockSize = maxBlockBytes(n);
+    if (blockSize === 0) {
+      return { bytes, blockSize, blocks: [], tooSmall: bytes.length > 0, empty: bytes.length === 0 };
+    }
+    const blocks = [];
+    for (let i = 0; i < bytes.length; i += blockSize) {
+      const chunk = Array.from(bytes.slice(i, i + blockSize));
+      const value = chunk.reduce((acc, byte) => (acc << 8n) + BigInt(byte), ZERO);
+      blocks.push({ value, length: chunk.length, bytes: chunk });
+    }
+    return { bytes, blockSize, blocks, tooSmall: false, empty: bytes.length === 0 };
+  }
+
+  function decodeBlocks(blocks) {
+    const bytes = [];
+    for (const block of blocks) {
+      let value = block.value;
+      const chunk = [];
+      for (let i = 0; i < block.length; i += 1) {
+        chunk.unshift(Number(value & 255n));
+        value >>= 8n;
+      }
+      bytes.push(...chunk);
+    }
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  }
+
+  function encryptText(text, e, n) {
+    const encoded = encodeText(text, n);
+    const cipherBlocks = encoded.blocks.map(block => ({ value: encrypt(block.value, e, n), length: block.length }));
+    return { ...encoded, cipherBlocks };
+  }
+
+  function decryptText(cipherBlocks, d, n) {
+    const blocks = cipherBlocks.map(block => ({ value: decrypt(block.value, d, n), length: block.length }));
+    return { blocks, text: decodeBlocks(blocks) };
+  }
+
+  return {
+    smallPrimes, gcd, egcd, egcdTrace, mod, modInverse, modPow, bitLength, isPrime,
+    chooseE, eCandidates, isSelfInverseExponent, hasDistinctExponents,
+    generateKeyPair, encrypt, decrypt, squareMultiplyTrace,
+    factorTrial, maxBlockBytes, encodeText, decodeBlocks, encryptText, decryptText
+  };
+});
+
+</script>
+<script>
+(function () {
+  'use strict';
+
+  const R = window.RSALab;
+  const $ = id => document.getElementById(id);
+
+  const PRESETS = {
+    small: {
+      label: '实例 1',
+      note: 'Slide 73：p=3，q=11，E=7，D=3，m=4',
+      p: 3n, q: 11n, e: 7n, m: 4n
+    },
+    big: {
+      label: '实例 2',
+      note: 'Slide 74–75：p=47，q=71，E=79，D=1019，m=688',
+      p: 47n, q: 71n, e: 79n, m: 688n
+    },
+    custom: {
+      label: '自选 p、q',
+      note: '在第 1 步的下拉框里选两个质数；N、φ(N)、D 会自动重算。',
+      p: null, q: null, e: null, m: 12n
+    }
+  };
+
+  const PRIMES = [
+    3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n,
+    43n, 47n, 53n, 59n, 61n, 67n, 71n, 73n, 79n, 83n, 89n, 97n
+  ];
+  const pairCache = new Map();
+
+  function pairUsable(p, q) {
+    const key = p < q ? `${p},${q}` : `${q},${p}`;
+    if (!pairCache.has(key)) pairCache.set(key, R.hasDistinctExponents(p, q));
+    return pairCache.get(key);
+  }
+
+  const state = {
+    tab: 'keygen',
+    preset: 'small',
+    step: 0,
+    eOverride: null,
+    swap: false,
+    custom: {p: 17n, q: 19n},
+    cryptoMode: 'number',
+    numberDraft: '4',
+    textDraft: 'HI',
+    cipher: null,
+    m: null,
+    encrypted: false,
+    decrypted: false,
+    reEncrypted: false,
+    textCipher: null,
+    textPlain: null,
+    eveRan: false,
+    cryptoStage: 'idle',
+    error: ''
+  };
+
+  const ICONS = {
+    key: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="4"/><path d="m11 11 8 8m-3-3 2-2m-5-1 2-2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>'
+  };
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function icon(name) { return ICONS[name] || ''; }
+
+  function toBig(value) {
+    const s = String(value).trim();
+    if (!/^\d+$/.test(s)) return null;
+    return BigInt(s);
+  }
+
+  function isqrt(n) {
+    if (n < 2n) return n;
+    let x = n, y = (x + 1n) / 2n;
+    while (y < x) { x = y; y = (x + n / x) / 2n; }
+    return x;
+  }
+
+  function short(text, max) {
+    const value = String(text);
+    return value.length > max ? value.slice(0, max) + '…' : value;
+  }
+
+  function defaultE(phi) {
+    const preferred = [7n, 5n, 11n, 13n, 17n, 19n, 23n, 29n, 3n];
+    const valid = value => value > 1n && value < phi && R.gcd(value, phi) === 1n && !R.isSelfInverseExponent(value, phi);
+    const found = preferred.find(valid);
+    if (found != null) return found;
+    for (let e = 3n; e < phi; e += 2n) {
+      if (valid(e)) return e;
+    }
+    return null;
+  }
+
+  function getModel() {
+    const custom = state.preset === 'custom';
+    const src = custom ? state.custom : PRESETS[state.preset];
+    const p = toBig(src.p);
+    const q = toBig(src.q);
+    if (p == null || q == null) return {ok: false, error: 'p 和 q 必须是整数。'};
+    if (p < 2n || q < 2n) return {ok: false, error: 'p 和 q 都必须大于 1。'};
+    if (p === q) return {ok: false, error: 'p 和 q 必须不同；否则 N 是平方数，很容易被开方。'};
+    if (!R.isPrime(p) || !R.isPrime(q)) return {ok: false, error: 'p 和 q 必须是质数。可以试试 17 和 19。'};
+    const n = p * q;
+    const phi = (p - 1n) * (q - 1n);
+    const e = state.eOverride != null
+      ? state.eOverride
+      : (custom ? defaultE(phi) : PRESETS[state.preset].e);
+    if (e == null) return {ok: false, error: '这组 p、q 只能得到 E = D 的钥匙，请换一组质数。'};
+    if (e <= 1n || e >= phi) return {ok: false, error: `E 必须满足 1 < E < φ(N) = ${phi}。`};
+    if (R.gcd(e, phi) !== 1n) return {ok: false, error: `E=${e} 与 φ(N)=${phi} 不互质，不能用。`};
+    const d = R.modInverse(e, phi);
+    if (d === e) return {ok: false, error: `E=${e} 求出的 D 也是 ${e}，公钥和私钥会相同；请换一个 E。`};
+    return {ok: true, p, q, n, phi, e, d};
+  }
+
+  function cryptoKeys(model) {
+    return state.swap
+      ? {encExp: model.d, decExp: model.e, encLabel: 'D', decLabel: 'E'}
+      : {encExp: model.e, decExp: model.d, encLabel: 'E', decLabel: 'D'};
+  }
+
+  function resetAll() {
+    const src = PRESETS[state.preset];
+    state.step = 0;
+    state.eOverride = null;
+    state.swap = false;
+    state.cryptoMode = 'number';
+    state.numberDraft = String(src.m);
+    state.textDraft = 'HI';
+    state.cipher = null;
+    state.m = null;
+    state.encrypted = false;
+    state.decrypted = false;
+    state.reEncrypted = false;
+    state.textCipher = null;
+    state.textPlain = null;
+    state.eveRan = false;
+    state.cryptoStage = 'idle';
+    state.error = '';
+  }
+
+  function setOutcome(style, title, text) {
+    $('outcome').className = 'outcome ' + style;
+    $('outcomeTitle').textContent = title;
+    $('outcomeText').textContent = text;
+  }
+
+  /* ---------- shared builders ---------- */
+
+  function panel(title) {
+    const node = el('section', 'panel');
+    if (title) node.append(el('h2', '', title));
+    return node;
+  }
+
+  function formula(parts, extra) {
+    const node = el('div', 'formula' + (extra ? ' ' + extra : ''));
+    parts.forEach(part => {
+      if (typeof part === 'string') node.append(document.createTextNode(part));
+      else node.append(el('span', part.cls || '', part.text));
+    });
+    return node;
+  }
+
+  function keycard(kind, exponent, modulus, label) {
+    const card = el('div', 'key-card ' + kind);
+    card.innerHTML = icon(kind === 'public' ? 'key' : 'lock');
+    card.append(el('small', '', label));
+    const pair = el('div', 'key-pair');
+    pair.append(el('span', '', `(${exponent}, ${modulus})`), el('span', 'key-tag', kind === 'public' ? '可以公开' : '必须保密'));
+    card.append(pair);
+    return card;
+  }
+
+  function noteBox(title, text, tone) {
+    const node = el('div', 'note' + (tone ? ' ' + tone : ''));
+    node.append(el('strong', '', title), el('p', '', text));
+    return node;
+  }
+
+  /* ---------- key generation ---------- */
+
+  function choosePrime(name, value) {
+    const model = getModel();
+    if (!model.ok) return;
+    const next = {p: model.p, q: model.q, [name]: BigInt(value)};
+    if (!pairUsable(next.p, next.q)) return;
+    state.custom = next;
+    state.preset = 'custom';
+    resetAll();
+    render();
+  }
+
+  function renderStepPrime(model) {
+    const wrap = el('div', 'keygen-wrap');
+    const stage = el('div', 'keygen-stage');
+
+    const left = panel('① 选两个质数');
+    const row = el('div', 'prime-row');
+    [['p', model.p, model.q], ['q', model.q, model.p]].forEach(([name, value, other]) => {
+      const card = el('div', 'prime-card');
+      card.append(el('small', '', `质数 ${name}`));
+      const select = el('select', 'prime-select');
+      select.setAttribute('aria-label', `选择质数 ${name}`);
+      PRIMES.forEach(prime => {
+        const option = el('option', '', String(prime));
+        option.value = String(prime);
+        if (prime === other) {
+          option.disabled = true;
+          option.textContent = `${prime}（已选）`;
+        } else if (!pairUsable(prime, other)) {
+          option.disabled = true;
+          option.textContent = `${prime}（E=D）`;
+        }
+        select.append(option);
+      });
+      select.value = String(value);
+      select.addEventListener('change', () => choosePrime(name, select.value));
+      card.append(select);
+      const check = el('span', 'prime-check');
+      check.innerHTML = icon('check') + '<span>是质数</span>';
+      card.append(check, el('span', 'prime-secret', '只有接收方知道'));
+      row.append(card);
+    });
+    left.append(row, noteBox('先验证', `${model.p} 和 ${model.q} 都只有 1 和它自己两个因数，而且互不相同。`, 'green'));
+    left.append(el('p', 'area-caption', '换 p 或 q：N、φ(N)、D 会自动重算。灰掉的质数会和另一个质数凑出 E = D，所以不能选。'));
+
+    const right = panel('为什么从这里开始');
+    const list = el('ul', '');
+    list.style.cssText = 'margin:0;padding-left:22px;display:grid;gap:6px;color:#53647c;font-size:18px';
+    ['p 和 q 是整个系统的秘密。', '知道 p、q 就能算出 φ(N)，再算出私钥 D。', '外界只会看到 N = p × q，看不到这两个因数。'].forEach(text => {
+      list.append(el('li', '', text));
+    });
+    right.append(list, noteBox('课堂提醒', '课堂用小质数是为了手算；真实的 p、q 是随机生成的大质数，各有几百位。', 'blue'));
+    stage.append(left, right);
+    wrap.append(stage);
+    return wrap;
+  }
+
+  function renderStepN(model) {
+    const wrap = el('div', 'keygen-wrap');
+    const stage = el('div', 'keygen-stage');
+
+    const left = panel('② 把两个质数乘起来');
+    const card = el('div', 'formula-card big');
+    card.append(formula([
+      {text: 'N', cls: 'hl'}, ' = ', String(model.p), ' × ', String(model.q), ' = ',
+      {text: String(model.n), cls: 'hl'}
+    ]));
+    card.append(el('p', 'formula-sub', `N 的二进制长度：${R.bitLength(model.n)} 位。真实 RSA 的 N 是 2048 位。`));
+    left.append(card);
+
+    if (model.n <= 420n && model.q <= 40n) {
+      const grid = el('div', 'dot-grid');
+      grid.style.gridTemplateColumns = `repeat(${Number(model.q)},16px)`;
+      for (let i = 0; i < Number(model.n); i += 1) grid.append(el('span', 'dot'));
+      left.append(grid, el('p', 'area-caption', `把 ${model.p} 行、每行 ${model.q} 个点排开，一共 ${model.n} 个。`));
+    } else {
+      const visual = el('div', 'formula-card');
+      visual.append(formula([String(model.p), ' × ', String(model.q)]), el('p', 'formula-sub', `画不下 ${model.n} 个点，但乘法关系不变。`));
+      left.append(visual);
+    }
+
+    const right = panel('谁是公开的');
+    right.append(noteBox('N 会写进公钥', `公钥里包含 (E, N)。Eve 能看到 N=${model.n}，但看不到 p 和 q。`, 'blue'));
+    right.append(noteBox('乘法容易，分解难', '算出 N 只要一次乘法；从 N 倒推 p、q 却很难——RSA 的安全性就建立在这里。', 'green'));
+    stage.append(left, right);
+    wrap.append(stage);
+    return wrap;
+  }
+
+  function renderStepPhi(model) {
+    const wrap = el('div', 'keygen-wrap');
+    const stage = el('div', 'keygen-stage');
+
+    const left = panel('③ 数一数有多少个数与 N 互质');
+    const card = el('div', 'formula-card');
+    card.append(formula([
+      {text: 'φ(N)', cls: 'secret'}, ' = (', String(model.p), '−1) × (', String(model.q), '−1) = ',
+      {text: String(model.phi), cls: 'secret'}
+    ]));
+    card.append(el('p', 'formula-sub', `φ(N) 是 1 到 N 之间与 N 互质的数的个数。`));
+    left.append(card);
+
+    const n = model.n;
+    const gridAllowed = n <= 420n;
+    if (gridAllowed) {
+      const cols = n % 11n === 0n ? 11 : (n <= 120n ? Number(model.q) : 19);
+      const grid = el('div', 'dot-grid');
+      grid.style.gridTemplateColumns = `repeat(${cols},26px)`;
+      for (let i = 1; i <= Number(n); i += 1) {
+        const value = BigInt(i);
+        const coprime = R.gcd(value, n) === 1n;
+        const dot = el('span', 'dot numbered ' + (coprime ? 'coprime' : 'strike'), String(i));
+        grid.append(dot);
+      }
+      left.append(grid);
+      const legend = el('p', 'area-caption');
+      legend.textContent = `绿色：与 ${n} 互质，共 ${model.phi} 个；粉色：${model.p} 或 ${model.q} 的倍数。`;
+      left.append(legend);
+    } else {
+      const visual = el('div', 'formula-card');
+      visual.append(
+        el('p', 'formula-sub', `1 到 ${n} 中，去掉 ${model.q} 个 p 的倍数和 ${model.p} 个 q 的倍数；N 被重复减了一次，再加回来。`),
+        formula([String(n), ' − ', String(model.q), ' − ', String(model.p), ' + 1 = ', {text: String(model.phi), cls: 'secret'}])
+      );
+      left.append(visual);
+    }
+
+    const right = panel('φ(N) 为什么必须保密');
+    right.append(noteBox('φ 是私钥的入口', '知道 φ(N) 和公开的 E，就能用扩展欧几里得算法算出 D。所以 φ(N) 不能公开。', 'blue'));
+    right.append(noteBox('p、q 用完就销毁', 'p、q、φ(N) 都只参与造钥匙；最后留下的只有公钥 (E, N) 和私钥 (D, N)。', 'green'));
+    stage.append(left, right);
+    wrap.append(stage);
+    return wrap;
+  }
+
+  function eChips(phi, selected) {
+    const list = [];
+    for (let e = 3n; e < phi && list.length < 12; e += 2n) {
+      const valid = R.gcd(e, phi) === 1n;
+      list.push({e, valid, prime: R.isPrime(e), selfInverse: R.isSelfInverseExponent(e, phi)});
+    }
+    if (!list.some(item => item.e === selected) && selected < phi) {
+      list.push({e: selected, valid: true, prime: R.isPrime(selected), selfInverse: R.isSelfInverseExponent(selected, phi)});
+    }
+    return list;
+  }
+
+  function setE(value) {
+    state.eOverride = BigInt(value);
+    state.swap = false;
+    state.encrypted = false;
+    state.decrypted = false;
+    state.reEncrypted = false;
+    state.cipher = null;
+    state.m = null;
+    state.textCipher = null;
+    state.cryptoStage = 'idle';
+    state.error = '';
+    render();
+  }
+
+  function renderStepE(model) {
+    const wrap = el('div', 'keygen-wrap');
+    const stage = el('div', 'keygen-stage');
+
+    const left = panel('④ 选一个 E');
+    left.append(el('p', 'muted', 'E 写进公钥。要求 1 < E < φ(N)、gcd(E, φ(N)) = 1，并且求出的 D 不能等于 E。'));
+    const chips = el('div', 'candidate-list');
+    eChips(model.phi, model.e).forEach(item => {
+      const usable = item.valid && !item.selfInverse;
+      const chip = el('button', 'candidate');
+      chip.type = 'button';
+      chip.disabled = !usable;
+      chip.setAttribute('aria-pressed', String(item.e === model.e));
+      chip.append(el('span', 'cand-e', `E=${item.e}`));
+      const meta = !item.valid ? 'gcd≠1 · 不能用'
+        : item.selfInverse ? 'E=D · 不能用'
+          : `gcd=1 · ${item.prime ? '质数' : '合数'}`;
+      chip.append(el('span', 'cand-meta', meta));
+      if (usable) chip.addEventListener('click', () => setE(item.e));
+      chips.append(chip);
+    });
+    left.append(chips);
+
+    const right = panel(`当前选择：E = ${model.e}`);
+    const gcdCard = el('div', 'formula-card');
+    gcdCard.append(formula([`gcd(`, String(model.e), ', ', String(model.phi), ') = ', {text: String(R.gcd(model.e, model.phi)), cls: 'hl'}]));
+    gcdCard.append(el('p', 'formula-sub', '结果是 1，说明 E 与 φ(N) 互质，可以求逆元。'));
+    right.append(gcdCard);
+    right.append(noteBox('E 不要求是质数', '只要与 φ(N) 互质就行。φ(N)=20 时，9 与 20 互质，但它会让 D 也等于 9，所以这里不选它；5 则因为 gcd(5,20)=5 不能用。', 'blue'));
+    right.append(noteBox('公钥和私钥不能相同', '若 E² ≡ 1 (mod φ(N))，求逆后 D = E，公钥和私钥就变成同一把钥匙。系统会自动跳过这些 E。', 'blue'));
+    right.append(noteBox('工程惯例', '真实系统通常直接取 E = 65537：它是质数，与大多数 φ(N) 互质，而且快速幂只需要很少的乘法。', 'green'));
+    stage.append(left, right);
+    wrap.append(stage);
+    return wrap;
+  }
+
+  function traceTable(rows, headers) {
+    const wrap = el('div', 'table-wrap');
+    const table = el('table', 'trace');
+    const head = el('tr');
+    headers.forEach(text => head.append(el('th', '', text)));
+    table.append(head);
+    rows.forEach(row => table.append(row));
+    wrap.append(table);
+    return wrap;
+  }
+
+  function egcdTable(model) {
+    const trace = R.egcdTrace(model.e, model.phi);
+    const rows = trace.rows.filter(row => row.q !== 0n);
+    const trs = rows.map((row, index) => {
+      const tr = el('tr');
+      [String(index + 1), String(row.q), String(row.a), String(row.b), String(row.remainder)]
+        .forEach(text => tr.append(el('td', '', text)));
+      return tr;
+    });
+    const final = el('tr', 'final');
+    final.append(el('td', '', '结果'), el('td', '', ''), el('td', '', ''), el('td', '', ''), el('td', '', '1'));
+    trs.push(final);
+    return {
+      table: traceTable(trs, ['轮次', '商 q', '被除数', '除数', '余数']),
+      trace
+    };
+  }
+
+  function swapDemo(model) {
+    const demo = (() => {
+      const src = PRESETS[state.preset];
+      const value = toBig(src.m);
+      return value != null && value < model.n ? value : 2n % model.n;
+    })();
+    const first = R.modPow(demo, model.d, model.n);
+    const second = R.modPow(first, model.e, model.n);
+    return {demo, first, second};
+  }
+
+  function renderStepD(model) {
+    const wrap = el('div', 'keygen-wrap');
+    const stage = el('div', 'keygen-stage');
+
+    const left = panel('⑤ 用扩展欧几里得求 D');
+    left.append(el('p', 'muted', `D 是 E 在模 φ(N) 下的逆元：E × D ≡ 1 (mod φ(N))。`));
+    const eg = egcdTable(model);
+    left.append(eg.table);
+    const check = el('div', 'formula-card');
+    check.append(formula([
+      'D = ', String(model.e), '⁻¹ mod ', String(model.phi), ' = ', {text: String(model.d), cls: 'hl'},
+      '，因为 ', String(model.e), ' × ', String(model.d), ' = ', String(model.e * model.d),
+      ' ≡ 1 (mod ', String(model.phi), ')'
+    ]));
+    left.append(check);
+
+    const right = panel('钥匙造好了');
+    const cards = el('div', 'key-cards');
+    const pubExp = state.swap ? model.d : model.e;
+    const priExp = state.swap ? model.e : model.d;
+    cards.append(
+      keycard('public', pubExp, model.n, state.swap ? '公钥（交换后）' : '公钥'),
+      keycard('private', priExp, model.n, state.swap ? '私钥（交换后）' : '私钥')
+    );
+    right.append(cards);
+
+    const swapRow = el('div', 'swap-row');
+    const swapBtn = el('button', '', state.swap ? '换回原组合' : '交换 E 和 D 试试');
+    swapBtn.type = 'button';
+    swapBtn.addEventListener('click', () => {
+      state.swap = !state.swap;
+      state.encrypted = false;
+      state.decrypted = false;
+      state.reEncrypted = false;
+      state.cipher = null;
+      state.m = null;
+      state.textCipher = null;
+      state.cryptoStage = 'idle';
+      state.error = '';
+      render();
+    });
+    swapRow.append(swapBtn, el('span', 'swap-note', '两种写法都能正确解密'));
+    right.append(swapRow);
+
+    const demo = swapDemo(model);
+    const demoLine = el('div', 'formula-card');
+    demoLine.append(formula([
+      `m=${demo.demo}`, ' → ', String(demo.demo), '^', String(pubExp), ' mod ', String(model.n), ' = ', {text: String(demo.first), cls: 'hl'},
+      ' → ', String(demo.first), '^', String(priExp), ' mod ', String(model.n), ' = ', {text: String(demo.second), cls: 'hl'}
+    ]));
+    right.append(demoLine);
+    right.append(noteBox('课件里两组 E/D 都对', '第 73 页用 E=7、D=3；第 74 页用 E=79、D=1019。只要 E×D≡1 (mod φ)，两组都能解密；E 和 D 的角色可以互换。', 'blue'));
+    right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E,N) 公开，(D,N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
+
+    stage.append(left, right);
+    wrap.append(stage);
+    return wrap;
+  }
+
+  function renderKeygen(model) {
+    const root = $('sceneRoot');
+    root.replaceChildren();
+    if (!model.ok) {
+      const p = panel('等待有效参数');
+      p.append(el('p', 'muted', '回到第 1 步，在下拉框里换两个质数。'));
+      root.append(p);
+      return;
+    }
+    if (state.step === 0) root.append(renderStepPrime(model));
+    else if (state.step === 1) root.append(renderStepN(model));
+    else if (state.step === 2) root.append(renderStepPhi(model));
+    else if (state.step === 3) root.append(renderStepE(model));
+    else root.append(renderStepD(model));
+  }
+
+  /* ---------- crypto ---------- */
+
+  function textBlockSize(model) { return R.maxBlockBytes(model.n); }
+
+  function doEncrypt(model) {
+    state.error = '';
+    const keys = cryptoKeys(model);
+    if (state.cryptoMode === 'number') {
+      const raw = $('numberInput').value.trim();
+      state.numberDraft = raw;
+      const m = toBig(raw);
+      if (m == null) {
+        state.error = '明文 m 必须是非负整数。';
+        state.cryptoStage = 'idle';
+        render();
+        return;
+      }
+      if (m >= model.n) {
+        state.error = `明文 m 必须小于 N=${model.n}；否则取模后信息就丢了。`;
+        state.cryptoStage = 'idle';
+        render();
+        return;
+      }
+      const cipher = R.encrypt(m, keys.encExp, model.n);
+      state.m = m;
+      state.cipher = cipher;
+      state.encrypted = true;
+      state.decrypted = false;
+      state.reEncrypted = false;
+      state.cryptoStage = 'encrypted';
+      render();
+      return;
+    }
+
+    const text = $('textInput').value;
+    state.textDraft = text;
+    const size = textBlockSize(model);
+    if (size === 0) {
+      state.error = `N=${model.n} 太小，连一个字节（0–255）都放不下；换“实例 2”再试文字。`;
+      state.cryptoStage = 'idle';
+      render();
+      return;
+    }
+    if (!text.length) {
+      state.error = '先输入一段文字。';
+      state.cryptoStage = 'idle';
+      render();
+      return;
+    }
+    const encoded = R.encryptText(text, keys.encExp, model.n);
+    state.textPlain = text;
+    state.textCipher = encoded.cipherBlocks;
+    state.encrypted = true;
+    state.decrypted = false;
+    state.reEncrypted = false;
+    state.cryptoStage = 'encrypted';
+    render();
+  }
+
+  function doDecrypt(model) {
+    state.error = '';
+    const keys = cryptoKeys(model);
+    if (state.cryptoMode === 'number') {
+      if (!state.encrypted || state.cipher == null) {
+        state.error = '还没有密文；先点“加密”。';
+        render();
+        return;
+      }
+      state.m = R.decrypt(state.cipher, keys.decExp, model.n);
+      state.decrypted = true;
+      state.cryptoStage = 'decrypted';
+      render();
+      return;
+    }
+    if (!state.textCipher) {
+      state.error = '还没有密文；先点“加密”。';
+      render();
+      return;
+    }
+    const result = R.decryptText(state.textCipher, keys.decExp, model.n);
+    state.textPlain = result.text;
+    state.decrypted = true;
+    state.cryptoStage = 'decrypted';
+    render();
+  }
+
+  function doReEncrypt(model) {
+    if (!state.encrypted) return;
+    state.reEncrypted = true;
+    const keys = cryptoKeys(model);
+    if (state.cryptoMode === 'number') state.cipher = R.encrypt(state.m, keys.encExp, model.n);
+    else state.textCipher = R.encryptText(state.textPlain, keys.encExp, model.n).cipherBlocks;
+    render();
+  }
+
+  function doEve(model) {
+    state.eveRan = true;
+    state.cryptoStage = 'eve';
+    render();
+  }
+
+  function keyStrip(model) {
+    const keys = cryptoKeys(model);
+    const strip = el('div', 'key-strip');
+    strip.append(el('span', 'strip-label', '当前钥匙'));
+    strip.append(el('span', 'pill public', `公钥 ${keys.encLabel}=${keys.encExp}，N=${model.n}`));
+    strip.append(el('span', 'pill private', `私钥 ${keys.decLabel}=${keys.decExp}`));
+    strip.append(el('span', 'pill secret', `p、q、φ=${model.phi} 已销毁`));
+    return strip;
+  }
+
+  function cryptoInput(model) {
+    const card = el('section', 'crypto-input');
+    const head = el('div', 'input-head');
+    head.append(el('h2', '', '选择明文'));
+    const toggle = el('div', 'mode-toggle');
+    [['number', '数字'], ['text', '文字']].forEach(([mode, label]) => {
+      const button = el('button', 'toggle-btn' + (state.cryptoMode === mode ? ' selected' : ''), label);
+      button.type = 'button';
+      button.setAttribute('aria-pressed', String(state.cryptoMode === mode));
+      button.addEventListener('click', () => {
+        if (state.cryptoMode === mode) return;
+        state.cryptoMode = mode;
+        state.encrypted = false;
+        state.decrypted = false;
+        state.reEncrypted = false;
+        state.cipher = null;
+        state.textCipher = null;
+        state.cryptoStage = 'idle';
+        state.error = '';
+        render();
+      });
+      toggle.append(button);
+    });
+    head.append(toggle);
+    card.append(head);
+
+    if (state.cryptoMode === 'number') {
+      const row = el('div', 'input-row');
+      const field = el('label', 'field');
+      field.append(el('span', '', `明文 m（0 ≤ m < ${model.n}）`));
+      const input = el('input');
+      input.id = 'numberInput';
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.autocomplete = 'off';
+      input.value = state.numberDraft;
+      input.addEventListener('input', () => { state.numberDraft = input.value; });
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); doEncrypt(model); }
+      });
+      field.append(input, el('span', 'field-hint', `课件实例的 m 就是这里输入的数字。`));
+      row.append(field);
+      card.append(row);
+    } else {
+      const row = el('div', 'input-row');
+      const field = el('label', 'field');
+      const size = textBlockSize(model);
+      field.append(el('span', '', '明文（UTF-8 文字）'));
+      const input = el('input');
+      input.id = 'textInput';
+      input.type = 'text';
+      input.autocomplete = 'off';
+      input.value = state.textDraft;
+      input.addEventListener('input', () => { state.textDraft = input.value; });
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); doEncrypt(model); }
+      });
+      field.append(input);
+      field.append(el('span', 'field-hint', size === 0
+        ? `N=${model.n} 太小，放不下一个字节；切换到“实例 2”再试。`
+        : `按 ${size} 字节一块分开加密；块的值必须小于 N=${model.n}。`));
+      row.append(field);
+      card.append(row);
+    }
+
+    const actions = el('div', 'action-row');
+    const encryptBtn = el('button', 'primary', '加密');
+    encryptBtn.type = 'button';
+    encryptBtn.disabled = state.cryptoMode === 'text' && textBlockSize(model) === 0;
+    encryptBtn.addEventListener('click', () => doEncrypt(model));
+    const decryptBtn = el('button', '', '解密');
+    decryptBtn.type = 'button';
+    decryptBtn.disabled = state.cryptoMode === 'number' ? state.cipher == null : !state.textCipher;
+    decryptBtn.addEventListener('click', () => doDecrypt(model));
+    const againBtn = el('button', '', '再加密一次');
+    againBtn.type = 'button';
+    againBtn.disabled = !state.encrypted;
+    againBtn.addEventListener('click', () => doReEncrypt(model));
+    actions.append(encryptBtn, decryptBtn, againBtn);
+    card.append(actions);
+
+    if (state.error) card.append(el('p', 'input-error', state.error));
+    return card;
+  }
+
+  function flowCard(kind, label, value, formulaText) {
+    const card = el('div', 'flow-card ' + kind);
+    card.append(el('small', '', label));
+    card.append(el('div', 'flow-value', value == null ? '?' : String(value)));
+    if (formulaText) card.append(el('div', 'flow-formula', formulaText));
+    return card;
+  }
+
+  function flow(model) {
+    const keys = cryptoKeys(model);
+    const wrap = el('div', 'flow');
+    if (state.cryptoMode === 'number') {
+      const m = state.m != null ? state.m : state.numberDraft;
+      wrap.append(flowCard('plain', '明文 m', m, '发送方输入'));
+      wrap.append(el('div', 'flow-arrow', '→'));
+      wrap.append(flowCard('cipher', '密文 c', state.encrypted ? state.cipher : '?', state.encrypted ? `c = m^${keys.encLabel} mod N` : 'Eve 只能看到这个'));
+      wrap.append(el('div', 'flow-arrow', '→'));
+      wrap.append(flowCard('back', '解回的 m', state.decrypted ? state.m : '?', state.decrypted ? `m = c^${keys.decLabel} mod N` : '只有私钥能解'));
+    } else {
+      wrap.append(flowCard('plain', '明文', short(state.textPlain || state.textDraft || '（空）', 18), 'UTF-8 分块'));
+      wrap.append(el('div', 'flow-arrow', '→'));
+      wrap.append(flowCard('cipher', '密文块', state.textCipher ? `${state.textCipher.length} 块` : '?',
+        state.textCipher ? short(state.textCipher.map(b => b.value).join(' '), 26) : 'Eve 只能看到数字'));
+      wrap.append(el('div', 'flow-arrow', '→'));
+      wrap.append(flowCard('back', '解回的文字', state.decrypted ? short(state.textPlain, 18) : '?', state.decrypted ? '逐块解密再拼接' : '只有私钥能解'));
+    }
+    return wrap;
+  }
+
+  function quickPowTrace(model, exp, label, open) {
+    const base = state.m;
+    if (base == null) return null;
+    const trace = R.squareMultiplyTrace(base, exp, model.n);
+    const details = el('details', 'trace-box');
+    details.open = open;
+    const summary = el('summary');
+    summary.append(el('span', '', `${label}：${base}^${exp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
+    details.append(summary);
+    const inner = el('div', 'trace-inner');
+    const rows = trace.steps.slice(0, 24).map(step => {
+      const tr = el('tr');
+      tr.append(el('td', '', step.bit), el('td', '', String(step.afterSquare)));
+      tr.append(el('td', '', step.multiplied ? `× ${base}` : '—'));
+      tr.append(el('td', '', String(step.after)));
+      return tr;
+    });
+    const last = rows[rows.length - 1];
+    if (last) last.className = 'final';
+    inner.append(traceTable(rows, ['读入位', '平方后', '乘底数?', '结果']));
+    if (trace.steps.length > 24) inner.append(el('p', 'muted', `只显示前 24 步，共 ${trace.steps.length} 步。`));
+    details.append(inner);
+    return details;
+  }
+
+  function blockDetail(model) {
+    const keys = cryptoKeys(model);
+    const wrap = el('div', 'table-wrap');
+    const table = el('table', 'trace');
+    const head = el('tr');
+    ['#', '块 m', `c = m^${keys.encLabel} mod N`, `m = c^${keys.decLabel} mod N`, '字符'].forEach(text => head.append(el('th', '', text)));
+    table.append(head);
+    const encoded = R.encodeText(state.textPlain || '', model.n);
+    state.textCipher.slice(0, 8).forEach((block, index) => {
+      const source = encoded.blocks[index];
+      const decoded = R.decrypt(block.value, keys.decExp, model.n);
+      const text = source ? new TextDecoder().decode(new Uint8Array(source.bytes)) : '';
+      const tr = el('tr');
+      [String(index + 1), String(source ? source.value : ''), String(block.value), state.decrypted ? String(decoded) : '—', state.decrypted ? text : '—']
+        .forEach(value => tr.append(el('td', '', value)));
+      table.append(tr);
+    });
+    wrap.append(table);
+    return wrap;
+  }
+
+  function determinismNote() {
+    const node = el('div', 'det-note');
+    node.append(
+      el('strong', '', '再加密一次，密文一模一样'),
+      el('p', '', '教材 RSA 是确定性的：同一明文、同一把公钥，永远得到同一个密文。真实系统会加入随机填充（OAEP），同一个消息两次加密看起来才不同。')
+    );
+    return node;
+  }
+
+  function scaleRow(label, valueText, ratio, now) {
+    const row = el('div', 'scale-row');
+    const track = el('div', 'scale-track');
+    const fill = el('span', 'scale-fill' + (now ? ' now' : ''));
+    fill.style.width = Math.max(2, Math.min(100, ratio * 100)) + '%';
+    track.append(fill);
+    row.append(el('span', '', label), track, el('span', '', valueText));
+    return row;
+  }
+
+  function evePanel(model) {
+    const panelEl = el('section', 'eve-panel');
+    const head = el('div', 'eve-head');
+    head.append(el('h2', '', 'Eve 的视角'));
+    head.append(el('p', 'eve-desc', 'Eve 只有公钥 (E, N)。她想从 N 倒推出 p 和 q。'));
+    const button = el('button', '', state.eveRan ? '再分解一次' : '让 Eve 分解 N');
+    button.type = 'button';
+    button.addEventListener('click', () => doEve(model));
+    head.append(button);
+    panelEl.append(head);
+
+    if (!state.eveRan) {
+      panelEl.append(el('p', 'muted', `试试最笨的方法：从 3 开始，一个奇数一个奇数地试除 N=${model.n}。`));
+      return panelEl;
+    }
+
+    const result = R.factorTrial(model.n, 1000000);
+    const sqrt = isqrt(model.n);
+    const grid = el('div', 'eve-grid');
+    const stats = [
+      ['N', String(model.n)],
+      ['√N 约等于', String(sqrt)],
+      ['试除次数', String(result.steps)]
+    ];
+    stats.forEach(([label, value]) => {
+      const box = el('div', 'eve-stat');
+      box.append(el('span', '', label), el('strong', '', value));
+      grid.append(box);
+    });
+    panelEl.append(grid);
+
+    if (result.p != null) {
+      const phi = (result.p - 1n) * (result.q - 1n);
+      const stolen = R.modInverse(state.swap ? model.d : model.e, phi);
+      const verdict = el('p', 'eve-verdict');
+      verdict.textContent = `Eve 找到 ${model.n} = ${result.p} × ${result.q}。φ=${phi}，公开指数在模 φ 下的逆元是 ${stolen}。`;
+      panelEl.append(verdict, el('p', 'muted', '分解成功 = 私钥泄露。小 N 的 RSA 完全不安全。'));
+
+      const scale = el('div', 'scale');
+      const small = R.factorTrial(33n);
+      const maxSteps = Math.max(Number(result.steps), 23, Number(small.steps));
+      scale.append(scaleRow(`N = ${model.n}`, `${result.steps} 次`, Number(result.steps) / maxSteps, true));
+      if (model.n !== 3337n) scale.append(scaleRow('N = 3337', '23 次', 23 / maxSteps, false));
+      if (model.n !== 33n) scale.append(scaleRow('N = 33', `${small.steps} 次`, Number(small.steps) / maxSteps, false));
+      scale.append(scaleRow('2048 位 RSA', '≈10^308 次', 1, false));
+      panelEl.append(scale);
+      panelEl.append(el('p', 'muted', '试除只是最笨的分解法；真实攻击更聪明，但面对 2048 位 RSA 仍然不可行。这就是 p、q 要选几百位的原因。'));
+    } else {
+      panelEl.append(el('p', 'eve-verdict ok', `Eve 在 ${result.steps} 次试除内没有分解出 N。把 p、q 取大一点，她就更难了。`));
+    }
+    return panelEl;
+  }
+
+  function caveatCard() {
+    const card = el('section', 'caveat');
+    card.append(el('h2', '', '教材 RSA 的三个问题'));
+    const list = el('ul');
+    [
+      ['确定性', '同一明文、同一公钥，密文永远相同；真实系统用 OAEP 随机填充。'],
+      ['小消息', '如果 m^E < N，加密时根本没取模，直接开 E 次方就能还原 m；填充可以避免。'],
+      ['速度慢', 'RSA 比 AES 慢几个数量级，所以真实系统只用它加密一把临时 AES 密钥。']
+    ].forEach(([title, text]) => {
+      const li = el('li');
+      li.append(el('strong', '', title + '：'), document.createTextNode(text));
+      list.append(li);
+    });
+    card.append(list, noteBox('工程上的分工', '正文用 AES 加密，AES 密钥用 RSA 加密——这叫混合加密。下一节的 PeerDrop 项目就是这个思路。', 'green'));
+    return card;
+  }
+
+  function renderCrypto(model) {
+    const root = $('sceneRoot');
+    root.replaceChildren();
+    if (!model.ok) {
+      const p = panel('等待有效参数');
+      p.append(el('p', 'muted', '回到“造钥匙”第 1 步，换两个质数。'));
+      root.append(p);
+      return;
+    }
+
+    const wrap = el('div', 'crypto-wrap');
+    wrap.append(keyStrip(model));
+    wrap.append(cryptoInput(model));
+    wrap.append(flow(model));
+
+    if (state.cryptoMode === 'number') {
+      if (state.encrypted) {
+        const keys = cryptoKeys(model);
+        const encTrace = quickPowTrace(model, keys.encExp, '加密的快速幂', true);
+        if (encTrace) wrap.append(encTrace);
+      }
+      if (state.decrypted) {
+        const keys = cryptoKeys(model);
+        const decBase = state.cipher != null ? state.cipher : 0n;
+        const trace = R.squareMultiplyTrace(decBase, keys.decExp, model.n);
+        const details = el('details', 'trace-box');
+        details.open = false;
+        const summary = el('summary');
+        summary.append(el('span', '', `解密的快速幂：${decBase}^${keys.decExp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
+        details.append(summary);
+        const inner = el('div', 'trace-inner');
+        const rows = trace.steps.slice(0, 24).map(step => {
+          const tr = el('tr');
+          tr.append(el('td', '', step.bit), el('td', '', String(step.afterSquare)));
+          tr.append(el('td', '', step.multiplied ? `× ${decBase}` : '—'));
+          tr.append(el('td', '', String(step.after)));
+          return tr;
+        });
+        if (rows.length) rows[rows.length - 1].className = 'final';
+        inner.append(traceTable(rows, ['读入位', '平方后', '乘底数?', '结果']));
+        details.append(inner);
+        wrap.append(details);
+      }
+    } else if (state.encrypted) {
+      const details = el('details', 'trace-box');
+      details.open = true;
+      details.append(el('summary', '', '逐块加密与解密'));
+      const inner = el('div', 'trace-inner');
+      inner.append(blockDetail(model));
+      details.append(inner);
+      wrap.append(details);
+    }
+
+    if (state.reEncrypted) wrap.append(determinismNote());
+    wrap.append(evePanel(model));
+    wrap.append(caveatCard());
+
+    const next = el('div', 'next-card');
+    next.append(
+      el('strong', '', '两把钥匙，两种用途'),
+      el('p', '', '公钥加密、私钥解密 → 保密；私钥加密、公钥解密 → 签名。RSA 负责造钥匙和做模幂，用哪一把加密决定用途。')
+    );
+    wrap.append(next);
+    root.append(wrap);
+  }
+
+  /* ---------- outcome & toolbar ---------- */
+
+  function renderOutcome(model) {
+    if (state.tab === 'keygen') {
+      if (!model.ok) {
+        setOutcome('danger', '参数还不能用', model.error);
+        return;
+      }
+      const texts = [
+        {style: 'info', title: '第 1 步：选两个质数', text: `p=${model.p}，q=${model.q}。它们只能自己知道；p≠q，而且都要是质数。`},
+        {style: 'info', title: '第 2 步：算出 N', text: `N = ${model.p} × ${model.q} = ${model.n}。N 会写进公钥，全世界都能看到。`},
+        {style: 'warning', title: '第 3 步：算出 φ(N)', text: `φ(${model.n}) = (${model.p}−1)(${model.q}−1) = ${model.phi}。它必须保密——泄露 φ 等于泄露私钥。`},
+        {style: 'info', title: '第 4 步：选 E', text: `E=${model.e}，gcd(${model.e}, ${model.phi})=1，求出的 D=${model.d} 与 E 不同。E 不要求是质数。`},
+        {
+          style: state.swap ? 'warning' : 'success',
+          title: state.swap ? 'E 和 D 可以互换' : '第 5 步：求 D',
+          text: state.swap
+            ? `交换后 (${model.d},${model.n}) 当公钥、(${model.e},${model.n}) 当私钥，仍然能正确解密。`
+            : `D = ${model.e}⁻¹ mod ${model.phi} = ${model.d}，因为 ${model.e}×${model.d}=${model.e * model.d}≡1 (mod ${model.phi})。`
+        }
+      ];
+      const data = texts[state.step];
+      setOutcome(data.style, data.title, data.text);
+      return;
+    }
+
+    if (state.error) {
+      setOutcome('danger', '输入有问题', state.error);
+      return;
+    }
+    if (!model.ok) {
+      setOutcome('danger', '参数还不能用', model.error);
+      return;
+    }
+    const keys = cryptoKeys(model);
+
+    if (state.cryptoStage === 'eve') {
+      const result = R.factorTrial(model.n, 1000000);
+      setOutcome('danger', 'Eve 分解了 N', result.p != null
+        ? `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，所有密文都能解。`
+        : `Eve 试了 ${result.steps} 次，暂时没有分解成功。`);
+      return;
+    }
+    if (state.cryptoStage === 'decrypted') {
+      if (state.cryptoMode === 'number') {
+        setOutcome('success', '明文回来了', `m = ${state.cipher}^${keys.decLabel} mod ${model.n} = ${state.m}。私钥把消息还原了。`);
+      } else {
+        setOutcome('success', '文字回来了', `${state.textCipher.length} 块密文逐块解密，再按 UTF-8 拼回“${state.textPlain}”。`);
+      }
+      return;
+    }
+    if (state.cryptoStage === 'encrypted') {
+      if (state.cryptoMode === 'number') {
+        setOutcome('info', '密文算出来了', `c = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。Eve 在网络里只能看到 ${state.cipher}。`);
+      } else {
+        setOutcome('info', '密文算出来了', `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独加密。`);
+      }
+      return;
+    }
+    if (state.cryptoMode === 'number') {
+      setOutcome('info', '先加密一个数字', `明文 m=${state.numberDraft}，公钥指数 ${keys.encLabel}=${keys.encExp}，N=${model.n}。按下“加密”。`);
+    } else {
+      setOutcome('info', '先加密一段文字', 'RSA 按字节分块；每个块必须小于 N。');
+    }
+  }
+
+  function renderToolbar(model) {
+    const crypto = state.tab === 'crypto';
+    $('toolbar').hidden = crypto;
+    if (crypto) return;
+    $('prevBtn').disabled = state.step <= 0;
+    $('nextBtn').disabled = state.step >= 4 || !model.ok;
+    $('stepCount').textContent = `第 ${state.step + 1} / 5 步`;
+    const dots = $('stepDots');
+    dots.replaceChildren();
+    for (let i = 0; i < 5; i += 1) {
+      const dot = el('button', 'step-dot' + (i < state.step ? ' done' : ''), String(i + 1));
+      dot.type = 'button';
+      if (i === state.step) dot.setAttribute('aria-current', 'true');
+      dot.setAttribute('aria-label', `第 ${i + 1} 步`);
+      dot.addEventListener('click', () => {
+        if (!getModel().ok) return;
+        state.step = i;
+        render();
+      });
+      dots.append(dot);
+    }
+  }
+
+  function renderPresets() {
+    const bar = $('presetBar');
+    bar.replaceChildren();
+    Object.entries(PRESETS).forEach(([id, preset]) => {
+      const button = el('button', 'preset-btn', preset.label);
+      button.type = 'button';
+      button.setAttribute('aria-pressed', String(state.preset === id));
+      button.addEventListener('click', () => {
+        if (state.preset === id) return;
+        state.preset = id;
+        state.numberDraft = String(preset.m);
+        resetAll();
+        render();
+      });
+      bar.append(button);
+    });
+    $('presetNote').textContent = PRESETS[state.preset].note;
+  }
+
+  function render() {
+    document.querySelectorAll('[data-tab]').forEach(button => {
+      button.setAttribute('aria-selected', String(button.dataset.tab === state.tab));
+    });
+    $('stage').setAttribute('aria-labelledby', 'tab-' + state.tab);
+    const model = getModel();
+    renderPresets();
+    renderToolbar(model);
+    renderOutcome(model);
+    if (state.tab === 'keygen') renderKeygen(model);
+    else renderCrypto(model);
+  }
+
+  /* ---------- events ---------- */
+
+  document.querySelectorAll('[data-tab]').forEach(button => {
+    button.addEventListener('click', () => {
+      state.tab = button.dataset.tab;
+      render();
+    });
+  });
+
+  $('nextBtn').addEventListener('click', () => {
+    if (state.step >= 4 || !getModel().ok) return;
+    state.step += 1;
+    render();
+  });
+  $('prevBtn').addEventListener('click', () => {
+    if (state.step <= 0) return;
+    state.step -= 1;
+    render();
+  });
+  $('resetBtn').addEventListener('click', () => {
+    resetAll();
+    render();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (state.tab !== 'keygen') return;
+    if (event.target.closest('input, textarea, select, button')) return;
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      if (state.step < 4 && getModel().ok) { state.step += 1; render(); }
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      if (state.step > 0) { state.step -= 1; render(); }
+    }
+  });
+
+  render();
+})();
+
+</script>
+</body>
+</html>
