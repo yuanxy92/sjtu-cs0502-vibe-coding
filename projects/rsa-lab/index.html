@@ -233,6 +233,10 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 .break-stat span{font-size:18px;color:#2f6b52}
 .break-stat strong{font-family:var(--mono);font-size:22px;color:#116149;overflow-wrap:anywhere}
 .break-verdict{font-size:20px;font-weight:750;color:#116149;margin-top:10px}
+.break-scale{display:grid;gap:8px;margin-top:12px}
+.break-scale-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px 18px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 16px}
+.break-scale-k{font-size:20px;color:#102344}
+.break-scale-v{font-family:var(--mono);font-size:22px;font-weight:750;color:#17427a;white-space:nowrap}
 
 .footer{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:19px;color:var(--muted)}
 .footer a{color:var(--blue)}
@@ -304,6 +308,9 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
   .time-track{grid-column:1 / -1;grid-row:2}
   .break-actions{flex-direction:column;align-items:flex-start;gap:10px}
   .break-actions .break-footnote{min-width:0}
+  .break-scale-row{padding:10px 12px}
+  .break-scale-k{font-size:19px}
+  .break-scale-v{font-size:20px}
   .footer{flex-direction:column;gap:6px;margin-top:24px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -1455,6 +1462,33 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     return card;
   }
 
+  function breakLimitPanel() {
+    const card = panel('如果 N 有 2048 位？');
+    card.append(el('p', 'break-lead', 'RSA-2048 的 N 是一个 617 位的十进制数，√N ≈ 10^308。从 3 开始逐个奇数试除，要找到较小的质数，大约需要 9 × 10^307 次。'));
+
+    const estimate = el('div', 'formula-card');
+    estimate.append(formula([{text: '试除次数', cls: 'hl'}, ' ≈ √N / 2 ≈ 9 × 10^307']));
+    estimate.append(el('p', 'formula-sub', '作为对比：表格最后一行 20 位的 N 只要约 17.5 亿次，已经要等一分钟。'));
+    card.append(estimate);
+
+    const rows = [
+      ['10^8 次/秒（本机速度）', '3 × 10^292 年'],
+      ['10^12 次/秒（快一万倍）', '3 × 10^288 年'],
+      ['10^18 次/秒（亿亿次）', '3 × 10^282 年']
+    ];
+    const scale = el('div', 'break-scale');
+    rows.forEach(([speed, time]) => {
+      const row = el('div', 'break-scale-row');
+      row.append(el('span', 'break-scale-k', speed), el('span', 'break-scale-v', time));
+      scale.append(row);
+    });
+    card.append(scale);
+
+    card.append(noteBox('换算成宇宙年龄', '宇宙年龄约 1.4\u00a0×\u00a010^10 年。即使每秒算 10^18 次，也要约 2\u00a0×\u00a010^272 个宇宙年龄。表格里 N 每多两位、试除次数就多 10 倍；从 20 位到 617 位，还差约 300 个数量级。', 'blue'));
+    card.append(el('p', 'break-footnote', '真实攻击不会用试除法，而是数域筛法（GNFS），量级约 2^110 次运算。2048 位 RSA 目前仍安全，业界正在迁移到 3072 位。'));
+    return card;
+  }
+
   function renderBreak() {
     const root = $('sceneRoot');
     root.replaceChildren();
@@ -1521,6 +1555,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
       wrap.append(placeholder);
     }
 
+    wrap.append(breakLimitPanel());
     root.append(wrap);
   }
 
