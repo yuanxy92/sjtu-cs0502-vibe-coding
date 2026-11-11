@@ -893,7 +893,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     right.append(gcdCard);
     right.append(noteBox('E 不要求是质数', '只要与 φ(N) 互质就行。φ(N)=20 时，9 与 20 互质，但它会让 D 也等于 9，所以这里不选它；5 则因为 gcd(5,20)=5 不能用。', 'blue'));
     right.append(noteBox('公钥和私钥不能相同', '若 E² ≡ 1 (mod φ(N))，求逆后 D = E，公钥和私钥就变成同一把钥匙。系统会自动跳过这些 E。', 'blue'));
-    right.append(noteBox('工程惯例', '真实系统通常直接取 E = 65537：它是质数，与大多数 φ(N) 互质，而且快速幂只需要很少的乘法。', 'green'));
+    right.append(noteBox('E 一定是奇数', 'φ(N) = (p−1)(q−1) 是两个偶数的乘积，所以 φ(N) 一定是偶数。偶数 E 和 φ(N) 都有公因数 2，gcd 不可能等于 1。因此能用的 E 都是奇数，并不是界面额外筛掉的。', 'green'));
     stage.append(left, right);
     wrap.append(stage);
     return wrap;
