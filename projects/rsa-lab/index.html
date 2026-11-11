@@ -198,6 +198,7 @@ details.trace-box summary:after{content:"+";font-size:24px;color:var(--muted)}
 details.trace-box[open] summary:after{content:"−"}
 details.trace-box .trace-inner{padding:12px 16px 16px}
 .math-steps{display:grid;gap:5px}
+.math-intro{font-size:20px;line-height:1.6;color:#35506f;margin-bottom:8px}
 .math-line{font-family:var(--mono);font-size:23px;font-weight:650;color:#17427a;overflow-wrap:anywhere}
 .math-note{font-family:var(--mono);font-size:18px;color:var(--muted);line-height:1.6;margin-top:6px;overflow-wrap:anywhere}
 
@@ -276,6 +277,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
   .roundtrip-tag{justify-self:start}
   .roundtrip-formula{font-size:21px}
   .math-line{font-size:20px}
+  .math-intro{font-size:19px}
   .math-note{font-size:18px}
   .key-cards{grid-template-columns:1fr;gap:12px}
   .key-card .key-pair{font-size:26px}
@@ -1207,6 +1209,11 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 
     const line = text => el('div', 'math-line', text);
     const chain = el('div', 'math-steps');
+    const maxK = Math.max(...used.map(item => item.k));
+    const exact = base ** exp;
+    const digitCount = exact.toString().length;
+    const huge = digitCount >= 8;
+    const ops = `只需 ${maxK} 次平方、${used.length - 1} 次乘法`;
     chain.append(line(`${target} = ${base}^${exp} mod ${modulus}`));
     chain.append(line(`= ${base}^(${used.map(item => 2 ** item.k).join(' + ')}) mod ${modulus}`));
     const powerText = item => item.k === 0 ? String(base) : `${base}^${2 ** item.k}`;
@@ -1216,7 +1223,12 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     if (String(product).length <= 18) chain.append(line(`= ${groupDigits(product)} mod ${modulus}`));
     chain.append(line(`= ${R.modPow(base, exp, modulus)}`));
 
-    const maxK = Math.max(...used.map(item => item.k));
+    const inner = el('div', 'trace-inner');
+    const intro = huge
+      ? `指数 ${exp} 不用逐次相乘：拆成 2 的幂之和，${ops}，不必真的算出 ${base}^${exp}（一个 ${digitCount} 位的数）。`
+      : `指数 ${exp} 拆成 2 的幂之和，${ops}。`;
+    inner.append(el('p', 'math-intro', intro), chain);
+
     if (maxK >= 1) {
       const parts = [];
       let value = R.mod(base, modulus);
@@ -1227,10 +1239,11 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
         parts.push(next === raw ? `${head} = ${raw}` : `${head} = ${raw} ≡ ${next}`);
         value = next;
       }
-      chain.append(el('p', 'math-note', `其中，每步平方后取模（mod ${modulus}）：${parts.join('，')}。`));
+      inner.append(el('p', 'math-note', `其中，每步平方后取模（mod ${modulus}）：${parts.join('，')}。`));
     }
-    const inner = el('div', 'trace-inner');
-    inner.append(chain);
+    if (huge) {
+      inner.append(el('p', 'math-note', `全程没有真正算出 ${base}^${exp}（${digitCount} 位）：每步平方、相乘后都立即取模。`));
+    }
     details.append(inner);
     return details;
   }
