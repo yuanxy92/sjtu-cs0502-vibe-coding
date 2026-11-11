@@ -201,6 +201,10 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 .math-intro{font-size:20px;line-height:1.6;color:#35506f;margin-bottom:8px}
 .math-line{font-family:var(--mono);font-size:23px;font-weight:650;color:#17427a;overflow-wrap:anywhere}
 .math-note{font-family:var(--mono);font-size:18px;color:var(--muted);line-height:1.6;margin-top:6px;overflow-wrap:anywhere}
+details.leak-box{margin-top:18px}
+.leak-box .trace-inner{display:grid;gap:8px}
+.leak-title{font-size:21px;font-weight:750;color:#102344;margin-top:8px}
+.leak-box .math-steps{padding:10px 14px;border:1px solid #dbe7fa;border-radius:8px;background:#f4f8ff}
 
 /* Break RSA */
 .break-wrap{display:grid;gap:20px;margin-top:20px}
@@ -283,6 +287,8 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
   .math-line{font-size:20px}
   .math-intro{font-size:19px}
   .math-note{font-size:18px}
+  .leak-title{font-size:20px}
+  .leak-box .math-steps{padding:10px 12px}
   .key-cards{grid-template-columns:1fr;gap:12px}
   .key-card .key-pair{font-size:26px}
   .crypto-input{padding:16px;gap:12px}
@@ -1056,6 +1062,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     stage.append(left, right);
     wrap.append(stage);
     wrap.append(dualUseNote());
+    wrap.append(leakNote(model));
     return wrap;
   }
 
@@ -1069,6 +1076,54 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
       '已知公钥算不出私钥；私钥持有者能算出公钥。'
     ].forEach(text => node.append(el('p', '', text)));
     return node;
+  }
+
+  function leakNote(model) {
+    const fmt = value => String(value).length > 6 ? groupDigits(value) : String(value);
+    const details = el('details', 'trace-box leak-box');
+    const summary = el('summary');
+    summary.append(el('span', '', '如果 φ 或 D 泄露了？'));
+    details.append(summary);
+
+    const inner = el('div', 'trace-inner');
+    const line = text => el('div', 'math-line', text);
+    const S = model.n - model.phi + 1n;
+    const delta = S * S - 4n * model.n;
+    const diff = model.p > model.q ? model.p - model.q : model.q - model.p;
+    const big = (S + diff) / 2n;
+    const small = (S - diff) / 2n;
+    const K = model.e * model.d - 1n;
+    const k = K / model.phi;
+
+    inner.append(el('p', 'math-intro', 'p、q、φ 是造钥匙的中间量，D 是私钥。任意一个泄露，整套密钥都会暴露。'));
+
+    inner.append(el('p', 'leak-title', '① 泄露 φ：N 和 φ 直接解出 p、q'));
+    const first = el('div', 'math-steps');
+    first.append(
+      line(`p + q = N − φ + 1 = ${model.n} − ${model.phi} + 1 = ${S}`),
+      line(`Δ = (p+q)² − 4N = ${S}² − 4×${model.n} = ${fmt(S * S)} − ${fmt(4n * model.n)} = ${delta} = ${diff}²`),
+      line(`p, q = (${S} ± ${diff}) / 2 = ${big}, ${small}`),
+      line(`D = E⁻¹ mod φ = ${model.e}⁻¹ mod ${model.phi} = ${model.d}`)
+    );
+    inner.append(first);
+    inner.append(el('p', 'math-note', 'φ 一泄露，不用分解 N：解一个二次方程就拿到 p、q，再用公开的 E 求出 D。'));
+
+    inner.append(el('p', 'leak-title', '② 泄露 D：公钥 E 加上 D，反推出 φ'));
+    const second = el('div', 'math-steps');
+    second.append(
+      line(`K = E×D − 1 = ${model.e}×${model.d} − 1 = ${fmt(K)}`),
+      line(`逐个试 k=1…E−1：k 整除 K 时，候选 φ = K/k`),
+      line(`k=${k} → φ=${model.phi}，p+q=${S}，Δ=${delta}=${diff}² → p,q=${big},${small}`)
+    );
+    inner.append(second);
+    inner.append(el('p', 'math-note', 'E 很小时 k < E，最多试 E−1 个 k。实例 1 的 k=1，实例 2 的 k=25；真实 RSA 常用的 65537 也只要试 6 万多次。'));
+
+    inner.append(el('p', 'leak-title', '③ 只有公钥，为什么反不过来？'));
+    inner.append(el('p', 'math-intro', '公钥只有 (E, N)，没有 D，就凑不出 K = E×D − 1，也就得不到 φ 的倍数。要分解 N，只能像“破解 RSA”页那样硬试，或使用数域筛法。E 和 D 不是对称的两把钥匙：E 是公开的正向指数，D 是陷门；泄露 D 等于交出陷门。'));
+    inner.append(el('p', 'math-note', '注意：这里能“从 D 推出 E”，前提是 E 本来就公开。如果 E 也保密，只凭 (D, N) 求 E 仍要分解 N。'));
+
+    details.append(inner);
+    return details;
   }
 
   function renderKeygen(model) {
