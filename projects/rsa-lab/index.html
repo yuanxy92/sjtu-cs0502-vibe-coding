@@ -1279,9 +1279,12 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     [31n, 37n],
     [101n, 103n],
     [10007n, 10009n],
+    [100019n, 100043n],
+    [1000003n, 1000033n],
+    [10000079n, 10000121n],
+    [100000007n, 100000037n],
     [1000000007n, 1000000021n],
-    [3500000011n, 3500000081n],
-    [17290903961n, 17290903979n]
+    [3500000011n, 3500000081n]
   ].map(([p, q]) => {
     const n = p * q;
     return {p, q, n, e: BREAK_E, cipher: R.encrypt(BREAK_PLAIN, BREAK_E, n)};
@@ -1463,7 +1466,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     rule.append(formula([{text: 'N', cls: 'hl'}, ' = p × q', '，试到 ', {text: '√N', cls: 'hl'}, ' 就一定能找到较小的因数']));
     rule.append(el('p', 'formula-sub', 'N 每多两位，√N 大约大 10 倍，试除次数也大约多 10 倍。'));
     intro.append(rule);
-    intro.append(noteBox('这次实验', '每行都用 E=7、明文 m=5。前几行瞬间完成；最后三行要等几秒、几十秒到几分钟。计算分块进行，试除次数和耗时实时刷新，等不及可以点“停止”。', 'blue'));
+    intro.append(noteBox('这次实验', '每行都用 E=7、明文 m=5。越往下 N 每多两位，试除次数大约多 10 倍：前几行瞬间完成，最后两行要等几秒到一分钟左右。计算分块进行，试除次数和耗时实时刷新，等不及可以点“停止”。', 'blue'));
     wrap.append(intro);
 
     const record = panel('试除记录');
@@ -1533,7 +1536,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
         const item = BREAK_CASES[state.breakPending];
         const run = state.breakJob;
         const live = run && run.started != null ? `已试除 ${groupDigits(run.job.steps)} 次，耗时 ${formatMs(performance.now() - run.started)}。` : '';
-        setOutcome('warning', '正在试除', `对 N=${item.n} 逐个奇数试除。${live}大 N 要等几秒到几分钟，可随时点“停止”。`);
+        setOutcome('warning', '正在试除', `对 N=${item.n} 逐个奇数试除。${live}大 N 要等几秒到一分钟，可随时点“停止”。`);
         return;
       }
       if (state.breakLast != null && state.breakResults[state.breakLast]) {
