@@ -296,7 +296,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
   <header class="app-header">
     <p class="eyebrow">计算机科学导论 · 信息安全</p>
     <h1>RSA 实验室</h1>
-    <p class="subtitle">两个质数造出一对钥匙：公钥加密，私钥解密；最后看看小 N 怎样被逐个试除破解。</p>
+    <p class="subtitle">两个质数造出一对钥匙：公钥加密／验签，私钥解密／签名；最后看看小 N 怎样被逐个试除破解。</p>
   </header>
 
   <nav id="presets" class="presets" aria-label="课件实例">
@@ -988,7 +988,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
       ' → ', String(first), '^', String(model.d), ' mod ', String(model.n), ' = ', {text: String(second), cls: 'hl'}
     ]));
     right.append(demoLine);
-    right.append(noteBox('公钥和私钥不能互换', 'E×D≡1 (mod φ)，所以先做 E 次方、再做 D 次方能还原数字。但 E 始终是公钥指数，只用于加密；D 始终是私钥指数，只用于解密。已知公钥 (E, N) 在安全参数下算不出 D；反过来，私钥持有者能恢复 p、q、φ，也就能算出公钥。', 'blue'));
+    right.append(noteBox('公钥加密／验签，私钥解密／签名', 'E×D≡1 (mod φ)，先 E 后 D、先 D 后 E 都能还原，所以才有两种用途：保密通信用公钥加密、私钥解密；认证用私钥“加密”（签名）、公钥“解密”（验签）。课件里“私钥加密”指的就是签名。方向不能混用：私钥“加密”的消息谁都能用公钥解开，不保密；公钥人人都有，用它“签”的名谁都能算出来，不认证。已知公钥算不出私钥；私钥持有者能算出公钥。', 'blue'));
     right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E, N) 公开，(D, N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
 
     stage.append(left, right);
@@ -1057,8 +1057,8 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
   function keyStrip(model) {
     const strip = el('div', 'key-strip');
     strip.append(el('span', 'strip-label', '当前钥匙'));
-    strip.append(el('span', 'pill public', `公钥 (E=${model.e}, N=${model.n}) · 加密`));
-    strip.append(el('span', 'pill private', `私钥 (D=${model.d}, N=${model.n}) · 解密`));
+    strip.append(el('span', 'pill public', `公钥 (E=${model.e}, N=${model.n}) · 加密 / 验签`));
+    strip.append(el('span', 'pill private', `私钥 (D=${model.d}, N=${model.n}) · 解密 / 签名`));
     return strip;
   }
 
@@ -1154,7 +1154,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 
     const wrap = el('div', 'crypto-wrap');
     wrap.append(keyStrip(model));
-    wrap.append(el('p', 'crypto-caption', '公钥 (E, N) 公开，用来加密；私钥 (D, N) 保密，用来解密。已知公钥推不出私钥。'));
+    wrap.append(el('p', 'crypto-caption', '公钥 (E, N) 公开，用来加密和验签；私钥 (D, N) 保密，用来解密和签名。认证时正是“私钥加密、公钥解密”。已知公钥推不出私钥。'));
     wrap.append(cryptoInput(model));
     wrap.append(flow(model));
     if (state.encrypted) wrap.append(powTrace(state.m, model.e, model.n, '加密的快速幂', true));
