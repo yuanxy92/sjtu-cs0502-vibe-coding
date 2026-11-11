@@ -97,6 +97,9 @@ h3{font-size:22px}
 .dot.strike{background:#fecaca}
 .area-grid{width:100%;gap:4px;margin-inline:auto}
 .area-grid .dot{width:100%;height:auto;aspect-ratio:1;border-radius:4px}
+.area-grid .dot.numbered{font-size:clamp(11px,0.7vw + 6px,15px);border-radius:5px}
+.area-grid.dense{justify-content:start;overflow-x:auto}
+.area-grid.dense .dot.numbered{font-size:clamp(10px,0.6vw + 6px,12px)}
 .area-caption{font-size:19px;color:var(--muted);margin-top:8px}
 .formula-card{display:grid;gap:5px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:14px 18px}
 .formula{font-family:var(--mono);font-size:29px;font-weight:700;color:#17427a;white-space:normal;overflow-wrap:anywhere}
@@ -806,8 +809,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     const gridAllowed = n <= 420n;
     if (gridAllowed) {
       const cols = n % 11n === 0n ? 11 : (n <= 120n ? Number(model.q) : 19);
-      const grid = el('div', 'dot-grid');
-      grid.style.gridTemplateColumns = `repeat(${cols},26px)`;
+      const dense = cols > 13;
+      const grid = el('div', 'dot-grid area-grid phi-grid' + (dense ? ' dense' : ''));
+      grid.style.gridTemplateColumns = dense ? `repeat(${cols},30px)` : `repeat(${cols}, minmax(0,1fr))`;
+      grid.style.maxWidth = `${cols * 38 + (cols - 1) * 4 + 26}px`;
       for (let i = 1; i <= Number(n); i += 1) {
         const value = BigInt(i);
         const coprime = R.gcd(value, n) === 1n;
