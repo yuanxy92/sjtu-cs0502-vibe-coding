@@ -17,6 +17,7 @@ Students learn computer science by directing AI coding agents to build, test, in
 - `projects/deadlock-lab/` — offline locks and deadlock simulator with a simple animated print-room example, atomic-operation comparison, two-lock deadlock, teacher guide, and model checks.
 - `projects/routing-lab/` — offline Dijkstra and link-state routing simulator with selectable rounds, five side-by-side host and router tables, router-failure recovery, packet forwarding, an offline download, and model checks.
 - `projects/rsa-lab/` — offline textbook-RSA classroom demo with selectable p and q, five-step key generation, public-key encryption and private-key decryption, plus a timed trial-division cracking ladder that recovers D and decrypts the ciphertext.
+- `projects/signature-lab/` — companion offline MD5 and digital-signature lab: hash text or a file, sign with the sender's private key, encrypt with the receiver's public key, decrypt, recompute the digest, and verify; tampering with one byte makes verification fail.
 - `projects/peer-drop/` — PeerDrop starter materials, interface reference, and local-network setup guide.
 - `projects/ai-project/` — choose-one-of-three AI project brief and student materials.
 

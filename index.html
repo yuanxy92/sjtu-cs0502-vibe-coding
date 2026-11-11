@@ -476,10 +476,10 @@
       <summary class="course-project-card__toggle">
         <span class="course-project-card__number">08</span>
         <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="rsa" data-zh="信息安全 · 密码学" data-en="Information security · Cryptography">Information security · Cryptography</span></span>
+          <span class="course-project-card__meta"><span data-language-heading="rsa" data-zh="信息安全 · 密码学与数字签名" data-en="Information security · Cryptography and digital signatures">Information security · Cryptography and digital signatures</span></span>
           <strong data-language-heading="rsa" data-zh="RSA 实验室" data-en="RSA Lab">RSA Lab</strong>
-          <span class="course-project-card__summary" data-language-content="rsa" data-language="zh" hidden>自选 p、q 造一对钥匙，逐步观察 N、φ(N)、E、D 的计算；用公钥加密、私钥解密，再逐个试除破解小 N，记录耗时并用恢复出的私钥解开密文。</span>
-          <span class="course-project-card__summary" data-language-content="rsa" data-language="en">Choose p and q to build a key pair, follow N, φ(N), E, and D step by step, then encrypt with the public key and decrypt with the private key—before cracking small N values by trial division, timing each attempt, and decrypting with the recovered private key.</span>
+          <span class="course-project-card__summary" data-language-content="rsa" data-language="zh" hidden>自选 p、q 造一对钥匙，逐步观察 N、φ(N)、E、D 的计算；用公钥加密、私钥解密，再逐个试除破解小 N。卡片内还有配套的数字签名实验室，走完 MD5、签名、加密、解密与验签。</span>
+          <span class="course-project-card__summary" data-language-content="rsa" data-language="en">Choose p and q to build a key pair, follow N, φ(N), E, and D step by step, then encrypt, decrypt, and crack small N values by trial division. The card also includes a companion Digital Signature Lab covering MD5, signing, encryption, decryption, and verification.</span>
         </span>
         <span class="course-project-card__action" aria-hidden="true">
           <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="rsa" data-zh="打开实验室" data-en="Open lab">Open lab</span>
@@ -497,7 +497,7 @@
           <p data-language-content="rsa" data-language="zh" hidden>课堂演示：两个课件实例与自选 p、q；逐步展示 φ(N) 计数、E 候选、扩展欧几里得求 D 和快速幂过程。灰掉的质数与 E 候选会凑出 E = D 或 gcd(E, φ(N)) ≠ 1，已被排除。破解页用 8 个从小到大的 N 记录试除次数与耗时，并用恢复出的私钥解开密文；移动端会切成逐条卡片。界面为中文，可离线使用。</p>
           <p data-language-content="rsa" data-language="en">Classroom demo: two slide examples plus a custom p and q. Watch φ(N) counting, E candidates, the extended Euclidean steps for D, and square-and-multiply. Prime pairs and E values that would make E = D or gcd(E, φ(N)) ≠ 1 are disabled. A cracking tab times trial division across eight increasing N values and decrypts the ciphertext with the recovered private key; on phones the table becomes stacked cards. The simulator has a Chinese interface and runs offline.</p>
         </div>
-        <div class="course-video-chapters" aria-label="RSA lab">
+        <div class="course-video-chapters course-video-chapters--stacked" aria-label="RSA and digital signature labs">
           <a class="course-video-chapter" href="./projects/rsa-lab/index.html">
             <span class="course-video-chapter__number">↗</span>
             <span class="course-video-chapter__content">
@@ -505,6 +505,16 @@
               <strong data-language-content="rsa" data-language="en">Open the RSA Lab</strong>
               <small data-language-content="rsa" data-language="zh" hidden>五步造钥匙、自选 p 和 q、公钥加密/私钥解密、计时破解小 N</small>
               <small data-language-content="rsa" data-language="en">Five-step key generation, custom p and q, public-key encryption, private-key decryption, and timed cracking of small N</small>
+            </span>
+            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+          </a>
+          <a class="course-video-chapter" href="./projects/signature-lab/index.html">
+            <span class="course-video-chapter__number">↗</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="rsa" data-language="zh" hidden>打开数字签名实验室（MD5 + RSA）</strong>
+              <strong data-language-content="rsa" data-language="en">Open the Digital Signature Lab (MD5 + RSA)</strong>
+              <small data-language-content="rsa" data-language="zh" hidden>输入文字或文件算 MD5，私钥签名、公钥加密、解密后重算散列验签；篡改一个字节即可看到失败</small>
+              <small data-language-content="rsa" data-language="en">Hash text or a file with MD5, sign with the sender's private key, encrypt with the receiver's public key, then decrypt and verify; tamper one byte to see it fail</small>
             </span>
             <i class="fas fa-external-link-alt" aria-hidden="true"></i>
           </a>

@@ -963,6 +963,10 @@ body {
   margin-top: 20px;
 }
 
+.course-video-chapters--stacked {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .course-video-chapter {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
