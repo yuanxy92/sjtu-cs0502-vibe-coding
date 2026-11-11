@@ -971,7 +971,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     right.append(cards);
 
     const swapRow = el('div', 'swap-row');
-    const swapBtn = el('button', '', state.swap ? '换回公钥加密、私钥解密' : '用私钥加密、公钥解密试试');
+    const swapBtn = el('button', '', state.swap ? '换回公钥加密、私钥解密' : '改用私钥签名、公钥验证');
     swapBtn.type = 'button';
     swapBtn.addEventListener('click', () => {
       state.swap = !state.swap;
@@ -985,7 +985,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       state.error = '';
       render();
     });
-    swapRow.append(swapBtn, el('span', 'swap-note', state.swap ? '签名方向：先 D 后 E' : '保密方向：先 E 后 D'));
+    swapRow.append(swapBtn, el('span', 'swap-note', state.swap ? '签名功能：私钥签、公钥验' : '保密功能：公钥加密、私钥解密'));
     right.append(swapRow);
 
     const demo = swapDemo(model);
@@ -997,7 +997,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       ' → ', String(demo.first), '^', String(secondExp), ' mod ', String(model.n), ' = ', {text: String(demo.second), cls: 'hl'}
     ]));
     right.append(demoLine);
-    right.append(noteBox('课件里两组 E/D 都对', '第 77 页用 E=3、D=7；第 79 页的实例 1 用 E=7、D=3，实例 2 用 E=79、D=1019。它们都满足 E×D≡1 (mod φ)。数值不同不是在交换身份：E 始终是公钥指数，D 始终是私钥指数。', 'blue'));
+    right.append(noteBox('指数互逆，功能不对称', '第 77 页用 E=3、D=7；第 79 页的实例 1 用 E=7、D=3，实例 2 用 E=79、D=1019。它们都满足 E×D≡1 (mod φ)，所以两种顺序都能还原数字；但公钥和私钥不等价：知道 (E,N) 推不出 D；反过来，私钥持有者能恢复 p、q、φ，也就能算出 E。', 'blue'));
     right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E,N) 公开，(D,N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
 
     stage.append(left, right);
@@ -1442,8 +1442,8 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
     const next = el('div', 'next-card');
     next.append(
-      el('strong', '', '两把钥匙，两种用途'),
-      el('p', '', '公钥加密、私钥解密 → 保密；私钥加密、公钥解密 → 签名。RSA 负责造钥匙和做模幂，用哪一把加密决定用途。')
+      el('strong', '', '两把钥匙，两种用途，单向不可逆'),
+      el('p', '', '公钥 (E, N) 公开，用来加密或验签；私钥 (D, N) 保密，用来解密或签名。已知公钥算不出私钥；反过来，私钥持有者能恢复 p、q、φ，也就能算出公钥。')
     );
     wrap.append(next);
     root.append(wrap);
@@ -1464,9 +1464,9 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
         {style: 'info', title: '第 4 步：选 E', text: `E=${model.e}，gcd(${model.e}, ${model.phi})=1，求出的 D=${model.d} 与 E 不同。E 不要求是质数。`},
         {
           style: state.swap ? 'warning' : 'success',
-          title: state.swap ? '签名方向：先 D 后 E' : '第 5 步：求 D',
+          title: state.swap ? '签名功能：私钥签、公钥验' : '第 5 步：求 D',
           text: state.swap
-            ? `先拿私钥 D 加密、再拿公钥 E 解密，也能还原 m。这只是换使用顺序；D 仍然是私钥，不能公开。`
+            ? `私钥 D 签名、公钥 E 验证，消息能还原。签名与加密是两种功能，不是交换两把钥匙；D 始终是私钥。`
             : `D = ${model.e}⁻¹ mod ${model.phi} = ${model.d}，因为 ${model.e}×${model.d}=${model.e * model.d}≡1 (mod ${model.phi})。`
         }
       ];
