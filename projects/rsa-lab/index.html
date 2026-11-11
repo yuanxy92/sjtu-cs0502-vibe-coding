@@ -290,7 +290,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   <footer class="footer">
     <p>课堂演示模型：数字很小，方便手算；真实的 RSA 使用 2048 位以上的大数。</p>
-    <p class="muted">对应 Slide11 第 68–75 页。</p>
+    <p class="muted">对应 Slide11 第 68–80 页。</p>
   </footer>
 </main>
 <script>
@@ -527,12 +527,12 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   const PRESETS = {
     small: {
       label: '实例 1',
-      note: 'Slide 73：p=3，q=11，E=7，D=3，m=4',
+      note: 'Slide 79：p=3，q=11，E=7，D=3，m=4',
       p: 3n, q: 11n, e: 7n, m: 4n
     },
     big: {
       label: '实例 2',
-      note: 'Slide 74–75：p=47，q=71，E=79，D=1019，m=688',
+      note: 'Slide 79：p=47，q=71，E=79，D=1019，m=688',
       p: 47n, q: 71n, e: 79n, m: 688n
     },
     custom: {
@@ -644,8 +644,8 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   function cryptoKeys(model) {
     return state.swap
-      ? {encExp: model.d, decExp: model.e, encLabel: 'D', decLabel: 'E'}
-      : {encExp: model.e, decExp: model.d, encLabel: 'E', decLabel: 'D'};
+      ? {encExp: model.d, decExp: model.e, encLabel: 'D', decLabel: 'E', encName: '私钥', decName: '公钥'}
+      : {encExp: model.e, decExp: model.d, encLabel: 'E', decLabel: 'D', encName: '公钥', decName: '私钥'};
   }
 
   function resetAll() {
@@ -964,16 +964,14 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
     const right = panel('钥匙造好了');
     const cards = el('div', 'key-cards');
-    const pubExp = state.swap ? model.d : model.e;
-    const priExp = state.swap ? model.e : model.d;
     cards.append(
-      keycard('public', pubExp, model.n, state.swap ? '公钥（交换后）' : '公钥'),
-      keycard('private', priExp, model.n, state.swap ? '私钥（交换后）' : '私钥')
+      keycard('public', model.e, model.n, '公钥'),
+      keycard('private', model.d, model.n, '私钥')
     );
     right.append(cards);
 
     const swapRow = el('div', 'swap-row');
-    const swapBtn = el('button', '', state.swap ? '换回原组合' : '交换 E 和 D 试试');
+    const swapBtn = el('button', '', state.swap ? '换回公钥加密、私钥解密' : '用私钥加密、公钥解密试试');
     swapBtn.type = 'button';
     swapBtn.addEventListener('click', () => {
       state.swap = !state.swap;
@@ -987,17 +985,19 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       state.error = '';
       render();
     });
-    swapRow.append(swapBtn, el('span', 'swap-note', '两种写法都能正确解密'));
+    swapRow.append(swapBtn, el('span', 'swap-note', state.swap ? '签名方向：先 D 后 E' : '保密方向：先 E 后 D'));
     right.append(swapRow);
 
     const demo = swapDemo(model);
+    const firstExp = state.swap ? model.d : model.e;
+    const secondExp = state.swap ? model.e : model.d;
     const demoLine = el('div', 'formula-card');
     demoLine.append(formula([
-      `m=${demo.demo}`, ' → ', String(demo.demo), '^', String(pubExp), ' mod ', String(model.n), ' = ', {text: String(demo.first), cls: 'hl'},
-      ' → ', String(demo.first), '^', String(priExp), ' mod ', String(model.n), ' = ', {text: String(demo.second), cls: 'hl'}
+      `m=${demo.demo}`, ' → ', String(demo.demo), '^', String(firstExp), ' mod ', String(model.n), ' = ', {text: String(demo.first), cls: 'hl'},
+      ' → ', String(demo.first), '^', String(secondExp), ' mod ', String(model.n), ' = ', {text: String(demo.second), cls: 'hl'}
     ]));
     right.append(demoLine);
-    right.append(noteBox('课件里两组 E/D 都对', '第 73 页用 E=7、D=3；第 74 页用 E=79、D=1019。只要 E×D≡1 (mod φ)，两组都能解密；E 和 D 的角色可以互换。', 'blue'));
+    right.append(noteBox('课件里两组 E/D 都对', '第 77 页用 E=3、D=7；第 79 页的实例 1 用 E=7、D=3，实例 2 用 E=79、D=1019。它们都满足 E×D≡1 (mod φ)。数值不同不是在交换身份：E 始终是公钥指数，D 始终是私钥指数。', 'blue'));
     right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E,N) 公开，(D,N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
 
     stage.append(left, right);
@@ -1085,7 +1085,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     const keys = cryptoKeys(model);
     if (state.cryptoMode === 'number') {
       if (!state.encrypted || state.cipher == null) {
-        state.error = '还没有密文；先点“加密”。';
+        state.error = state.swap ? '还没有签名；先点“签名”。' : '还没有密文；先点“加密”。';
         render();
         return;
       }
@@ -1096,7 +1096,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       return;
     }
     if (!state.textCipher) {
-      state.error = '还没有密文；先点“加密”。';
+      state.error = state.swap ? '还没有签名；先点“签名”。' : '还没有密文；先点“加密”。';
       render();
       return;
     }
@@ -1123,11 +1123,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   }
 
   function keyStrip(model) {
-    const keys = cryptoKeys(model);
     const strip = el('div', 'key-strip');
     strip.append(el('span', 'strip-label', '当前钥匙'));
-    strip.append(el('span', 'pill public', `公钥 ${keys.encLabel}=${keys.encExp}，N=${model.n}`));
-    strip.append(el('span', 'pill private', `私钥 ${keys.decLabel}=${keys.decExp}`));
+    strip.append(el('span', 'pill public', `公钥 E=${model.e}，N=${model.n}`));
+    strip.append(el('span', 'pill private', `私钥 D=${model.d}`));
     strip.append(el('span', 'pill secret', `p、q、φ=${model.phi} 已销毁`));
     return strip;
   }
@@ -1135,7 +1134,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   function cryptoInput(model) {
     const card = el('section', 'crypto-input');
     const head = el('div', 'input-head');
-    head.append(el('h2', '', '选择明文'));
+    head.append(el('h2', '', state.swap ? '选择消息' : '选择明文'));
     const toggle = el('div', 'mode-toggle');
     [['number', '数字'], ['text', '文字']].forEach(([mode, label]) => {
       const button = el('button', 'toggle-btn' + (state.cryptoMode === mode ? ' selected' : ''), label);
@@ -1161,7 +1160,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     if (state.cryptoMode === 'number') {
       const row = el('div', 'input-row');
       const field = el('label', 'field');
-      field.append(el('span', '', `明文 m（0 ≤ m < ${model.n}）`));
+      field.append(el('span', '', `${state.swap ? '消息' : '明文'} m（0 ≤ m < ${model.n}）`));
       const input = el('input');
       input.id = 'numberInput';
       input.type = 'text';
@@ -1179,7 +1178,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       const row = el('div', 'input-row');
       const field = el('label', 'field');
       const size = textBlockSize(model);
-      field.append(el('span', '', '明文（UTF-8 文字）'));
+      field.append(el('span', '', `${state.swap ? '消息' : '明文'}（UTF-8 文字）`));
       const input = el('input');
       input.id = 'textInput';
       input.type = 'text';
@@ -1198,15 +1197,15 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     }
 
     const actions = el('div', 'action-row');
-    const encryptBtn = el('button', 'primary', '加密');
+    const encryptBtn = el('button', 'primary', state.swap ? '签名' : '加密');
     encryptBtn.type = 'button';
     encryptBtn.disabled = state.cryptoMode === 'text' && textBlockSize(model) === 0;
     encryptBtn.addEventListener('click', () => doEncrypt(model));
-    const decryptBtn = el('button', '', '解密');
+    const decryptBtn = el('button', '', state.swap ? '验证' : '解密');
     decryptBtn.type = 'button';
     decryptBtn.disabled = state.cryptoMode === 'number' ? state.cipher == null : !state.textCipher;
     decryptBtn.addEventListener('click', () => doDecrypt(model));
-    const againBtn = el('button', '', '再加密一次');
+    const againBtn = el('button', '', state.swap ? '再签一次' : '再加密一次');
     againBtn.type = 'button';
     againBtn.disabled = !state.encrypted;
     againBtn.addEventListener('click', () => doReEncrypt(model));
@@ -1230,18 +1229,18 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     const wrap = el('div', 'flow');
     if (state.cryptoMode === 'number') {
       const m = state.m != null ? state.m : state.numberDraft;
-      wrap.append(flowCard('plain', '明文 m', m, '发送方输入'));
+      wrap.append(flowCard('plain', state.swap ? '消息 m' : '明文 m', m, '发送方输入'));
       wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('cipher', '密文 c', state.encrypted ? state.cipher : '?', state.encrypted ? `c = m^${keys.encLabel} mod N` : 'Eve 只能看到这个'));
+      wrap.append(flowCard('cipher', state.swap ? '签名 s' : '密文 c', state.encrypted ? state.cipher : '?', state.encrypted ? `${state.swap ? 's' : 'c'} = m^${keys.encLabel} mod N` : (state.swap ? '任何人都能看到' : 'Eve 只能看到这个')));
       wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('back', '解回的 m', state.decrypted ? state.m : '?', state.decrypted ? `m = c^${keys.decLabel} mod N` : '只有私钥能解'));
+      wrap.append(flowCard('back', state.swap ? '验证出的 m' : '解回的 m', state.decrypted ? state.m : '?', state.decrypted ? `m = ${state.swap ? 's' : 'c'}^${keys.decLabel} mod N` : (state.swap ? '任何人都能用公钥验证' : '只有私钥能解')));
     } else {
-      wrap.append(flowCard('plain', '明文', short(state.textPlain || state.textDraft || '（空）', 18), 'UTF-8 分块'));
+      wrap.append(flowCard('plain', state.swap ? '消息' : '明文', short(state.textPlain || state.textDraft || '（空）', 18), 'UTF-8 分块'));
       wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('cipher', '密文块', state.textCipher ? `${state.textCipher.length} 块` : '?',
-        state.textCipher ? short(state.textCipher.map(b => b.value).join(' '), 26) : 'Eve 只能看到数字'));
+      wrap.append(flowCard('cipher', state.swap ? '签名块' : '密文块', state.textCipher ? `${state.textCipher.length} 块` : '?',
+        state.textCipher ? short(state.textCipher.map(b => b.value).join(' '), 26) : (state.swap ? '任何人都能看到' : 'Eve 只能看到数字')));
       wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('back', '解回的文字', state.decrypted ? short(state.textPlain, 18) : '?', state.decrypted ? '逐块解密再拼接' : '只有私钥能解'));
+      wrap.append(flowCard('back', state.swap ? '验证出的文字' : '解回的文字', state.decrypted ? short(state.textPlain, 18) : '?', state.decrypted ? (state.swap ? '逐块验证再拼接' : '逐块解密再拼接') : (state.swap ? '任何人都能用公钥验证' : '只有私钥能解')));
     }
     return wrap;
   }
@@ -1276,7 +1275,8 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     const wrap = el('div', 'table-wrap');
     const table = el('table', 'trace');
     const head = el('tr');
-    ['#', '块 m', `c = m^${keys.encLabel} mod N`, `m = c^${keys.decLabel} mod N`, '字符'].forEach(text => head.append(el('th', '', text)));
+    const cipherSym = state.swap ? 's' : 'c';
+    ['#', '块 m', `${cipherSym} = m^${keys.encLabel} mod N`, `m = ${cipherSym}^${keys.decLabel} mod N`, '字符'].forEach(text => head.append(el('th', '', text)));
     table.append(head);
     const encoded = R.encodeText(state.textPlain || '', model.n);
     state.textCipher.slice(0, 8).forEach((block, index) => {
@@ -1295,8 +1295,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   function determinismNote() {
     const node = el('div', 'det-note');
     node.append(
-      el('strong', '', '再加密一次，密文一模一样'),
-      el('p', '', '教材 RSA 是确定性的：同一明文、同一把公钥，永远得到同一个密文。真实系统会加入随机填充（OAEP），同一个消息两次加密看起来才不同。')
+      el('strong', '', state.swap ? '再签一次，签名一模一样' : '再加密一次，密文一模一样'),
+      el('p', '', state.swap
+        ? '教材 RSA 是确定性的：同一消息、同一个私钥，永远得到同一个签名。真实签名会先对消息做哈希，并使用更完整的签名方案。'
+        : '教材 RSA 是确定性的：同一明文、同一把公钥，永远得到同一个密文。真实系统会加入随机填充（OAEP），同一个消息两次加密看起来才不同。')
     );
     return node;
   }
@@ -1399,7 +1401,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     if (state.cryptoMode === 'number') {
       if (state.encrypted) {
         const keys = cryptoKeys(model);
-        const encTrace = quickPowTrace(model, keys.encExp, '加密的快速幂', true);
+        const encTrace = quickPowTrace(model, keys.encExp, state.swap ? '签名的快速幂' : '加密的快速幂', true);
         if (encTrace) wrap.append(encTrace);
       }
       if (state.decrypted) {
@@ -1409,7 +1411,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
         const details = el('details', 'trace-box');
         details.open = false;
         const summary = el('summary');
-        summary.append(el('span', '', `解密的快速幂：${decBase}^${keys.decExp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
+        summary.append(el('span', '', `${state.swap ? '验证' : '解密'}的快速幂：${decBase}^${keys.decExp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
         details.append(summary);
         const inner = el('div', 'trace-inner');
         const rows = trace.steps.slice(0, 24).map(step => {
@@ -1427,7 +1429,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     } else if (state.encrypted) {
       const details = el('details', 'trace-box');
       details.open = true;
-      details.append(el('summary', '', '逐块加密与解密'));
+      details.append(el('summary', '', state.swap ? '逐块签名与验证' : '逐块加密与解密'));
       const inner = el('div', 'trace-inner');
       inner.append(blockDetail(model));
       details.append(inner);
@@ -1462,9 +1464,9 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
         {style: 'info', title: '第 4 步：选 E', text: `E=${model.e}，gcd(${model.e}, ${model.phi})=1，求出的 D=${model.d} 与 E 不同。E 不要求是质数。`},
         {
           style: state.swap ? 'warning' : 'success',
-          title: state.swap ? 'E 和 D 可以互换' : '第 5 步：求 D',
+          title: state.swap ? '签名方向：先 D 后 E' : '第 5 步：求 D',
           text: state.swap
-            ? `交换后 (${model.d},${model.n}) 当公钥、(${model.e},${model.n}) 当私钥，仍然能正确解密。`
+            ? `先拿私钥 D 加密、再拿公钥 E 解密，也能还原 m。这只是换使用顺序；D 仍然是私钥，不能公开。`
             : `D = ${model.e}⁻¹ mod ${model.phi} = ${model.d}，因为 ${model.e}×${model.d}=${model.e * model.d}≡1 (mod ${model.phi})。`
         }
       ];
@@ -1486,30 +1488,40 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     if (state.cryptoStage === 'eve') {
       const result = R.factorTrial(model.n, 1000000);
       setOutcome('danger', 'Eve 分解了 N', result.p != null
-        ? `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，所有密文都能解。`
+        ? (state.swap
+          ? `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，Eve 可以伪造签名。`
+          : `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，所有密文都能解。`)
         : `Eve 试了 ${result.steps} 次，暂时没有分解成功。`);
       return;
     }
     if (state.cryptoStage === 'decrypted') {
       if (state.cryptoMode === 'number') {
-        setOutcome('success', '明文回来了', `m = ${state.cipher}^${keys.decLabel} mod ${model.n} = ${state.m}。私钥把消息还原了。`);
+        setOutcome('success', state.swap ? '验证通过' : '明文回来了', state.swap
+          ? `m = ${state.swap ? 's' : 'c'}^${keys.decLabel} mod ${model.n} = ${state.m}。公钥验证成功。`
+          : `m = ${state.cipher}^${keys.decLabel} mod ${model.n} = ${state.m}。${keys.decName}把消息还原了。`);
       } else {
-        setOutcome('success', '文字回来了', `${state.textCipher.length} 块密文逐块解密，再按 UTF-8 拼回“${state.textPlain}”。`);
+        setOutcome('success', state.swap ? '验证通过' : '文字回来了', state.swap
+          ? `${state.textCipher.length} 块签名逐块验证，再按 UTF-8 拼回“${state.textPlain}”。`
+          : `${state.textCipher.length} 块密文逐块解密，再按 UTF-8 拼回“${state.textPlain}”。`);
       }
       return;
     }
     if (state.cryptoStage === 'encrypted') {
       if (state.cryptoMode === 'number') {
-        setOutcome('info', '密文算出来了', `c = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。Eve 在网络里只能看到 ${state.cipher}。`);
+        setOutcome('info', state.swap ? '签名算出来了' : '密文算出来了', state.swap
+          ? `s = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。任何人都能用公钥 E 验证。`
+          : `c = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。Eve 在网络里只能看到 ${state.cipher}。`);
       } else {
-        setOutcome('info', '密文算出来了', `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独加密。`);
+        setOutcome('info', state.swap ? '签名块算出来了' : '密文算出来了', state.swap
+          ? `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独签名。`
+          : `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独加密。`);
       }
       return;
     }
     if (state.cryptoMode === 'number') {
-      setOutcome('info', '先加密一个数字', `明文 m=${state.numberDraft}，公钥指数 ${keys.encLabel}=${keys.encExp}，N=${model.n}。按下“加密”。`);
+      setOutcome('info', state.swap ? '先签一个数字' : '先加密一个数字', `明文 m=${state.numberDraft}，${keys.encName}指数 ${keys.encLabel}=${keys.encExp}，N=${model.n}。按下“${state.swap ? '签名' : '加密'}”。`);
     } else {
-      setOutcome('info', '先加密一段文字', 'RSA 按字节分块；每个块必须小于 N。');
+      setOutcome('info', state.swap ? '先签一段文字' : '先加密一段文字', 'RSA 按字节分块；每个块必须小于 N。');
     }
   }
 
