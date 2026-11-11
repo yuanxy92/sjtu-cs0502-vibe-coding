@@ -1108,7 +1108,8 @@ details.leak-box{margin-top:18px}
     inner.append(first);
     inner.append(el('p', 'math-note', 'φ 一泄露，不用分解 N：解一个二次方程就拿到 p、q，再用公开的 E 求出 D。'));
 
-    inner.append(el('p', 'leak-title', '② 泄露 D：公钥 E 加上 D，反推出 φ'));
+    inner.append(el('p', 'leak-title', '② 泄露 D：能直接解密，还能反推出 φ'));
+    inner.append(el('p', 'math-intro', '有了 D，直接算 m = c^D mod N 就能解密，不必分解 N。下面分解 N 是为了看清泄露范围：D 里还藏着 p、q、φ。'));
     const second = el('div', 'math-steps');
     second.append(
       line(`K = E×D − 1 = ${model.e}×${model.d} − 1 = ${fmt(K)}`),
