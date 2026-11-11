@@ -505,6 +505,36 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     return { p: null, q: null, steps, exhausted: d * d <= n };
   }
 
+  function trialJob(n, limit) {
+    n = BigInt(n);
+    const max = BigInt(limit || 5000000);
+    let d = 3n;
+    let steps = 0;
+    let done = false;
+    let p = null;
+    let q = null;
+    let exhausted = false;
+    if (n < 4n) done = true;
+    else if (n % TWO === ZERO) { p = TWO; q = n / TWO; steps = 1; done = true; }
+    return {
+      get done() { return done; },
+      get steps() { return steps; },
+      get d() { return d; },
+      result() { return { p, q, steps, exhausted }; },
+      chunk(budgetMs) {
+        const until = performance.now() + budgetMs;
+        while (!done && d * d <= n && d <= max) {
+          steps += 1;
+          if (n % d === ZERO) { p = d; q = n / d; done = true; break; }
+          d += TWO;
+          if (steps % 65536 === 0 && performance.now() >= until) break;
+        }
+        if (!done && (d * d > n || d > max)) { done = true; exhausted = d * d <= n; }
+        return done;
+      }
+    };
+  }
+
   function maxBlockBytes(n) {
     return Math.max(0, Math.floor((bitLength(n) - 1) / 8));
   }
@@ -553,7 +583,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     smallPrimes, gcd, egcd, egcdTrace, mod, modInverse, modPow, bitLength, isPrime,
     chooseE, eCandidates, isSelfInverseExponent, hasDistinctExponents,
     generateKeyPair, encrypt, decrypt, squareMultiplyTrace,
-    factorTrial, maxBlockBytes, encodeText, decodeBlocks, encryptText, decryptText
+    factorTrial, trialJob, maxBlockBytes, encodeText, decodeBlocks, encryptText, decryptText
   };
 });
 
@@ -610,6 +640,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     error: '',
     breakResults: {},
     breakPending: null,
+    breakJob: null,
     breakLast: null,
     breakError: ''
   };
@@ -1166,15 +1197,16 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 
   const BREAK_E = 7n;
   const BREAK_PLAIN = 5n;
+  const BREAK_LIMIT = 100000000000;
   const BREAK_CASES = [
     [3n, 11n],
     [11n, 13n],
     [31n, 37n],
     [101n, 103n],
     [10007n, 10009n],
-    [1000033n, 1000037n],
-    [10000079n, 10000121n],
-    [100000007n, 100000037n]
+    [1000000007n, 1000000021n],
+    [3500000011n, 3500000081n],
+    [17290903961n, 17290903979n]
   ].map(([p, q]) => {
     const n = p * q;
     return {p, q, n, e: BREAK_E, cipher: R.encrypt(BREAK_PLAIN, BREAK_E, n)};
@@ -1190,44 +1222,73 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     if (ms < 1) return ms.toFixed(2) + ' ms';
     if (ms < 100) return ms.toFixed(1) + ' ms';
     if (ms < 1000) return Math.round(ms) + ' ms';
-    return (ms / 1000).toFixed(2) + ' s';
+    if (ms < 60000) return (ms / 1000).toFixed(ms < 10000 ? 2 : 1) + ' s';
+    const m = Math.floor(ms / 60000);
+    const s = Math.round((ms % 60000) / 1000);
+    return `${m} 分 ${s} 秒`;
   }
 
   function startBreak(index) {
     if (state.breakPending != null) return;
     state.breakPending = index;
     state.breakError = '';
+    state.breakJob = {
+      job: R.trialJob(BREAK_CASES[index].n, BREAK_LIMIT),
+      started: null,
+      lastPaint: 0
+    };
     render();
-    setTimeout(() => {
+    setTimeout(tickBreak, 30);
+  }
+
+  function tickBreak() {
+    const run = state.breakJob;
+    if (run == null) return;
+    if (run.started == null) run.started = performance.now();
+    const finished = run.job.chunk(30);
+    const now = performance.now();
+    if (finished) {
+      const index = state.breakPending;
       const item = BREAK_CASES[index];
-      try {
-        const started = performance.now();
-        const factored = R.factorTrial(item.n, 200000000);
-        const elapsed = performance.now() - started;
-        if (factored.p == null || factored.q == null) {
-          state.breakError = `试除了 ${groupDigits(factored.steps)} 次，仍然没有找到因数。`;
-        } else {
-          const phi = (factored.p - 1n) * (factored.q - 1n);
-          const d = R.modInverse(BREAK_E, phi);
-          const plain = R.decrypt(item.cipher, d, item.n);
-          state.breakResults[index] = {
-            p: factored.p,
-            q: factored.q,
-            phi,
-            d,
-            steps: factored.steps,
-            ms: elapsed,
-            cipher: item.cipher,
-            plain
-          };
-          state.breakLast = index;
-        }
-      } catch (error) {
-        state.breakError = error.message;
+      const factored = run.job.result();
+      const elapsed = now - run.started;
+      if (factored.p == null || factored.q == null) {
+        state.breakError = `试除了 ${groupDigits(factored.steps)} 次，仍然没有找到因数。`;
+      } else {
+        const phi = (factored.p - 1n) * (factored.q - 1n);
+        const d = R.modInverse(BREAK_E, phi);
+        const plain = R.decrypt(item.cipher, d, item.n);
+        state.breakResults[index] = {
+          p: factored.p,
+          q: factored.q,
+          phi,
+          d,
+          steps: factored.steps,
+          ms: elapsed,
+          cipher: item.cipher,
+          plain
+        };
+        state.breakLast = index;
       }
+      state.breakJob = null;
       state.breakPending = null;
       render();
-    }, 50);
+      return;
+    }
+    if (now - run.lastPaint >= 250) {
+      run.lastPaint = now;
+      render();
+    }
+    setTimeout(tickBreak, 10);
+  }
+
+  function stopBreak() {
+    const run = state.breakJob;
+    if (run == null) return;
+    state.breakError = `已停止：试除到 ${groupDigits(run.job.d)}，共 ${groupDigits(run.job.steps)} 次，这次没有记录。`;
+    state.breakJob = null;
+    state.breakPending = null;
+    render();
   }
 
   function resetBreak() {
@@ -1240,6 +1301,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 
   function breakRow(item, index) {
     const result = state.breakResults[index];
+    const run = state.breakPending === index ? state.breakJob : null;
     const tr = el('tr', result ? 'done' : '');
     const nCell = el('td', 'break-n');
     nCell.dataset.label = 'N';
@@ -1262,20 +1324,25 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
 
     const stepsCell = el('td', '');
     stepsCell.dataset.label = '试除次数';
-    stepsCell.textContent = result ? groupDigits(result.steps) : '—';
+    stepsCell.textContent = result ? groupDigits(result.steps) : (run ? groupDigits(run.job.steps) : '—');
     tr.append(stepsCell);
 
     const timeCell = el('td', 'break-time');
     timeCell.dataset.label = '耗时';
-    timeCell.textContent = result ? formatMs(result.ms) : '—';
+    timeCell.textContent = result ? formatMs(result.ms) : (run && run.started != null ? formatMs(performance.now() - run.started) : '—');
     tr.append(timeCell);
 
     const action = el('td', 'break-action');
     action.dataset.label = '操作';
     if (result) {
       action.append(el('span', 'done-tag', '已破解'));
+    } else if (run) {
+      const stop = el('button', 'break-btn', '停止');
+      stop.type = 'button';
+      stop.addEventListener('click', stopBreak);
+      action.append(stop);
     } else {
-      const button = el('button', 'break-btn' + (state.breakPending == null ? ' primary' : ''), state.breakPending === index ? '计算中…' : '破解');
+      const button = el('button', 'break-btn' + (state.breakPending == null ? ' primary' : ''), '破解');
       button.type = 'button';
       button.disabled = state.breakPending != null;
       button.addEventListener('click', () => startBreak(index));
@@ -1321,7 +1388,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
     rule.append(formula([{text: 'N', cls: 'hl'}, ' = p × q', '，试到 ', {text: '√N', cls: 'hl'}, ' 就一定能找到较小的因数']));
     rule.append(el('p', 'formula-sub', 'N 每多两位，√N 大约大 10 倍，试除次数也大约多 10 倍。'));
     intro.append(rule);
-    intro.append(noteBox('这次实验', '每行都用 E=7、明文 m=5。点“破解”后记录试除次数和耗时；N 越往后越大，等得越久。', 'blue'));
+    intro.append(noteBox('这次实验', '每行都用 E=7、明文 m=5。前几行瞬间完成；最后三行要等几秒、几十秒到几分钟。计算分块进行，试除次数和耗时实时刷新，等不及可以点“停止”。', 'blue'));
     wrap.append(intro);
 
     const record = panel('试除记录');
@@ -1350,6 +1417,7 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
       bars.append(el('p', 'muted', '破解第一行后，这里会出现耗时柱状图。'));
     } else {
       const maxMs = Math.max(...indices.map(i => state.breakResults[i].ms));
+      const logMax = Math.log10(maxMs + 1);
       const list = el('div', 'time-bars');
       indices.forEach(i => {
         const result = state.breakResults[i];
@@ -1357,13 +1425,13 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
         row.append(el('span', 'time-label', `N=${groupDigits(BREAK_CASES[i].n)}`));
         const track = el('span', 'time-track');
         const fill = el('span', 'time-fill');
-        fill.style.width = (maxMs > 0 ? Math.max(1.5, (result.ms / maxMs) * 100) : 100) + '%';
+        fill.style.width = (logMax > 0 ? Math.max(1.5, (Math.log10(result.ms + 1) / logMax) * 100) : 100) + '%';
         track.append(fill);
         row.append(track, el('span', 'time-value', formatMs(result.ms)));
         list.append(row);
       });
       bars.append(list);
-      bars.append(el('p', 'break-footnote', '柱长按本次记录中的最大耗时归一化。数字只大了一点，柱子就会差出几个数量级；耗时受设备和浏览器影响会有波动，重点看数量级和试除次数。'));
+      bars.append(el('p', 'break-footnote', '柱长用对数刻度：柱子差一截，耗时大约差 10 倍。耗时受设备和浏览器影响会有波动，重点看数量级和试除次数。'));
     }
     wrap.append(bars);
 
@@ -1388,7 +1456,9 @@ details.trace-box .trace-inner{padding:12px 16px 16px}
       }
       if (state.breakPending != null) {
         const item = BREAK_CASES[state.breakPending];
-        setOutcome('warning', '正在试除', `对 N=${item.n} 逐个奇数试除，并记录耗时。N 越大，这一步越久。`);
+        const run = state.breakJob;
+        const live = run && run.started != null ? `已试除 ${groupDigits(run.job.steps)} 次，耗时 ${formatMs(performance.now() - run.started)}。` : '';
+        setOutcome('warning', '正在试除', `对 N=${item.n} 逐个奇数试除。${live}大 N 要等几秒到几分钟，可随时点“停止”。`);
         return;
       }
       if (state.breakLast != null && state.breakResults[state.breakLast]) {
