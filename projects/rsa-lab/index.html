@@ -95,6 +95,8 @@ h3{font-size:22px}
 .dot.numbered.strike{background:#fee2e2;color:#991b1b}
 .dot.coprime{background:#5eead4}
 .dot.strike{background:#fecaca}
+.area-grid{width:100%;gap:4px;margin-inline:auto}
+.area-grid .dot{width:100%;height:auto;aspect-ratio:1;border-radius:4px}
 .area-caption{font-size:19px;color:var(--muted);margin-top:8px}
 .formula-card{display:grid;gap:5px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:14px 18px}
 .formula{font-family:var(--mono);font-size:29px;font-weight:700;color:#17427a;white-space:normal;overflow-wrap:anywhere}
@@ -767,8 +769,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     left.append(card);
 
     if (model.n <= 420n && model.q <= 40n) {
-      const grid = el('div', 'dot-grid');
-      grid.style.gridTemplateColumns = `repeat(${Number(model.q)},16px)`;
+      const cols = Number(model.q);
+      const grid = el('div', 'dot-grid area-grid');
+      grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0,1fr))`;
+      grid.style.maxWidth = `${cols * 38 + (cols - 1) * 4 + 26}px`;
       for (let i = 0; i < Number(model.n); i += 1) grid.append(el('span', 'dot'));
       left.append(grid, el('p', 'area-caption', `把 ${model.p} 行、每行 ${model.q} 个点排开，一共 ${model.n} 个。`));
     } else {
