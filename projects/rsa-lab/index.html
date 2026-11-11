@@ -16,7 +16,6 @@
   -webkit-font-smoothing:antialiased;
   --blue:#2563eb;
   --blue-dark:#1d4ed8;
-  --teal:#0f766e;
   --red:#b91c1c;
   --amber:#b45309;
   --green:#15803d;
@@ -54,7 +53,7 @@ h3{font-size:22px}
 .preset-buttons .preset-btn[aria-pressed="true"]:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
 .preset-note{font-size:19px;color:var(--muted)}
 .tabs{display:flex;gap:5px;border-bottom:1px solid var(--line);margin-top:18px}
-.tabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px}
+.tabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px;transition:none}
 .tabs button[aria-selected="true"]{background:var(--blue);color:#fff}
 .toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px 0 13px}
 .playback{display:flex;gap:9px}
@@ -136,9 +135,6 @@ table.trace tr.final td{background:#effaf4;color:#116149;font-weight:700}
 .key-card svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .key-card.public{color:#116149}
 .key-card.private{color:var(--amber)}
-.swap-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
-.swap-note{font-size:19px;color:var(--muted)}
-.strike-text{text-decoration:line-through;color:var(--red)}
 
 /* Crypto */
 .crypto-wrap{display:grid;gap:16px;margin-top:16px}
@@ -147,16 +143,10 @@ table.trace tr.final td{background:#effaf4;color:#116149;font-weight:700}
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:4px 12px;font-family:var(--mono);font-size:20px;font-weight:700;border:1px solid}
 .pill.public{color:#116149;border-color:#b8dcc8;background:#f4fbf7}
 .pill.private{color:var(--amber);border-color:#e6c27e;background:#fff9eb}
-.pill.secret{color:var(--red);border-color:#f1a5ab;background:#fff1f2}
-.pill.plain{color:var(--muted);border-color:var(--line);background:#f6f8fc;font-family:system-ui,sans-serif;font-weight:650}
+.crypto-caption{font-size:20px;color:var(--muted);margin-top:-4px}
 .crypto-input{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px 16px;display:grid;gap:10px}
 .input-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .input-head h2{font-size:24px}
-.mode-toggle{display:flex;gap:5px;margin-left:auto;padding:4px;border:1px solid var(--line);border-radius:8px;background:#edf1f7}
-.toggle-btn{border:0;background:transparent;min-height:38px;padding:5px 13px;font-size:19px;border-radius:5px}
-.toggle-btn.selected{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(16,35,68,.16)}
-.mode-toggle .toggle-btn.selected{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(16,35,68,.16)}
-.mode-toggle .toggle-btn.selected:hover{background:#fff;border-color:var(--line)}
 .input-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
 .field{display:grid;gap:3px;flex:1;min-width:220px}
 .field span{font-size:19px;color:var(--muted)}
@@ -184,31 +174,38 @@ details.trace-box summary::-webkit-details-marker{display:none}
 details.trace-box summary:after{content:"+";font-size:24px;color:var(--muted)}
 details.trace-box[open] summary:after{content:"−"}
 details.trace-box .trace-inner{padding:10px 14px 14px}
-.det-note{border:1px solid #e6be66;border-radius:8px;background:#fff9eb;padding:10px 14px;font-size:19px;color:#854d0e}
-.det-note strong{color:#7c2d12}
-.eve-panel{border:2px dashed #f0b5ba;border-radius:10px;background:#fff8f8;padding:14px 17px;display:grid;gap:10px}
-.eve-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.eve-head h2{font-size:24px;color:var(--red)}
-.eve-head .eve-desc{font-size:19px;color:var(--muted);flex:1;min-width:220px}
-.eve-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.eve-stat{border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px 12px;display:grid;gap:1px}
-.eve-stat span{font-size:18px;color:var(--muted)}
-.eve-stat strong{font-family:var(--mono);font-size:26px}
-.scale{display:grid;gap:5px}
-.scale-row{display:grid;grid-template-columns:110px minmax(0,1fr) 100px;align-items:center;gap:9px;font-size:18px;color:var(--muted)}
-.scale-track{height:16px;border-radius:9px;background:#f1e4e4;overflow:hidden}
-.scale-fill{display:block;height:100%;border-radius:9px;background:#dc6b6b}
-.scale-fill.now{background:var(--red)}
-.eve-verdict{font-size:20px;font-weight:750;color:#991b1b}
-.eve-verdict.ok{color:#116149}
-.caveat{border:1px solid var(--line);border-radius:10px;background:#fff;padding:13px 17px;display:grid;gap:6px}
-.caveat h2{font-size:23px}
-.caveat ul{margin:0;padding-left:22px;display:grid;gap:3px;font-size:20px;color:var(--muted)}
-.caveat li strong{color:#102344}
-.next-card{border:1px solid #b8dcc8;border-radius:10px;background:#f4fbf7;padding:13px 17px;display:grid;gap:3px}
-.next-card strong{font-size:22px;color:#116149}
-.next-card p{font-size:20px;color:#365b4a}
-.next-card a{color:var(--teal);font-weight:750;font-size:20px}
+
+/* Break RSA */
+.break-wrap{display:grid;gap:16px;margin-top:16px}
+.break-lead{font-size:21px;color:#102344;margin-bottom:4px}
+.break-table{min-width:1000px}
+.break-table th{white-space:nowrap}
+.break-table td{font-size:19px}
+.break-table .break-n{font-family:var(--mono);font-weight:750;color:#17427a}
+.break-table .break-digits{display:block;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:18px;font-weight:500;color:var(--muted)}
+.break-table .break-keys span{display:block}
+.break-table .break-time{font-family:var(--mono);font-weight:700;color:var(--red)}
+.break-table .break-action{text-align:right}
+.break-table tr.done td{background:#f4fbf7}
+.break-table tr.done .break-time{color:#116149}
+.break-btn{min-height:40px;padding:4px 15px;font-size:19px;font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.done-tag{display:inline-flex;align-items:center;border:1px solid #b8dcc8;border-radius:20px;background:#f4fbf7;color:#116149;padding:3px 12px;font-size:18px;font-weight:700;white-space:nowrap}
+.break-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.break-actions .break-footnote{flex:1;min-width:260px}
+.break-actions button{font-size:19px}
+.break-footnote{font-size:18px;color:var(--muted)}
+.time-bars{display:grid;gap:8px}
+.time-row{display:grid;grid-template-columns:280px minmax(0,1fr) 100px;align-items:center;gap:12px;font-size:19px}
+.time-label{font-family:var(--mono);font-weight:700;color:#17427a;white-space:nowrap}
+.time-track{height:20px;border-radius:10px;background:#e9eef7;overflow:hidden}
+.time-fill{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#60a5fa,#2563eb);min-width:2px}
+.time-value{text-align:right;font-family:var(--mono);font-size:19px;color:#17427a}
+.break-result{border-color:#b8dcc8;background:#f7fcf9}
+.break-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0}
+.break-stat{border:1px solid #cfe7dc;border-radius:8px;background:#fff;padding:8px 11px;display:grid;gap:1px;min-width:0}
+.break-stat span{font-size:18px;color:#2f6b52}
+.break-stat strong{font-family:var(--mono);font-size:22px;color:#116149;overflow-wrap:anywhere}
+.break-verdict{font-size:20px;font-weight:750;color:#116149;margin-top:8px}
 
 .footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:19px;color:var(--muted)}
 .footer a{color:var(--blue)}
@@ -221,7 +218,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   .keygen-stage{grid-template-columns:1fr}
   .flow{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr) 30px minmax(0,1fr)}
   .flow-value{font-size:30px}
-  .eve-grid{grid-template-columns:1fr 1fr}
+  .break-stats{grid-template-columns:1fr 1fr}
 }
 @media(max-width:760px){
   .app{padding:18px 12px 26px}
@@ -241,8 +238,25 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   .flow{grid-template-columns:1fr;gap:6px}
   .flow-arrow{transform:rotate(90deg);font-size:24px}
   .flow-card{min-height:110px}
-  .eve-grid{grid-template-columns:1fr}
-  .scale-row{grid-template-columns:90px minmax(0,1fr) 70px}
+  .break-stats{grid-template-columns:1fr}
+  .break-table{display:block;min-width:0;width:100%}
+  .break-table tr:first-child{display:none}
+  .break-table tr{display:grid;grid-template-columns:1fr;gap:2px;padding:12px 0;border-bottom:1px solid #e6ebf3}
+  table.trace.break-table td{display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px;border:0;padding:2px 0;white-space:normal;font-size:18px;overflow-wrap:anywhere}
+  table.trace.break-table td *{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-all}
+  .break-table td::before{content:attr(data-label);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:18px;font-weight:650;color:var(--muted)}
+  .break-table tr.done{background:#f4fbf7}
+  .break-table tr.done td{background:transparent}
+  .break-table td.break-action{display:block;margin-top:4px;text-align:left}
+  .break-table td.break-action::before{display:none}
+  .break-table .break-digits{display:inline;margin-left:6px}
+  table.trace.break-table td.break-n{display:block}
+  table.trace.break-table td.break-n::before{display:block}
+  table.trace.break-table td.break-n span{word-break:normal;overflow-wrap:normal}
+  .time-row{grid-template-columns:1fr auto;gap:3px 10px}
+  .time-track{grid-column:1 / -1;grid-row:2}
+  .break-actions{flex-direction:column;align-items:flex-start}
+  .break-actions .break-footnote{min-width:0}
   .footer{flex-direction:column;gap:4px}
 }
 @media(prefers-reduced-motion:reduce){
@@ -256,10 +270,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   <header class="app-header">
     <p class="eyebrow">计算机科学导论 · 信息安全</p>
     <h1>RSA 实验室</h1>
-    <p class="subtitle">两个质数造出一对钥匙：N 公开，φ(N) 保密；p、q 可以自己选。</p>
+    <p class="subtitle">两个质数造出一对钥匙：公钥加密，私钥解密；最后看看小 N 怎样被逐个试除破解。</p>
   </header>
 
-  <nav class="presets" aria-label="课件实例">
+  <nav id="presets" class="presets" aria-label="课件实例">
     <span class="preset-label">课件实例</span>
     <div id="presetBar" class="preset-buttons"></div>
     <span id="presetNote" class="preset-note"></span>
@@ -267,7 +281,8 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   <nav class="tabs" role="tablist" aria-label="实验阶段">
     <button id="tab-keygen" role="tab" aria-selected="true" aria-controls="stage" data-tab="keygen">① 造钥匙</button>
-    <button id="tab-crypto" role="tab" aria-selected="false" aria-controls="stage" data-tab="crypto">② 加密、解密与 Eve</button>
+    <button id="tab-crypto" role="tab" aria-selected="false" aria-controls="stage" data-tab="crypto">② 加密与解密</button>
+    <button id="tab-break" role="tab" aria-selected="false" aria-controls="stage" data-tab="break">③ 破解 RSA</button>
   </nav>
 
   <section id="stage" role="tabpanel" aria-labelledby="tab-keygen">
@@ -290,7 +305,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   <footer class="footer">
     <p>课堂演示模型：数字很小，方便手算；真实的 RSA 使用 2048 位以上的大数。</p>
-    <p class="muted">对应 Slide11 第 68–80 页。</p>
+    <p class="muted">对应 Slide11 第 68–80 页。破解页用很小的 N 演示试除为什么不可行。</p>
   </footer>
 </main>
 <script>
@@ -559,21 +574,18 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     preset: 'small',
     step: 0,
     eOverride: null,
-    swap: false,
     custom: {p: 17n, q: 19n},
-    cryptoMode: 'number',
     numberDraft: '4',
-    textDraft: 'HI',
     cipher: null,
     m: null,
     encrypted: false,
     decrypted: false,
-    reEncrypted: false,
-    textCipher: null,
-    textPlain: null,
-    eveRan: false,
     cryptoStage: 'idle',
-    error: ''
+    error: '',
+    breakResults: {},
+    breakPending: null,
+    breakLast: null,
+    breakError: ''
   };
 
   const ICONS = {
@@ -595,18 +607,6 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     const s = String(value).trim();
     if (!/^\d+$/.test(s)) return null;
     return BigInt(s);
-  }
-
-  function isqrt(n) {
-    if (n < 2n) return n;
-    let x = n, y = (x + 1n) / 2n;
-    while (y < x) { x = y; y = (x + n / x) / 2n; }
-    return x;
-  }
-
-  function short(text, max) {
-    const value = String(text);
-    return value.length > max ? value.slice(0, max) + '…' : value;
   }
 
   function defaultE(phi) {
@@ -642,28 +642,15 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     return {ok: true, p, q, n, phi, e, d};
   }
 
-  function cryptoKeys(model) {
-    return state.swap
-      ? {encExp: model.d, decExp: model.e, encLabel: 'D', decLabel: 'E', encName: '私钥', decName: '公钥'}
-      : {encExp: model.e, decExp: model.d, encLabel: 'E', decLabel: 'D', encName: '公钥', decName: '私钥'};
-  }
-
   function resetAll() {
     const src = PRESETS[state.preset];
     state.step = 0;
     state.eOverride = null;
-    state.swap = false;
-    state.cryptoMode = 'number';
     state.numberDraft = String(src.m);
-    state.textDraft = 'HI';
     state.cipher = null;
     state.m = null;
     state.encrypted = false;
     state.decrypted = false;
-    state.reEncrypted = false;
-    state.textCipher = null;
-    state.textPlain = null;
-    state.eveRan = false;
     state.cryptoStage = 'idle';
     state.error = '';
   }
@@ -791,7 +778,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     }
 
     const right = panel('谁是公开的');
-    right.append(noteBox('N 会写进公钥', `公钥里包含 (E, N)。Eve 能看到 N=${model.n}，但看不到 p 和 q。`, 'blue'));
+    right.append(noteBox('N 会写进公钥', `公钥里包含 (E, N)。外界能看到 N=${model.n}，但看不到 p 和 q。`, 'blue'));
     right.append(noteBox('乘法容易，分解难', '算出 N 只要一次乘法；从 N 倒推 p、q 却很难——RSA 的安全性就建立在这里。', 'green'));
     stage.append(left, right);
     wrap.append(stage);
@@ -858,13 +845,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   function setE(value) {
     state.eOverride = BigInt(value);
-    state.swap = false;
     state.encrypted = false;
     state.decrypted = false;
-    state.reEncrypted = false;
     state.cipher = null;
     state.m = null;
-    state.textCipher = null;
     state.cryptoStage = 'idle';
     state.error = '';
     render();
@@ -935,15 +919,10 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     };
   }
 
-  function swapDemo(model) {
-    const demo = (() => {
-      const src = PRESETS[state.preset];
-      const value = toBig(src.m);
-      return value != null && value < model.n ? value : 2n % model.n;
-    })();
-    const first = R.modPow(demo, model.d, model.n);
-    const second = R.modPow(first, model.e, model.n);
-    return {demo, first, second};
+  function demoValue(model) {
+    const src = PRESETS[state.preset];
+    const value = toBig(src.m);
+    return value != null && value < model.n ? value : 2n % model.n;
   }
 
   function renderStepD(model) {
@@ -970,35 +949,17 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     );
     right.append(cards);
 
-    const swapRow = el('div', 'swap-row');
-    const swapBtn = el('button', '', state.swap ? '换回公钥加密、私钥解密' : '改用私钥签名、公钥验证');
-    swapBtn.type = 'button';
-    swapBtn.addEventListener('click', () => {
-      state.swap = !state.swap;
-      state.encrypted = false;
-      state.decrypted = false;
-      state.reEncrypted = false;
-      state.cipher = null;
-      state.m = null;
-      state.textCipher = null;
-      state.cryptoStage = 'idle';
-      state.error = '';
-      render();
-    });
-    swapRow.append(swapBtn, el('span', 'swap-note', state.swap ? '签名功能：私钥签、公钥验' : '保密功能：公钥加密、私钥解密'));
-    right.append(swapRow);
-
-    const demo = swapDemo(model);
-    const firstExp = state.swap ? model.d : model.e;
-    const secondExp = state.swap ? model.e : model.d;
+    const demo = demoValue(model);
+    const first = R.modPow(demo, model.e, model.n);
+    const second = R.modPow(first, model.d, model.n);
     const demoLine = el('div', 'formula-card');
     demoLine.append(formula([
-      `m=${demo.demo}`, ' → ', String(demo.demo), '^', String(firstExp), ' mod ', String(model.n), ' = ', {text: String(demo.first), cls: 'hl'},
-      ' → ', String(demo.first), '^', String(secondExp), ' mod ', String(model.n), ' = ', {text: String(demo.second), cls: 'hl'}
+      `m=${demo}`, ' → ', String(demo), '^', String(model.e), ' mod ', String(model.n), ' = ', {text: String(first), cls: 'hl'},
+      ' → ', String(first), '^', String(model.d), ' mod ', String(model.n), ' = ', {text: String(second), cls: 'hl'}
     ]));
     right.append(demoLine);
-    right.append(noteBox('指数互逆，功能不对称', '第 77 页用 E=3、D=7；第 79 页的实例 1 用 E=7、D=3，实例 2 用 E=79、D=1019。它们都满足 E×D≡1 (mod φ)，所以两种顺序都能还原数字；但公钥和私钥不等价：知道 (E,N) 推不出 D；反过来，私钥持有者能恢复 p、q、φ，也就能算出 E。', 'blue'));
-    right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E,N) 公开，(D,N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
+    right.append(noteBox('公钥和私钥不能互换', 'E×D≡1 (mod φ)，所以先做 E 次方、再做 D 次方能还原数字。但 E 始终是公钥指数，只用于加密；D 始终是私钥指数，只用于解密。已知公钥 (E, N) 在安全参数下算不出 D；反过来，私钥持有者能恢复 p、q、φ，也就能算出公钥。', 'blue'));
+    right.append(noteBox('销毁 p、q、φ', '最后只保留两对数字：(E, N) 公开，(D, N) 保密。p、q 与 φ(N) 用完就丢掉。', 'green'));
 
     stage.append(left, right);
     wrap.append(stage);
@@ -1023,193 +984,86 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
   /* ---------- crypto ---------- */
 
-  function textBlockSize(model) { return R.maxBlockBytes(model.n); }
-
   function doEncrypt(model) {
     state.error = '';
-    const keys = cryptoKeys(model);
-    if (state.cryptoMode === 'number') {
-      const raw = $('numberInput').value.trim();
-      state.numberDraft = raw;
-      const m = toBig(raw);
-      if (m == null) {
-        state.error = '明文 m 必须是非负整数。';
-        state.cryptoStage = 'idle';
-        render();
-        return;
-      }
-      if (m >= model.n) {
-        state.error = `明文 m 必须小于 N=${model.n}；否则取模后信息就丢了。`;
-        state.cryptoStage = 'idle';
-        render();
-        return;
-      }
-      const cipher = R.encrypt(m, keys.encExp, model.n);
-      state.m = m;
-      state.cipher = cipher;
-      state.encrypted = true;
-      state.decrypted = false;
-      state.reEncrypted = false;
-      state.cryptoStage = 'encrypted';
-      render();
-      return;
-    }
-
-    const text = $('textInput').value;
-    state.textDraft = text;
-    const size = textBlockSize(model);
-    if (size === 0) {
-      state.error = `N=${model.n} 太小，连一个字节（0–255）都放不下；换“实例 2”再试文字。`;
+    const input = $('numberInput');
+    const raw = input ? input.value.trim() : state.numberDraft;
+    state.numberDraft = raw;
+    const m = toBig(raw);
+    if (m == null) {
+      state.error = '明文 m 必须是非负整数。';
       state.cryptoStage = 'idle';
       render();
       return;
     }
-    if (!text.length) {
-      state.error = '先输入一段文字。';
+    if (m >= model.n) {
+      state.error = `明文 m 必须小于 N=${model.n}；否则取模后信息就丢了。`;
       state.cryptoStage = 'idle';
       render();
       return;
     }
-    const encoded = R.encryptText(text, keys.encExp, model.n);
-    state.textPlain = text;
-    state.textCipher = encoded.cipherBlocks;
+    const cipher = R.encrypt(m, model.e, model.n);
+    state.m = m;
+    state.cipher = cipher;
     state.encrypted = true;
     state.decrypted = false;
-    state.reEncrypted = false;
     state.cryptoStage = 'encrypted';
     render();
   }
 
   function doDecrypt(model) {
     state.error = '';
-    const keys = cryptoKeys(model);
-    if (state.cryptoMode === 'number') {
-      if (!state.encrypted || state.cipher == null) {
-        state.error = state.swap ? '还没有签名；先点“签名”。' : '还没有密文；先点“加密”。';
-        render();
-        return;
-      }
-      state.m = R.decrypt(state.cipher, keys.decExp, model.n);
-      state.decrypted = true;
-      state.cryptoStage = 'decrypted';
+    if (!state.encrypted || state.cipher == null) {
+      state.error = '还没有密文；先点“加密”。';
       render();
       return;
     }
-    if (!state.textCipher) {
-      state.error = state.swap ? '还没有签名；先点“签名”。' : '还没有密文；先点“加密”。';
-      render();
-      return;
-    }
-    const result = R.decryptText(state.textCipher, keys.decExp, model.n);
-    state.textPlain = result.text;
+    state.m = R.decrypt(state.cipher, model.d, model.n);
     state.decrypted = true;
     state.cryptoStage = 'decrypted';
-    render();
-  }
-
-  function doReEncrypt(model) {
-    if (!state.encrypted) return;
-    state.reEncrypted = true;
-    const keys = cryptoKeys(model);
-    if (state.cryptoMode === 'number') state.cipher = R.encrypt(state.m, keys.encExp, model.n);
-    else state.textCipher = R.encryptText(state.textPlain, keys.encExp, model.n).cipherBlocks;
-    render();
-  }
-
-  function doEve(model) {
-    state.eveRan = true;
-    state.cryptoStage = 'eve';
     render();
   }
 
   function keyStrip(model) {
     const strip = el('div', 'key-strip');
     strip.append(el('span', 'strip-label', '当前钥匙'));
-    strip.append(el('span', 'pill public', `公钥 E=${model.e}，N=${model.n}`));
-    strip.append(el('span', 'pill private', `私钥 D=${model.d}`));
-    strip.append(el('span', 'pill secret', `p、q、φ=${model.phi} 已销毁`));
+    strip.append(el('span', 'pill public', `公钥 (E=${model.e}, N=${model.n}) · 加密`));
+    strip.append(el('span', 'pill private', `私钥 (D=${model.d}, N=${model.n}) · 解密`));
     return strip;
   }
 
   function cryptoInput(model) {
     const card = el('section', 'crypto-input');
     const head = el('div', 'input-head');
-    head.append(el('h2', '', state.swap ? '选择消息' : '选择明文'));
-    const toggle = el('div', 'mode-toggle');
-    [['number', '数字'], ['text', '文字']].forEach(([mode, label]) => {
-      const button = el('button', 'toggle-btn' + (state.cryptoMode === mode ? ' selected' : ''), label);
-      button.type = 'button';
-      button.setAttribute('aria-pressed', String(state.cryptoMode === mode));
-      button.addEventListener('click', () => {
-        if (state.cryptoMode === mode) return;
-        state.cryptoMode = mode;
-        state.encrypted = false;
-        state.decrypted = false;
-        state.reEncrypted = false;
-        state.cipher = null;
-        state.textCipher = null;
-        state.cryptoStage = 'idle';
-        state.error = '';
-        render();
-      });
-      toggle.append(button);
-    });
-    head.append(toggle);
+    head.append(el('h2', '', '输入明文'));
     card.append(head);
 
-    if (state.cryptoMode === 'number') {
-      const row = el('div', 'input-row');
-      const field = el('label', 'field');
-      field.append(el('span', '', `${state.swap ? '消息' : '明文'} m（0 ≤ m < ${model.n}）`));
-      const input = el('input');
-      input.id = 'numberInput';
-      input.type = 'text';
-      input.inputMode = 'numeric';
-      input.autocomplete = 'off';
-      input.value = state.numberDraft;
-      input.addEventListener('input', () => { state.numberDraft = input.value; });
-      input.addEventListener('keydown', event => {
-        if (event.key === 'Enter') { event.preventDefault(); doEncrypt(model); }
-      });
-      field.append(input, el('span', 'field-hint', `课件实例的 m 就是这里输入的数字。`));
-      row.append(field);
-      card.append(row);
-    } else {
-      const row = el('div', 'input-row');
-      const field = el('label', 'field');
-      const size = textBlockSize(model);
-      field.append(el('span', '', `${state.swap ? '消息' : '明文'}（UTF-8 文字）`));
-      const input = el('input');
-      input.id = 'textInput';
-      input.type = 'text';
-      input.autocomplete = 'off';
-      input.value = state.textDraft;
-      input.addEventListener('input', () => { state.textDraft = input.value; });
-      input.addEventListener('keydown', event => {
-        if (event.key === 'Enter') { event.preventDefault(); doEncrypt(model); }
-      });
-      field.append(input);
-      field.append(el('span', 'field-hint', size === 0
-        ? `N=${model.n} 太小，放不下一个字节；切换到“实例 2”再试。`
-        : `按 ${size} 字节一块分开加密；块的值必须小于 N=${model.n}。`));
-      row.append(field);
-      card.append(row);
-    }
+    const row = el('div', 'input-row');
+    const field = el('label', 'field');
+    field.append(el('span', '', `明文 m（0 ≤ m < ${model.n}）`));
+    const input = el('input');
+    input.id = 'numberInput';
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.autocomplete = 'off';
+    input.value = state.numberDraft;
+    input.addEventListener('input', () => { state.numberDraft = input.value; });
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') { event.preventDefault(); doEncrypt(model); }
+    });
+    field.append(input, el('span', 'field-hint', '课件实例的 m 就是这里输入的数字。'));
+    row.append(field);
+    card.append(row);
 
     const actions = el('div', 'action-row');
-    const encryptBtn = el('button', 'primary', state.swap ? '签名' : '加密');
+    const encryptBtn = el('button', 'primary', '加密');
     encryptBtn.type = 'button';
-    encryptBtn.disabled = state.cryptoMode === 'text' && textBlockSize(model) === 0;
     encryptBtn.addEventListener('click', () => doEncrypt(model));
-    const decryptBtn = el('button', '', state.swap ? '验证' : '解密');
+    const decryptBtn = el('button', '', '解密');
     decryptBtn.type = 'button';
-    decryptBtn.disabled = state.cryptoMode === 'number' ? state.cipher == null : !state.textCipher;
+    decryptBtn.disabled = state.cipher == null;
     decryptBtn.addEventListener('click', () => doDecrypt(model));
-    const againBtn = el('button', '', state.swap ? '再签一次' : '再加密一次');
-    againBtn.type = 'button';
-    againBtn.disabled = !state.encrypted;
-    againBtn.addEventListener('click', () => doReEncrypt(model));
-    actions.append(encryptBtn, decryptBtn, againBtn);
+    actions.append(encryptBtn, decryptBtn);
     card.append(actions);
 
     if (state.error) card.append(el('p', 'input-error', state.error));
@@ -1225,34 +1079,22 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
   }
 
   function flow(model) {
-    const keys = cryptoKeys(model);
     const wrap = el('div', 'flow');
-    if (state.cryptoMode === 'number') {
-      const m = state.m != null ? state.m : state.numberDraft;
-      wrap.append(flowCard('plain', state.swap ? '消息 m' : '明文 m', m, '发送方输入'));
-      wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('cipher', state.swap ? '签名 s' : '密文 c', state.encrypted ? state.cipher : '?', state.encrypted ? `${state.swap ? 's' : 'c'} = m^${keys.encLabel} mod N` : (state.swap ? '任何人都能看到' : 'Eve 只能看到这个')));
-      wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('back', state.swap ? '验证出的 m' : '解回的 m', state.decrypted ? state.m : '?', state.decrypted ? `m = ${state.swap ? 's' : 'c'}^${keys.decLabel} mod N` : (state.swap ? '任何人都能用公钥验证' : '只有私钥能解')));
-    } else {
-      wrap.append(flowCard('plain', state.swap ? '消息' : '明文', short(state.textPlain || state.textDraft || '（空）', 18), 'UTF-8 分块'));
-      wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('cipher', state.swap ? '签名块' : '密文块', state.textCipher ? `${state.textCipher.length} 块` : '?',
-        state.textCipher ? short(state.textCipher.map(b => b.value).join(' '), 26) : (state.swap ? '任何人都能看到' : 'Eve 只能看到数字')));
-      wrap.append(el('div', 'flow-arrow', '→'));
-      wrap.append(flowCard('back', state.swap ? '验证出的文字' : '解回的文字', state.decrypted ? short(state.textPlain, 18) : '?', state.decrypted ? (state.swap ? '逐块验证再拼接' : '逐块解密再拼接') : (state.swap ? '任何人都能用公钥验证' : '只有私钥能解')));
-    }
+    const m = state.m != null ? state.m : (state.numberDraft || '?');
+    wrap.append(flowCard('plain', '明文 m', m, '发送方输入'));
+    wrap.append(el('div', 'flow-arrow', '→'));
+    wrap.append(flowCard('cipher', '密文 c', state.encrypted ? state.cipher : '?', state.encrypted ? `c = m^${model.e} mod N` : '公开信道里只能看到 c'));
+    wrap.append(el('div', 'flow-arrow', '→'));
+    wrap.append(flowCard('back', '解回的 m', state.decrypted ? state.m : '?', state.decrypted ? `m = c^${model.d} mod N` : '只有私钥 D 能解'));
     return wrap;
   }
 
-  function quickPowTrace(model, exp, label, open) {
-    const base = state.m;
-    if (base == null) return null;
-    const trace = R.squareMultiplyTrace(base, exp, model.n);
+  function powTrace(base, exp, modulus, label, open) {
+    const trace = R.squareMultiplyTrace(base, exp, modulus);
     const details = el('details', 'trace-box');
     details.open = open;
     const summary = el('summary');
-    summary.append(el('span', '', `${label}：${base}^${exp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
+    summary.append(el('span', '', `${label}：${base}^${exp} mod ${modulus}`), el('span', 'muted', `${trace.steps.length} 位`));
     details.append(summary);
     const inner = el('div', 'trace-inner');
     const rows = trace.steps.slice(0, 24).map(step => {
@@ -1270,119 +1112,6 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
     return details;
   }
 
-  function blockDetail(model) {
-    const keys = cryptoKeys(model);
-    const wrap = el('div', 'table-wrap');
-    const table = el('table', 'trace');
-    const head = el('tr');
-    const cipherSym = state.swap ? 's' : 'c';
-    ['#', '块 m', `${cipherSym} = m^${keys.encLabel} mod N`, `m = ${cipherSym}^${keys.decLabel} mod N`, '字符'].forEach(text => head.append(el('th', '', text)));
-    table.append(head);
-    const encoded = R.encodeText(state.textPlain || '', model.n);
-    state.textCipher.slice(0, 8).forEach((block, index) => {
-      const source = encoded.blocks[index];
-      const decoded = R.decrypt(block.value, keys.decExp, model.n);
-      const text = source ? new TextDecoder().decode(new Uint8Array(source.bytes)) : '';
-      const tr = el('tr');
-      [String(index + 1), String(source ? source.value : ''), String(block.value), state.decrypted ? String(decoded) : '—', state.decrypted ? text : '—']
-        .forEach(value => tr.append(el('td', '', value)));
-      table.append(tr);
-    });
-    wrap.append(table);
-    return wrap;
-  }
-
-  function determinismNote() {
-    const node = el('div', 'det-note');
-    node.append(
-      el('strong', '', state.swap ? '再签一次，签名一模一样' : '再加密一次，密文一模一样'),
-      el('p', '', state.swap
-        ? '教材 RSA 是确定性的：同一消息、同一个私钥，永远得到同一个签名。真实签名会先对消息做哈希，并使用更完整的签名方案。'
-        : '教材 RSA 是确定性的：同一明文、同一把公钥，永远得到同一个密文。真实系统会加入随机填充（OAEP），同一个消息两次加密看起来才不同。')
-    );
-    return node;
-  }
-
-  function scaleRow(label, valueText, ratio, now) {
-    const row = el('div', 'scale-row');
-    const track = el('div', 'scale-track');
-    const fill = el('span', 'scale-fill' + (now ? ' now' : ''));
-    fill.style.width = Math.max(2, Math.min(100, ratio * 100)) + '%';
-    track.append(fill);
-    row.append(el('span', '', label), track, el('span', '', valueText));
-    return row;
-  }
-
-  function evePanel(model) {
-    const panelEl = el('section', 'eve-panel');
-    const head = el('div', 'eve-head');
-    head.append(el('h2', '', 'Eve 的视角'));
-    head.append(el('p', 'eve-desc', 'Eve 只有公钥 (E, N)。她想从 N 倒推出 p 和 q。'));
-    const button = el('button', '', state.eveRan ? '再分解一次' : '让 Eve 分解 N');
-    button.type = 'button';
-    button.addEventListener('click', () => doEve(model));
-    head.append(button);
-    panelEl.append(head);
-
-    if (!state.eveRan) {
-      panelEl.append(el('p', 'muted', `试试最笨的方法：从 3 开始，一个奇数一个奇数地试除 N=${model.n}。`));
-      return panelEl;
-    }
-
-    const result = R.factorTrial(model.n, 1000000);
-    const sqrt = isqrt(model.n);
-    const grid = el('div', 'eve-grid');
-    const stats = [
-      ['N', String(model.n)],
-      ['√N 约等于', String(sqrt)],
-      ['试除次数', String(result.steps)]
-    ];
-    stats.forEach(([label, value]) => {
-      const box = el('div', 'eve-stat');
-      box.append(el('span', '', label), el('strong', '', value));
-      grid.append(box);
-    });
-    panelEl.append(grid);
-
-    if (result.p != null) {
-      const phi = (result.p - 1n) * (result.q - 1n);
-      const stolen = R.modInverse(state.swap ? model.d : model.e, phi);
-      const verdict = el('p', 'eve-verdict');
-      verdict.textContent = `Eve 找到 ${model.n} = ${result.p} × ${result.q}。φ=${phi}，公开指数在模 φ 下的逆元是 ${stolen}。`;
-      panelEl.append(verdict, el('p', 'muted', '分解成功 = 私钥泄露。小 N 的 RSA 完全不安全。'));
-
-      const scale = el('div', 'scale');
-      const small = R.factorTrial(33n);
-      const maxSteps = Math.max(Number(result.steps), 23, Number(small.steps));
-      scale.append(scaleRow(`N = ${model.n}`, `${result.steps} 次`, Number(result.steps) / maxSteps, true));
-      if (model.n !== 3337n) scale.append(scaleRow('N = 3337', '23 次', 23 / maxSteps, false));
-      if (model.n !== 33n) scale.append(scaleRow('N = 33', `${small.steps} 次`, Number(small.steps) / maxSteps, false));
-      scale.append(scaleRow('2048 位 RSA', '≈10^308 次', 1, false));
-      panelEl.append(scale);
-      panelEl.append(el('p', 'muted', '试除只是最笨的分解法；真实攻击更聪明，但面对 2048 位 RSA 仍然不可行。这就是 p、q 要选几百位的原因。'));
-    } else {
-      panelEl.append(el('p', 'eve-verdict ok', `Eve 在 ${result.steps} 次试除内没有分解出 N。把 p、q 取大一点，她就更难了。`));
-    }
-    return panelEl;
-  }
-
-  function caveatCard() {
-    const card = el('section', 'caveat');
-    card.append(el('h2', '', '教材 RSA 的三个问题'));
-    const list = el('ul');
-    [
-      ['确定性', '同一明文、同一公钥，密文永远相同；真实系统用 OAEP 随机填充。'],
-      ['小消息', '如果 m^E < N，加密时根本没取模，直接开 E 次方就能还原 m；填充可以避免。'],
-      ['速度慢', 'RSA 比 AES 慢几个数量级，所以真实系统只用它加密一把临时 AES 密钥。']
-    ].forEach(([title, text]) => {
-      const li = el('li');
-      li.append(el('strong', '', title + '：'), document.createTextNode(text));
-      list.append(li);
-    });
-    card.append(list, noteBox('工程上的分工', '正文用 AES 加密，AES 密钥用 RSA 加密——这叫混合加密。下一节的 PeerDrop 项目就是这个思路。', 'green'));
-    return card;
-  }
-
   function renderCrypto(model) {
     const root = $('sceneRoot');
     root.replaceChildren();
@@ -1395,63 +1124,253 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
 
     const wrap = el('div', 'crypto-wrap');
     wrap.append(keyStrip(model));
+    wrap.append(el('p', 'crypto-caption', '公钥 (E, N) 公开，用来加密；私钥 (D, N) 保密，用来解密。已知公钥推不出私钥。'));
     wrap.append(cryptoInput(model));
     wrap.append(flow(model));
+    if (state.encrypted) wrap.append(powTrace(state.m, model.e, model.n, '加密的快速幂', true));
+    if (state.decrypted) wrap.append(powTrace(state.cipher, model.d, model.n, '解密的快速幂', false));
+    root.append(wrap);
+  }
 
-    if (state.cryptoMode === 'number') {
-      if (state.encrypted) {
-        const keys = cryptoKeys(model);
-        const encTrace = quickPowTrace(model, keys.encExp, state.swap ? '签名的快速幂' : '加密的快速幂', true);
-        if (encTrace) wrap.append(encTrace);
+  /* ---------- break RSA ---------- */
+
+  const BREAK_E = 7n;
+  const BREAK_PLAIN = 5n;
+  const BREAK_CASES = [
+    [3n, 11n],
+    [11n, 13n],
+    [31n, 37n],
+    [101n, 103n],
+    [10007n, 10009n],
+    [1000033n, 1000037n],
+    [10000079n, 10000121n],
+    [100000007n, 100000037n]
+  ].map(([p, q]) => {
+    const n = p * q;
+    return {p, q, n, e: BREAK_E, cipher: R.encrypt(BREAK_PLAIN, BREAK_E, n)};
+  });
+
+  function groupDigits(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  function formatMs(ms) {
+    if (!Number.isFinite(ms)) return '—';
+    if (ms < 0.01) return '<0.01 ms';
+    if (ms < 1) return ms.toFixed(2) + ' ms';
+    if (ms < 100) return ms.toFixed(1) + ' ms';
+    if (ms < 1000) return Math.round(ms) + ' ms';
+    return (ms / 1000).toFixed(2) + ' s';
+  }
+
+  function startBreak(index) {
+    if (state.breakPending != null) return;
+    state.breakPending = index;
+    state.breakError = '';
+    render();
+    setTimeout(() => {
+      const item = BREAK_CASES[index];
+      try {
+        const started = performance.now();
+        const factored = R.factorTrial(item.n, 200000000);
+        const elapsed = performance.now() - started;
+        if (factored.p == null || factored.q == null) {
+          state.breakError = `试除了 ${groupDigits(factored.steps)} 次，仍然没有找到因数。`;
+        } else {
+          const phi = (factored.p - 1n) * (factored.q - 1n);
+          const d = R.modInverse(BREAK_E, phi);
+          const plain = R.decrypt(item.cipher, d, item.n);
+          state.breakResults[index] = {
+            p: factored.p,
+            q: factored.q,
+            phi,
+            d,
+            steps: factored.steps,
+            ms: elapsed,
+            cipher: item.cipher,
+            plain
+          };
+          state.breakLast = index;
+        }
+      } catch (error) {
+        state.breakError = error.message;
       }
-      if (state.decrypted) {
-        const keys = cryptoKeys(model);
-        const decBase = state.cipher != null ? state.cipher : 0n;
-        const trace = R.squareMultiplyTrace(decBase, keys.decExp, model.n);
-        const details = el('details', 'trace-box');
-        details.open = false;
-        const summary = el('summary');
-        summary.append(el('span', '', `${state.swap ? '验证' : '解密'}的快速幂：${decBase}^${keys.decExp} mod ${model.n}`), el('span', 'muted', `${trace.steps.length} 位`));
-        details.append(summary);
-        const inner = el('div', 'trace-inner');
-        const rows = trace.steps.slice(0, 24).map(step => {
-          const tr = el('tr');
-          tr.append(el('td', '', step.bit), el('td', '', String(step.afterSquare)));
-          tr.append(el('td', '', step.multiplied ? `× ${decBase}` : '—'));
-          tr.append(el('td', '', String(step.after)));
-          return tr;
-        });
-        if (rows.length) rows[rows.length - 1].className = 'final';
-        inner.append(traceTable(rows, ['读入位', '平方后', '乘底数?', '结果']));
-        details.append(inner);
-        wrap.append(details);
-      }
-    } else if (state.encrypted) {
-      const details = el('details', 'trace-box');
-      details.open = true;
-      details.append(el('summary', '', state.swap ? '逐块签名与验证' : '逐块加密与解密'));
-      const inner = el('div', 'trace-inner');
-      inner.append(blockDetail(model));
-      details.append(inner);
-      wrap.append(details);
+      state.breakPending = null;
+      render();
+    }, 50);
+  }
+
+  function resetBreak() {
+    if (state.breakPending != null) return;
+    state.breakResults = {};
+    state.breakLast = null;
+    state.breakError = '';
+    render();
+  }
+
+  function breakRow(item, index) {
+    const result = state.breakResults[index];
+    const tr = el('tr', result ? 'done' : '');
+    const nCell = el('td', 'break-n');
+    nCell.dataset.label = 'N';
+    nCell.append(el('span', '', groupDigits(item.n)), el('small', 'break-digits', `${String(item.n).length} 位`));
+    tr.append(nCell);
+
+    const pqCell = el('td', '');
+    pqCell.dataset.label = 'p × q';
+    pqCell.textContent = result ? `${result.p} × ${result.q}` : '—';
+    tr.append(pqCell);
+
+    const keyCell = el('td', 'break-keys');
+    keyCell.dataset.label = 'φ(N) / D';
+    if (result) {
+      keyCell.append(el('span', '', `φ = ${groupDigits(result.phi)}`), el('span', '', `D = ${groupDigits(result.d)}`));
+    } else {
+      keyCell.textContent = '—';
+    }
+    tr.append(keyCell);
+
+    const stepsCell = el('td', '');
+    stepsCell.dataset.label = '试除次数';
+    stepsCell.textContent = result ? groupDigits(result.steps) : '—';
+    tr.append(stepsCell);
+
+    const timeCell = el('td', 'break-time');
+    timeCell.dataset.label = '耗时';
+    timeCell.textContent = result ? formatMs(result.ms) : '—';
+    tr.append(timeCell);
+
+    const action = el('td', 'break-action');
+    action.dataset.label = '操作';
+    if (result) {
+      action.append(el('span', 'done-tag', '已破解'));
+    } else {
+      const button = el('button', 'break-btn' + (state.breakPending == null ? ' primary' : ''), state.breakPending === index ? '计算中…' : '破解');
+      button.type = 'button';
+      button.disabled = state.breakPending != null;
+      button.addEventListener('click', () => startBreak(index));
+      action.append(button);
+    }
+    tr.append(action);
+    return tr;
+  }
+
+  function breakResultCard(index) {
+    const item = BREAK_CASES[index];
+    const result = state.breakResults[index];
+    const card = panel(`最新破解：N=${item.n}`);
+    card.classList.add('break-result');
+
+    const stats = el('div', 'break-stats');
+    [['p', result.p], ['q', result.q], ['φ(N)', result.phi], ['D', result.d]].forEach(([label, value]) => {
+      const box = el('div', 'break-stat');
+      box.append(el('span', '', label), el('strong', '', String(value)));
+      stats.append(box);
+    });
+    card.append(stats);
+
+    const decrypt = el('div', 'formula-card');
+    decrypt.append(formula([
+      '密文 c = ', String(result.cipher), ' → ',
+      `m = c^${result.d} mod ${item.n} = `, {text: String(result.plain), cls: 'hl'}
+    ]));
+    decrypt.append(el('p', 'formula-sub', `因为 ${item.e} × ${result.d} ≡ 1 (mod ${result.phi})，攻击者恢复出的 D 可以直接解开这条密文。`));
+    card.append(decrypt);
+    card.append(el('p', 'break-verdict', `明文是 ${result.plain}。攻击者没有猜 p、q，只是把 N 试除了 ${groupDigits(result.steps)} 次，耗时 ${formatMs(result.ms)}。`));
+    return card;
+  }
+
+  function renderBreak() {
+    const root = $('sceneRoot');
+    root.replaceChildren();
+    const wrap = el('div', 'break-wrap');
+
+    const intro = panel('攻击者只有公钥 (E, N)');
+    intro.append(el('p', 'break-lead', 'N 是两个质数的乘积。攻击者不知道 p、q，也不知道 φ(N) 和 D；他能做的第一步，就是从 3 开始，用奇数逐个试除 N。'));
+    const rule = el('div', 'formula-card');
+    rule.append(formula([{text: 'N', cls: 'hl'}, ' = p × q', '，试到 ', {text: '√N', cls: 'hl'}, ' 就一定能找到较小的因数']));
+    rule.append(el('p', 'formula-sub', 'N 每多两位，√N 大约大 10 倍，试除次数也大约多 10 倍。'));
+    intro.append(rule);
+    intro.append(noteBox('这次实验', '每行都用 E=7、明文 m=5。点“破解”后记录试除次数和耗时；N 越往后越大，等得越久。', 'blue'));
+    wrap.append(intro);
+
+    const record = panel('试除记录');
+    const tableWrap = el('div', 'table-wrap');
+    const table = el('table', 'trace break-table');
+    const head = el('tr');
+    ['N', 'p × q', 'φ(N) / D', '试除次数', '耗时', '操作'].forEach(text => head.append(el('th', '', text)));
+    table.append(head);
+    BREAK_CASES.forEach((item, index) => table.append(breakRow(item, index)));
+    tableWrap.append(table);
+    record.append(tableWrap);
+
+    const actions = el('div', 'break-actions');
+    actions.append(el('p', 'break-footnote', '同一把公开指数 E=7，同一条明文 m=5；密文由 c = m^E mod N 得到。'));
+    const reset = el('button', '', '清空记录');
+    reset.type = 'button';
+    reset.disabled = Object.keys(state.breakResults).length === 0 || state.breakPending != null;
+    reset.addEventListener('click', resetBreak);
+    actions.append(reset);
+    record.append(actions);
+    wrap.append(record);
+
+    const bars = panel('耗时对比');
+    const indices = Object.keys(state.breakResults).map(Number).sort((a, b) => a - b);
+    if (!indices.length) {
+      bars.append(el('p', 'muted', '破解第一行后，这里会出现耗时柱状图。'));
+    } else {
+      const maxMs = Math.max(...indices.map(i => state.breakResults[i].ms));
+      const list = el('div', 'time-bars');
+      indices.forEach(i => {
+        const result = state.breakResults[i];
+        const row = el('div', 'time-row');
+        row.append(el('span', 'time-label', `N=${groupDigits(BREAK_CASES[i].n)}`));
+        const track = el('span', 'time-track');
+        const fill = el('span', 'time-fill');
+        fill.style.width = (maxMs > 0 ? Math.max(1.5, (result.ms / maxMs) * 100) : 100) + '%';
+        track.append(fill);
+        row.append(track, el('span', 'time-value', formatMs(result.ms)));
+        list.append(row);
+      });
+      bars.append(list);
+      bars.append(el('p', 'break-footnote', '柱长按本次记录中的最大耗时归一化。数字只大了一点，柱子就会差出几个数量级；耗时受设备和浏览器影响会有波动，重点看数量级和试除次数。'));
+    }
+    wrap.append(bars);
+
+    if (state.breakLast != null && state.breakResults[state.breakLast]) {
+      wrap.append(breakResultCard(state.breakLast));
+    } else {
+      const placeholder = panel('用破解出的私钥解密');
+      placeholder.append(el('p', 'muted', '破解任意一行后，这里会显示攻击者怎样用恢复出来的 D 解开密文。'));
+      wrap.append(placeholder);
     }
 
-    if (state.reEncrypted) wrap.append(determinismNote());
-    wrap.append(evePanel(model));
-    wrap.append(caveatCard());
-
-    const next = el('div', 'next-card');
-    next.append(
-      el('strong', '', '两把钥匙，两种用途，单向不可逆'),
-      el('p', '', '公钥 (E, N) 公开，用来加密或验签；私钥 (D, N) 保密，用来解密或签名。已知公钥算不出私钥；反过来，私钥持有者能恢复 p、q、φ，也就能算出公钥。')
-    );
-    wrap.append(next);
     root.append(wrap);
   }
 
   /* ---------- outcome & toolbar ---------- */
 
   function renderOutcome(model) {
+    if (state.tab === 'break') {
+      if (state.breakError) {
+        setOutcome('danger', '破解失败', state.breakError);
+        return;
+      }
+      if (state.breakPending != null) {
+        const item = BREAK_CASES[state.breakPending];
+        setOutcome('warning', '正在试除', `对 N=${item.n} 逐个奇数试除，并记录耗时。N 越大，这一步越久。`);
+        return;
+      }
+      if (state.breakLast != null && state.breakResults[state.breakLast]) {
+        const item = BREAK_CASES[state.breakLast];
+        const result = state.breakResults[state.breakLast];
+        setOutcome('success', '破解成功', `N=${item.n} = ${result.p} × ${result.q}，试除 ${groupDigits(result.steps)} 次，耗时 ${formatMs(result.ms)}。用恢复出的 D=${result.d} 解出明文 ${result.plain}。`);
+        return;
+      }
+      setOutcome('info', '从小 N 开始', '每个 N 都用 E=7、明文 m=5。点“破解”后记录试除次数和耗时，再用恢复出的 D 解密。');
+      return;
+    }
+
     if (state.tab === 'keygen') {
       if (!model.ok) {
         setOutcome('danger', '参数还不能用', model.error);
@@ -1462,13 +1381,7 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
         {style: 'info', title: '第 2 步：算出 N', text: `N = ${model.p} × ${model.q} = ${model.n}。N 会写进公钥，全世界都能看到。`},
         {style: 'warning', title: '第 3 步：算出 φ(N)', text: `φ(${model.n}) = (${model.p}−1)(${model.q}−1) = ${model.phi}。它必须保密——泄露 φ 等于泄露私钥。`},
         {style: 'info', title: '第 4 步：选 E', text: `E=${model.e}，gcd(${model.e}, ${model.phi})=1，求出的 D=${model.d} 与 E 不同。E 不要求是质数。`},
-        {
-          style: state.swap ? 'warning' : 'success',
-          title: state.swap ? '签名功能：私钥签、公钥验' : '第 5 步：求 D',
-          text: state.swap
-            ? `私钥 D 签名、公钥 E 验证，消息能还原。签名与加密是两种功能，不是交换两把钥匙；D 始终是私钥。`
-            : `D = ${model.e}⁻¹ mod ${model.phi} = ${model.d}，因为 ${model.e}×${model.d}=${model.e * model.d}≡1 (mod ${model.phi})。`
-        }
+        {style: 'success', title: '第 5 步：求 D', text: `D = ${model.e}⁻¹ mod ${model.phi} = ${model.d}，因为 ${model.e}×${model.d}=${model.e * model.d}≡1 (mod ${model.phi})。`}
       ];
       const data = texts[state.step];
       setOutcome(data.style, data.title, data.text);
@@ -1483,52 +1396,21 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       setOutcome('danger', '参数还不能用', model.error);
       return;
     }
-    const keys = cryptoKeys(model);
-
-    if (state.cryptoStage === 'eve') {
-      const result = R.factorTrial(model.n, 1000000);
-      setOutcome('danger', 'Eve 分解了 N', result.p != null
-        ? (state.swap
-          ? `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，Eve 可以伪造签名。`
-          : `N = ${result.p} × ${result.q}，只试了 ${result.steps} 次。有了 p、q 就能算 φ 和私钥，所有密文都能解。`)
-        : `Eve 试了 ${result.steps} 次，暂时没有分解成功。`);
-      return;
-    }
     if (state.cryptoStage === 'decrypted') {
-      if (state.cryptoMode === 'number') {
-        setOutcome('success', state.swap ? '验证通过' : '明文回来了', state.swap
-          ? `m = ${state.swap ? 's' : 'c'}^${keys.decLabel} mod ${model.n} = ${state.m}。公钥验证成功。`
-          : `m = ${state.cipher}^${keys.decLabel} mod ${model.n} = ${state.m}。${keys.decName}把消息还原了。`);
-      } else {
-        setOutcome('success', state.swap ? '验证通过' : '文字回来了', state.swap
-          ? `${state.textCipher.length} 块签名逐块验证，再按 UTF-8 拼回“${state.textPlain}”。`
-          : `${state.textCipher.length} 块密文逐块解密，再按 UTF-8 拼回“${state.textPlain}”。`);
-      }
+      setOutcome('success', '明文回来了', `m = ${state.cipher}^${model.d} mod ${model.n} = ${state.m}。私钥把消息还原了。`);
       return;
     }
     if (state.cryptoStage === 'encrypted') {
-      if (state.cryptoMode === 'number') {
-        setOutcome('info', state.swap ? '签名算出来了' : '密文算出来了', state.swap
-          ? `s = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。任何人都能用公钥 E 验证。`
-          : `c = ${state.m}^${keys.encLabel} mod ${model.n} = ${state.cipher}。Eve 在网络里只能看到 ${state.cipher}。`);
-      } else {
-        setOutcome('info', state.swap ? '签名块算出来了' : '密文算出来了', state.swap
-          ? `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独签名。`
-          : `“${state.textPlain}”被拆成 ${state.textCipher.length} 块，每块单独加密。`);
-      }
+      setOutcome('info', '密文算出来了', `c = ${state.m}^${model.e} mod ${model.n} = ${state.cipher}。公开信道里只能看到密文 c。`);
       return;
     }
-    if (state.cryptoMode === 'number') {
-      setOutcome('info', state.swap ? '先签一个数字' : '先加密一个数字', `明文 m=${state.numberDraft}，${keys.encName}指数 ${keys.encLabel}=${keys.encExp}，N=${model.n}。按下“${state.swap ? '签名' : '加密'}”。`);
-    } else {
-      setOutcome('info', state.swap ? '先签一段文字' : '先加密一段文字', 'RSA 按字节分块；每个块必须小于 N。');
-    }
+    setOutcome('info', '先加密一个数字', `明文 m=${state.numberDraft}，公钥指数 E=${model.e}，N=${model.n}。按下“加密”。`);
   }
 
   function renderToolbar(model) {
-    const crypto = state.tab === 'crypto';
-    $('toolbar').hidden = crypto;
-    if (crypto) return;
+    const keygen = state.tab === 'keygen';
+    $('toolbar').hidden = !keygen;
+    if (!keygen) return;
     $('prevBtn').disabled = state.step <= 0;
     $('nextBtn').disabled = state.step >= 4 || !model.ok;
     $('stepCount').textContent = `第 ${state.step + 1} / 5 步`;
@@ -1572,12 +1454,15 @@ details.trace-box .trace-inner{padding:10px 14px 14px}
       button.setAttribute('aria-selected', String(button.dataset.tab === state.tab));
     });
     $('stage').setAttribute('aria-labelledby', 'tab-' + state.tab);
+    const isBreak = state.tab === 'break';
+    $('presets').hidden = isBreak;
     const model = getModel();
-    renderPresets();
+    if (!isBreak) renderPresets();
     renderToolbar(model);
     renderOutcome(model);
     if (state.tab === 'keygen') renderKeygen(model);
-    else renderCrypto(model);
+    else if (state.tab === 'crypto') renderCrypto(model);
+    else renderBreak();
   }
 
   /* ---------- events ---------- */

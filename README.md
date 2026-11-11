@@ -16,7 +16,7 @@ Students learn computer science by directing AI coding agents to build, test, in
 - `projects/round-robin-lab/` — offline CPU Round Robin simulator with animated queue transitions, the complete Chinese requirements document, and acceptance checks.
 - `projects/deadlock-lab/` — offline locks and deadlock simulator with a simple animated print-room example, atomic-operation comparison, two-lock deadlock, teacher guide, and model checks.
 - `projects/routing-lab/` — offline Dijkstra and link-state routing simulator with selectable rounds, five side-by-side host and router tables, router-failure recovery, packet forwarding, an offline download, and model checks.
-- `projects/rsa-lab/` — offline textbook-RSA classroom demo with selectable p and q, five-step key generation, encryption and decryption, and Eve's trial-division attack.
+- `projects/rsa-lab/` — offline textbook-RSA classroom demo with selectable p and q, five-step key generation, public-key encryption and private-key decryption, plus a timed trial-division cracking ladder that recovers D and decrypts the ciphertext.
 - `projects/peer-drop/` — PeerDrop starter materials, interface reference, and local-network setup guide.
 - `projects/ai-project/` — choose-one-of-three AI project brief and student materials.
 
