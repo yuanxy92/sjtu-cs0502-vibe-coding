@@ -42,6 +42,9 @@ h1{font-size:43px;line-height:1.15;letter-spacing:-.03em}
 .subtitle{color:var(--muted);font-size:23px}
 .offline{font-size:19px;color:var(--muted)}
 .offline b{color:var(--green)}
+.pagenav{display:flex;gap:10px;margin-top:6px}
+.pagenav a{text-decoration:none}
+.pagenav .cur{background:var(--blue);border-color:var(--blue);color:#fff}
 
 .panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:22px 24px;margin-top:20px;min-width:0}
 .panel h2{margin-bottom:10px;font-size:26px}
@@ -54,50 +57,36 @@ h1{font-size:43px;line-height:1.15;letter-spacing:-.03em}
 .databar .spacer{flex:1}
 .databar button{border-radius:20px;min-height:40px;padding:5px 14px;font-size:19px}
 .databar button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.databar button[aria-pressed="true"]:hover{background:var(--blue-dark)}
+.sizectrl{display:inline-flex;align-items:center;gap:6px;font-size:18px;color:var(--muted)}
+.sizectrl input{width:96px;min-height:40px;padding:4px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-family:var(--mono);font-size:19px}
+.sizectrl button{border-radius:20px;min-height:40px;padding:5px 14px;font-size:19px}
 .preview{margin-top:12px}
 .preview summary{font-size:20px;font-weight:750;color:#17427a}
 .preview .tablewrap{margin-top:10px;max-height:340px;overflow:auto}
 
 /* tables */
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px;background:#fff}
-#sqlOut .tablewrap{max-height:520px;overflow:auto}
 table.rel{border-collapse:collapse;width:100%;font-size:20px}
 table.rel th{background:#eef3fb;color:#17427a;font-weight:750;padding:9px 14px;border-bottom:2px solid #c9d8ef;text-align:left;white-space:nowrap;position:sticky;top:0}
 table.rel td{padding:8px 14px;border-bottom:1px solid #e6ecf5;white-space:nowrap}
 table.rel td.num{font-family:var(--mono)}
 table.rel .idx{color:var(--muted);font-weight:600;width:56px;background:#f6f8fc}
-.empty td{color:var(--muted)}
+table.rel .empty td{color:var(--muted)}
+#sqlOut .tablewrap{max-height:520px;overflow:auto}
 
 /* sql editor + result stacked for classroom display */
 .sqlgrid{display:grid;grid-template-columns:1fr;gap:0;margin-top:0}
 textarea#sqlInput{width:100%;min-height:190px;font-family:var(--mono);font-size:20px;line-height:1.5;padding:14px;border:1px solid #bac8da;border-radius:9px;background:#fff;resize:vertical}
 .runrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px}
 .count-chip{font-size:19px;color:var(--muted)}
-.sizectrl{display:inline-flex;align-items:center;gap:6px;font-size:18px;color:var(--muted)}
-.sizectrl input{width:96px;min-height:40px;padding:4px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-family:var(--mono);font-size:19px}
-.sizectrl button{border-radius:20px;min-height:40px;padding:5px 14px;font-size:19px}
-
-/* exercises */
-.exlist2{display:grid;gap:12px;margin-top:14px}
-.ex{border:1px solid var(--line);border-radius:9px;background:#fff;padding:14px 18px}
-.ex summary{font-size:21px;font-weight:750;color:#17427a}
-.ex .q{font-size:20px;margin-top:10px}
-.ex textarea{width:100%;min-height:86px;font-family:var(--mono);font-size:19px;line-height:1.45;padding:10px 12px;border:1px solid #bac8da;border-radius:8px;margin-top:10px;resize:vertical}
-.ex .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-.ex .row button{min-height:40px;padding:5px 14px;font-size:19px;border-radius:20px}
-.ex .fb{font-size:20px;font-weight:750;margin-top:8px}
-.ex .fb.ok{color:var(--green)}
-.ex .fb.no{color:var(--red)}
-.ex .fb.info{color:var(--muted);font-weight:600}
-.ex .hintbox,.ex .ansbox{display:none;margin-top:10px;border-left:3px solid #e6be66;background:#fff9eb;color:#854d0e;border-radius:0 8px 8px 0;padding:10px 14px;font-size:19px}
-.ex .ansbox{border-left-color:#c7d7ef;background:#f0f6ff;color:#17427a}
-.ex .ansbox code,.ex .hintbox code{font-family:var(--mono);font-size:18px}
-.ex.pass summary::after{content:' ✓ 已通过';color:var(--green);font-size:18px;font-weight:750}
 .sqlerr{border:1px solid #f1a5ab;background:#fff1f2;color:#991b1b;border-radius:9px;padding:14px 18px;margin-top:14px;font-size:20px}
 .exlist{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .exlist button{border-radius:20px;min-height:40px;padding:5px 14px;font-size:18px}
 .hint{font-size:19px;color:var(--muted);margin-top:10px}
 .hint code{font-family:var(--mono);background:#f0f6ff;border:1px solid #c7d7ef;border-radius:5px;padding:0 6px;font-size:17px}
+
+/* note */
 .note{display:flex;gap:14px;align-items:flex-start;border:1px solid #e6be66;border-radius:9px;background:#fff9eb;color:#854d0e;padding:16px 20px;margin-top:12px}
 .note svg{flex:none;width:26px;height:26px;margin-top:3px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .note p{font-size:20px;margin:0}
@@ -122,6 +111,10 @@ textarea#sqlInput{width:100%;min-height:190px;font-family:var(--mono);font-size:
     <h1>SQL 平台</h1>
     <p class="subtitle">输入 SQL，马上出结果；顺便看看这条查询到底有多"贵"。</p>
     <p class="offline"><b>● 离线可用</b> · 界面中文 · 所有计算都在你的浏览器里完成</p>
+    <nav class="pagenav" aria-label="页面切换">
+      <a><button type="button" class="cur" aria-current="page">SQL 平台</button></a>
+      <a href="./exercises.html"><button type="button">课堂练习 →</button></a>
+    </nav>
   </header>
 
   <div class="panel">
@@ -156,7 +149,7 @@ WHERE S.Sid = E.Sid AND C.Cid = E.Cid
         <span id="sqlCount" class="count-chip"></span>
       </div>
       <div id="sqlErr" class="sqlerr" hidden></div>
-      <p class="hint">支持 <code>SELECT 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件]</code>；条件支持 <code>= != &lt; &lt;= &gt; &gt;=</code>、<code>AND / OR</code> 和表别名。多表用逗号连接时，引擎会先做笛卡尔积再用 WHERE 过滤——这正是复杂度暴涨的原因。</p>
+      <p class="hint">支持 <code>SELECT [DISTINCT] 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件]</code>；条件支持 <code>= != &lt; &lt;= &gt; &gt;=</code>、<code>AND / OR</code> 和表别名。多表用逗号连接时，引擎会先做笛卡尔积再用 WHERE 过滤——这正是复杂度暴涨的原因。</p>
     </div>
     <div class="panel" style="margin-top:20px">
       <h2>查询示例</h2>
@@ -172,97 +165,33 @@ WHERE S.Sid = E.Sid AND C.Cid = E.Cid
     <div class="cx" id="cxLine"></div>
   </div>
 
-  <div class="panel" id="exercisePanel">
-    <h2>课堂练习</h2>
-    <p class="muted">按课件进度一步步来。每题写完点「检查」，引擎会把你的结果和参考答案逐行比对（顺序无关）。<b>题目基于课件示例数据（5 学生 / 4 门课 / 5 条选课）</b>，先切回「课件示例数据」再作答。</p>
-    <div id="exercises" class="exlist2"></div>
-  </div>
-
-  <footer style="margin-top:30px;color:var(--muted);font-size:19px;text-align:center">SQL 平台 · CS0502 Vibe Coding · 与课件《数据库》配套使用</footer>
+  <footer style="margin-top:30px;color:var(--muted);font-size:19px;text-align:center">SQL 平台 · CS0502 Vibe Coding · 与课件《数据库》配套使用 · <a href="./exercises.html">课堂练习</a></footer>
 </div>
 
+<script src="./sql-engine.js"></script>
 <script>
 'use strict';
+const E = window.SQLE;
+let DATA = null, mode = 'small';
 
-/* ================= 数据 ================= */
-let DATA = null;
-let mode = 'small';
-
-function slideData(){
-  return {
-    Student:{cols:['Sid','Sname','Sage'],rows:[
-      ['3023001093','李家杰',21],['3011112340','王伟',20],
-      ['3020621034','刘佳琪',18],['3020831035','吕松',19],['3021131123','赵万里',22]]},
-    Course:{cols:['Cid','Cname','Credit'],rows:[
-      [1,'数据库',4],[2,'操作系统',5],[3,'英语',3],[4,'微积分',2]]},
-    Enrolled:{cols:['Sid','Cid','Grade'],rows:[
-      ['3023001093',1,92],['3023001093',2,88],['3020621034',1,70],
-      ['3020831035',1,85],['3021131123',2,95]]}
-  };
-}
-function randomData(nStu, nCou){
-  nStu=Math.max(1,Math.min(10000,Math.floor(nStu)||200));
-  nCou=Math.max(1,Math.min(20,Math.floor(nCou)||20));
-  const SUR='王李张刘陈杨赵黄周吴徐孙马朱胡郭何高林郑'.split('');
-  const GIV='伟芳娜敏静丽强磊军洋勇艳杰娟涛明超霞平刚华晨悦辰昊'.split('');
-  const COURSES=['高等数学','线性代数','大学物理','数据结构','操作系统','计算机网络','数据库','编译原理','机器学习','信号与系统','电路理论','概率统计','软件工程','计算机组成','人工智能','密码学','图形学','嵌入式系统','算法设计','数值分析'].slice(0,nCou);
-  const students=[];
-  for(let i=0;i<nStu;i++){
-    const id='3023'+String(i).padStart(7,'0');
-    students.push([id, SUR[Math.floor(Math.random()*SUR.length)]+GIV[Math.floor(Math.random()*GIV.length)], 17+Math.floor(Math.random()*7)]);
-  }
-  const courses=COURSES.map((c,i)=>[i+1,c,2+Math.floor(Math.random()*4)]);
-  const enrolled=[]; const seen=new Set();
-  students.forEach(s=>{
-    const k=Math.min(nCou,3+Math.floor(Math.random()*6));   // 每人选 3~8 门
-    const picks=new Set();
-    while(picks.size<k) picks.add(1+Math.floor(Math.random()*nCou));
-    picks.forEach(c=>{
-      const key=s[0]+'_'+c;
-      if(!seen.has(key)){ seen.add(key); enrolled.push([s[0],c,40+Math.floor(Math.random()*61)]); }
-    });
-  });
-  return {
-    Student:{cols:['Sid','Sname','Sage'],rows:students},
-    Course:{cols:['Cid','Cname','Credit'],rows:courses},
-    Enrolled:{cols:['Sid','Cid','Grade'],rows:enrolled}
-  };
-}
 function setData(m){
   mode=m;
-  DATA = m==='small' ? slideData() : randomData(
-    document.getElementById('numStu').value,
-    document.getElementById('numCou').value);
+  DATA = m==='small' ? E.loadSlide() : E.loadRandom(document.getElementById('numStu').value, document.getElementById('numCou').value);
   renderChips(); renderPreview(); renderFlat();
   document.getElementById('btnSmall').setAttribute('aria-pressed', m==='small');
   document.getElementById('btnBig').setAttribute('aria-pressed', m==='big');
   document.getElementById('sizeCtrl').hidden = m!=='big';
 }
-function fmt(n){ return n.toLocaleString('en-US'); }
+const fmt = E.fmt;
 function renderChips(){
   document.getElementById('chipStudent').innerHTML='Student <small>'+fmt(DATA.Student.rows.length)+' 行</small>';
   document.getElementById('chipCourse').innerHTML='Course <small>'+fmt(DATA.Course.rows.length)+' 行</small>';
   document.getElementById('chipEnrolled').innerHTML='Enrolled <small>'+fmt(DATA.Enrolled.rows.length)+' 行</small>';
 }
-function tableHTML(rel, capRows, withIndex){
-  let h='<div class="tablewrap"><table class="rel"><thead><tr>';
-  if(withIndex) h+='<th class="idx">#</th>';
-  h+=rel.cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
-  const rows = capRows ? rel.rows.slice(0,capRows) : rel.rows;
-  rows.forEach((r,i)=>{
-    h+='<tr>';
-    if(withIndex) h+='<td class="num idx">'+(i+1)+'</td>';
-    h+=r.map(v=>'<td'+(typeof v==='number'?' class="num"':'')+'>'+v+'</td>').join('')+'</tr>';
-  });
-  if(!rows.length) h+='<tr class="empty"><td'+(withIndex?' colspan="'+(rel.cols.length+1)+'"':' colspan="'+rel.cols.length+'"')+'>（空集，没有满足条件的元组）</td></tr>';
-  h+='</tbody></table></div>';
-  if(capRows&&rel.rows.length>capRows) h+='<p class="muted" style="margin-top:8px">只显示前 '+capRows+' 行，共 '+fmt(rel.rows.length)+' 行。</p>';
-  return h;
-}
 function renderPreview(){
   document.getElementById('previewWrap').innerHTML =
     ['Student','Course','Enrolled'].map(n=>
-      '<details'+(n==='Enrolled'?' open':'')+'><summary>'+n+'（'+fmt(DATA[n].rows.length)+' 行）</summary>'+tableHTML(DATA[n],20)+'</details>'
+      '<details'+(n==='Enrolled'?' open':'')+'><summary>'+n+'（'+fmt(DATA[n].rows.length)+' 行）</summary>'+E.tableHTML(DATA[n],20)+'</details>'
     ).join('');
 }
 /* Excel 单表视图：把三张表全部摊平到一张大表，直观看到冗余 */
@@ -278,246 +207,34 @@ function renderFlat(){
   const nameRep=(n/nStu).toFixed(1), couRep=(n/nCou).toFixed(1);
   document.getElementById('flatWrap').innerHTML =
     '<details><summary>对照：如果像 Excel 一样全塞进一张表（'+fmt(n)+' 行）</summary>'+
-    tableHTML({cols,rows},25)+
-    '<div class="note warn" style="margin-top:12px">'+
+    E.tableHTML({cols,rows},25)+
+    '<div class="note">'+
     '<svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>'+
     '<p><b>冗余来了</b>：'+fmt(n)+' 行里，<b>Sname / Sage 重复了约 '+nameRep+' 次</b>（'+fmt(nStu)+' 个学生），<b>Cname / Credit 重复了约 '+couRep+' 次</b>（'+fmt(nCou)+' 门课）。'+
     '想改一门课的名字要改 '+fmt(n)+' 处，漏一处数据就不一致。'+
-    '关系数据库把三张表拆开、靠外键关联，<b>每个事实只存一份</b>——查询时再用连接（②号示例）把表拼回来。</p></div></details>';
+    '关系数据库把三张表拆开、靠外键关联，<b>每个事实只存一份</b>——查询时再用连接把表拼回来。</p></div></details>';
 }
 
-/* ================= SQL 引擎 ================= */
-const KEYWORDS=new Set(['SELECT','FROM','WHERE','AND','OR','NATURAL','JOIN']);
-function tokenize(s){
-  const t=[]; let i=0;
-  while(i<s.length){
-    const c=s[i];
-    if(/\s/.test(c)){i++;continue;}
-    if(c==="'"){ let j=i+1,str=''; while(j<s.length&&s[j]!=="'"){str+=s[j];j++;} if(j>=s.length) throw new Error('字符串缺少收尾的单引号'); t.push({k:'str',v:str}); i=j+1; continue; }
-    if(/[A-Za-z_\u4e00-\u9fa5]/.test(c)){ let j=i; while(j<s.length&&/[A-Za-z0-9_.\u4e00-\u9fa5]/.test(s[j]))j++; t.push({k:'id',v:s.slice(i,j)}); i=j; continue; }
-    if(/[0-9]/.test(c)){ let j=i; while(j<s.length&&/[0-9.]/.test(s[j]))j++; t.push({k:'num',v:Number(s.slice(i,j))}); i=j; continue; }
-    const two=s.slice(i,i+2);
-    if(two==='<='||two==='>='||two==='!='||two==='<>'){ t.push({k:'op',v:two==='<>'?'!=':two}); i+=2; continue; }
-    if('=<>'.includes(c)){ t.push({k:'op',v:c}); i++; continue; }
-    if('(),;*'.includes(c)){ t.push({k:'sym',v:c}); i++; continue; }
-    throw new Error('无法识别的符号：'+c);
-  }
-  return t;
-}
-function parseSQL(src){
-  const t=tokenize(src); let p=0;
-  const peek=()=>t[p], next=()=>t[p++];
-  const kw=x=>{ const tk=next(); if(!tk||tk.k!=='id'||tk.v.toUpperCase()!==x) throw new Error('需要关键字 '+x+'，但看到「'+(tk?tk.v:'结尾')+'」'); };
-  const isKw=x=>peek()&&peek().k==='id'&&peek().v.toUpperCase()===x;
-  kw('SELECT');
-  let distinct=false;
-  if(isKw('DISTINCT')){ next(); distinct=true; }
-  const select=[];
-  if(peek()&&peek().k==='sym'&&peek().v==='*'){ next(); select.push('*'); }
-  else{
-    for(;;){
-      const tk=next(); if(!tk||tk.k!=='id') throw new Error('SELECT 后需要列名');
-      select.push(tk.v);
-      if(peek()&&peek().k==='sym'&&peek().v===','){next();continue;}
-      break;
-    }
-  }
-  kw('FROM');
-  const from=[];
-  for(;;){
-    const isNat = isKw('NATURAL') && from.length>0;
-    if(isNat){ next(); kw('JOIN'); }
-    const name=next(); if(!name||name.k!=='id') throw new Error('FROM 后需要表名');
-    let alias=null;
-    if(peek()&&peek().k==='id'&&!KEYWORDS.has(peek().v.toUpperCase())) alias=next().v;
-    from.push({name:name.v,alias:alias||name.v,natural:isNat});
-    if(peek()&&peek().k==='sym'&&peek().v===','){next();continue;}
-    if(isKw('NATURAL')) continue;
-    break;
-  }
-  let where=null;
-  if(isKw('WHERE')){ next(); where=parseOr(); }
-  if(peek()&&peek().k==='sym'&&peek().v===';') next();
-  if(p<t.length) throw new Error('SQL 末尾有多余内容：「'+t[p].v+'」（本平台支持 SELECT…FROM…WHERE）');
-  return {select,from,where,distinct};
-
-  function parseOr(){ let l=parseAnd(); while(isKw('OR')){ next(); l={t:'or',l,r:parseAnd()}; } return l; }
-  function parseAnd(){ let l=parseCond(); while(isKw('AND')){ next(); l={t:'and',l,r:parseCond()}; } return l; }
-  function parseCond(){
-    const a=parseOperand();
-    const tk=next();
-    if(!tk||tk.k!=='op') throw new Error('条件里需要比较符（= != < <= > >=），看到「'+(tk?tk.v:'结尾')+'」');
-    return {t:'cmp',op:tk.v,l:a,r:parseOperand()};
-  }
-  function parseOperand(){
-    const tk=next();
-    if(!tk) throw new Error('条件不完整');
-    if(tk.k==='num') return {t:'num',v:tk.v};
-    if(tk.k==='str') return {t:'str',v:tk.v};
-    if(tk.k==='id') return {t:'col',v:tk.v};
-    throw new Error('条件里不能使用「'+tk.v+'」');
-  }
-}
-function countConds(n){
-  if(!n) return 0;
-  if(n.t==='and'||n.t==='or') return countConds(n.l)+countConds(n.r);
-  return 1;
-}
-function runSQL(src){
-  const t0=performance.now();
-  const ast=parseSQL(src);
-  let env=null, crossRows=0, joinComps=0, joinKind='none', joinSizes=[], whereEvals=0, pending=[];
-  function lookup(o,col){
-    if(o[col]!==undefined) return o[col];
-    if(col.includes('.')) throw new Error('找不到列「'+col+'」。请检查表名/别名拼写。');
-    const hits=env.aliases.map(a=>a+'.'+col).filter(c=>o[c]!==undefined);
-    if(hits.length===1) return o[hits[0]];
-    if(hits.length>1) throw new Error('列名「'+col+'」在多张表中出现，请写成 表名.'+col);
-    throw new Error('找不到列「'+col+'」');
-  }
-  function operandVal(nd,o){ return nd.t==='col'?lookup(o,nd.v):nd.v; }
-  function evalCmp(n,o){
-    const l=operandVal(n.l,o), r=operandVal(n.r,o);
-    switch(n.op){
-      case '=': return l==r;
-      case '!=': return l!=r;
-      default:{
-        const ln=Number(l), rn=Number(r);
-        const numeric=!isNaN(ln)&&!isNaN(rn)&&l!==''&&r!=='';
-        const a=numeric?ln:l, b=numeric?rn:r;
-        if(n.op==='>')return a>b; if(n.op==='<')return a<b;
-        if(n.op==='>=')return a>=b; return a<=b;
-      }
-    }
-  }
-  function evalWhere(n,o){
-    if(!n) return true;
-    if(n.t==='and') return evalWhere(n.l,o)&&evalWhere(n.r,o);
-    if(n.t==='or') return evalWhere(n.l,o)||evalWhere(n.r,o);
-    return evalCmp(n,o);
-  }
-  /* 选择下推：把 WHERE 拆成顶层 AND 合取项，只涉及已连接表的条件提前过滤 */
-  const conjuncts=[];
-  (function flat(n){ if(!n)return; if(n.t==='and'){flat(n.l);flat(n.r);} else conjuncts.push(n); })(ast.where);
-  pending=conjuncts.slice();
-  const condCount=countConds(ast.where);
-  function conjReady(c){
-    let ok=true;
-    (function walk(n){
-      if(!ok||!n)return;
-      if(n.t==='and'||n.t==='or'||n.t==='cmp'){ walk(n.l); walk(n.r); return; }
-      if(n.t!=='col')return;
-      const v=n.v;
-      if(v.includes('.')){ if(!env||!(v.split('.')[0] in env.aliasTable)) ok=false; }
-      else if(env){ if(!env.aliases.some(a=>DATA[env.aliasTable[a]].cols.includes(v))) ok=false; }
-      else ok=false;
-    })(c);
-    return ok;
-  }
-  function applyReady(){
-    const now=[], later=[];
-    pending.forEach(c=>(conjReady(c)?now:later).push(c));
-    if(now.length){
-      whereEvals += env.rows.length*now.length;
-      if(env.rows.length) env.rows=env.rows.filter(o=>now.every(c=>evalWhere(c,o)));
-    }
-    pending=later;
-  }
-  ast.from.forEach(tb=>{
-    const key=Object.keys(DATA).find(k=>k.toLowerCase()===tb.name.toLowerCase());
-    if(!key) throw new Error('没有名为「'+tb.name+'」的表。可用表：'+Object.keys(DATA).join('、'));
-    const d=DATA[key];
-    const mk=r=>{const o={};d.cols.forEach((c,i)=>o[tb.alias+'.'+c]=r[i]);return o;};
-    if(tb.natural&&env){
-      const common=d.cols.filter(c=>env.aliases.some(a=>DATA[env.aliasTable[a]].cols.includes(c)));
-      if(!common.length) throw new Error(tb.alias+' 与前面的表没有公共属性，不能 NATURAL JOIN');
-      const prevRows=env.rows.length, newRows=d.rows.length;
-      if(prevRows*newRows>5e7) throw new Error('连接比较次数达 '+fmt(prevRows*newRows)+' 次，超出浏览器计算上限。请把数据规模调小，或先在 WHERE 里过滤。');
-      joinComps += prevRows*newRows*common.length;
-      joinSizes.push(prevRows+'×'+newRows);
-      joinKind='natural';
-      const cur=d.rows.map(mk), rows=[];
-      const prevVal=(re,c)=>{
-        for(const a of env.aliases){ const q=a+'.'+c; if(re[q]!==undefined) return re[q]; }
-        return undefined;
-      };
-      env.rows.forEach(re=>cur.forEach(ce=>{
-        if(common.every(c=>prevVal(re,c)===ce[tb.alias+'.'+c])){
-          const merged=Object.assign({},re,ce);
-          common.forEach(c=>{delete merged[tb.alias+'.'+c];});
-          rows.push(merged);
-        }
-      }));
-      env={rows, cols:env.cols.concat(d.cols.filter(c=>!common.includes(c)).map(c=>tb.alias+'.'+c)),
-           aliases:env.aliases.concat([tb.alias]),
-           aliasTable:Object.assign(env.aliasTable, Object.fromEntries([[tb.alias,key]]))};
-      applyReady();
-      crossRows=env.rows.length;
-      return;
-    }
-    if(!env){ env={rows:d.rows.map(mk), cols:d.cols.map(c=>tb.alias+'.'+c), aliases:[tb.alias], aliasTable:Object.fromEntries([[tb.alias,key]])}; applyReady(); crossRows=env.rows.length; return; }
-    const prevRows=env.rows.length, newRows=d.rows.length;
-    if(prevRows*newRows>5e7) throw new Error('先做笛卡尔积会产生 '+fmt(prevRows*newRows)+' 行中间结果，超出浏览器内存上限。请把数据规模调小，或先在 WHERE 里写上连接条件（如 S.Sid=E.Sid）。');
-    joinComps += prevRows*newRows;
-    joinSizes.push(prevRows+'×'+newRows);
-    joinKind=joinKind==='natural'?'mixed':'cross';
-    const rows=[];
-    env.rows.forEach(re=>d.rows.forEach(r=>rows.push(Object.assign({},re,mk(r)))));
-    env={rows, cols:env.cols.concat(d.cols.map(c=>tb.alias+'.'+c)),
-         aliases:env.aliases.concat([tb.alias]),
-         aliasTable:Object.assign(env.aliasTable, Object.fromEntries([[tb.alias,key]]))};
-    applyReady();
-    crossRows=env.rows.length;
-  });
-  if(!env) throw new Error('FROM 后面需要至少一张表');
-  if(pending.length){
-    const n=env.rows.length;
-    if(n) env.rows=env.rows.filter(o=>pending.every(c=>evalWhere(c,o)));
-    whereEvals += n*pending.length;
-  }
-  let rows=env.rows;
-  let outCols;
-  if(ast.select[0]==='*'){
-    outCols=env.cols;
-    rows=rows.map(o=>outCols.map(c=>o[c]));
-  } else {
-    outCols=ast.select;
-    rows=rows.map(o=>ast.select.map(c=>lookup(o,c)));
-  }
-  if(ast.distinct){
-    const seen=new Set(), ded=[];
-    rows.forEach(r=>{const k=JSON.stringify(r); if(!seen.has(k)){seen.add(k);ded.push(r);}});
-    rows=ded;
-  }
-  const ms=performance.now()-t0;
-  const fromSizes=ast.from.map(tb=>{
-    const key=Object.keys(DATA).find(k=>k.toLowerCase()===tb.name.toLowerCase());
-    return DATA[key].rows.length;
-  });
-  const scanned=fromSizes.reduce((a,b)=>a+b,0);
-  return {cols:outCols, rows, fromSizes, scanned, crossRows, joinComps, joinKind, joinSizes, condCount, whereEvals, ms};
-}
-
-/* ================= UI ================= */
+/* ================= SQL UI ================= */
+const EXAMPLES=[
+  ['① 90 分以上的选课','SELECT * FROM Enrolled WHERE Grade > 90;'],
+  ['② 投影：选了课的学号','SELECT DISTINCT Sid FROM Enrolled;'],
+  ['③ 补考名单（两表连接）','SELECT Sname, Cid, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade < 60;'],
+  ['④ 三表连接：成绩单','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND E.Grade >= 90;'],
+  ['⑤ 学霸成绩单（≥95）','SELECT Sname, Cname, Grade\nFROM Student NATURAL JOIN Enrolled\n  NATURAL JOIN Course\nWHERE Grade >= 95;'],
+  ['⑥ 60–69 分的边缘成绩','SELECT Sid, Cid, Grade FROM Enrolled\nWHERE Grade >= 60 AND Grade <= 69;'],
+  ['⑦ 4 学分及以上的课','SELECT Cname, Credit FROM Course\nWHERE Credit >= 4;'],
+  ['⑧ 年龄最小/最大的学生','SELECT Sname, Sage FROM Student\nWHERE Sage <= 18 OR Sage >= 22;'],
+  ['⑨ 按姓名精确查找','SELECT * FROM Student WHERE Sname = \'李家杰\';'],
+  ['⑩ 开了哪些课','SELECT DISTINCT Cname\nFROM Enrolled NATURAL JOIN Course;'],
+  ['⑪ 王牌课的成绩分布','SELECT Cname, Grade\nFROM Enrolled NATURAL JOIN Course\nWHERE Cname = \'数据库\';'],
+  ['⑫ 年轻人的高分记录','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND S.Sage <= 19 AND E.Grade >= 85;']
+];
 function renderExamples(){
-  const EX=[
-    ['① 90 分以上的选课','SELECT * FROM Enrolled WHERE Grade > 90;'],
-    ['② 投影：选了课的学号','SELECT DISTINCT Sid FROM Enrolled;'],
-    ['③ 补考名单（两表连接）','SELECT Sname, Cid, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade < 60;'],
-    ['④ 三表连接：成绩单','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND E.Grade >= 90;'],
-    ['⑤ 学霸成绩单（≥95）','SELECT Sname, Cname, Grade\nFROM Student NATURAL JOIN Enrolled\n  NATURAL JOIN Course\nWHERE Grade >= 95;'],
-    ['⑥ 60–69 分的边缘成绩','SELECT Sid, Cid, Grade FROM Enrolled\nWHERE Grade >= 60 AND Grade <= 69;'],
-    ['⑦ 4 学分及以上的课','SELECT Cname, Credit FROM Course\nWHERE Credit >= 4;'],
-    ['⑧ 年龄最小/最大的学生','SELECT Sname, Sage FROM Student\nWHERE Sage <= 18 OR Sage >= 22;'],
-    ['⑨ 按姓名精确查找','SELECT * FROM Student WHERE Sname = \'李家杰\';'],
-    ['⑩ 开了哪些课','SELECT DISTINCT Cname\nFROM Enrolled NATURAL JOIN Course;'],
-    ['⑪ 王牌课的成绩分布','SELECT Cname, Grade\nFROM Enrolled NATURAL JOIN Course\nWHERE Cname = \'数据库\';'],
-    ['⑫ 年轻人的高分记录','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND S.Sage <= 19 AND E.Grade >= 85;']
-  ];
   const wrap=document.getElementById('sqlExamples');
-  wrap.innerHTML=EX.map((e,i)=>'<button type="button" data-i="'+i+'">'+e[0]+'</button>').join('');
+  wrap.innerHTML=EXAMPLES.map((e,i)=>'<button type="button" data-i="'+i+'">'+e[0]+'</button>').join('');
   wrap.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    document.getElementById('sqlInput').value=EX[+b.dataset.i][1];
+    document.getElementById('sqlInput').value=EXAMPLES[+b.dataset.i][1];
     runSql();
   });
 }
@@ -536,12 +253,11 @@ function renderMetrics(m){
   cards.push(['执行耗时', m.ms.toFixed(2)+' ms', 'good']);
   document.getElementById('metrics').innerHTML=cards.map(c=>
     '<div class="metric"><div class="k">'+c[0]+'</div><div class="v '+(c[2]||'')+'">'+c[1]+'</div></div>').join('');
-  // complexity line
   const prods=m.fromSizes.join(' × ');
   const product=m.fromSizes.reduce((a,b)=>a*b,1);
   let cx;
   if(m.joinKind==='cross'||m.joinKind==='mixed'){
-    cx='复杂度理论上限：<b>O('+prods+' × c)</b>，即 '+fmt(product)+' 行组合、每行过 '+m.condCount+' 个条件。引擎把只涉及已连接表的条件<b>提前判断（选择下推）</b>，实际中间结果只有 '+fmt(m.crossRows)+' 行、WHERE 共判断 '+fmt(m.whereEvals)+' 次——这就是课件优化树里"选择下推"做的事。';
+    cx='复杂度理论上限：<b>O('+prods+' × c)</b>，即 '+fmt(product)+' 行组合、每行过 '+m.condCount+' 个条件。引擎把只涉及已连接表的条件<b>提前判断（谓词下推）</b>，实际中间结果只有 '+fmt(m.crossRows)+' 行、WHERE 共判断 '+fmt(m.whereEvals)+' 次——这就是课件优化树里"选择下推"做的事。';
   } else if(m.joinKind==='natural'){
     cx='复杂度估计：<b>O(n × m × k)</b>（k 为公共属性数）—— 朴素连接是平方级的：'+m.joinSizes.join(' , ')+'，本次比较了 '+fmt(m.joinComps)+' 次； WHERE 条件也已下推，实际判断 '+fmt(m.whereEvals)+' 次。';
   } else {
@@ -555,8 +271,8 @@ function runSql(){
   err.hidden=true;
   document.getElementById('sqlCount').textContent='';
   try{
-    const m=runSQL(document.getElementById('sqlInput').value);
-    document.getElementById('sqlOut').innerHTML=tableHTML(m,500,true);
+    const m=E.runSQL(document.getElementById('sqlInput').value);
+    document.getElementById('sqlOut').innerHTML=E.tableHTML(m,500,true);
     document.getElementById('sqlCount').textContent='结果 '+fmt(m.rows.length)+' 行';
     renderMetrics(m);
   }catch(e){
@@ -567,117 +283,6 @@ function runSql(){
   }
 }
 document.getElementById('sqlRun').onclick=runSql;
-
-/* ================= 课堂练习 ================= */
-const EXERCISES=[
-  {t:'热身：按条件挑行（σ 选择）',
-   q:'教务老师想列出所有 <b>90 分以上</b>的选课记录（全部列）。<br>提示：用 <code>WHERE Grade &gt; 90</code>。',
-   expect:"SELECT * FROM Enrolled WHERE Grade > 90;",
-   hint:'只需要一张表 Enrolled；SELECT 全部列用 *；条件是 Grade > 90。',
-   ans:"SELECT * FROM Enrolled WHERE Grade > 90;"},
-  {t:'只挑几列（π 投影）',
-   q:'列出所有学生的<b>学号和姓名</b>（不要年龄）。',
-   expect:"SELECT Sid, Sname FROM Student;",
-   hint:'SELECT 后面写需要的列名，逗号分隔。',
-   ans:"SELECT Sid, Sname FROM Student;"},
-  {t:'选择 + 投影',
-   q:'把 <b>88 分以上</b>的选课记录的<b>学号和成绩</b>列出来——先挑行还是先挑列？',
-   expect:"SELECT Sid, Grade FROM Enrolled WHERE Grade >= 88;",
-   hint:'一条 SQL 同时做两件事：SELECT 管列，WHERE 管行。',
-   ans:"SELECT Sid, Grade FROM Enrolled WHERE Grade >= 88;"},
-  {t:'两表连接：把名字找回来',
-   q:'Enrolled 里只有学号。请列出 <b>90 分以上学生的姓名和成绩</b>（Student + Enrolled）。',
-   expect:"SELECT Sname, Grade FROM Student S, Enrolled E WHERE S.Sid = E.Sid AND E.Grade > 90;",
-   hint:'FROM 写两张表，WHERE 里先给连接条件 S.Sid = E.Sid，再给过滤条件。',
-   ans:"SELECT Sname, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade > 90;"},
-  {t:'三表连接（课件第 20 页同款）',
-   q:'列出选了<b>“数据库”课</b>的学生的<b>姓名和成绩</b>（Student + Enrolled + Course）。',
-   expect:"SELECT S.Sname, E.Grade FROM Student S, Enrolled E, Course C WHERE S.Sid = E.Sid AND C.Cid = E.Cid AND C.Cname = '数据库';",
-   hint:'两条连接条件（S-E、E-C）+ 一条课程名过滤。',
-   ans:"SELECT S.Sname, E.Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库';"},
-  {t:'DISTINCT：去掉重复行',
-   q:'有学生选了课的<b>课程名</b>有哪些？每门课只出现一次。<br>（想想 Excel 单表视图里 Cname 重复了多少次。）',
-   expect:"SELECT DISTINCT Cname FROM Enrolled NATURAL JOIN Course;",
-   hint:'Enrolled 连接 Course 后每选课一条记录，同一门课会重复；用 SELECT DISTINCT。',
-   ans:"SELECT DISTINCT Cname\nFROM Enrolled NATURAL JOIN Course;"},
-  {t:'思考题：空集也是答案',
-   q:'课件原题：查询选了<b>数据库</b>课、<b>年龄 20 岁以下</b>、成绩 <b>90 分以上</b>的学生姓名。写出来运行，看看结果是什么？',
-   expect:"SELECT S.Sname FROM Student S, Enrolled E, Course C WHERE S.Sid = E.Sid AND C.Cid = E.Cid AND C.Cname = '数据库' AND S.Sage < 20 AND E.Grade > 90;",
-   hint:'条件全部写进 WHERE。运行后别急着怀疑自己——仔细看看选了数据库的是谁、他们几岁。',
-   ans:"SELECT Sname\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND S.Sage &lt; 20\n  AND E.Grade &gt; 90;\n\n-- 结果是空集：数据库课 90 分以上的是赵万里（22 岁），\n-- 20 岁以下的刘佳琪（70 分）和吕松（85 分）都没上 90。\n-- SQL 没错，是数据本身没有满足三个条件的学生。"},
-  {t:'优化改写：同样的结果，更快的 SQL',
-   q:'下面这条查询结果是对的，但很慢。<b>只允许调整 FROM 里表的顺序</b>（WHERE 条件原样保留，可跟着换写法），改写出一条<b>结果完全相同、但「连接比较次数」更小</b>的 SQL。<br>建议先切到「随机生成大数据」（学生 1000）感受差距。想想：哪张表先被过滤到最小，就应该最先出场？',
-   slowSql:"SELECT S.Sname, C.Cname, E.Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND E.Grade >= 90;",
-   expect:"SELECT S.Sname, C.Cname, E.Grade\nFROM Course C, Enrolled E, Student S\nWHERE C.Cname = '数据库' AND C.Cid = E.Cid\n  AND E.Grade >= 90 AND E.Sid = S.Sid;",
-   hint:'把 <code>Course</code> 放到 FROM 最前面：Cname=「数据库」这个条件在第一张表扫描后就能立刻生效（选择下推），后面每一步连接的都是被砍小后的结果。',
-   ans:"SELECT S.Sname, C.Cname, E.Grade<br>FROM <b>Course C</b>, Enrolled E, Student S<br>WHERE C.Cname = '数据库' AND C.Cid = E.Cid<br>&nbsp;&nbsp;AND E.Grade >= 90 AND E.Sid = S.Sid;<br><br>-- 1000 学生规模下：连接比较 5,496,980 → 63,477 次，约快 86 倍。<br>-- 真实数据库的优化器会自动做这种重排——这正是课件优化树的思想。"},
-  {t:'讨论题（不用写 SQL）：为什么快？',
-   q:'第 5 题的三表连接，理论上要先做 5×5×4=100 行的笛卡尔积。但本页引擎实际产生的中间结果远小于 100 行——<b>为什么？</b>和课件里“选择下推”有什么关系？',
-   discussion:'参考答案：引擎把 WHERE 拆成一个个条件，<b>每连接完一张表，就把只涉及已连接表的条件立刻用上</b>（选择下推）。比如 S.Sid=E.Sid 在拼 Enrolled 时就把 25 行砍到 5 行，C.Cid=E.Cid 和 Cname=「数据库」在拼 Course 时继续砍。课件优化树做的事一模一样：把 σ 尽量往下推，让中间结果从一开始就小。真实数据库的查询优化器还会配合索引，把 O(n×m) 降到接近 O(n+m)。'
-  }
-];
-function renderExercises(){
-  const wrap=document.getElementById('exercises');
-  wrap.innerHTML=EXERCISES.map((e,i)=>{
-    if(e.discussion){
-      return '<details class="ex" id="ex'+i+'"><summary>练习 '+i+' · '+e.t+'</summary>'+
-        '<p class="q">'+e.q+'</p>'+
-        '<div class="row"><button type="button" data-show="ans" data-i="'+i+'">看参考答案</button></div>'+
-        '<div class="ansbox" style="white-space:pre-wrap">'+e.discussion+'</div></details>';
-    }
-    return '<details class="ex" id="ex'+i+'"><summary>练习 '+i+' · '+e.t+'</summary>'+
-      '<p class="q">'+e.q+'</p>'+
-      '<textarea id="exin'+i+'" spellcheck="false" aria-label="练习'+i+' SQL">'+(e.slowSql?e.slowSql.replace(/</g,'&lt;'):'SELECT ;')+'</textarea>'+
-      '<div class="row"><button type="button" class="primary" data-check="'+i+'">检查</button>'+
-      '<button type="button" data-show="hint" data-i="'+i+'">提示</button>'+
-      '<button type="button" data-show="ans" data-i="'+i+'">看答案</button></div>'+
-      '<div class="fb info" id="exfb'+i+'"></div>'+
-      '<div class="hintbox">'+e.hint+'</div>'+
-      '<div class="ansbox"><code>'+e.ans.replace(/\n/g,'<br>')+'</code></div></details>';
-  }).join('');
-  wrap.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>checkEx(+b.dataset.check));
-  wrap.querySelectorAll('[data-show]').forEach(b=>b.onclick=()=>{
-    const box=b.closest('.ex').querySelector(b.dataset.show==='hint'?'.hintbox':'.ansbox');
-    box.style.display=box.style.display==='block'?'none':'block';
-  });
-}
-function checkEx(i){
-  const fb=document.getElementById('exfb'+i);
-  const card=document.getElementById('ex'+i);
-  fb.className='fb info';
-  const key=r=>r.rows.map(x=>JSON.stringify(x)).sort().join('|');
-  try{
-    const mine=runSQL(document.getElementById('exin'+i).value);
-    const ex=EXERCISES[i];
-    if(ex.slowSql){
-      const slow=runSQL(ex.slowSql);
-      if(key(mine)!==key(slow)){
-        fb.textContent='✗ 结果和原查询不一致（你有 '+mine.rows.length+' 行，原查询 '+slow.rows.length+' 行）。改写只能调整表顺序，别改变查询含义。';
-        fb.className='fb no'; card.classList.remove('pass'); return;
-      }
-      if(mine.joinComps<slow.joinComps){
-        fb.textContent='✓ 漂亮！结果一致，连接比较从 '+fmt(slow.joinComps)+' 次降到 '+fmt(mine.joinComps)+' 次（约快 '+(slow.joinComps/mine.joinComps).toFixed(1)+' 倍）。';
-        fb.className='fb ok'; card.classList.add('pass');
-      } else {
-        fb.textContent='✗ 结果对了，但没变快：你的连接比较 '+fmt(mine.joinComps)+' 次 ≥ 原查询 '+fmt(slow.joinComps)+' 次。提示：哪张表能最先被过滤到最小？';
-        fb.className='fb no'; card.classList.remove('pass');
-      }
-      return;
-    }
-    const ref=runSQL(ex.expect);
-    if(key(mine)===key(ref)){
-      fb.textContent='✓ 正确！结果与参考答案完全一致（'+ref.rows.length+' 行）。';
-      fb.className='fb ok'; card.classList.add('pass');
-    } else {
-      fb.textContent='✗ 还差一点：你的结果有 '+mine.rows.length+' 行，参考答案有 '+ref.rows.length+' 行。看看是列选多了/少了，还是条件没写全？';
-      fb.className='fb no'; card.classList.remove('pass');
-    }
-  }catch(e){
-    fb.textContent='✗ '+e.message;
-    fb.className='fb no';
-  }
-}
-renderExercises();
 document.getElementById('sqlInput').addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='Enter') runSql();
 });
