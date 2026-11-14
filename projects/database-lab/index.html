@@ -605,6 +605,12 @@ const EXERCISES=[
    expect:"SELECT S.Sname FROM Student S, Enrolled E, Course C WHERE S.Sid = E.Sid AND C.Cid = E.Cid AND C.Cname = '数据库' AND S.Sage < 20 AND E.Grade > 90;",
    hint:'条件全部写进 WHERE。运行后别急着怀疑自己——仔细看看选了数据库的是谁、他们几岁。',
    ans:"SELECT Sname\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND S.Sage &lt; 20\n  AND E.Grade &gt; 90;\n\n-- 结果是空集：数据库课 90 分以上的是赵万里（22 岁），\n-- 20 岁以下的刘佳琪（70 分）和吕松（85 分）都没上 90。\n-- SQL 没错，是数据本身没有满足三个条件的学生。"},
+  {t:'优化改写：同样的结果，更快的 SQL',
+   q:'下面这条查询结果是对的，但很慢。<b>只允许调整 FROM 里表的顺序</b>（WHERE 条件原样保留，可跟着换写法），改写出一条<b>结果完全相同、但「连接比较次数」更小</b>的 SQL。<br>建议先切到「随机生成大数据」（学生 1000）感受差距。想想：哪张表先被过滤到最小，就应该最先出场？',
+   slowSql:"SELECT S.Sname, C.Cname, E.Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND E.Grade >= 90;",
+   expect:"SELECT S.Sname, C.Cname, E.Grade\nFROM Course C, Enrolled E, Student S\nWHERE C.Cname = '数据库' AND C.Cid = E.Cid\n  AND E.Grade >= 90 AND E.Sid = S.Sid;",
+   hint:'把 <code>Course</code> 放到 FROM 最前面：Cname=「数据库」这个条件在第一张表扫描后就能立刻生效（选择下推），后面每一步连接的都是被砍小后的结果。',
+   ans:"SELECT S.Sname, C.Cname, E.Grade<br>FROM <b>Course C</b>, Enrolled E, Student S<br>WHERE C.Cname = '数据库' AND C.Cid = E.Cid<br>&nbsp;&nbsp;AND E.Grade >= 90 AND E.Sid = S.Sid;<br><br>-- 1000 学生规模下：连接比较 5,496,980 → 63,477 次，约快 86 倍。<br>-- 真实数据库的优化器会自动做这种重排——这正是课件优化树的思想。"},
   {t:'讨论题（不用写 SQL）：为什么快？',
    q:'第 5 题的三表连接，理论上要先做 5×5×4=100 行的笛卡尔积。但本页引擎实际产生的中间结果远小于 100 行——<b>为什么？</b>和课件里“选择下推”有什么关系？',
    discussion:'参考答案：引擎把 WHERE 拆成一个个条件，<b>每连接完一张表，就把只涉及已连接表的条件立刻用上</b>（选择下推）。比如 S.Sid=E.Sid 在拼 Enrolled 时就把 25 行砍到 5 行，C.Cid=E.Cid 和 Cname=「数据库」在拼 Course 时继续砍。课件优化树做的事一模一样：把 σ 尽量往下推，让中间结果从一开始就小。真实数据库的查询优化器还会配合索引，把 O(n×m) 降到接近 O(n+m)。'
@@ -621,7 +627,7 @@ function renderExercises(){
     }
     return '<details class="ex" id="ex'+i+'"><summary>练习 '+i+' · '+e.t+'</summary>'+
       '<p class="q">'+e.q+'</p>'+
-      '<textarea id="exin'+i+'" spellcheck="false" aria-label="练习'+i+' SQL">SELECT ;</textarea>'+
+      '<textarea id="exin'+i+'" spellcheck="false" aria-label="练习'+i+' SQL">'+(e.slowSql?e.slowSql.replace(/</g,'&lt;'):'SELECT ;')+'</textarea>'+
       '<div class="row"><button type="button" class="primary" data-check="'+i+'">检查</button>'+
       '<button type="button" data-show="hint" data-i="'+i+'">提示</button>'+
       '<button type="button" data-show="ans" data-i="'+i+'">看答案</button></div>'+
@@ -639,10 +645,26 @@ function checkEx(i){
   const fb=document.getElementById('exfb'+i);
   const card=document.getElementById('ex'+i);
   fb.className='fb info';
+  const key=r=>r.rows.map(x=>JSON.stringify(x)).sort().join('|');
   try{
     const mine=runSQL(document.getElementById('exin'+i).value);
-    const ref=runSQL(EXERCISES[i].expect);
-    const key=r=>r.rows.map(x=>JSON.stringify(x)).sort().join('|');
+    const ex=EXERCISES[i];
+    if(ex.slowSql){
+      const slow=runSQL(ex.slowSql);
+      if(key(mine)!==key(slow)){
+        fb.textContent='✗ 结果和原查询不一致（你有 '+mine.rows.length+' 行，原查询 '+slow.rows.length+' 行）。改写只能调整表顺序，别改变查询含义。';
+        fb.className='fb no'; card.classList.remove('pass'); return;
+      }
+      if(mine.joinComps<slow.joinComps){
+        fb.textContent='✓ 漂亮！结果一致，连接比较从 '+fmt(slow.joinComps)+' 次降到 '+fmt(mine.joinComps)+' 次（约快 '+(slow.joinComps/mine.joinComps).toFixed(1)+' 倍）。';
+        fb.className='fb ok'; card.classList.add('pass');
+      } else {
+        fb.textContent='✗ 结果对了，但没变快：你的连接比较 '+fmt(mine.joinComps)+' 次 ≥ 原查询 '+fmt(slow.joinComps)+' 次。提示：哪张表能最先被过滤到最小？';
+        fb.className='fb no'; card.classList.remove('pass');
+      }
+      return;
+    }
+    const ref=runSQL(ex.expect);
     if(key(mine)===key(ref)){
       fb.textContent='✓ 正确！结果与参考答案完全一致（'+ref.rows.length+' 行）。';
       fb.className='fb ok'; card.classList.add('pass');
