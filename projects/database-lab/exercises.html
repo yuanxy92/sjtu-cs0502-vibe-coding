@@ -94,6 +94,7 @@ table.rel .empty td{color:var(--muted)}
 .ex .mini{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .ex .mini span{border:1px solid var(--line);border-radius:7px;background:#f8fafd;padding:4px 12px;font-size:17px;color:var(--muted)}
 .ex .mini b{font-family:var(--mono);color:#102344}
+.ex .mini b.bad{color:var(--red)}
 .ex .sqlerr{border:1px solid #f1a5ab;background:#fff1f2;color:#991b1b;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:19px}
 </style>
 </head>
@@ -238,13 +239,12 @@ function renderExercises(){
   });
 }
 function miniMetrics(m){
+  const naiveWhere=m.naiveCrossRows*m.condCount;
   return '<div class="mini">'+
-    '<span>扫描 <b>'+fmt(m.scanned)+'</b> 行</span>'+
     (m.joinKind!=='none'
-      ? '<span>完整笛卡尔积 <b>'+fmt(m.naiveCrossRows)+'</b> 行 → 下推后峰值 <b>'+fmt(m.peakRows)+'</b> 行</span>'+
-        '<span>连接比较 <b>'+fmt(m.naiveJoinComps)+'</b> → <b>'+fmt(m.joinComps)+'</b> 次</span>'
-      : '')+
-    '<span>WHERE 判断 <b>'+fmt(m.whereEvals)+'</b> 次</span>'+
+      ? '<span>记录数 没优化 <b class="bad">'+fmt(m.naiveCrossRows)+'</b> → 有优化 <b>'+fmt(m.peakRows)+'</b> 条</span>'+
+        '<span>WHERE 比较 <b class="bad">'+fmt(naiveWhere)+'</b> → <b>'+fmt(m.whereEvals)+'</b> 次</span>'
+      : '<span>记录数 <b>'+fmt(m.naiveCrossRows)+'</b> 条 · WHERE 比较 <b>'+fmt(m.whereEvals)+'</b> 次</span>')+
     '<span>输出 <b>'+fmt(m.rows.length)+'</b> 行</span>'+
     '<span>耗时 <b>'+m.ms.toFixed(2)+' ms</b></span></div>';
 }
