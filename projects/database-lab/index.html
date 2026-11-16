@@ -99,9 +99,23 @@ textarea#sqlInput{width:100%;min-height:190px;font-family:var(--mono);font-size:
 .metric .v{font-family:var(--mono);font-size:30px;font-weight:800;margin-top:2px}
 .metric .v.good{color:var(--green)}
 .metric .v.warn{color:var(--amber)}
+.metric .v.bad{color:var(--red)}
 .cx{border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:14px 18px;margin-top:12px;font-size:20px}
 .cx b{font-family:var(--mono)}
 .cx .idx{margin-top:8px;color:#17427a;font-size:19px}
+/* 优化分析：照课件的两个虚线框 */
+.optgrid{display:grid;gap:12px;margin-top:14px}
+@media(min-width:1100px){.optgrid{grid-template-columns:1fr 1fr}}
+.optbox{border:1.5px dashed #8fb0d8;border-radius:10px;padding:14px 18px;background:#fbfdff}
+.optbox .t{font-size:20px;font-weight:800;color:#17427a}
+.optbox .f{font-family:var(--mono);font-size:25px;font-weight:750;margin-top:8px;color:#0f172a;line-height:1.4;word-break:break-word}
+.optbox .f em{font-style:normal;color:var(--muted);font-size:20px}
+.optbox .f b{color:var(--red);font-weight:800}
+.optbox.best{border-color:#8ecfa8;background:#f7fdf9}
+.optbox.best .t{color:#15803d}
+.optbox.best .f b{color:var(--green)}
+.optnote{margin-top:10px;font-size:19px;color:var(--muted);line-height:1.55}
+.optnote b{color:#17427a}
 </style>
 </head>
 <body>
@@ -149,7 +163,7 @@ WHERE S.Sid = E.Sid AND C.Cid = E.Cid
         <span id="sqlCount" class="count-chip"></span>
       </div>
       <div id="sqlErr" class="sqlerr" hidden></div>
-      <p class="hint">支持 <code>SELECT [DISTINCT] 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件]</code>；条件支持 <code>= != &lt; &lt;= &gt; &gt;=</code>、<code>AND / OR</code> 和表别名。多表用逗号连接时，引擎会先做笛卡尔积再用 WHERE 过滤——这正是复杂度暴涨的原因。</p>
+      <p class="hint">支持 <code>SELECT [DISTINCT] 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件]</code>；条件支持 <code>= != &lt; &lt;= &gt; &gt;=</code>、<code>AND / OR</code> 和表别名。字符串用单引号 <code>'数据库'</code>，中文输入法打出的 <code>“数据库”</code> 同样可用。多表用逗号连接时，引擎会按 FROM 顺序逐表相乘、并用 WHERE 里只涉及已连接表的条件提前过滤（谓词下推）。</p>
     </div>
     <div class="panel" style="margin-top:20px">
       <h2>查询示例</h2>
@@ -163,6 +177,7 @@ WHERE S.Sid = E.Sid AND C.Cid = E.Cid
     <h2>执行指标</h2>
     <div class="metrics" id="metrics"></div>
     <div class="cx" id="cxLine"></div>
+    <div class="optgrid" id="optGrid"></div>
   </div>
 
   <footer style="margin-top:30px;color:var(--muted);font-size:19px;text-align:center">SQL 平台 · CS0502 Vibe Coding · 与课件《数据库》配套使用 · <a href="./exercises.html">课堂练习</a></footer>
@@ -245,26 +260,58 @@ function renderMetrics(m){
   const cards=[];
   cards.push(['扫描行数', fmt(m.scanned)]);
   if(m.joinKind!=='none'){
-    cards.push([joinLabel+'次数', fmt(m.joinComps)+' <small style="font-size:16px;color:var(--muted)">('+m.joinSizes.join(' , ')+'）</small>', 'warn']);
+    cards.push(['实际中间结果峰值', fmt(m.peakRows)+' <small style="font-size:16px;color:var(--muted)">(本页引擎下推后)</small>', 'good']);
+    cards.push([joinLabel+'次数', fmt(m.joinComps)+' <small style="font-size:16px;color:var(--muted)">('+m.joinSizes.join(' , ')+'）</small>', 'good']);
   }
   cards.push(['WHERE 判断次数', fmt(m.whereEvals)+' <small style="font-size:16px;color:var(--muted)">('+m.condCount+' 个条件，已下推提前判断)</small>', 'warn']);
-  cards.push(['下推后中间行数', fmt(m.crossRows), 'warn']);
   cards.push(['输出行数', fmt(m.rows.length), 'good']);
   cards.push(['执行耗时', m.ms.toFixed(2)+' ms', 'good']);
   document.getElementById('metrics').innerHTML=cards.map(c=>
     '<div class="metric"><div class="k">'+c[0]+'</div><div class="v '+(c[2]||'')+'">'+c[1]+'</div></div>').join('');
-  const prods=m.fromSizes.join(' × ');
-  const product=m.fromSizes.reduce((a,b)=>a*b,1);
   let cx;
   if(m.joinKind==='cross'||m.joinKind==='mixed'){
-    cx='复杂度理论上限：<b>O('+prods+' × c)</b>，即 '+fmt(product)+' 行组合、每行过 '+m.condCount+' 个条件。引擎把只涉及已连接表的条件<b>提前判断（谓词下推）</b>，实际中间结果只有 '+fmt(m.crossRows)+' 行、WHERE 共判断 '+fmt(m.whereEvals)+' 次——这就是课件优化树里"选择下推"做的事。';
+    cx='<b>套课件公式看这次查询</b>：优化前按 FROM 顺序把表全乘起来（'+m.fromSizes.join('×')+' = '+fmt(m.naiveCrossRows)+' 行），'+
+      '优化后每连接完一张表就立刻用上只涉及已连接表的条件（每步 '+m.joinSizes.join(' , ')+'），'+
+      '实际比较 '+fmt(m.joinComps)+' 次、峰值 '+fmt(m.peakRows)+' 行 —— 这就是优化树里"把 σ 往下推"。';
   } else if(m.joinKind==='natural'){
-    cx='复杂度估计：<b>O(n × m × k)</b>（k 为公共属性数）—— 朴素连接是平方级的：'+m.joinSizes.join(' , ')+'，本次比较了 '+fmt(m.joinComps)+' 次； WHERE 条件也已下推，实际判断 '+fmt(m.whereEvals)+' 次。';
+    cx='复杂度估计：<b>O(n × m × k)</b>（k 为公共属性数）—— 朴素连接是平方级的：'+m.joinSizes.join(' , ')+'，本次比较了 '+fmt(m.joinComps)+' 次；'+
+      '不做下推的完整笛卡尔积需要 '+fmt(m.naiveJoinComps)+' 次、'+fmt(m.naiveCrossRows)+' 行中间结果。';
   } else {
     cx='复杂度估计：<b>O(n × c)</b> —— 单表全扫描 '+fmt(m.scanned)+' 行，每行做 '+m.condCount+' 次条件判断。数据翻倍，耗时约翻倍（线性）。';
   }
   document.getElementById('cxLine').innerHTML = cx +
     '<p class="idx">思考：如果连接列上有索引或用了哈希连接，O(n×m) 可以降到接近 O(n+m)——这就是"先做选择、再连接"和建索引的价值。</p>';
+}
+/* 大数字用中文单位，方便和课件（1万 / 100 / 10万 / 1000亿）对照 */
+function bigNum(n){
+  if(n>=1e8) return (n/1e8).toFixed(2)+' 亿';
+  if(n>=1e4) return (n/1e4).toFixed(2)+' 万';
+  return fmt(n);
+}
+function pct(x){
+  if(x>=1) return '100%';
+  const p=x*100;
+  return (p>=10?p.toFixed(0):p.toFixed(1))+'%';
+}
+/* 照课件《优化分析》的口径：原始关系代数图 vs 最优关系代数图 */
+function renderOpt(m){
+  const box=document.getElementById('optGrid');
+  if(m.joinKind==='none'||!m.tableStats||m.tableStats.length<2){ box.innerHTML=''; return; }
+  const orig=m.fromSizes.join(' × ')+' = '+bigNum(m.naiveCrossRows);
+  const opt=m.tableStats.map(t=>'('+fmt(t.n)+'×'+pct(t.sel)+')').join(' × ')+' = '+bigNum(m.optCrossRows);
+  const better=m.naiveCrossRows/Math.max(m.optCrossRows,1);
+  box.innerHTML=
+    '<div class="optbox"><div class="t">原始关系代数图</div>'+
+      '<div class="f">'+orig+'<em> 行</em></div></div>'+
+    '<div class="optbox best"><div class="t">最优关系代数图（先选择、再连接）</div>'+
+      '<div class="f">'+opt+'<em> 行</em></div></div>'+
+    '<div class="optnote">公式与课件第 20–26 页一致：把每张表<b>自己的选择条件</b>先做掉，再相乘求连接——'+
+      m.tableStats.map(t=>t.table+' 保留 '+pct(t.sel)+'（'+fmt(t.survivors)+'/'+fmt(t.n)+'）').join('、')+'。'+
+      '中间结果从 '+bigNum(m.naiveCrossRows)+' 降到 '+bigNum(m.optCrossRows)+'，约少 '+
+      (better>=1.05?better.toFixed(better>=100?0:1)+' 倍':'一点')+'。<br>'+
+      '不过要注意：<b>本页引擎是按你写的 FROM 顺序连接的</b>，它只能下推条件、不会自动重排表——'+
+      '所以实际峰值是 '+fmt(m.peakRows)+' 行；要做到"最优图"的效果，得自己把最有选择性的表写在最前面（练习 8）。<br>'+
+      '课件例题同款：<b>1万×100×10万 = 1000 亿</b> → <b>(1万×10%)×(100×1%)×(10万×20%) = 0.2 亿</b>。</div>';
 }
 function runSql(){
   const err=document.getElementById('sqlErr');
@@ -275,11 +322,13 @@ function runSql(){
     document.getElementById('sqlOut').innerHTML=E.tableHTML(m,500,true);
     document.getElementById('sqlCount').textContent='结果 '+fmt(m.rows.length)+' 行';
     renderMetrics(m);
+    renderOpt(m);
   }catch(e){
     err.textContent='✗ '+e.message;
     err.hidden=false;
     document.getElementById('metricPanel').hidden=true;
     document.getElementById('sqlOut').innerHTML='';
+    document.getElementById('optGrid').innerHTML='';
   }
 }
 document.getElementById('sqlRun').onclick=runSql;

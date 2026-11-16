@@ -69,12 +69,19 @@ function tableHTML(rel, capRows, withIndex){
 }
 
 const KEYWORDS=new Set(['SELECT','FROM','WHERE','AND','OR','NATURAL','JOIN','DISTINCT']);
+/* 中文输入法常打出 “ ” ‘ ’，也允许直接写 " —— 统一当成字符串引号 */
+const QUOTE_CLOSE={"'":"'",'"':'"','“':'”','‘':'’','”':'”','’':'’','`':'`','＂':'”'};
 function tokenize(s){
   const t=[]; let i=0;
   while(i<s.length){
     const c=s[i];
     if(/\s/.test(c)){i++;continue;}
-    if(c==="'"){ let j=i+1,str=''; while(j<s.length&&s[j]!=="'"){str+=s[j];j++;} if(j>=s.length) throw new Error('字符串缺少收尾的单引号'); t.push({k:'str',v:str}); i=j+1; continue; }
+    if(QUOTE_CLOSE[c]){
+      const close=QUOTE_CLOSE[c]; let j=i+1,str='';
+      while(j<s.length&&s[j]!==close&&!(s[j]===c&&c!==close)){str+=s[j];j++;}
+      if(j>=s.length) throw new Error('字符串缺少收尾的引号（请用成对的单引号 \'\' 或中文引号 “”）');
+      t.push({k:'str',v:str}); i=j+1; continue;
+    }
     if(/[A-Za-z_\u4e00-\u9fa5]/.test(c)){ let j=i; while(j<s.length&&/[A-Za-z0-9_.\u4e00-\u9fa5]/.test(s[j]))j++; t.push({k:'id',v:s.slice(i,j)}); i=j; continue; }
     if(/[0-9]/.test(c)){ let j=i; while(j<s.length&&/[0-9.]/.test(s[j]))j++; t.push({k:'num',v:Number(s.slice(i,j))}); i=j; continue; }
     const two=s.slice(i,i+2);
@@ -147,7 +154,8 @@ function countConds(n){
 function runSQL(src){
   const t0=performance.now();
   const ast=parseSQL(src);
-  let env=null, crossRows=0, joinComps=0, joinKind='none', joinSizes=[], whereEvals=0, pending=[];
+  let env=null, crossRows=0, joinComps=0, joinKind='none', joinSizes=[], whereEvals=0, pending=[], peakRows=0;
+  const notePeak=v=>{ if(v>peakRows) peakRows=v; };
   function lookup(o,col){
     if(o[col]!==undefined) return o[col];
     if(col.includes('.')) throw new Error('找不到列「'+col+'」。请检查表名/别名拼写。');
@@ -234,13 +242,15 @@ function runSQL(src){
            aliasTable:Object.assign(env.aliasTable, Object.fromEntries([[tb.alias,key]]))};
       applyReady();
       crossRows=env.rows.length;
+      notePeak(rows.length);
       return;
     }
-    if(!env){ env={rows:d.rows.map(mk), cols:d.cols.map(c=>tb.alias+'.'+c), aliases:[tb.alias], aliasTable:Object.fromEntries([[tb.alias,key]])}; applyReady(); crossRows=env.rows.length; return; }
+    if(!env){ env={rows:d.rows.map(mk), cols:d.cols.map(c=>tb.alias+'.'+c), aliases:[tb.alias], aliasTable:Object.fromEntries([[tb.alias,key]])}; applyReady(); crossRows=env.rows.length; notePeak(d.rows.length); return; }
     const prevRows=env.rows.length, newRows=d.rows.length;
     if(prevRows*newRows>5e7) throw new Error('先做笛卡尔积会产生 '+fmt(prevRows*newRows)+' 行中间结果，超出浏览器内存上限。请把数据规模调小，或先在 WHERE 里写上连接条件（如 S.Sid=E.Sid）。');
     joinComps += prevRows*newRows;
     joinSizes.push(prevRows+'×'+newRows);
+    notePeak(prevRows*newRows);
     joinKind=joinKind==='natural'?'mixed':'cross';
     const rows=[];
     env.rows.forEach(re=>d.rows.forEach(r=>rows.push(Object.assign({},re,mk(r)))));
@@ -276,7 +286,48 @@ function runSQL(src){
     return DATA[key].rows.length;
   });
   const scanned=fromSizes.reduce((a,b)=>a+b,0);
-  return {cols:outCols, rows, fromSizes, scanned, crossRows, joinComps, joinKind, joinSizes, condCount, whereEvals, ms};
+  /* —— 优化前（不做谓词下推）的代价：逐表累乘做完整笛卡尔积 ——
+     naiveSteps[0] 是第一张表；此后每一步都把上一步的完整结果与下一张表相乘 */
+  let naiveJoinComps=0, run=1;
+  fromSizes.forEach((n,i)=>{
+    run*=n;
+    if(i>0) naiveJoinComps+=run;      // 第 i 步要比较/配对的行数 = 前 i 张表行数之积
+  });
+  const naiveCrossRows=fromSizes.reduce((a,b)=>a*b,1);   // 完整笛卡尔积行数
+  /* —— 每张表自身的「选择率」：只涉及这一张表的 WHERE 条件能筛掉多少 —— */
+  const tbls=ast.from.map(tb=>({alias:tb.alias, table:tb.name,
+    key:Object.keys(DATA).find(k=>k.toLowerCase()===tb.name.toLowerCase())}));
+  const tableStats=tbls.map(tb=>{
+    const cols=DATA[tb.key].cols, rowsRaw=DATA[tb.key].rows;
+    const mine=(ast.where?conjuncts:[]).filter(c=>{
+      let own=true;
+      (function walk(n){
+        if(!own||!n) return;
+        if(n.t==='col'){
+          const v=n.v;
+          if(v.includes('.')){ if(v.split('.')[0]!==tb.alias) own=false; return; }
+          const owners=tbls.filter(t=>DATA[t.key].cols.includes(v)).map(t=>t.alias);
+          if(owners.length!==1||owners[0]!==tb.alias) own=false;
+          return;
+        }
+        walk(n.l); walk(n.r);
+      })(c);
+      return own;
+    });
+    let surv=rowsRaw.length;
+    if(mine.length){
+      surv=rowsRaw.filter(r=>{
+        const o={}; cols.forEach((c,i)=>o[tb.alias+'.'+c]=r[i]);
+        return mine.every(c=>evalWhere(c,o));
+      }).length;
+    }
+    return {alias:tb.alias, table:tb.table, n:rowsRaw.length, survivors:surv,
+            sel:rowsRaw.length?surv/rowsRaw.length:1};
+  });
+  const optCrossRows=tableStats.reduce((a,t)=>a*Math.max(t.survivors,0),1); // 理论最优：先各自筛小再连接
+  return {cols:outCols, rows, fromSizes, scanned, crossRows, peakRows, joinComps, joinKind, joinSizes,
+          condCount, whereEvals, ms,
+          naiveJoinComps, naiveCrossRows, tableStats, optCrossRows};
 }
 
 return { fmt, tableHTML, runSQL, loadSlide, loadRandom, getData, slideData, randomData };

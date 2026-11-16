@@ -240,7 +240,10 @@ function renderExercises(){
 function miniMetrics(m){
   return '<div class="mini">'+
     '<span>扫描 <b>'+fmt(m.scanned)+'</b> 行</span>'+
-    (m.joinKind!=='none'?'<span>连接比较 <b>'+fmt(m.joinComps)+'</b> 次</span>':'')+
+    (m.joinKind!=='none'
+      ? '<span>完整笛卡尔积 <b>'+fmt(m.naiveCrossRows)+'</b> 行 → 下推后峰值 <b>'+fmt(m.peakRows)+'</b> 行</span>'+
+        '<span>连接比较 <b>'+fmt(m.naiveJoinComps)+'</b> → <b>'+fmt(m.joinComps)+'</b> 次</span>'
+      : '')+
     '<span>WHERE 判断 <b>'+fmt(m.whereEvals)+'</b> 次</span>'+
     '<span>输出 <b>'+fmt(m.rows.length)+'</b> 行</span>'+
     '<span>耗时 <b>'+m.ms.toFixed(2)+' ms</b></span></div>';
@@ -256,14 +259,14 @@ function runEx(i){
 }
 const key=r=>r.rows.map(x=>JSON.stringify(x)).sort().join('|');
 function cmpTable(mine, ref, mineLabel, refLabel, speedMatters){
-  const row=(label,m,cls)=>'<tr><td>'+label+'</td><td>'+fmt(m.rows.length)+' 行</td><td class="'+cls+'">'+fmt(m.joinComps)+' 次</td><td class="'+cls+'">'+m.ms.toFixed(2)+' ms</td></tr>';
+  const row=(label,m,cls)=>'<tr><td>'+label+'</td><td>'+fmt(m.rows.length)+' 行</td><td class="'+cls+'">'+fmt(m.joinComps)+' 次</td><td>'+fmt(m.peakRows)+' 行</td><td class="'+cls+'">'+m.ms.toFixed(2)+' ms</td></tr>';
   let clsMine='', clsRef='';
   if(speedMatters){
     if(mine.joinComps<ref.joinComps){ clsMine='better'; clsRef='worse'; }
     else if(mine.joinComps>ref.joinComps){ clsMine='worse'; clsRef='better'; }
   }
   return '<div class="cmp"><p class="muted" style="margin:10px 0 6px">判分对比（运行结果 + 运行速度）：</p>'+
-    '<div class="tablewrap"><table class="rel"><thead><tr><th></th><th>结果</th><th>连接比较</th><th>耗时</th></tr></thead><tbody>'+
+    '<div class="tablewrap"><table class="rel"><thead><tr><th></th><th>结果</th><th>连接比较</th><th>中间行数峰值</th><th>耗时</th></tr></thead><tbody>'+
     row(mineLabel,mine,clsMine)+row(refLabel,ref,clsRef)+'</tbody></table></div></div>';
 }
 function checkEx(i){
