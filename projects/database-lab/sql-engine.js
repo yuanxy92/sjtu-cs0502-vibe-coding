@@ -151,10 +151,12 @@ function countConds(n){
   if(n.t==='and'||n.t==='or') return countConds(n.l)+countConds(n.r);
   return 1;
 }
-function runSQL(src){
+function runSQL(src,opts){
+  /* opts.naive = true：按"没优化"的方式真跑一遍（先把表全乘起来，最后才筛），用于实测耗时 */
+  const NAIVE=!!(opts&&opts.naive);
   const t0=performance.now();
   const ast=parseSQL(src);
-  let env=null, crossRows=0, joinComps=0, joinKind='none', joinSizes=[], whereEvals=0, pending=[], peakRows=0;
+  let env=null, crossRows=0, joinComps=0, joinKind='none', joinSizes=[], whereEvals=0, pending=[], peakRows=0, whereSteps=[];
   const notePeak=v=>{ if(v>peakRows) peakRows=v; };
   function lookup(o,col){
     if(o[col]!==undefined) return o[col];
@@ -204,10 +206,12 @@ function runSQL(src){
     return ok;
   }
   function applyReady(){
+    if(NAIVE) return;                 // 没优化：所有条件都留到最后一次性判断
     const now=[], later=[];
     pending.forEach(c=>(conjReady(c)?now:later).push(c));
     if(now.length){
       whereEvals += env.rows.length*now.length;
+      whereSteps.push({rows:env.rows.length, conds:now.length, after:now.length?env.rows.filter(o=>now.every(c=>evalWhere(c,o))).length:0, cols:env.cols.slice()});
       if(env.rows.length) env.rows=env.rows.filter(o=>now.every(c=>evalWhere(c,o)));
     }
     pending=later;
@@ -265,6 +269,7 @@ function runSQL(src){
     const n=env.rows.length;
     if(n) env.rows=env.rows.filter(o=>pending.every(c=>evalWhere(c,o)));
     whereEvals += n*pending.length;
+    whereSteps.push({rows:n, conds:pending.length, after:env.rows.length, cols:env.cols.slice()});
   }
   let rows=env.rows;
   let outCols;
@@ -327,7 +332,7 @@ function runSQL(src){
   const optCrossRows=tableStats.reduce((a,t)=>a*Math.max(t.survivors,0),1); // 理论最优：先各自筛小再连接
   return {cols:outCols, rows, fromSizes, scanned, crossRows, peakRows, joinComps, joinKind, joinSizes,
           condCount, whereEvals, ms,
-          naiveJoinComps, naiveCrossRows, tableStats, optCrossRows};
+          naiveJoinComps, naiveCrossRows, tableStats, optCrossRows, whereSteps};
 }
 
 return { fmt, tableHTML, runSQL, loadSlide, loadRandom, getData, slideData, randomData };

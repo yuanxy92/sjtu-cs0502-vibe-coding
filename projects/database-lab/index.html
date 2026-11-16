@@ -102,6 +102,13 @@ textarea#sqlInput{width:100%;min-height:190px;font-family:var(--mono);font-size:
 .mtable td.n.plain{color:#0f172a}
 .mnote{margin-top:10px;font-size:19px;color:var(--muted);line-height:1.55}
 .mnote b{color:#17427a}
+.mformulas{display:grid;gap:8px;margin-top:12px}
+.mfrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:19px}
+.mfrow code{font-family:var(--mono);font-size:19px;background:#f8fafd;border:1px solid var(--line);border-radius:7px;padding:5px 12px;color:#102344}
+.tag{font-size:17px;font-weight:800;border-radius:6px;padding:3px 10px;white-space:nowrap}
+.tag.bad{background:#fdecec;color:#b91c1c}
+.tag.good{background:#e8f7ee;color:#15803d}
+.tag.plain{background:#eef4fc;color:#17427a}
 </style>
 </head>
 <body>
@@ -238,40 +245,100 @@ function renderExamples(){
     runSql();
   });
 }
-function renderMetrics(m){
+function renderMetrics(m, naive){
   document.getElementById('metricPanel').hidden=false;
   const box=document.getElementById('metrics');
   const note=document.getElementById('metricNote');
   /* 没优化：先把所有表全乘起来（完整笛卡尔积），再逐条过 WHERE */
   const naiveRows=m.naiveCrossRows;
   const naiveWhere=naiveRows*m.condCount;
+  /* 耗时：naive.ms 是实测（数据不太大时），否则按 WHERE 次数比例估算 */
+  const optMs=m.ms;
+  let naiveMsTxt, naiveMsEst=false;
+  if(naive) naiveMsTxt=fmtMs(naive.ms);
+  else{
+    const est=optMs*naiveWhere/Math.max(m.whereEvals,1);
+    naiveMsEst=true;
+    naiveMsTxt='≈ '+(est>=1000?(est/1000).toFixed(1)+' s':est.toFixed(0)+' ms')+'（估算）';
+  }
+  const f=(label,rows,where,time)=>'<div class="mfrow"><span class="tag '+label[1]+'">'+label[0]+'</span>'+
+    '<code>中间记录数 = '+rows+'</code><code>WHERE 比较次数 = '+where+'</code><code>耗时 = '+time+'</code></div>';
   if(m.joinKind==='none'){
     /* 单表：没有连接，只有一遍扫描 + 条件判断 */
     box.innerHTML='<table class="mtable"><thead><tr>'+
-      '<th>记录数</th><th>WHERE 比较次数</th></tr></thead><tbody><tr>'+
+      '<th>记录数</th><th>WHERE 比较次数</th><th>耗时</th></tr></thead><tbody><tr>'+
       '<td class="n plain">'+fmt(naiveRows)+' 条</td>'+
-      '<td class="n plain">'+fmt(m.whereEvals)+' 次</td></tr></tbody></table>';
-    note.innerHTML='单表查询：只扫描 '+fmt(m.scanned)+' 条记录，每条过 '+m.condCount+' 个条件，共比较 '+fmt(m.whereEvals)+' 次，最后留下 '+fmt(m.rows.length)+' 条。';
+      '<td class="n plain">'+fmt(m.whereEvals)+' 次</td>'+
+      '<td class="n plain">'+fmtMs(m.ms)+'</td></tr></tbody></table>'+
+      '<div class="mformulas">'+f(['单表','plain'],
+        fmt(naiveRows)+'（表本身的行数）',
+        fmt(naiveRows)+' × '+m.condCount+' 个条件 = '+fmt(m.whereEvals),
+        '实测 '+fmtMs(m.ms))+'</div>';
+    note.innerHTML='单表查询：只扫描 '+fmt(m.scanned)+' 条记录，每条过 '+m.condCount+' 个条件，最后留下 '+fmt(m.rows.length)+' 条。';
     return;
   }
   box.innerHTML='<table class="mtable"><thead><tr>'+
-    '<th>方案</th><th>中间记录数</th><th>WHERE 比较次数</th></tr></thead><tbody>'+
-    '<tr><td>没优化</td><td class="n bad">'+fmt(naiveRows)+' 条</td><td class="n bad">'+fmt(naiveWhere)+' 次</td></tr>'+
-    '<tr><td>有优化</td><td class="n good">'+fmt(m.peakRows)+' 条</td><td class="n good">'+fmt(m.whereEvals)+' 次</td></tr>'+
+    '<th>方案</th><th>中间记录数</th><th>WHERE 比较次数</th><th>耗时</th></tr></thead><tbody>'+
+    '<tr><td>没优化</td><td class="n bad">'+fmt(naiveRows)+' 条</td><td class="n bad">'+fmt(naiveWhere)+' 次</td><td class="n bad">'+naiveMsTxt+'</td></tr>'+
+    '<tr><td>有优化</td><td class="n good">'+fmt(m.peakRows)+' 条</td><td class="n good">'+fmt(m.whereEvals)+' 次</td><td class="n good">'+fmtMs(optMs)+'</td></tr>'+
     '</tbody></table>';
-  note.innerHTML='<b>没优化</b>：先把 '+m.fromSizes.join('×')+' = '+fmt(naiveRows)+' 条全乘出来，再一条条筛（'+fmt(naiveRows)+'×'+m.condCount+' 个条件）。'+
-    '<b>有优化</b>：每张表先用自己的条件筛小，再连接，实际最多只出现 '+fmt(m.peakRows)+' 条。'+
-    '另外，扫描的原始记录一共 '+fmt(m.scanned)+' 条（'+m.fromSizes.join('+')+'，就是三张表本身的大小），和上面"中间记录数"不是一回事；本次耗时 '+m.ms.toFixed(2)+' ms。';
+  /* 公式：每个数字怎么算出来的 */
+  const stepProd=m.joinSizes.filter(s=>s).map(s=>{
+    const [a,b]=s.split('×').map(Number); return {txt:s, n:a*b};
+  });
+  const peakTxt=stepProd.length
+    ? 'max(' + stepProd.map(s=>s.txt+'='+fmt(s.n)).join(', ') + ') = ' + fmt(m.peakRows)
+    : fmt(m.peakRows);
+  const whereTxt=m.whereSteps.map(s=>fmt(s.rows)+'×'+s.conds).join(' + ') + ' = ' + fmt(m.whereEvals);
+  box.innerHTML+='<div class="mformulas">'+
+    f(['没优化','bad'], m.fromSizes.join(' × ') + ' = ' + fmt(naiveRows),
+      fmt(naiveRows)+' × '+m.condCount+' 个条件 = '+fmt(naiveWhere),
+      (naive?'实测 '+fmtMs(naive.ms):'跑不动，按比较次数外推 '+naiveMsTxt))+
+    f(['有优化','good'], peakTxt, whereTxt, '实测 '+fmtMs(optMs))+
+    '</div>';
+  note.innerHTML='<b>中间记录数</b>：连接过程中最多同时出现多少条（不是结果行数，也不是原始表的大小）。'+
+    '<b>WHERE 比较次数</b>：每步的行数 × 该步能判断几个条件，再相加。'+
+    '没优化时先把 '+m.fromSizes.join('×')+' 全乘出来，所以每条要过全部 '+m.condCount+' 个条件；'+
+    '有优化时每连上一张表就立刻用上此刻能判断的条件（'+m.whereSteps.map(s=>fmt(s.rows)+'→'+fmt(s.after)).join('，')+'），每步只用得上 1–'+Math.max(...m.whereSteps.map(s=>s.conds))+' 个。'+
+    '原始表本身一共 '+fmt(m.scanned)+' 条（'+m.fromSizes.join('+')+'），与上面两个数无关。<br>'+
+    (naive
+      ? '<b>两行耗时都是在同一台电脑上真跑出来的</b>：「没优化」就是真的先乘出 '+fmt(naiveRows)+' 条、再逐条筛，所以慢；「有优化」是先筛再连。'
+      : '「有优化」的 '+fmtMs(optMs)+' 是实测；「没优化」要乘出 '+fmt(naiveRows)+' 条，浏览器跑不动，按两者 WHERE 比较次数的比例外推出 '+naiveMsTxt+'。')+
+    '<br>'+
+    '真实数据库 <b>会自动做这些优化</b>：优化器先把条件尽量下推、删掉用不到的列，再按统计信息估算代价、挑连接顺序和算法（索引、哈希连接），不需要你手写顺序。'+
+    '本页引擎只做到了"下推"这一步、<b>不会自动重排表</b>——所以练习 8 才要你自己把最有选择性的表挪到最前面。';
+}
+/* 小数据下单次只要零点几毫秒，抖动很大：多跑几次取平均值 */
+function bench(sql,opts){
+  let total=0,last=null,n=0;
+  const t0=performance.now();
+  while(n<300&&performance.now()-t0<25){
+    last=E.runSQL(sql,opts); total+=last.ms; n++;
+  }
+  return {r:last, ms: total/Math.max(n,1), reps:n};
+}
+function fmtMs(v){
+  if(v>=1000) return (v/1000).toFixed(2)+' s';
+  if(v>=100) return v.toFixed(0)+' ms';
+  if(v>=1) return v.toFixed(2)+' ms';
+  return v.toFixed(3)+' ms';
 }
 function runSql(){
   const err=document.getElementById('sqlErr');
   err.hidden=true;
   document.getElementById('sqlCount').textContent='';
   try{
-    const m=E.runSQL(document.getElementById('sqlInput').value);
+    const sql=document.getElementById('sqlInput').value;
+    const mb=bench(sql,null);
+    const m=mb.r; m.ms=mb.ms;
     document.getElementById('sqlOut').innerHTML=E.tableHTML(m,500,true);
     document.getElementById('sqlCount').textContent='结果 '+fmt(m.rows.length)+' 行';
-    renderMetrics(m);
+    /* 再按"没优化"的方式真跑一遍拿耗时；数据太大（>100 万条中间结果）就不跑，改用估算 */
+    let naive=null;
+    if(m.joinKind!=='none'&&m.naiveCrossRows<=1e6){
+      try{ const nb=bench(sql,{naive:true}); naive=nb.r; naive.ms=nb.ms; }catch(e){ naive=null; }
+    }
+    renderMetrics(m,naive);
   }catch(e){
     err.textContent='✗ '+e.message;
     err.hidden=false;
