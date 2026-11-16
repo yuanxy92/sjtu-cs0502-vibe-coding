@@ -68,7 +68,8 @@ function tableHTML(rel, capRows, withIndex){
   return h;
 }
 
-const KEYWORDS=new Set(['SELECT','FROM','WHERE','AND','OR','NATURAL','JOIN','DISTINCT']);
+const KEYWORDS=new Set(['SELECT','FROM','WHERE','AND','OR','NATURAL','JOIN','DISTINCT','ORDER','BY','ASC','DESC','LIMIT']);
+const AGGS=new Set(['COUNT','AVG','SUM','MIN','MAX']);
 /* 中文输入法常打出 “ ” ‘ ’，也允许直接写 " —— 统一当成字符串引号 */
 const QUOTE_CLOSE={"'":"'",'"':'"','“':'”','‘':'’','”':'”','’':'’','`':'`','＂':'”'};
 function tokenize(s){
@@ -104,8 +105,19 @@ function parseSQL(src){
   if(peek()&&peek().k==='sym'&&peek().v==='*'){ next(); select.push('*'); }
   else{
     for(;;){
-      const tk=next(); if(!tk||tk.k!=='id') throw new Error('SELECT 后需要列名');
-      select.push(tk.v);
+      const tk=peek();
+      /* 聚合函数：COUNT(*) / COUNT(列) / AVG(列) / SUM / MIN / MAX */
+      if(tk&&tk.k==='id'&&AGGS.has(tk.v.toUpperCase())&&t[p+1]&&t[p+1].k==='sym'&&t[p+1].v==='('){
+        const fn=next().v.toUpperCase(); next();
+        let arg;
+        if(peek()&&peek().k==='sym'&&peek().v==='*'){ next(); arg='*'; }
+        else{ const c=next(); if(!c||c.k!=='id') throw new Error(fn+' 括号里要写列名或 *'); arg=c.v; }
+        const close=next(); if(!close||close.k!=='sym'||close.v!==')') throw new Error(fn+' 缺少右括号');
+        select.push({agg:fn, arg, label:fn+'('+arg+')'});
+      } else {
+        const c=next(); if(!c||c.k!=='id') throw new Error('SELECT 后需要列名');
+        select.push({col:c.v, label:c.v});
+      }
       if(peek()&&peek().k==='sym'&&peek().v===','){next();continue;}
       break;
     }
@@ -125,9 +137,27 @@ function parseSQL(src){
   }
   let where=null;
   if(isKw('WHERE')){ next(); where=parseOr(); }
+  const orderBy=[];
+  if(isKw('ORDER')){ next(); kw('BY');
+    for(;;){
+      const c=next(); if(!c||c.k!=='id') throw new Error('ORDER BY 后面要写列名');
+      let dir=1;
+      if(isKw('ASC')){ next(); }
+      else if(isKw('DESC')){ next(); dir=-1; }
+      orderBy.push({col:c.v, dir});
+      if(peek()&&peek().k==='sym'&&peek().v===','){next();continue;}
+      break;
+    }
+  }
+  let limit=null;
+  if(isKw('LIMIT')){
+    next();
+    const n=next(); if(!n||n.k!=='num') throw new Error('LIMIT 后面要写数字');
+    limit=Math.max(1,Math.floor(n.v));
+  }
   if(peek()&&peek().k==='sym'&&peek().v===';') next();
-  if(p<t.length) throw new Error('SQL 末尾有多余内容：「'+t[p].v+'」（本平台支持 SELECT…FROM…WHERE）');
-  return {select,from,where,distinct};
+  if(p<t.length) throw new Error('SQL 末尾有多余内容：「'+t[p].v+'」（本平台支持 SELECT…FROM…WHERE [ORDER BY…] [LIMIT n]）');
+  return {select,from,where,distinct,orderBy,limit};
 
   function parseOr(){ let l=parseAnd(); while(isKw('OR')){ next(); l={t:'or',l,r:parseAnd()}; } return l; }
   function parseAnd(){ let l=parseCond(); while(isKw('AND')){ next(); l={t:'and',l,r:parseCond()}; } return l; }
@@ -272,19 +302,72 @@ function runSQL(src,opts){
     whereSteps.push({rows:n, conds:pending.length, after:env.rows.length, cols:env.cols.slice()});
   }
   let rows=env.rows;
-  let outCols;
-  if(ast.select[0]==='*'){
+  let outCols, tuples;
+  const hasAgg=ast.select.some(it=>it&&it.agg);
+  if(hasAgg){
+    if(ast.select.some(it=>it&&it.col)) throw new Error('聚合函数不能和普通列写在一起（本平台不支持 GROUP BY）');
+    outCols=ast.select.map(it=>it.label);
+    const rec=ast.select.map(it=>{
+      if(it.agg==='COUNT'){
+        if(it.arg==='*') return rows.length;
+        return rows.reduce((a,o)=>a+(lookup(o,it.arg)!=null?1:0),0);
+      }
+      if(it.arg==='*') throw new Error(it.agg+' 里要写列名，不能写 *');
+      const vals=[];
+      rows.forEach(o=>{ const v=Number(lookup(o,it.arg)); if(!isNaN(v)) vals.push(v); });
+      if(!vals.length) return 0;
+      if(it.agg==='AVG') return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*100)/100;
+      if(it.agg==='SUM') return vals.reduce((a,b)=>a+b,0);
+      if(it.agg==='MIN') return vals.reduce((a,b)=>Math.min(a,b));
+      return vals.reduce((a,b)=>Math.max(a,b));
+    });
+    tuples=[{o:null,v:rec}];
+  } else if(ast.select.length===1&&ast.select[0]==='*'){
     outCols=env.cols;
-    rows=rows.map(o=>outCols.map(c=>o[c]));
+    tuples=rows.map(o=>({o,v:outCols.map(c=>o[c])}));
   } else {
-    outCols=ast.select;
-    rows=rows.map(o=>ast.select.map(c=>lookup(o,c)));
+    outCols=ast.select.map(it=>it.label);
+    tuples=rows.map(o=>({o,v:ast.select.map(it=>lookup(o,it.col))}));
   }
   if(ast.distinct){
     const seen=new Set(), ded=[];
-    rows.forEach(r=>{const k=JSON.stringify(r); if(!seen.has(k)){seen.add(k);ded.push(r);}});
-    rows=ded;
+    tuples.forEach(t=>{const k=JSON.stringify(t.v); if(!seen.has(k)){seen.add(k);ded.push(t);}});
+    tuples=ded;
   }
+  if(ast.orderBy.length&&!hasAgg){
+    ast.orderBy.forEach(it=>{
+      const c=it.col;
+      let ok=outCols.includes(c);
+      if(!ok&&c.includes('.')){
+        const parts=c.split('.'); ok=!!env.aliasTable[parts[0]]&&DATA[env.aliasTable[parts[0]]].cols.includes(parts[1]);
+      } else if(!ok){
+        ok=env.aliases.some(a=>DATA[env.aliasTable[a]].cols.includes(c));
+      }
+      if(!ok) throw new Error('排序用的列「'+c+'」不存在');
+    });
+    const keyOf=(t,item)=>{
+      if(t.o&&item.col.includes('.')) return t.o[item.col];
+      if(t.o){
+        const hit=env.aliases.map(a=>a+'.'+item.col).filter(c=>t.o[c]!==undefined);
+        if(hit.length) return t.o[hit[0]];
+      }
+      const i=outCols.indexOf(item.col);
+      return i>=0?t.v[i]:undefined;
+    };
+    tuples.sort((A,B)=>{
+      for(const it of ast.orderBy){
+        const a=keyOf(A,it), b=keyOf(B,it);
+        let c;
+        const an=Number(a), bn=Number(b);
+        if(a!=null&&b!=null&&a!==''&&b!==''&&!isNaN(an)&&!isNaN(bn)) c=an-bn;
+        else c=String(a==null?'':a).localeCompare(String(b==null?'':b));
+        if(c) return c*it.dir;
+      }
+      return 0;
+    });
+  }
+  if(ast.limit!=null) tuples=tuples.slice(0,ast.limit);
+  rows=tuples.map(t=>t.v);
   const ms=performance.now()-t0;
   const fromSizes=ast.from.map(tb=>{
     const key=Object.keys(DATA).find(k=>k.toLowerCase()===tb.name.toLowerCase());

@@ -113,7 +113,7 @@ table.rel .empty td{color:var(--muted)}
 
   <div class="panel">
     <h2>作答数据</h2>
-    <p class="muted">练习 1–7 按<b>课件示例数据</b>判分（保持默认即可）；练习 8「优化改写」建议切到随机大数据（学生 1000）感受差距——判分按<b>当前所选数据</b>现场运行参考查询，结果与速度都以它为准。</p>
+    <p class="muted">10 道题按<b>课件的顺序</b>排：单表（σ 选择、π 投影）→ 笛卡尔积 → 连接（含自然连接）→ 空集思考题；最后另附 4 道<b>扩展题</b>（排序、取前几名、统计），课上可留作机动或作业。判分按<b>当前所选数据</b>现场运行参考查询，结果与速度都以它为准——用课件示例数据即可（保持默认）。</p>
     <div class="databar">
       <span class="chip" id="chipStudent"></span>
       <span class="chip" id="chipCourse"></span>
@@ -160,50 +160,79 @@ function renderChips(){
 
 /* ================= 题目 ================= */
 const EXERCISES=[
-  {t:'热身：按条件挑行（σ 选择）',
-   q:'教务老师想列出所有 <b>90 分以上</b>的选课记录（全部列）。',
-   expect:"SELECT * FROM Enrolled WHERE Grade > 90;",
-   hint:'只需要一张表 Enrolled；SELECT 全部列用 *；挑行用 <code>WHERE Grade &gt; 90</code>。',
-   ans:"SELECT * FROM Enrolled WHERE Grade > 90;"},
-  {t:'只挑几列（π 投影）',
+  {t:'先认识表：把全部记录列出来',
+   q:'先看一眼 <b>Student</b> 这张表：所有学生的<b>全部列</b>。',
+   expect:"SELECT * FROM Student;",
+   hint:'SELECT 后面用 <code>*</code> 表示"所有列"，只要一张表就不用连接。',
+   ans:"SELECT * FROM Student;"},
+  {t:'σ 选择：按条件挑行',
+   q:'列出所有 <b>85 分及以上</b>的选课记录（全部列）。',
+   expect:"SELECT * FROM Enrolled WHERE Grade >= 85;",
+   hint:'只需要一张表 Enrolled；挑行用 <code>WHERE Grade &gt;= 85</code>——"及以上"要用 <code>&gt;=</code>，写成 <code>&gt;</code> 会漏掉正好 85 分的那条。',
+   ans:"SELECT * FROM Enrolled WHERE Grade >= 85;\n\n-- 数据里有正好 85 分的一条（吕松），所以 > 和 >= 结果不一样。"},
+  {t:'σ 复合条件：两个 AND',
+   q:'列出成绩在 <b>70 到 89 分之间</b>（含 70、89）的选课记录。',
+   expect:"SELECT * FROM Enrolled WHERE Grade >= 70 AND Grade <= 89;",
+   hint:'一个范围要写两个比较，用 <code>AND</code> 连起来：<code>Grade &gt;= 70 AND Grade &lt;= 89</code>。',
+   ans:"SELECT * FROM Enrolled WHERE Grade >= 70 AND Grade <= 89;"},
+  {t:'π 投影：只挑几列',
    q:'列出所有学生的<b>学号和姓名</b>（不要年龄）。',
    expect:"SELECT Sid, Sname FROM Student;",
    hint:'SELECT 后面写需要的列名，逗号分隔。',
    ans:"SELECT Sid, Sname FROM Student;"},
-  {t:'选择 + 投影',
-   q:'把 <b>88 分以上</b>的选课记录的<b>学号和成绩</b>列出来——先挑行还是先挑列？',
+  {t:'σ + π：一条语句两件事',
+   q:'把 <b>88 分以上</b>的选课记录的<b>学号和成绩</b>列出来。',
    expect:"SELECT Sid, Grade FROM Enrolled WHERE Grade >= 88;",
-   hint:'一条 SQL 同时做两件事：SELECT 管列，WHERE 管行。',
+   hint:'SELECT 管列（π），WHERE 管行（σ），可以同时用。',
    ans:"SELECT Sid, Grade FROM Enrolled WHERE Grade >= 88;"},
-  {t:'两表连接：把名字找回来',
+  {t:'× 笛卡尔积：不给连接条件会怎样',
+   q:'把 Student 和 Enrolled <b>硬拼在一起</b>（不写任何"学号相等"的条件），看看到底会出多少条记录。<br>提示：5 个学生 × 5 条选课记录 = ？',
+   expect:"SELECT * FROM Student S, Enrolled E;",
+   hint:'两张表用逗号放进 FROM、WHERE 里不写连接条件，引擎就只能一条一条配对：<code>SELECT * FROM Student S, Enrolled E;</code>',
+   ans:"SELECT * FROM Student S, Enrolled E;\n\n-- 5 × 5 = 25 条。每条学生记录都被复制了 5 遍，\n-- 而且大部分配对毫无意义（张三配了李四的选课）。\n-- 关系代数里的 × 就是这个意思；连接（⋈）多出来的就是「配对条件」。"},
+  {t:'⋈ 两表连接：把名字找回来',
    q:'Enrolled 里只有学号。请列出 <b>90 分以上学生的姓名和成绩</b>（Student + Enrolled）。',
-   expect:"SELECT Sname, Grade FROM Student S, Enrolled E WHERE S.Sid = E.Sid AND E.Grade > 90;",
-   hint:'FROM 写两张表，WHERE 里先给连接条件 S.Sid = E.Sid，再给过滤条件。',
-   ans:"SELECT Sname, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade > 90;"},
-  {t:'三表连接（课件第 20 页同款）',
+   expect:"SELECT Sname, Grade FROM Student S, Enrolled E WHERE S.Sid = E.Sid AND E.Grade >= 90;",
+   hint:'FROM 写两张表，WHERE 里先给连接条件 <code>S.Sid = E.Sid</code>，再给过滤条件。',
+   ans:"SELECT Sname, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade >= 90;"},
+  {t:'⋈ 自然连接：公共属性自动配对',
+   q:'同样要"每条选课记录带上课程名"，这次改用 <b>NATURAL JOIN</b> 写：它会把两张表里<b>同名属性</b>（Cid）自动配对。<br>结果和"逗号 + Cid 相等"应该一样，但 Cid 只会出现一列。',
+   expect:"SELECT Sid, Cname, Grade FROM Enrolled NATURAL JOIN Course;",
+   hint:'<code>FROM Enrolled NATURAL JOIN Course</code> 即可，不用再写 <code>Cid = Cid</code>；公共属性只保留一份，所以 SELECT 里不用写它。',
+   ans:"SELECT Sid, Cname, Grade\nFROM Enrolled NATURAL JOIN Course;\n\n-- 等价于：\n-- SELECT E.Sid, C.Cname, E.Grade\n-- FROM Enrolled E, Course C WHERE E.Cid = C.Cid;\n-- 差别：自然连接按同名属性自动配对，公共列 Cid 只留一列。\n-- 注意：它靠「列名相同」自动判断，列名巧合会连错，真实库里要小心。"},
+  {t:'⋈ 三表连接（课件第 20 页同款）',
    q:'列出选了<b>“数据库”课</b>的学生的<b>姓名和成绩</b>（Student + Enrolled + Course）。',
    expect:"SELECT S.Sname, E.Grade FROM Student S, Enrolled E, Course C WHERE S.Sid = E.Sid AND C.Cid = E.Cid AND C.Cname = '数据库';",
-   hint:'两条连接条件（S-E、E-C）+ 一条课程名过滤。',
+   hint:'两张表之间各有一条连接条件（S-E、E-C），再加一条课程名过滤。',
    ans:"SELECT S.Sname, E.Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库';"},
-  {t:'DISTINCT：去掉重复行',
-   q:'有学生选了课的<b>课程名</b>有哪些？每门课只出现一次。',
-   expect:"SELECT DISTINCT Cname FROM Enrolled NATURAL JOIN Course;",
-   hint:'Enrolled 连接 Course 后每选课一条记录，同一门课会重复出现（回想 Excel 单表视图里 Cname 重复了多少次）；用 <code>SELECT DISTINCT</code> 去重。',
-   ans:"SELECT DISTINCT Cname\nFROM Enrolled NATURAL JOIN Course;"},
   {t:'思考题：空集也是答案',
    q:'课件原题：查询选了<b>数据库</b>课、<b>年龄 20 岁以下</b>、成绩 <b>90 分以上</b>的学生姓名。写出来运行，看看结果是什么？',
    expect:"SELECT S.Sname FROM Student S, Enrolled E, Course C WHERE S.Sid = E.Sid AND C.Cid = E.Cid AND C.Cname = '数据库' AND S.Sage < 20 AND E.Grade > 90;",
    hint:'条件全部写进 WHERE。运行后别急着怀疑自己——仔细看看选了数据库的是谁、他们几岁。',
    ans:"SELECT Sname\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND S.Sage < 20\n  AND E.Grade > 90;\n\n结果是空集：数据库课 90 分以上的是赵万里（22 岁），\n20 岁以下的刘佳琪（70 分）和吕松（85 分）都没上 90。\nSQL 没错，是数据本身没有满足三个条件的学生。"},
-  {t:'优化改写：同样的结果，更快的 SQL',
-   q:'下面这条查询结果是对的，但很慢。<b>只允许调整 FROM 里表的顺序</b>，改写出一条<b>结果完全相同、但连接比较次数更少</b>的 SQL（WHERE 条件内容不变，可跟着表顺序挪动）。<br>建议先切到「随机生成大数据（学生 1000）」再对比指标。',
-   slowSql:"SELECT S.Sname, C.Cname, E.Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND C.Cname = '数据库' AND E.Grade >= 90;",
-   expect:"SELECT S.Sname, C.Cname, E.Grade\nFROM Course C, Enrolled E, Student S\nWHERE C.Cname = '数据库' AND C.Cid = E.Cid\n  AND E.Grade >= 90 AND E.Sid = S.Sid;",
-   hint:'哪张表能最先被过滤到最小，就应该最先出场。把 <code>Course</code> 放到 FROM 最前面：Cname=「数据库」在第一张表扫描后就能立刻生效（谓词下推），后面每一步连接的都是被砍小后的结果。',
-   ans:"SELECT S.Sname, C.Cname, E.Grade\nFROM Course C, Enrolled E, Student S\nWHERE C.Cname = '数据库' AND C.Cid = E.Cid\n  AND E.Grade >= 90 AND E.Sid = S.Sid;\n\n1000 学生规模下：连接比较约 550 万 → 6 万次（百倍级提速）。\n真实数据库的优化器会自动做这种重排——这正是课件优化树的思想。"},
-  {t:'讨论题（不用写 SQL）：为什么快？',
-   q:'第 8 题只是调了表的顺序，结果一模一样，速度却差几十上百倍——<b>为什么？</b>和课件里"选择下推"有什么关系？',
-   discussion:'参考答案：引擎按 FROM 顺序逐张表连接，<b>每连接完一张表，就把只涉及已连接表的条件立刻用上</b>（谓词下推）。Course 打头时，Cname=「数据库」先把这张表砍到 1 行，后续每步连接的都是小结果；Student 打头时，第一步没有任何条件可用，只能先做 1000×5500 的完整笛卡尔积。课件优化树做的事一模一样：把 σ 尽量往下推，让中间结果从一开始就小。真实数据库的查询优化器还会配合索引，把 O(n×m) 降到接近 O(n+m)。'}
+  {t:'扩展① 排序：按成绩从高到低',
+   q:'把 <b>Enrolled</b> 全部记录按成绩<b>从高到低</b>列出来。',
+   ordered:true,
+   expect:"SELECT * FROM Enrolled ORDER BY Grade DESC;",
+   hint:'<code>ORDER BY 列名 DESC</code> 表示降序（升序是 <code>ASC</code>，默认就是升序）。',
+   ans:"SELECT * FROM Enrolled ORDER BY Grade DESC;\n\n-- 95、92、88、85、70；去掉 DESC 就是从 70 开始。"},
+  {t:'扩展② 排序 + 取前几名',
+   q:'只想知道成绩<b>最高的 3 条</b>选课记录（学号 + 成绩）。',
+   ordered:true,
+   expect:"SELECT Sid, Grade FROM Enrolled ORDER BY Grade DESC LIMIT 3;",
+   hint:'先 <code>ORDER BY Grade DESC</code> 排好，再用 <code>LIMIT 3</code> 只留前 3 行——顺序反了就取到「最差的 3 条」。',
+   ans:"SELECT Sid, Grade FROM Enrolled\nORDER BY Grade DESC LIMIT 3;\n\n-- LIMIT 必须写在 ORDER BY 之后：先排序，再截取。"},
+  {t:'扩展③ 排序 + 连接：谁考得好',
+   q:'列出 <b>85 分及以上</b>学生的<b>姓名和成绩</b>，按成绩从高到低排。',
+   ordered:true,
+   expect:"SELECT Sname, Grade FROM Student S, Enrolled E WHERE S.Sid = E.Sid AND E.Grade >= 85 ORDER BY Grade DESC;",
+   hint:'先写两表连接和过滤，最后再加 <code>ORDER BY Grade DESC</code>；排序写在 WHERE 后面。',
+   ans:"SELECT Sname, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade >= 85\nORDER BY Grade DESC;"},
+  {t:'扩展④ 统计：一共多少条、平均分多少',
+   q:'用聚合函数一次问两件事：选课记录<b>总条数</b>、所有记录的<b>平均分</b>。',
+   expect:"SELECT COUNT(*), AVG(Grade) FROM Enrolled;",
+   hint:'<code>COUNT(*)</code> 数条数，<code>AVG(Grade)</code> 求平均；两个聚合函数可以写在一起，结果只有一行。',
+   ans:"SELECT COUNT(*), AVG(Grade) FROM Enrolled;\n\n-- 5 条，平均分 86。聚合函数把「很多行」压成「一行」。\n-- 注意：本平台只支持整表聚合，不支持 GROUP BY（按课程分组以后再讲）。"}
 ];
 
 /* ================= 渲染 ================= */
@@ -211,16 +240,9 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 function renderExercises(){
   const wrap=document.getElementById('exercises');
   wrap.innerHTML=EXERCISES.map((e,i)=>{
-    if(e.discussion){
-      return '<details class="ex" id="ex'+i+'"><summary>练习 '+(i+1)+' · '+e.t+'</summary>'+
-        '<p class="q">'+e.q+'</p>'+
-        '<div class="row"><button type="button" data-show="ans" data-i="'+i+'">看参考答案</button></div>'+
-        '<div class="ansbox" style="white-space:pre-wrap">'+e.discussion+'</div></details>';
-    }
-    const pre = e.slowSql ? esc(e.slowSql) : 'SELECT ;';
     return '<details class="ex" id="ex'+i+'"><summary>练习 '+(i+1)+' · '+e.t+'</summary>'+
       '<p class="q">'+e.q+'</p>'+
-      '<textarea id="exin'+i+'" spellcheck="false" aria-label="练习'+(i+1)+' SQL">'+pre+'</textarea>'+
+      '<textarea id="exin'+i+'" spellcheck="false" aria-label="练习'+(i+1)+' SQL">SELECT ;</textarea>'+
       '<div class="row">'+
       '<button type="button" data-run="'+i+'">运行</button>'+
       '<button type="button" class="primary" data-check="'+i+'">检查</button>'+
@@ -258,16 +280,12 @@ function runEx(i){
   }
 }
 const key=r=>r.rows.map(x=>JSON.stringify(x)).sort().join('|');
-function cmpTable(mine, ref, mineLabel, refLabel, speedMatters){
-  const row=(label,m,cls)=>'<tr><td>'+label+'</td><td>'+fmt(m.rows.length)+' 行</td><td class="'+cls+'">'+fmt(m.joinComps)+' 次</td><td>'+fmt(m.peakRows)+' 行</td><td class="'+cls+'">'+m.ms.toFixed(2)+' ms</td></tr>';
-  let clsMine='', clsRef='';
-  if(speedMatters){
-    if(mine.joinComps<ref.joinComps){ clsMine='better'; clsRef='worse'; }
-    else if(mine.joinComps>ref.joinComps){ clsMine='worse'; clsRef='better'; }
-  }
+const keyInOrder=r=>r.rows.map(x=>JSON.stringify(x)).join('|');
+function cmpTable(mine, ref, mineLabel, refLabel){
+  const row=(label,m)=>'<tr><td>'+label+'</td><td>'+fmt(m.rows.length)+' 行</td><td>'+fmt(m.joinComps)+' 次</td><td>'+fmt(m.peakRows)+' 行</td><td>'+m.ms.toFixed(2)+' ms</td></tr>';
   return '<div class="cmp"><p class="muted" style="margin:10px 0 6px">判分对比（运行结果 + 运行速度）：</p>'+
     '<div class="tablewrap"><table class="rel"><thead><tr><th></th><th>结果</th><th>连接比较</th><th>中间行数峰值</th><th>耗时</th></tr></thead><tbody>'+
-    row(mineLabel,mine,clsMine)+row(refLabel,ref,clsRef)+'</tbody></table></div></div>';
+    row(mineLabel,mine)+row(refLabel,ref)+'</tbody></table></div></div>';
 }
 function checkEx(i){
   const fb=document.getElementById('exfb'+i);
@@ -278,34 +296,23 @@ function checkEx(i){
     const mine=E.runSQL(document.getElementById('exin'+i).value);
     out.innerHTML=E.tableHTML(mine,20,true)+miniMetrics(mine);
     const ex=EXERCISES[i];
-    if(ex.slowSql){
-      const base=E.runSQL(ex.slowSql);
-      if(key(mine)!==key(base)){
-        fb.innerHTML='✗ 结果和原查询不一致（你有 '+fmt(mine.rows.length)+' 行，原查询 '+fmt(base.rows.length)+' 行）。改写只能调整表顺序，不能改变查询含义。';
-        fb.className='fb no'; card.classList.remove('pass');
-        fb.insertAdjacentHTML('afterend', cmpTable(mine, base, '你的写法','原查询', true));
-        return;
-      }
-      if(mine.joinComps<base.joinComps){
-        fb.innerHTML='✓ 漂亮！结果一致，连接比较从 '+fmt(base.joinComps)+' 次降到 '+fmt(mine.joinComps)+' 次（约快 '+(base.joinComps/Math.max(1,mine.joinComps)).toFixed(1)+' 倍）。';
-        fb.className='fb ok'; card.classList.add('pass');
-      } else {
-        fb.innerHTML='✗ 结果对了，但没变快：你的连接比较 '+fmt(mine.joinComps)+' 次 ≥ 原查询 '+fmt(base.joinComps)+' 次。提示：哪张表能最先被过滤到最小？';
-        fb.className='fb no'; card.classList.remove('pass');
-      }
-      fb.insertAdjacentHTML('afterend', cmpTable(mine, base, '你的写法','原查询', true));
-      return;
-    }
     const ref=E.runSQL(ex.expect);
-    if(key(mine)===key(ref)){
+    const same = ex.ordered ? keyInOrder(mine)===keyInOrder(ref) : key(mine)===key(ref);
+    if(same){
       const slower = mine.joinComps > ref.joinComps*1.5;
-      fb.innerHTML='✓ 正确！结果与参考答案完全一致（'+fmt(ref.rows.length)+' 行）。'+(slower?'<br><span style="font-weight:600;color:var(--muted)">小提醒：结果对了，但你的写法连接比较 '+fmt(mine.joinComps)+' 次，参考只要 '+fmt(ref.joinComps)+' 次——做完第 8 题再回来体会。</span>':'');
+      fb.innerHTML='✓ 正确！结果与参考答案完全一致（'+fmt(ref.rows.length)+' 行）。'+(slower?'<br><span style="font-weight:600;color:var(--muted)">小提醒：结果对了，但你的写法连接比较 '+fmt(mine.joinComps)+' 次，参考只要 '+fmt(ref.joinComps)+' 次——想想把最有选择性的表放在 FROM 最前面会不会更省。</span>':'');
       fb.className='fb ok'; card.classList.add('pass');
     } else {
-      fb.innerHTML='✗ 结果不一致：你的 '+fmt(mine.rows.length)+' 行，参考答案 '+fmt(ref.rows.length)+' 行。看看是列选多了/少了，还是条件没写全？';
+      const sameSet = key(mine)===key(ref);
+      fb.innerHTML=
+        (ex.ordered&&sameSet)
+          ? '✗ 行都对，但<b>顺序不对</b>：检查 <code>ORDER BY</code> 的列名，以及该用 <code>DESC</code> 还是 <code>ASC</code>。'
+          : mine.rows.length===ref.rows.length
+            ? '✗ 行数对了（'+fmt(ref.rows.length)+' 行），但内容或列不一致——检查 SELECT 挑了哪几列、WHERE 条件是否等价。'
+            : '✗ 结果不一致：你的 '+fmt(mine.rows.length)+' 行，参考答案 '+fmt(ref.rows.length)+' 行。看看是列选多了/少了，还是条件没写全？';
       fb.className='fb no'; card.classList.remove('pass');
     }
-    fb.insertAdjacentHTML('afterend', cmpTable(mine, ref, '你的写法','参考答案', false));
+    fb.insertAdjacentHTML('afterend', cmpTable(mine, ref, '你的写法','参考答案'));
   }catch(e){
     fb.textContent='✗ '+e.message;
     fb.className='fb no';

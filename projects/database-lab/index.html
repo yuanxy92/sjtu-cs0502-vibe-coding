@@ -156,7 +156,7 @@ WHERE S.Sid = E.Sid AND C.Cid = E.Cid
         <span id="sqlCount" class="count-chip"></span>
       </div>
       <div id="sqlErr" class="sqlerr" hidden></div>
-      <p class="hint">支持 <code>SELECT [DISTINCT] 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件]</code>；条件支持 <code>= != &lt; &lt;= &gt; &gt;=</code>、<code>AND / OR</code> 和表别名。字符串用单引号 <code>'数据库'</code>，中文输入法打出的 <code>“数据库”</code> 同样可用。多表用逗号连接时，引擎会按 FROM 顺序逐表相乘、并用 WHERE 里只涉及已连接表的条件提前过滤（谓词下推）。</p>
+      <p class="hint">支持 <code>SELECT [DISTINCT] 列|* FROM 表[,表… | NATURAL JOIN 表] [WHERE 条件] [ORDER BY 列 [ASC|DESC], …] [LIMIT n]</code>；条件是 <code>= != &lt; &lt;= &gt; &gt;=</code> 配 <code>AND / OR</code>，可用表别名。扩展写法：<code>COUNT(*)</code>、<code>AVG(列)</code>、<code>SUM/MIN/MAX(列)</code> 可单独作查询（不支持 GROUP BY）。字符串用单引号 <code>'数据库'</code>，中文引号 <code>“数据库”</code> 也行。多表用逗号连接时，引擎按 FROM 顺序逐表相乘、并用 WHERE 里只涉及已连接表的条件提前过滤（谓词下推）。</p>
     </div>
     <div class="panel" style="margin-top:20px">
       <h2>查询示例</h2>
@@ -225,7 +225,7 @@ function renderFlat(){
 /* ================= SQL UI ================= */
 const EXAMPLES=[
   ['① 90 分以上的选课','SELECT * FROM Enrolled WHERE Grade > 90;'],
-  ['② 投影：选了课的学号','SELECT DISTINCT Sid FROM Enrolled;'],
+  ['② 按成绩排序（高→低）','SELECT Sid, Cid, Grade FROM Enrolled\nORDER BY Grade DESC;'],
   ['③ 补考名单（两表连接）','SELECT Sname, Cid, Grade\nFROM Student S, Enrolled E\nWHERE S.Sid = E.Sid AND E.Grade < 60;'],
   ['④ 三表连接：成绩单','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND E.Grade >= 90;'],
   ['⑤ 学霸成绩单（≥95）','SELECT Sname, Cname, Grade\nFROM Student NATURAL JOIN Enrolled\n  NATURAL JOIN Course\nWHERE Grade >= 95;'],
@@ -233,9 +233,9 @@ const EXAMPLES=[
   ['⑦ 4 学分及以上的课','SELECT Cname, Credit FROM Course\nWHERE Credit >= 4;'],
   ['⑧ 年龄最小/最大的学生','SELECT Sname, Sage FROM Student\nWHERE Sage <= 18 OR Sage >= 22;'],
   ['⑨ 按姓名精确查找','SELECT * FROM Student WHERE Sname = \'李家杰\';'],
-  ['⑩ 开了哪些课','SELECT DISTINCT Cname\nFROM Enrolled NATURAL JOIN Course;'],
+  ['⑩ 成绩前 3 名（排序 + LIMIT）','SELECT Sid, Grade FROM Enrolled\nORDER BY Grade DESC LIMIT 3;'],
   ['⑪ 王牌课的成绩分布','SELECT Cname, Grade\nFROM Enrolled NATURAL JOIN Course\nWHERE Cname = \'数据库\';'],
-  ['⑫ 年轻人的高分记录','SELECT Sname, Cname, Grade\nFROM Student S, Enrolled E, Course C\nWHERE S.Sid = E.Sid AND C.Cid = E.Cid\n  AND S.Sage <= 19 AND E.Grade >= 85;']
+  ['⑫ 统计：记录数与平均分','SELECT COUNT(*), AVG(Grade) FROM Enrolled;']
 ];
 function renderExamples(){
   const wrap=document.getElementById('sqlExamples');
@@ -261,6 +261,9 @@ function renderMetrics(m, naive){
     naiveMsEst=true;
     naiveMsTxt='≈ '+(est>=1000?(est/1000).toFixed(1)+' s':est.toFixed(0)+' ms')+'（估算）';
   }
+  const whereFormula=(rows,conds,evals)=>conds>0
+    ? fmt(rows)+' × '+conds+' 个条件 = '+fmt(evals)
+    : '没有 WHERE 条件 = 0';
   const f=(label,rows,where,time)=>'<div class="mfrow"><span class="tag '+label[1]+'">'+label[0]+'</span>'+
     '<code>中间记录数 = '+rows+'</code><code>WHERE 比较次数 = '+where+'</code><code>耗时 = '+time+'</code></div>';
   if(m.joinKind==='none'){
@@ -272,7 +275,7 @@ function renderMetrics(m, naive){
       '<td class="n plain">'+fmtMs(m.ms)+'</td></tr></tbody></table>'+
       '<div class="mformulas">'+f(['单表','plain'],
         fmt(naiveRows)+'（表本身的行数）',
-        fmt(naiveRows)+' × '+m.condCount+' 个条件 = '+fmt(m.whereEvals),
+        whereFormula(naiveRows,m.condCount,m.whereEvals),
         '实测 '+fmtMs(m.ms))+'</div>';
     note.innerHTML='单表查询：只扫描 '+fmt(m.scanned)+' 条记录，每条过 '+m.condCount+' 个条件，最后留下 '+fmt(m.rows.length)+' 条。';
     return;
@@ -289,10 +292,12 @@ function renderMetrics(m, naive){
   const peakTxt=stepProd.length
     ? 'max(' + stepProd.map(s=>s.txt+'='+fmt(s.n)).join(', ') + ') = ' + fmt(m.peakRows)
     : fmt(m.peakRows);
-  const whereTxt=m.whereSteps.map(s=>fmt(s.rows)+'×'+s.conds).join(' + ') + ' = ' + fmt(m.whereEvals);
+  const whereTxt=m.whereSteps.length
+    ? m.whereSteps.map(s=>fmt(s.rows)+'×'+s.conds).join(' + ') + ' = ' + fmt(m.whereEvals)
+    : '没有 WHERE 条件 = 0';
   box.innerHTML+='<div class="mformulas">'+
     f(['没优化','bad'], m.fromSizes.join(' × ') + ' = ' + fmt(naiveRows),
-      fmt(naiveRows)+' × '+m.condCount+' 个条件 = '+fmt(naiveWhere),
+      whereFormula(naiveRows,m.condCount,naiveWhere),
       (naive?'实测 '+fmtMs(naive.ms):'跑不动，按比较次数外推 '+naiveMsTxt))+
     f(['有优化','good'], peakTxt, whereTxt, '实测 '+fmtMs(optMs))+
     '</div>';
@@ -302,11 +307,11 @@ function renderMetrics(m, naive){
     '有优化时每连上一张表就立刻用上此刻能判断的条件（'+m.whereSteps.map(s=>fmt(s.rows)+'→'+fmt(s.after)).join('，')+'），每步只用得上 1–'+Math.max(...m.whereSteps.map(s=>s.conds))+' 个。'+
     '原始表本身一共 '+fmt(m.scanned)+' 条（'+m.fromSizes.join('+')+'），与上面两个数无关。<br>'+
     (naive
-      ? '<b>两行耗时都是在同一台电脑上真跑出来的</b>：「没优化」就是真的先乘出 '+fmt(naiveRows)+' 条、再逐条筛，所以慢；「有优化」是先筛再连。'
+      ? '<b>两行耗时都是在同一台电脑上真跑出来的</b>：「没优化」是真的先乘出 '+fmt(naiveRows)+' 条、再逐条筛；「有优化」是先筛再连。数据小的时候两者可能只差几十微秒、甚至打平（测量噪声），把数据放大到几百上千行，差距才明显。'
       : '「有优化」的 '+fmtMs(optMs)+' 是实测；「没优化」要乘出 '+fmt(naiveRows)+' 条，浏览器跑不动，按两者 WHERE 比较次数的比例外推出 '+naiveMsTxt+'。')+
     '<br>'+
     '真实数据库 <b>会自动做这些优化</b>：优化器先把条件尽量下推、删掉用不到的列，再按统计信息估算代价、挑连接顺序和算法（索引、哈希连接），不需要你手写顺序。'+
-    '本页引擎只做到了"下推"这一步、<b>不会自动重排表</b>——所以练习 8 才要你自己把最有选择性的表挪到最前面。';
+    '本页引擎只做到了"下推"这一步、<b>不会自动重排表</b>——所以自己写多表查询时，记得把最有选择性的表放在 FROM 最前面。';
 }
 /* 小数据下单次只要零点几毫秒，抖动很大：多跑几次取平均值 */
 function bench(sql,opts){
