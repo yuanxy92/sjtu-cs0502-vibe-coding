@@ -1,0 +1,1344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>频繁项集实验室</title>
+<style>
+:root{
+  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:22px;
+  line-height:1.45;
+  color:#102344;
+  background:#f6f8fc;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --red:#b91c1c;
+  --amber:#b45309;
+  --green:#15803d;
+  --line:#d6deea;
+  --muted:#53647c;
+  --card:#fff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(900px 420px at 8% -60px, rgba(37,99,235,.09), transparent 60%),
+  radial-gradient(760px 380px at 96% -40px, rgba(180,83,9,.08), transparent 60%),
+  radial-gradient(1000px 520px at 50% 108%, rgba(21,128,61,.07), transparent 62%),
+  #f6f8fc;
+  background-attachment:fixed}
+button,select,input{font:inherit;color:inherit}
+button,select,summary{cursor:pointer}
+button{min-height:44px;padding:8px 18px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-weight:650;transition:background-color .15s,transform .15s}
+button:hover:not(:disabled){background:#eff5ff;border-color:#6c96e8}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{cursor:not-allowed;background:#f0f3f7;color:#8c99ab;border-color:#e1e7f0}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}
+.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.primary:hover:not(:disabled){background:var(--blue-dark)}
+h1,h2,h3,p{margin:0}
+h1{font-size:43px;line-height:1.15;letter-spacing:-.03em;text-wrap:balance}
+h2{font-size:26px;line-height:1.25}
+h3{font-size:22px}
+html{scrollbar-width:thin;scrollbar-color:#b9c8de #eef2f8}
+html::-webkit-scrollbar{width:10px}
+html::-webkit-scrollbar-track{background:#eef2f8}
+html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
+.app{max-width:1460px;margin:auto;padding:30px 34px 40px}
+.app-header{position:relative;overflow:hidden;display:grid;gap:8px;padding:22px 26px;border:1px solid #c7d7ef;border-radius:14px;
+  background:linear-gradient(115deg,#eaf1ff 0%,#f7f9fd 42%,#fdf4e7 76%,#eaf7ef 100%)}
+.header-motif{position:absolute;right:20px;top:14px;width:220px;height:132px;opacity:.55;pointer-events:none}
+.eyebrow{color:var(--blue);font-size:19px;font-weight:750;letter-spacing:.08em}
+.subtitle{color:var(--muted);font-size:23px;max-width:62ch}
+.muted{color:var(--muted)}
+
+/* Dataset switcher + tabs */
+.presets{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.preset-label{font-size:19px;font-weight:750;color:var(--muted)}
+.preset-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.preset-btn{min-height:42px;padding:6px 15px;font-size:20px;border-radius:20px}
+.preset-buttons .preset-btn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.preset-note{font-size:19px;color:var(--muted)}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:24px;overflow-x:auto;
+  position:sticky;top:0;z-index:20;background:rgba(246,248,252,.93);backdrop-filter:blur(8px);padding-top:6px}
+.tabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px;white-space:nowrap;transition:none}
+.tabs button[aria-selected="true"]{background:var(--blue);color:#fff}
+
+/* Toolbar, stepper, outcome banner */
+.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:16px;padding:18px 0 16px}
+.playback{display:flex;gap:10px}
+.step-count{color:var(--muted);font-size:20px;margin-left:auto}
+.step-dots{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.step-dot{min-height:0;height:34px;width:auto;min-width:34px;padding:0 10px;border-radius:17px;font-size:18px;font-weight:750;color:var(--muted);background:#eef2f8;border:1px solid var(--line)}
+.step-dot[aria-current="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-dot.done{background:#dbeafe;border-color:#a9c6f5;color:var(--blue-dark)}
+.slider-row{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:650;color:var(--muted)}
+.slider-row input[type=range]{width:230px;accent-color:var(--blue)}
+.slider-row output{font-family:var(--mono);font-size:23px;font-weight:750;color:var(--blue-dark);min-width:64px}
+.outcome{display:flex;align-items:center;min-height:92px;padding:16px 22px;border:1px solid #c7d7ef;border-radius:8px;background:#f0f6ff;transition:background-color .25s,border-color .25s}
+.outcome strong{display:block;font-size:28px}
+.outcome p{font-size:22px;margin-top:4px}
+.outcome.success{border-color:#a6d5c3;background:#effaf4;color:#116149}
+.outcome.warning{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.outcome.danger{border-color:#f1a5ab;background:#fff1f2;color:#991b1b}
+.outcome.info{border-color:#c7d7ef;background:#f0f6ff;color:#17427a}
+
+/* Layout blocks */
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:20px}
+.grid2.wide-left{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start;margin-top:20px}
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:22px 24px;min-width:0}
+.panel h2{margin-bottom:12px}
+.panel h3{margin:16px 0 8px}
+.panel .muted{font-size:19px}
+.note{border-left:4px solid #e6be66;background:#fff9eb;padding:14px 18px;font-size:20px;line-height:1.6;color:#854d0e;border-radius:0 6px 6px 0;margin-top:16px}
+.note strong{display:block;font-size:21px;margin-bottom:6px}
+.note p+p{margin-top:8px}
+.note.blue{border-color:#93b4e6;background:#f0f6ff;color:#17427a}
+.note.green{border-color:#86c9a9;background:#f0fbf5;color:#116149}
+.note.red{border-color:#e9a2a8;background:#fff1f2;color:#991b1b}
+details.deeper{margin-top:14px;border:1px dashed #b6c6dd;border-radius:8px;background:#f8fafd;padding:4px 14px}
+details.deeper summary{font-size:19px;font-weight:700;color:var(--blue-dark);padding:8px 0}
+details.deeper[open]{border-style:solid}
+.formula-card{display:grid;gap:7px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:16px 20px;margin-top:14px}
+.formula{font-family:var(--mono);font-size:27px;font-weight:700;color:#17427a;overflow-wrap:anywhere}
+.formula-sub{font-size:20px;color:var(--muted)}
+.formula .hl{color:var(--blue);background:#dbeafe;border-radius:4px;padding:0 5px}
+.formula .bad{color:var(--red);background:#ffe0e2;border-radius:4px;padding:0 5px}
+.formula .good{color:var(--green);background:#d8f3e3;border-radius:4px;padding:0 5px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table.trace{border-collapse:collapse;width:100%;font-size:20px}
+table.trace th,table.trace td{border-bottom:1px solid #e6ebf3;padding:9px 14px;text-align:left;white-space:nowrap}
+table.trace th{background:#f4f7fc;color:var(--muted);font-size:18px;font-weight:700;position:sticky;top:0}
+table.trace td{font-family:var(--mono)}
+table.trace tr:last-child td{border-bottom:0}
+table.trace td.wrap{white-space:normal;font-family:inherit;min-width:260px;width:40%}
+table.trace td.soft{white-space:normal;overflow-wrap:anywhere;min-width:150px;max-width:320px}
+table.trace tr.is-frequent td{background:#effaf4;color:#116149}
+table.trace tr.is-hit td{background:#e7f0ff}
+table.trace tr.is-pruned td{background:#fff1f2;color:#991b1b}
+table.trace tr.is-pruned td.mono{font-family:var(--mono)}
+table.trace tbody tr:hover td{filter:brightness(.985)}
+.num{color:var(--muted);font-variant-numeric:tabular-nums}
+.nw{white-space:nowrap}
+.scroll-420{max-height:420px;overflow-y:auto}
+.scroll-560{max-height:560px;overflow-y:auto}
+.scroll-420,.scroll-560,.table-wrap,.lattice-wrap{scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
+.scroll-420::-webkit-scrollbar,.scroll-560::-webkit-scrollbar,.table-wrap::-webkit-scrollbar,.lattice-wrap::-webkit-scrollbar{width:9px;height:9px}
+.scroll-420::-webkit-scrollbar-track,.scroll-560::-webkit-scrollbar-track,.table-wrap::-webkit-scrollbar-track,.lattice-wrap::-webkit-scrollbar-track{background:#eef2f8}
+.scroll-420::-webkit-scrollbar-thumb,.scroll-560::-webkit-scrollbar-thumb,.table-wrap::-webkit-scrollbar-thumb,.lattice-wrap::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
+.scroll-420::-webkit-scrollbar-thumb:hover,.scroll-560::-webkit-scrollbar-thumb:hover,.table-wrap::-webkit-scrollbar-thumb:hover,.lattice-wrap::-webkit-scrollbar-thumb:hover{background:#6c96e8}
+
+/* Item chips and basket rows */
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #c3d3ea;background:#f2f6fc;border-radius:16px;padding:2px 11px;font-size:19px;line-height:1.5;white-space:normal}
+.chip b{font-weight:750}
+.chip.frequent{border-color:#86c9a9;background:#effaf4;color:#116149}
+.chip.pruned{border-color:#e9a2a8;background:#fff1f2;color:#991b1b;text-decoration:line-through;text-decoration-thickness:1.5px}
+.chip.counted{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.chip .sup{font-family:var(--mono);font-size:17px;opacity:.85}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.basket-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed #e6ebf3}
+.basket-row:last-child{border-bottom:0}
+.basket-id{font-family:var(--mono);font-size:18px;color:var(--muted);min-width:74px}
+.basket-items{display:flex;flex-wrap:wrap;gap:6px}
+.basket-items .chip{font-size:18px;padding:1px 9px}
+.bar-row{display:grid;grid-template-columns:var(--lab,230px) minmax(0,1fr) 150px;gap:12px;align-items:center;font-size:19px}
+.bar-row + .bar-row{margin-top:11px}
+.bar-track{position:relative;height:26px;border-radius:5px;background:#eef2f8;overflow:hidden}
+.bar-fill{position:absolute;inset:0 auto 0 0;background:#93b4e6;border-radius:5px}
+.bar-fill.freq{background:#4ea87c}
+.bar-fill.weak{background:#d8c07a}
+.bar-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-val{font-family:var(--mono);font-size:18px;text-align:right;color:var(--muted)}
+.threshold-line{position:absolute;top:0;bottom:0;width:3px;background:var(--red);left:var(--cut,50%)}
+
+/* Candidate ledger (Apriori rounds) */
+.round-head{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;margin-bottom:10px}
+.round-head h2{font-size:27px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
+.metric{border:1px solid var(--line);border-radius:9px;background:#f8fafd;padding:12px 15px}
+.metric small{display:block;font-size:18px;color:var(--muted);font-weight:700}
+.metric b{font-family:var(--mono);font-size:29px;color:#17427a}
+.metric.bad b{color:var(--red)}
+.metric.good b{color:var(--green)}
+.brute{display:grid;gap:6px;border:1px solid #e6be66;border-radius:9px;background:#fff9eb;padding:14px 18px;font-size:20px;color:#854d0e;margin-top:16px}
+.brute b{font-family:var(--mono);font-size:25px}
+
+/* Rule table controls */
+.sortbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sortbar .preset-btn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.rule-ante,.rule-cons{display:flex;flex-wrap:wrap;gap:5px;white-space:normal}
+.rule-cons{margin-top:6px}
+.split-note{font-size:18px;color:var(--muted);margin:8px 0 0}
+.badge{display:inline-block;border-radius:5px;padding:1px 8px;font-family:var(--mono);font-size:19px;font-weight:750}
+.badge.hi{background:#d8f3e3;color:#116149}
+.badge.mid{background:#fff0cd;color:#854d0e}
+.badge.lo{background:#ffe0e2;color:#991b1b}
+tr.selected td{background:#e7f0ff!important}
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-size:19px;color:var(--muted);display:grid;gap:6px}
+@media (max-width:1100px){
+  .grid2,.grid2.wide-left,.grid3{grid-template-columns:minmax(0,1fr)}
+  :root{font-size:20px}
+  .header-motif{display:none}
+}
+
+/* Itemset lattice (tab 2, courseware source) */
+.lat-panel{background:linear-gradient(180deg,#ffffff,#f8fafd)}
+.lat-controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:4px 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#f4f7fc}
+.lat-controls button{min-height:38px;padding:4px 14px;font-size:18px}
+.ctl-select{display:flex;gap:8px;align-items:center;font-size:18px;color:var(--muted);font-weight:650}
+.ctl-select select{min-height:38px;padding:2px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-size:18px}
+.switch{display:flex;gap:7px;align-items:center;font-size:18px;font-weight:650;color:var(--muted)}
+.switch input{width:19px;height:19px;accent-color:var(--blue)}
+.lattice-wrap{overflow-x:auto;margin-top:6px}
+.lattice-wrap svg{display:block;width:100%;min-width:980px;height:auto}
+.lat-node{cursor:pointer}
+.lat-node:hover .lat-body{stroke-width:3.4}
+.lat-node:focus{outline:none}
+.lat-node:focus-visible .lat-body{stroke:#2563eb;stroke-width:3.4}
+.lat-body[filter]{animation:latPop .3s ease-out;transform-box:fill-box;transform-origin:center}
+.lattice-wrap line[stroke-dasharray="6 4"]{animation:latDash 1.6s linear infinite}
+@keyframes latPop{from{transform:scale(.82)}to{transform:scale(1)}}
+@keyframes latDash{to{stroke-dashoffset:-20}}
+.lat-legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:18px;color:var(--muted);margin-top:10px}
+.lat-sw{display:inline-block;width:24px;height:16px;border:2px solid;border-radius:9px;vertical-align:-3px;margin-right:6px}
+.ins-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ins-label{font-family:var(--mono);font-size:34px;font-weight:800;color:#17427a;letter-spacing:.02em}
+.ins-state{font-size:19px;color:var(--muted);margin:6px 0 10px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app-header">
+    <svg class="header-motif" viewBox="0 0 220 132" aria-hidden="true">
+      <g stroke="#9db4d6" stroke-width="1.4" fill="none">
+        <path d="M110 16 L50 46 M110 16 L110 46 M110 16 L170 46"/>
+        <path d="M50 46 L30 82 M50 46 L110 82 M110 46 L30 82 M110 46 L110 82 M110 46 L190 82 M170 46 L110 82 M170 46 L190 82"/>
+        <path d="M30 82 L110 116 M110 82 L110 116 M190 82 L110 116"/>
+      </g>
+      <g font-family="ui-monospace,Menlo,monospace" font-size="12" font-weight="700" text-anchor="middle">
+        <ellipse cx="110" cy="16" rx="20" ry="12" fill="#f1f5f9" stroke="#94a3b8"/><text x="110" y="20" fill="#475569">null</text>
+        <ellipse cx="50" cy="46" rx="14" ry="12" fill="#c9ecd8" stroke="#15803d"/><text x="50" y="50" fill="#14532d">A</text>
+        <ellipse cx="110" cy="46" rx="14" ry="12" fill="#c9ecd8" stroke="#15803d"/><text x="110" y="50" fill="#14532d">B</text>
+        <ellipse cx="170" cy="46" rx="14" ry="12" fill="#fbdadd" stroke="#b91c1c"/><text x="170" y="50" fill="#7f1d1d">C</text>
+        <ellipse cx="30" cy="82" rx="18" ry="12" fill="#c9ecd8" stroke="#15803d"/><text x="30" y="86" fill="#14532d">AB</text>
+        <ellipse cx="110" cy="82" rx="18" ry="12" fill="#dfe6f3" stroke="#46608c" stroke-dasharray="4 3"/><text x="110" y="86" fill="#334155">AC</text>
+        <ellipse cx="190" cy="82" rx="18" ry="12" fill="#dfe6f3" stroke="#46608c" stroke-dasharray="4 3"/><text x="190" y="86" fill="#334155">BC</text>
+        <ellipse cx="110" cy="116" rx="24" ry="12" fill="#eef2f9" stroke="#a9b8d4" stroke-dasharray="4 3"/><text x="110" y="120" fill="#64748b">ABC</text>
+      </g>
+    </svg>
+    <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
+    <h1>频繁项集实验室</h1>
+    <p class="subtitle">课件 4 单玩具数据 + 同项空间的 20 单构造例画整张项集格图，两份真实数据（观影记录、超市小票）走 Apriori：连接、剪枝、扫描、筛选，再按最小置信度生成关联规则。</p>
+  </header>
+
+  <nav id="sources" class="presets" aria-label="数据集">
+    <span class="preset-label">数据集</span>
+    <div id="sourceBar" class="preset-buttons"></div>
+    <span id="sourceNote" class="preset-note"></span>
+  </nav>
+
+  <nav class="tabs" role="tablist" aria-label="实验阶段">
+    <button id="tab-data" role="tab" aria-selected="true" aria-controls="stage" data-tab="data">① 购物篮与支持度</button>
+    <button id="tab-apriori" role="tab" aria-selected="false" aria-controls="stage" data-tab="apriori">② Apriori 逐轮剪枝</button>
+    <button id="tab-rules" role="tab" aria-selected="false" aria-controls="stage" data-tab="rules">③ 关联规则与置信度</button>
+  </nav>
+
+  <section id="stage" role="tabpanel" aria-labelledby="tab-data">
+    <div id="toolbar" class="toolbar"></div>
+    <div id="outcome" class="outcome info" role="status" aria-live="polite">
+      <div><strong id="outcomeTitle"></strong><p id="outcomeText"></p></div>
+    </div>
+    <div id="sceneRoot"></div>
+  </section>
+
+  <footer class="footer">
+    <p>数据来源：Slide13 第 35 页 Database TDB（课件原表）、20 单构造例（手工设计、make-data.py 可复现）、MovieLens 610K-small（GroupLens）、Groceries 经典超市小票（9,835 张）。真实数据为课堂演示各截取热门前 60／30 项，全部数据内嵌在本页，可离线打开。</p>
+    <p class="muted">对应 Slide13 第 26–38 页（关联规则与置信度 p29–30）。格图配色对照 p36–38：绿＝频繁，红＝计数后不达标，蓝灰＝被剪枝或向下闭包排除、从未计数；红边／红虚线＝正在展示排除依据。</p>
+  </footer>
+</main>
+<script>
+/* Apriori engine for the itemset lab.
+ * Produces a round-by-round trace so the UI can replay join / prune / count / select.
+ * Itemsets are represented as sorted index arrays; counting uses BigInt bitmasks.
+ */
+(function () {
+  'use strict';
+
+  function bit(i) { return 1n << BigInt(i); }
+
+  function prepare(baskets) {
+    const universe = new Set();
+    baskets.forEach(b => b.forEach(i => universe.add(i)));
+    const items = Array.from(universe).sort((a, b) => a - b);
+    const masks = baskets.map(b => b.reduce((m, i) => m | bit(i), 0n));
+    return { items, masks, n: baskets.length };
+  }
+
+  function subsetsOf(arr) {
+    const out = [];
+    const k = arr.length;
+    for (let s = 1; s < (1 << k) - 1; s++) {
+      const a = [];
+      for (let i = 0; i < k; i++) if (s & (1 << i)) a.push(arr[i]);
+      out.push(a);
+    }
+    return out;
+  }
+
+  /* One Apriori round: join L(k-1) -> candidates, prune by subset, scan, select. */
+  function nextRound(prevIn, minsupCount, db) {
+    // L(k-1) must be lexicographically ordered, otherwise the prefix join misses pairs.
+    const prev = prevIn.slice().sort((a, b) => {
+      for (let i = 0; i < a.items.length; i++) if (a.items[i] !== b.items[i]) return a.items[i] - b.items[i];
+      return 0;
+    });
+    const k = prev.length ? prev[0].items.length + 1 : 1;
+    const seen = new Map(prev.map(p => [p.items.join(','), p]));
+    const cands = [];
+    const stats = { k, joined: 0, prunedSubset: 0, counted: 0, frequent: 0, comparisons: 0 };
+
+    if (k === 1) {
+      for (const i of db.items) {
+        const items = [i];
+        const mask = bit(i);
+        let count = 0;
+        for (const m of db.masks) if ((m & mask) === mask) count++;
+        stats.joined++;
+        stats.counted++;
+        const c = { items, mask, count, support: count / db.n, from: null, pruned: null };
+        c.frequent = c.count >= minsupCount;
+        cands.push(c);
+      }
+    } else {
+      for (let a = 0; a < prev.length; a++) {
+        for (let b = a + 1; b < prev.length; b++) {
+          const x = prev[a].items, y = prev[b].items;
+          if (x.slice(0, k - 2).join(',') !== y.slice(0, k - 2).join(',')) continue;
+          if (!(x[k - 2] < y[k - 2])) continue;
+          const items = x.concat([y[k - 2]]);
+          stats.joined++;
+          // Only (k-1)-subsets need checking; dropping the last item gives x, already in prev.
+          let drop = -1;
+          for (let t = 0; t < k - 1 && drop < 0; t++) {
+            if (!seen.has(items.filter((_, j) => j !== t).join(','))) drop = t;
+          }
+          if (drop >= 0) {
+            stats.prunedSubset++;
+            const missing = items.filter((_, j) => j !== drop);
+            cands.push({ items, mask: null, count: null, support: null, from: [x, y], pruned: missing, frequent: false });
+            continue;
+          }
+          let mask = 0n;
+          items.forEach(i => { mask |= bit(i); });
+          let count = 0;
+          for (const m of db.masks) if ((m & mask) === mask) count++;
+          stats.counted++;
+          const c = { items, mask, count, support: count / db.n, from: [x, y], pruned: null, frequent: count >= minsupCount };
+          cands.push(c);
+          if (c.frequent) stats.frequent++;
+        }
+      }
+    }
+    if (k === 1) cands.forEach(c => { if (c.frequent) stats.frequent++; });
+    stats.comparisons = stats.counted * db.n;
+    cands.sort((p, q) => (q.count || -1) - (p.count || -1) || p.items.join().localeCompare(q.items.join()));
+    const frequent = cands.filter(c => c.frequent).map(c => ({ items: c.items, mask: c.mask, count: c.count, support: c.support }));
+    return { k, cands, frequent, stats, comparisons: stats.counted * db.n };
+  }
+
+  /* Full run, rounds appended lazily so the UI can stop early. */
+  function mine(baskets, minsupRatio, maxRounds) {
+    const db = prepare(baskets);
+    const minsupCount = Math.ceil(minsupRatio * db.n - 1e-9);
+    const rounds = [];
+    let prev = [];
+    const cap = maxRounds || 12;
+    for (let guard = 0; guard < cap; guard++) {
+      const r = nextRound(prev, minsupCount, db);
+      rounds.push(r);
+      if (!r.frequent.length) break;
+      prev = r.frequent;
+    }
+    const all = [];
+    rounds.forEach(r => r.frequent.forEach(f => all.push(f)));
+    return { db, minsupCount, rounds, frequent: all };
+  }
+
+  /* Association rules from frequent itemsets; consequent may hold several items. */
+  function rules(frequent, db, minconf, maxLen) {
+    const supMap = new Map(frequent.map(f => [f.items.join(','), f.support]));
+    const out = [];
+    const cap = maxLen || 4;
+    for (const f of frequent) {
+      if (f.items.length < 2 || f.items.length > cap) continue;
+      for (const ante of subsetsOf(f.items)) {
+        const cons = f.items.filter(i => ante.indexOf(i) < 0);
+        const sa = supMap.get(ante.join(','));
+        if (sa === undefined) continue;
+        const conf = f.support / sa;
+        if (conf < minconf) continue;
+        out.push({ ante, cons, support: f.support, confidence: conf });
+      }
+    }
+    return out;
+  }
+
+  /* Item frequencies, for the support bar chart on tab 1. */
+  function itemCounts(baskets, items) {
+    const c = new Array(items).fill(0);
+    baskets.forEach(b => b.forEach(i => { c[i]++; }));
+    return c;
+  }
+
+  window.ItemsetMine = { mine, rules, prepare, itemCounts, subsetsOf, bit };
+})();
+
+</script>
+<script>
+/* Generated by make-data.py -- do not edit by hand.
+ * Slide13 p35 Database TDB (courseware toy example)
+ * MovieLens 610K-small (GroupLens, https://grouplens.org/datasets/movielens/) 
+ * Groceries (classic supermarket receipts, 9,835 transactions)
+ */
+window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":2},{"name":"beer","label":"beer","count":3},{"name":"bread","label":"bread","count":3},{"name":"butter","label":"butter","count":1},{"name":"diapers","label":"diapers","count":3}],"baskets":[[0,2,3],[1,2,4],[0,1,2,4],[1,4]],"tids":[10,20,30,40],"meta":{"kind":"course","slide":"Slide13 第 35–38 页","files":[{"name":"Database TDB（课件直接给出）","columns":[["Tid","事务编号"],["Items","该事务包含的项"],["Binary","按 A B C D E 顺序的 0/1 表示"]],"rows":[["10","A, C, D","10110"],["20","B, C, E","01101"],["30","A, B, C, E","11101"],["40","B, E","01001"]]}],"pipeline":["课件原样保留：4 条事务、5 个项，不做任何截取。","minsup = 0.3 ⇒ 至少出现在 ceil(4 × 0.3) = 2 条事务里。","项集格共 2^5 = 32 个节点（含 null），可以在第 ② 页整张画出来。"],"definition":{"u":["Bread","Butter","Cheese","Eggs","Milk","Yogurt"],"rows":[[1,"Bread, Butter, Milk","110010"],[2,"Eggs, Milk, Yogurt","000111"],[3,"Bread, Cheese, Eggs, Milk","101110"],[4,"Eggs, Milk, Yogurt","000111"],[5,"Cheese, Milk, Yogurt","001011"]],"note":"support({Bread, Milk}) = 2/5 = 0.4；support({Cheese, Yogurt}) = 1/5 = 0.2；conf({Eggs, Milk} ⇒ {Yogurt}) = 0.4/0.6 = 2/3。"}}},"course20":{"items":[{"name":"milk","label":"milk","count":14},{"name":"beer","label":"beer","count":10},{"name":"bread","label":"bread","count":11},{"name":"butter","label":"butter","count":4},{"name":"diapers","label":"diapers","count":13}],"baskets":[[0,1,4],[0,2,4],[0,1,4],[2,3],[0,1,4],[0,2,4],[1,4],[0,1,2],[0,2,4],[0,3],[0,1,4],[2,4],[0,2,4],[1,2],[0,1,4],[2,3],[0,2],[0,1,4],[1,2,4],[0,3]],"tids":[10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200],"meta":{"kind":"course","slide":"手工构造 · 与 p35 同一项空间","files":[{"name":"Database TDB-20（构造例，可复现）","columns":[["Tid","事务编号"],["Items","该事务包含的项"],["Binary","按 A B C D E 顺序的 0/1 表示"]],"rows":[["10","A, B, E","11001"],["20","A, C, E","10101"],["30","A, B, E","11001"],["40","C, D","00110"],["50","A, B, E","11001"],["60","A, C, E","10101"],["70","B, E","01001"],["80","A, B, C","11100"],["90","A, C, E","10101"],["100","A, D","10010"],["110","A, B, E","11001"],["120","C, E","00101"],["130","A, C, E","10101"],["140","B, C","01100"],["150","A, B, E","11001"],["160","C, D","00110"],["170","A, C","10100"],["180","A, B, E","11001"],["190","B, C, E","01101"],["200","A, D","10010"]]}],"pipeline":["20 条事务、项空间与 p35 相同（A–E），所以复用同一张 32 节点格图。","构造目标：D 只出现 4 次、B+C 只共现 3 次；阈值 30% ⇒ 至少 6 单。","于是第 3 轮连接出 ABC / ABE / ACE 三个候选，ABC 因 BC 不频繁被剪——4 单例子里看不到的剪枝在这里出现。","把阈值拖到 20%（≥4 单）：D 与 ACE 翻身进入频繁集，第 4 轮还会再剪一个 ABCE。"],"stats":[["事务","20 单"],["项","5 个"],["阈值 30%","≥6 单"],["第 3 轮","3 候选 · 剪 1 · 数 2 · 频繁 1"]]}},"movie":{"items":[{"name":"The Shawshank Redemption","label":"Shawshank Redemption","year":"1994","genres":["Crime","Drama"],"count":274},{"name":"Forrest Gump","label":"Forrest Gump","year":"1994","genres":["Comedy","Drama","Romance","War"],"count":249},{"name":"Pulp Fiction","label":"Pulp Fiction","year":"1994","genres":["Comedy","Crime","Drama","Thriller"],"count":244},{"name":"The Silence of the Lambs","label":"Silence of the Lambs","year":"1991","genres":["Crime","Horror","Thriller"],"count":225},{"name":"The Matrix","label":"Matrix","year":"1999","genres":["Action","Sci-Fi","Thriller"],"count":222},{"name":"Star Wars: Episode IV - A New Hope","label":"Star Wars IV: New Hope","year":"1977","genres":["Action","Adventure","Sci-Fi"],"count":201},{"name":"Fight Club","label":"Fight Club","year":"1999","genres":["Action","Crime","Drama","Thriller"],"count":179},{"name":"Schindler's List","label":"Schindler's List","year":"1993","genres":["Drama","War"],"count":175},{"name":"Star Wars: Episode V - The Empire Strikes Back","label":"Star Wars V: Empire","year":"1980","genres":["Action","Adventure","Sci-Fi"],"count":168},{"name":"Braveheart","label":"Braveheart","year":"1995","genres":["Action","Drama","War"],"count":166},{"name":"The Usual Suspects","label":"Usual Suspects","year":"1995","genres":["Crime","Mystery","Thriller"],"count":163},{"name":"Raiders of the Lost Ark","label":"Raiders of the Lost Ark","year":"1981","genres":["Action","Adventure"],"count":163},{"name":"The Godfather","label":"Godfather","year":"1972","genres":["Crime","Drama"],"count":158},{"name":"American Beauty","label":"American Beauty","year":"1999","genres":["Drama","Romance"],"count":152},{"name":"Star Wars: Episode VI - Return of the Jedi","label":"Star Wars VI: Jedi","year":"1983","genres":["Action","Adventure","Sci-Fi"],"count":150},{"name":"Terminator 2: Judgment Day","label":"Terminator 2","year":"1991","genres":["Action","Sci-Fi"],"count":150},{"name":"Toy Story","label":"Toy Story","year":"1995","genres":["Adventure","Animation","Children","Comedy","Fantasy"],"count":147},{"name":"The Lord of the Rings: The Fellowship of the Ring","label":"LOTR 1: Fellowship","year":"2001","genres":["Adventure","Fantasy"],"count":146},{"name":"Jurassic Park","label":"Jurassic Park","year":"1993","genres":["Action","Adventure","Sci-Fi","Thriller"],"count":145},{"name":"Saving Private Ryan","label":"Saving Private Ryan","year":"1998","genres":["Action","Drama","War"],"count":141},{"name":"Seven","label":"Seven","year":"1995","genres":["Mystery","Thriller"],"count":140},{"name":"The Lord of the Rings: The Return of the King","label":"LOTR 3: Return of King","year":"2003","genres":["Action","Adventure","Drama","Fantasy"],"count":140},{"name":"The Fugitive","label":"Fugitive","year":"1993","genres":["Thriller"],"count":137},{"name":"Fargo","label":"Fargo","year":"1996","genres":["Comedy","Crime","Drama","Thriller"],"count":137},{"name":"The Lord of the Rings: The Two Towers","label":"LOTR 2: Two Towers","year":"2002","genres":["Adventure","Fantasy"],"count":131},{"name":"Apollo 13","label":"Apollo 13","year":"1995","genres":["Adventure","Drama","IMAX"],"count":127},{"name":"The Sixth Sense","label":"Sixth Sense","year":"1999","genres":["Drama","Horror","Mystery"],"count":125},{"name":"Memento","label":"Memento","year":"2000","genres":["Mystery","Thriller"],"count":122},{"name":"Back to the Future","label":"Back to the Future","year":"1985","genres":["Adventure","Comedy","Sci-Fi"],"count":121},{"name":"Twelve Monkeys","label":"Twelve Monkeys","year":"1995","genres":["Mystery","Sci-Fi","Thriller"],"count":118},{"name":"Gladiator","label":"Gladiator","year":"2000","genres":["Action","Adventure","Drama"],"count":117},{"name":"The Lion King","label":"Lion King","year":"1994","genres":["Adventure","Animation","Children","Drama","Musical","IMAX"],"count":115},{"name":"Shrek","label":"Shrek","year":"2001","genres":["Adventure","Animation","Children","Comedy","Fantasy","Romance"],"count":114},{"name":"Aladdin","label":"Aladdin","year":"1992","genres":["Adventure","Animation","Children","Comedy","Musical"],"count":113},{"name":"The Dark Knight","label":"Dark Knight","year":"2008","genres":["Action","Crime","Drama","IMAX"],"count":112},{"name":"Alien","label":"Alien","year":"1979","genres":["Horror","Sci-Fi"],"count":110},{"name":"The Princess Bride","label":"Princess Bride","year":"1987","genres":["Action","Adventure","Comedy","Fantasy","Romance"],"count":109},{"name":"One Flew Over the Cuckoo's Nest","label":"Cuckoo's Nest","year":"1975","genres":["Drama"],"count":108},{"name":"Inception","label":"Inception","year":"2010","genres":["Action","Crime","Drama","Mystery","Sci-Fi","Thriller","IMAX"],"count":107},{"name":"The Godfather: Part II","label":"Godfather II","year":"1974","genres":["Crime","Drama"],"count":107},{"name":"Reservoir Dogs","label":"Reservoir Dogs","year":"1992","genres":["Crime","Mystery","Thriller"],"count":106},{"name":"Indiana Jones and the Last Crusade","label":"Indiana Jones 3","year":"1989","genres":["Action","Adventure"],"count":105},{"name":"Eternal Sunshine of the Spotless Mind","label":"Eternal Sunshine","year":"2004","genres":["Drama","Romance","Sci-Fi"],"count":105},{"name":"American History X","label":"American History X","year":"1998","genres":["Crime","Drama"],"count":104},{"name":"Dances with Wolves","label":"Dances with Wolves","year":"1990","genres":["Adventure","Drama","Western"],"count":103},{"name":"Goodfellas","label":"Goodfellas","year":"1990","genres":["Crime","Drama"],"count":103},{"name":"Good Will Hunting","label":"Good Will Hunting","year":"1997","genres":["Drama","Romance"],"count":103},{"name":"Monty Python and the Holy Grail","label":"Monty Python: Holy Grail","year":"1975","genres":["Adventure","Comedy","Fantasy"],"count":101},{"name":"Die Hard","label":"Die Hard","year":"1988","genres":["Action","Crime","Thriller"],"count":99},{"name":"Groundhog Day","label":"Groundhog Day","year":"1993","genres":["Comedy","Fantasy","Romance"],"count":97},{"name":"Amelie","label":"Amelie","year":"2001","genres":["Comedy","Romance"],"count":95},{"name":"Finding Nemo","label":"Finding Nemo","year":"2003","genres":["Adventure","Animation","Children","Comedy"],"count":95},{"name":"The Terminator","label":"Terminator","year":"1984","genres":["Action","Sci-Fi","Thriller"],"count":94},{"name":"Léon: The Professional","label":"Léon: The Professional","year":"1994","genres":["Action","Crime","Drama","Thriller"],"count":91},{"name":"The Departed","label":"Departed","year":"2006","genres":["Crime","Drama","Thriller"],"count":90},{"name":"A Beautiful Mind","label":"Beautiful Mind","year":"2001","genres":["Drama","Romance"],"count":90},{"name":"The Green Mile","label":"Green Mile","year":"1999","genres":["Crime","Drama"],"count":89},{"name":"Pirates of the Caribbean: The Curse of the Black Pearl","label":"Pirates: Black Pearl","year":"2003","genres":["Action","Adventure","Comedy","Fantasy"],"count":89},{"name":"Kill Bill: Vol. 1","label":"Kill Bill: Vol. 1","year":"2003","genres":["Action","Crime","Thriller"],"count":88},{"name":"Blade Runner","label":"Blade Runner","year":"1982","genres":["Action","Sci-Fi","Thriller"],"count":88}],"baskets":[[30,34,38,46,54,58],[3,5,8,13,22,23,26,33,36,41,45,47,49],[2,7,9,10,16,22,33,44],[0,1,3,9,18,20,22,25,29,31,33,44],[0,2,3,7,10,18,20,25,31,44],[11,17,24,28],[17,21,24,30,32,33,34,55],[0,1,3,9,14,15,18,19,22,25,46],[4,11,20,30],[1,3,9,20,25,29,44],[0,7,10,23,27,34,35,36,37,40,47,50,53,59],[17,24,30,31,32,33,55],[1,4,5,8,11,14,18,28,31,32,33,41,57],[0,1,30,37,58,59],[10,27,35,40,53,59],[4,5,7,11,17,19,21,24,30,34,38],[2,3,20,22],[1,5,8,11,14,18,28,31,36,44],[0,1,11,12,19,25,28,30,45,47,54],[0,4,5,8,9,11,14,17,21,24,34,38,41,48],[8,11,16,28,33,35,36,48,52],[0,2,3,5,7,8,10,11,23,29,36,48],[0,1,6,27,50,57,58],[10,25,44],[0,1,2,3,22,25,44],[0,7,9,10,22,25,44],[0,2,9,16,25,31,33,44],[2,3,6,13,23,27,30,42,43,50,51,53,58],[0,1,15,16,18,20,22,25,31,33,44],[0,3,9,10,16,22,29,31,33,44],[0,1,19,56],[0,1,4,7,9,19,35,38,51],[2,12,23,47,59],[3,5,8,15,26,34,35],[0,1,3],[0,1,2,3,9,15,18,20,22,31],[0,1,2,7,9,10,15,18,20,22,25,29,31,33,53],[3,5,7,8,12,15,19,23,39,59],[0,7,12,34],[0,3,10,17,21,24,27,29,35,40,42,45,53,58],[0,6,7,19,21,27,34,38,43,56],[0,1,2,4,6,13,19,28,38,48,51,53,57],[0,1,2,3,4,5,8,10,14,15,26,37,59],[0,1,7,12,13,14,25,28,32,37,42,46,55],[16,48,52],[13,16,19,27,34,37,51,55,57,58],[2,12,13,23,27,37,39,50,54],[5,8,11,15,17,21,24,32,35,41,48,52,59],[4,5,8,11,14,17,21,24,30,34,57],[0,2,4,11,15,16,18,25,28,41,48,52],[4,5,8,12,14,15,18,19,22,36,39,41,52],[15,18,22,29],[0,1,9,17,19,21,26,27,30,34,38,50,59],[0,7,10,17,21,24,27,34,37,38,54,55,58],[5,23,29],[0,1,3,5,7,9,18,19,25,33,44,46,49],[0,2,9,15,18,22,25,29,31,33,44],[3,4,12,14,17,19,30,32,37],[1,3,16,23,27,32,35,36,37,38,46,48,55],[0,2,25,33,53],[1,19,28,43,44,51,55],[6,13,14,26,30],[0,1,2,3,15,20,22,31,33,44],[1,7,23,24,27,31,32,33,47,49,50,51,53],[0,4,17,21,24,57],[0,9,16,25,44],[4,18,28,50,55,59],[0,1,2,3,9,10,22,29],[2,4,6,7,13,20,23,37,40,50,59],[0,1,6,13,33,34,38,46,51,54,55],[1,3,5,12,13,37,53],[2,3,5,8,11,15,18,19,22,29,30,31,33,52],[1,11,15,18,28,30,37,41,44,57,59],[0,1,2,3,7,9,10,15,18,20,22,25,31,33,44],[2,7,8,12,19,23,39,44,45],[5,12,14,23],[0,1,2,9,16,44],[0,2,3,4,5,6,8,20,27,38,43],[0,1,9,20,22,25,31,44],[3,5,8,9,11,23,41,47],[4,5,6,8,9,13,14,17,19,21,24,30,36,57,58],[0,2,9,25],[0,1,7,20,22,29],[2,3,9,20,44],[9,20,22,31],[5,11,17,21,24],[1,2,3,7,10,20,22,25,31,33,44],[1,32,51],[2,10,16,33,44],[5,14,29,35,52,59],[27,42,46,50],[1,38,46],[5,6,19,30],[6,7,28],[0,1,13,16,25,32,36,46,49,51],[0,1,7,10,23,25,44],[8,9,11,14,15,18,30,41,48,52],[4,8,9,11,18,24,36,41],[0,5,8,11,14,17,21,24,25,32,36,41,47,57],[1,2,12,13,23,37,39,40,45],[0,1,3,9,44],[3,7,14,26,28,30],[1,7,18,25],[15,18,22,25,33,44],[0,3,9,15,20,22,25,44],[0,1,2,3,9,15,16,18,20,22,23,25,29,31,44],[5,6,8,11,17,36,45,47],[1,18,22,33],[8,9,14,15,18,19,22,35,48],[27,34,38],[16,24,27,31,33,55],[0,1,3,4,6,7,17,21,24,26,30,34,38,49,54],[0,6,7,12,37,38,39,42,46,50,55,58],[0,2,10,16,20,23,29,53],[1,18,25,44],[2,5,7,8,12,21,37],[4,25,30,31,34,35,48],[0,2,4,15,37,52,53,59],[0,2,9,17,21,24,30,32,44],[1,5,21,58],[4,9,14,15,19,26],[4,5,8,14,15,17,21,24,28,32,34,55,56,57],[0,6,11,15,32,41,47,52],[11,12,15,17,21,24,32,34,35,41,48,52,57],[11,13,30,33,47,49],[5,8,11,14,16,18,19,22,23,26,41,44,48],[0,26,27,32,34,50,54],[1,3,7,12,19,28,36,49],[8,28,33,35,36],[0,4,5,8,10,12,35,59],[0,1,2,3,7,9,15,16,22,25,31],[2,3,4,5,11,12,13,15,28,34,35,41,48,52],[4,5,8,11,14,16,18,27,31,32,33,35,44,48],[0,1,2,3,7,9,15,18,22,25,29,31,33,44],[0,4,29,37,42,53],[1,9,15,16,18,25,31,33,44],[2,3,4,10,12,20,37,39,42,50],[0,2,3,20,22,29],[1,3,4,8,9,15,19,22,28,30,36,59],[4,11,41,57],[0,1,2,3,4,6,7,19,20,23,36,40,46,53],[16,31,51],[0,3,4,5,8,11,14,28,32,42,50,53,55],[0,4,6,7,26,36,55,56],[29,32,42],[2,6,10,20,23,27,40,43,58],[0,1,2,4,10,13,14,19,20,34,38,40,42,43,52],[4,7,16,24,25,26,55],[0,3,4,5,8,11,15,18,19,23,25,28,29,52,59],[4,5,8,10,12,13,26,36,37,39,45],[16,23,29],[0,4,52,56],[2,3,15,16,18,22,29,31,33],[1,5,8,14,16,18,25,28,31],[5,16,29],[0,7,10],[1,10,16,26,31,32,34,38,45,50,51,54],[0,1,3,9,14,23,25,46],[0,1,2,9,15,18,22,29,33,44],[2,12,37,46],[6,7,17,23,24,47,50],[1,2,5,8,11,12,14,23,36,39],[0,2,6,10,12,27,37,38,39,40,43,45,50,58],[0,1,2,4,6,7,9,10,19,38,46],[3,10,20,22,23,40,53],[0,1,3,4,6,7,13,19,38,42,43,50],[2,5,9,11,12,15,18,20,22,23,39],[4,8,14,15,35,52],[24,34,36,47,51],[0,4,7,10,11,17,19,21,24,40,49],[0,1,5,7,9,10,15,25,31,49],[4,13,42,58],[0,1,4,6,7,9,12,31,33,34,38,39,53],[1,3,18,25,31],[0,2,5,7,8,10,31,33],[0,2,3,8,12,17,26,27,28,29,48,59],[0,1,10,25,27,37,39,43,45,54],[1,2,4,5,8,15,26,30,31,32,42,47,49,50,51],[0,1,2,4,8,9,10,15],[0,5,9,14,16,20,29],[0,2,3,6,7,10,12,39,58],[0,2,9,15,18,22,25,44],[6,11,28],[0,1,4,5,9,13,14,19,28,32,49,50,56],[10,12,13,37,53,58],[1,16,18,22,25,31,33],[1,2,3,7,15,31,33,44],[5,14,16,29],[0,2,3,16,20,22,29,31,44,53],[2,3,7,13,16,18,32,44,46,51,55],[0,2,10,11,46],[5,12,16],[0,1,8,46,55,56],[6,9,15,17,19,21,30,34,38,40,48,54,57,58],[0,1,3,5,8,11,12,16,25,26,28,32,39,46,49],[4,6,8,27,42],[4,17,21,27,42],[0,1,2,3,7,9,10,18,20,29,31,44],[0,1,2,9,18],[0,1,8,26,27,29,30],[13,25,29,35],[0,3,7,16,17,21,24,31,34,37,38,43,45,54,57],[1,9,15,18,22,25,44],[2,6,18,22,48],[2,3,23],[32,36,51],[5,16,29],[4,6,7,9,27,37,42,43,50,51],[11,13,37,39],[1,9,10,22],[0,10,16,43,51,53],[11,29,36,42,47,50,54],[2,3,7,15,18,22,31,33,48],[2,9,20,40,41,42,43,45],[0,1,3,7,9,18,22,33,44],[2,4,6,9,27,29,35,38,40,45,53,59],[4,5,6,8,17,19,21,24,34,41,57],[0,4,5,8,11,14,17,21,24,30,34,41,46,48,49],[0,2,3,5,12,13,23,36,37,39,45,47,49],[0,1,2,3,7,9,16,18,20,22,25,31,44],[3,12,13,22,23,35,36,39,47],[0,2,3,6,7,12,17,19,22,39,43,45,46,56],[2,6,23,50],[0,3,7,13,37],[0,5,6,12,16,37,45,49],[0,1,2,9,15,18,22,25],[2,3,6,10,20,27,31,37,43,46,53,54],[1,18,31,32,33,36,51,55],[2,9,17,24,27,30,43,55],[2,4,6,40,42,50,58],[25,33,44],[0,4,12,13,14,26,32],[0,2,3,6,10,23,40,43,58],[0,6,10,12,30,34,37,38,39,42,54,57,58],[0,1,7,15,16,22,25,31],[0,1,4,7,11,17,19,21,24,48,52],[35,42,59],[2,3,4,5,6,8,11,15,17,20,21,32,34,40,48],[0,1,2,3,7,9,10,15,20],[2,3,7,10,15,18,20,29,44],[0,1,2,3,9,15,18,22,25,31,33,53],[0,6,7,10,13,27,29,43,50,53],[5,9,13,15,19,37],[3,16,22,23,29],[2,13,40,58],[0,1,3,7,9,22,44],[5,6,9,26,28,30,36,47],[1,2,9,18,22,25,31,33],[4,5,38,51],[0,1,3,26,45,46,56],[0,5,12,17,20,21,24,39,45,47,52,57],[1,2,7,9,19,21,24,39],[1,3,4,7,14,19,22,23,26,35,40,48,52,59],[1,4,6,17,21,24,30,38,57],[9,16,20,25,29,44],[0,1,7,9,15,16,18,22,31,44],[2,6,7,16,38,50,51],[0,10,12,17,21,24,34,37,39,54],[0,6,42,43,53],[0,1,15,16,18,22,25,29,31,33,44],[3,5,11,12,49,55],[10,11,28,48,57],[0,1,6,13,16,18,20,26,31,33,40,43,45,54,58],[1,3,22,25,33,44],[0,1,2,9,15,18,22,25,29,53],[5,6,17,21,24,32,36,42],[2,3,4,27,34,38,40,42,50],[5,14,16],[4,5,8,9,11,12,15,19,22,36,39,52],[4,5,8,9,11,12,14,15,19,30,35,39,41,48],[12,17,21,24,34,39],[3,6,11,12,13,23,26,34,37,42,43],[0,1,2,9,18,22,25,31,33],[1,5,13,16,18,32,33],[0,35,56],[2,16,17,21,24,32,51,55],[3,6,20,27],[1,18,22],[5,8,11,16,17,21,24,26,29,31,32,36,47,50],[10,11,12,22,48,49],[0,1,4,6,7,11,17,21,38,50],[0,1,2,3,7,9,10,18,20,22,25,29,31],[0,2,3,5,9,13,14,22,25,29,32],[0,1,5,6,7,10,19,34,38,54,56],[5,11,18,22,32,36],[0,16,28,31,32,51,56],[0,1,43,46],[0,2,3,6,13,23,50],[3,5,8,11,14,18,28,31,33,35,41,44,56],[1,3,18,22,25,44],[3,5,11,17,18,41],[1,4,6,16,35,38,50],[4,13,26],[1,3,7,9,18,25],[0,4,17,21,24,38,43,54,56,57],[31,33,34,36],[0,32,36,51,57],[2,4,5,6,8,14,15,17,19,20,43,54,57],[0,1,3,9,10,18,22,44],[0,1,4,6,13,20,27,31,32,42,43,51,55,57],[4,6,13,26,27,28,31,33,42,48,49,51],[13,15,18],[1,4,30,34,58],[0,4,6,11,19,27,34,38,48,53,54],[0,1,4,16,34,38],[1,2,4,6,7,8,21,26,37,42,46,47,51,55,59],[2,6,10,12,13,29,39,40,42,45,46,53,54],[3,4,7,8,12,13,14,19,31,33,45],[17,21,24,33,57],[0,4,7,25,32,41,48],[3,17,19,32],[0,1,5,9,14,15,16,18,23,31,33],[0,1,2,7,10,20,22,29,44],[0,1,2,7,9,10,18,22,29,44,59],[1,2,3,10],[2,18,33,44],[0,3,9,20,25,33],[1,4,7,9,16,18,31],[3,4,5,6,8,27,34,38,54],[1,3,9,15,16,18,20,22,25,31,33,44],[2,6,12,13,34,38,40,43,45,54],[1,2,4,10,13,16,28,29,37,44],[0,2,3,7,9,10,22],[0,1,2,3,7,25,44],[1,4,5,14,26,30],[0,1,2,3,9,15,18,22,25,31,33,44,53],[0,2,3,5,7,9,10,15,18,20,22,23,25,31],[2,3,29,31],[5,14,16,17,21,24,25,28,36,57],[0,1,2,22,44]],"meta":{"kind":"file","slide":"真实数据 · GroupLens","files":[{"name":"ratings.csv（评分流水）","columns":[["userId","用户编号"],["movieId","电影编号"],["rating","评分 0.5–5"],["timestamp","评分时间（Unix 秒）"]],"rows":[["1","1","4.0","964982703"],["1","3","4.0","964981247"],["1","6","4.0","964982224"],["1","47","5.0","964983815"]]},{"name":"movies.csv（电影目录）","columns":[["movieId","电影编号"],["title","片名（含年份）"],["genres","类型，| 分隔"]],"rows":[["1","Toy Story (1995)","Adventure|Animation|Children|Comedy|Fantasy"],["3","Grumpier Old Men (1995)","Comedy|Romance"],["6","Heat (1995)","Action|Crime|Thriller"],["47","Seven (a.k.a. Se7en) (1995)","Mystery|Thriller"]]}],"pipeline":["只保留 rating ≥ 4.0 的评分：喜欢才算\"买过\"。","按 userId 把电影聚成一张购物篮（同一用户 = 同一事务）。","只保留全局被喜欢次数最多的 60 部电影，项空间才画得下。","篮长 3–15 的留下，得到 330 张篮。"],"stats":[["原始评分","100,836 条"],["用户","610 人"],["电影","9,742 部"],["进页面","330 篮 × 60 项"]],"example":{"label":"上面 4 行评分都来自 userId 1、都 ≥ 4 星 ⇒ 聚成一张购物篮","chips":["Toy Story (1995)","Grumpier Old Men (1995)","Heat (1995)","Seven (a.k.a. Se7en) (1995)"]}}},"groceries":{"items":[{"name":"whole milk","label":"whole milk","count":2513},{"name":"other vegetables","label":"other vegetables","count":1903},{"name":"rolls/buns","label":"rolls/buns","count":1809},{"name":"soda","label":"soda","count":1715},{"name":"yogurt","label":"yogurt","count":1372},{"name":"bottled water","label":"bottled water","count":1087},{"name":"root vegetables","label":"root vegetables","count":1072},{"name":"tropical fruit","label":"tropical fruit","count":1032},{"name":"shopping bags","label":"shopping bags","count":969},{"name":"sausage","label":"sausage","count":924},{"name":"pastry","label":"pastry","count":875},{"name":"citrus fruit","label":"citrus fruit","count":814},{"name":"bottled beer","label":"bottled beer","count":792},{"name":"newspapers","label":"newspapers","count":785},{"name":"canned beer","label":"canned beer","count":764},{"name":"pip fruit","label":"pip fruit","count":744},{"name":"fruit/vegetable juice","label":"fruit/vegetable juice","count":711},{"name":"whipped/sour cream","label":"whipped/sour cream","count":705},{"name":"brown bread","label":"brown bread","count":638},{"name":"domestic eggs","label":"domestic eggs","count":624},{"name":"frankfurter","label":"frankfurter","count":580},{"name":"margarine","label":"margarine","count":576},{"name":"coffee","label":"coffee","count":571},{"name":"pork","label":"pork","count":567},{"name":"butter","label":"butter","count":545},{"name":"curd","label":"curd","count":524},{"name":"beef","label":"beef","count":516},{"name":"napkins","label":"napkins","count":515},{"name":"chocolate","label":"chocolate","count":488},{"name":"frozen vegetables","label":"frozen vegetables","count":473}],"baskets":[[0,7,10,15],[0,4,7,17,25,26],[6,7,19,20],[0,6,8,18],[0,2,12,20,21],[0,7,15,17,25,29],[0,1,5,7,9,17,23,26,27],[3,5,6,23],[9,12,18,21],[1,8,9,20],[0,1,2,5,16,22],[3,5,9,11,16,19,22],[4,6,7,11,15,16,19],[0,17,23,25,26],[0,4,5,7,11,28],[0,3,10,17,28],[0,5,7,10,11,19],[1,2,6,7,8,13,16,24,29],[8,9,14,18],[0,2,4,13,26],[2,7,8,15,16,19,20],[1,11,13,23],[0,2,4,11,17],[1,6,8,13,19,23,26],[4,17,18,22,25,26],[3,5,14,23],[1,13,23,27],[0,1,4,21,23,24,26],[7,9,10,15,22],[0,1,5,6,24],[0,3,4,14],[0,3,7,12,19,21,23,25],[5,7,11,17,25],[0,2,3,6,17,23,25],[6,7,13,15],[0,4,5,18,19,25],[6,7,8,9,11,18],[0,4,23,26],[4,8,13,16,29],[0,4,13,25],[0,6,8,17,27],[1,2,5,13],[1,4,5,7,9,15,23,25,26,28],[0,1,6,15,21,23,28],[3,5,14,27],[0,4,6,7,19,25,29],[1,4,5,11],[1,2,4,6,7,17],[0,1,4,6,7,11,19,21,22,24],[0,1,6,8,10,15,20,23],[4,7,9,18],[0,5,7,14,19,24],[0,1,25,27],[1,2,4,6,7,8],[3,4,6,11],[0,1,6,26],[1,2,10,11,13,14],[6,16,17,21,26],[2,6,7,13],[1,2,6,9,12,20],[0,3,8,22,27],[0,1,13,14,18,20,23,24],[2,4,6,11,18],[0,1,4,6,11,17,19,21,25],[0,2,13,28],[7,8,10,16,19,24,28],[0,2,8,9],[0,3,9,10,12,18,19,21,22,29],[1,4,8,16],[0,1,9,16,24],[2,8,11,20],[0,2,5,7,12,19,21,27],[0,2,5,7,19],[2,3,8,16,20],[0,3,5,13],[0,1,11,12,13,21],[4,7,11,19],[0,2,4,28],[1,4,10,12,19,24],[0,1,13,19,25,29],[0,1,2,6],[0,1,3,13],[0,6,7,17],[1,6,8,23],[0,3,7,8,10,24],[1,3,7,17],[0,1,4,6,7,10,13],[0,4,5,6,11,27,28],[0,18,21,23,27],[0,9,10,23],[1,2,8,9,13,20,23],[1,4,8,9,18],[0,1,4,8,10,19],[3,8,16,24,27,29],[2,6,12,25,26],[2,13,23,26],[1,2,6,26,29],[0,6,13,15,23,26],[0,4,10,11,26],[0,2,4,6,9,10],[1,2,6,9,23,26,27],[3,5,7,11,16,27],[1,2,4,6,9,15,26],[1,11,17,23],[1,3,4,17,28,29],[0,1,5,7,11,16],[0,4,7,15,17,25,27],[1,2,6,14],[2,15,24,28],[0,1,11,15,23],[0,6,7,9,11,12,16,18,26],[4,6,7,18],[0,13,19,24,25],[0,2,6,23,29],[0,1,3,4,6,10,11,16,19,26],[1,2,17,19,20,27],[0,2,5,7,16,17,19,21],[5,9,16,24],[0,8,10,11,27,28],[0,9,20,21,28],[5,6,7,11],[2,5,13,21,22],[7,11,18,27],[0,6,7,20,26,29],[0,1,3,7,9,19,23,26,28],[0,4,6,25],[3,5,16,17,23],[1,12,17,25,27],[1,2,3,8,19,29],[10,11,13,21,25],[3,6,13,16,26],[0,2,3,8],[0,2,3,9,10,23],[1,2,18,23,26,27],[0,1,2,4,15,16],[1,7,12,16,28],[3,4,5,7],[1,2,4,5,6,27,28],[4,6,9,18],[0,6,15,19,29],[2,3,7,17,22],[0,6,8,18,27],[0,1,2,3,12,15,21,23,28],[0,1,8,15,19,29],[0,5,15,16,19],[1,7,12,15,17,23],[0,4,5,14],[0,4,11,19],[5,6,7,29],[4,8,9,17,19,20,21,24],[0,2,3,10,20],[1,3,7,8,9,10,27],[3,5,6,23],[0,2,4,5,6,7,17,19,21],[3,12,14,15,28],[0,3,5,7,8,16,22],[0,2,4,5,9,15,25],[1,4,6,19,23],[0,11,15,21],[0,4,5,19,25],[1,6,9,21,22,23],[0,1,4,15,23],[0,2,6,7,12],[0,1,2,7,9,18,29],[1,2,3,4,5,7,10,19,21,22],[2,6,11,16,25,26],[2,3,6,20,26],[0,1,3,24,28],[3,8,10,16],[1,7,11,15,16,18,25],[0,7,11,17,24,25,29],[1,5,8,11,16],[0,2,4,10,25,28],[3,7,8,23,27],[0,3,12,21],[0,2,20,26],[0,1,2,8,21,23,26,29],[0,2,8,10,13,26,28],[0,2,16,17],[0,6,18,19,20,24,25],[0,1,3,5,12,27],[0,3,5,10,18,25,26,27],[0,5,11,12],[0,4,8,11,18,21],[8,11,15,23,28],[1,11,17,19,20,25],[0,1,4,7,15,18,20],[5,12,14,16],[0,8,10,15],[3,8,14,17],[0,2,4,7,25],[5,6,14,20],[0,15,21,22,24,25,26],[2,21,22,25],[0,5,6,16],[0,3,4,7,10],[2,7,11,22],[1,4,13,17],[0,1,6,7,11,17,25,26],[3,5,14,18],[2,4,11,26],[3,4,5,13],[0,2,5,16,25],[0,2,5,16,21],[0,7,10,19],[0,2,10,16],[11,16,24,26],[0,1,6,13,18,19,20,23],[0,3,15,16,21,26,27],[0,13,18,26],[1,2,3,8,9,10,20,25],[0,3,18,22],[2,3,4,5,8,10],[0,1,2,5,9,11,20,23],[0,1,7,15,27],[0,4,12,27],[1,6,7,8,11,15,28],[2,7,13,25],[0,6,7,26],[4,6,7,13,14,18,26],[2,3,4,10,19,27,28],[0,6,20,21],[3,5,18,23],[1,4,6,9,23,26,28],[0,8,18,20],[0,6,10,25],[1,2,12,26],[0,1,19,20,22,23,26],[0,4,13,18,28],[0,1,6,13],[0,2,5,17],[0,6,18,21],[0,2,5,27],[1,7,15,17,20,23],[4,6,10,15,20,25],[1,2,15,26,27],[0,1,4,6,9,25],[0,1,2,3,6,17,29],[0,2,10,13],[0,3,5,14],[2,3,5,18,22],[0,4,19,24,29],[1,4,12,16,17,26,28],[0,1,4,9,22,25,29],[1,2,5,9,13,23],[7,10,14,28],[2,3,26,29],[1,2,3,6,9,11,12,16],[0,4,11,17,24],[0,1,2,13,17,23,25],[4,7,13,15,20,24,26],[1,6,21,23,26,29],[3,4,5,7,13,18,21],[7,9,14,15],[0,6,17,24,27],[0,1,6,9,13],[1,7,15,17,23],[1,6,9,12],[0,16,21,22],[2,4,7,11],[0,4,17,23,24,25],[1,2,3,6,9,11,20,24,29],[0,1,11,13],[2,4,11,21,22],[1,4,6,8],[5,7,13,24],[5,8,16,22],[0,2,12,24,26],[1,2,17,25],[1,4,7,9,12,23],[0,7,18,24],[1,3,5,9,17,20],[3,8,11,16,26],[0,4,9,15,25],[0,5,24,25,26],[0,7,26,29],[0,1,3,4,8,22],[1,2,5,6,17,24,25],[1,6,14,21],[3,12,16,27],[0,1,2,10,29],[3,6,7,12,21,23],[3,12,15,25],[0,2,4,7,10,11,17,24,25],[1,2,5,6,10,19,20],[1,12,13,14],[0,5,23,29],[0,3,5,17,19],[4,6,11,15,21],[1,3,7,9,10,20],[1,4,7,23,26,29],[0,1,9,20,25],[0,6,21,26],[0,1,8,28],[0,2,9,16,19,29],[0,3,4,6,26,28],[2,4,11,27],[0,1,6,15,17,19,21],[1,9,11,13,22],[3,7,12,21,23,27],[1,6,7,21],[0,2,4,7,10,11,15],[3,9,11,16,18,23,25],[1,4,8,10],[0,1,2,5,9,20,22,24],[2,3,4,17,25],[0,8,9,13,19,22,27],[0,1,8,9,29],[7,10,11,15,22,28],[2,8,9,14],[1,6,8,10,23],[1,3,17,24],[3,4,5,17],[0,4,6,18,20,28],[0,10,14,16],[2,9,11,12,18,25],[4,9,19,22,25],[1,2,3,4,6,16,26],[0,2,13,28],[3,5,17,19],[1,15,16,18],[0,2,9,20,21],[3,8,9,16],[0,4,8,11,24],[11,18,22,26],[0,1,2,9,17,22],[3,10,25,28],[0,9,16,24],[2,3,17,23,28],[4,6,8,18],[10,13,14,19],[10,13,19,20,22],[12,13,27,29],[0,1,18,27],[2,4,8,13,16],[0,1,6,23],[0,1,2,4,6,10,11,25],[7,8,10,27,28],[8,11,14,16,28],[3,7,8,11,18,27],[3,13,14,27],[0,1,2,19,25],[1,4,7,12,13,16],[0,4,10,15,20,25],[0,9,10,18],[5,10,12,20],[0,6,7,13],[2,6,10,13,18,26,27],[0,1,3,6,17,26],[0,3,5,11,12,16],[2,3,12,18],[0,1,7,15,25],[0,3,5,23,24,25,27,28],[1,10,25,27],[0,1,11,24],[0,1,2,3,6],[0,1,10,18,23],[0,1,3,6,16,19,25,26],[1,7,11,15],[1,13,16,21,26],[0,4,6,8,17,19],[3,5,6,21],[0,2,4,20,21],[1,4,11,23],[1,8,14,29],[3,12,16,18],[0,1,2,6,13,14,15,18],[0,1,4,15,23],[3,4,6,12,29],[0,1,2,4,7,13,17,20],[0,4,7,8,10,15,19,21,22,27],[1,2,13,29],[0,1,3,4,16,17,18,19,26],[1,4,5,8,9,16],[7,8,15,17,22],[3,5,8,16,22],[1,2,3,7,27,29],[0,1,3,4,5,9,17,18],[2,3,4,24],[0,1,5,7],[0,3,9,16,17,24,28],[3,4,13,27,29],[4,5,13,19,29],[0,2,7,9,17,25],[1,5,7,12,27],[0,6,15,16,17,27],[2,18,20,25],[5,6,19,24,26],[2,3,5,16,20,26],[3,5,7,26,29],[2,3,5,15],[1,7,15,16,17,21,22,26],[7,8,20,23],[4,5,14,15,27],[0,2,3,4,6,9,20,26],[0,3,6,17],[0,2,12,21],[10,13,14,28],[2,3,5,8,12,19],[8,9,19,25],[0,2,4,19,25,26],[0,2,6,10,13,18,19],[0,4,6,10,12,18],[1,4,7,9,13,24,26],[0,6,17,23],[2,5,6,10,18],[0,5,10,15,25],[1,2,8,22,23,24,29],[0,4,6,10,18],[0,4,9,10,16,18,20,21,27],[0,4,15,17,21],[6,10,18,23],[0,9,17,25],[0,1,4,15],[0,5,15,29],[0,1,4,6,13],[1,11,16,19],[0,8,9,10],[4,5,6,12,18,23,24,26],[3,5,7,15],[5,6,11,18,19,20,27],[0,1,2,4,13],[0,2,4,6,11,17],[1,2,3,5,8,9,10,13,19,25],[2,7,12,16,27],[0,2,3,10],[3,14,17,27],[1,4,15,20,22],[0,8,12,15,16,18],[1,2,9,10,19,20],[0,1,2,3,6,21,29],[3,5,17,22],[0,2,5,7,8,20,27],[0,5,6,11,12,17,24],[0,1,4,6,25],[6,8,11,18,19,21,24],[0,1,2,4,6,15],[0,1,2,3,4,7,15,17,26,28],[0,1,6,16,19,21,23],[0,2,3,5],[3,6,12,13,23],[3,9,22,28],[0,10,19,22,24,26],[7,11,15,23],[0,3,4,25,26,28],[0,1,6,15,17,18],[0,1,7,17,20,26],[3,9,11,16,17,23],[0,1,2,6,10,17,21,24,25,26],[0,5,7,24,27],[0,1,4,7,9,15,18,20,24],[0,5,21,22],[0,1,3,8,17],[0,1,2,5,6,13],[3,6,14,23,25,26],[0,2,6,19,25],[1,2,6,7,15,21,24],[0,3,7,8,11],[0,1,7,8,13,25],[0,1,2,19,24,26],[0,1,9,16],[1,2,3,4,6,7,13,17,21],[0,12,13,18],[3,5,8,28],[3,4,6,9,13,17,19,25],[0,3,5,8,16],[0,2,6,29],[0,13,15,17,24],[0,5,15,19],[3,16,22,29],[1,4,6,9,13,25,26],[2,3,8,10,20],[0,6,8,9,23,24,26,28],[4,6,13,15,27],[4,7,10,12,15,29],[0,8,15,25],[3,8,11,14,28],[1,2,4,9,20],[4,7,10,11],[1,2,10,17,28],[0,8,16,17,21],[0,7,11,22],[1,7,8,9,11],[0,2,5,10,13,15,18,21],[0,1,4,24],[0,3,5,8,19],[3,4,7,18,19],[1,3,4,9,17],[6,11,18,26],[0,1,5,6,12],[2,4,8,24],[1,3,5,7,11,26],[1,6,7,8,23],[1,3,5,6,11,19],[2,12,14,16,28],[2,7,9,10],[0,2,13,20,22],[1,2,6,12,17,26],[0,1,2,6],[1,2,3,7,14,20],[11,17,22,23,28],[2,3,4,27],[0,1,2,13,21,22,26],[0,6,13,26],[2,4,12,23,29],[1,2,3,15,24],[0,8,11,19],[0,6,10,12,17,18,27],[0,2,8,20],[0,4,5,7,9,17],[0,1,6,7,8,10,11,16,18,28],[0,1,2,4,11],[0,9,11,14],[0,3,8,16],[4,5,6,12,17,22],[2,5,10,17],[1,2,5,7,9],[2,6,9,20,25,29],[0,1,8,21,24],[1,6,9,27],[1,5,24,26,27],[0,1,3,6,8,9],[0,1,4,6,8,11,23,26],[0,1,5,17],[5,7,9,18,20],[0,2,12,27],[2,4,7,8],[8,10,11,18,28],[0,2,10,21,25],[0,4,6,16,17],[3,13,17,22],[0,1,4,6,12,16,29],[1,3,5,11,18,24],[5,6,12,16,18],[4,7,13,22],[1,2,3,9,12,28],[2,8,9,13],[0,1,2,11],[3,5,12,16,27],[1,2,4,13,20,24],[0,2,13,15],[0,2,4,16,18],[3,5,7,9,11,12,15],[0,5,13,15,24],[1,6,15,16,19],[2,14,21,23,27],[3,5,8,15,16],[1,4,16,21],[0,4,20,27],[0,1,9,11,13],[0,1,2,6,21],[4,5,7,23],[0,5,12,24],[0,1,2,9,11,19,23,28],[3,16,22,29],[0,1,2,4,5,6,7,19,21],[0,3,4,5,7],[3,6,7,8,13,15],[1,5,8,9],[2,4,5,7,12,18,25],[7,9,16,24],[0,6,13,19],[3,12,16,23],[1,2,9,20],[0,6,15,29],[0,2,13,18,20,21],[0,1,4,7,24],[11,13,15,18,20,22],[3,4,9,15,16,25,29],[0,1,3,9,13,25],[0,2,4,16,22,24],[0,1,16,23],[1,2,23,26,29],[1,14,17,18],[0,1,4,8,15,16,20,24],[0,5,13,22,25],[0,1,8,9,10,18],[0,1,3,8,12,16,22],[0,2,4,11,14,25],[0,3,7,9,17],[0,1,2,9,10,11,17,19],[0,4,7,15,25],[1,11,18,25],[1,6,8,11,15,17,21,26],[0,6,12,15],[4,6,9,11,17,23,25,29],[0,2,6,10,11,22,26],[1,18,20,21,23],[0,4,6,26],[0,9,10,26],[1,7,8,15,17,23,28],[4,7,11,27],[1,5,8,9,15],[2,6,7,15,21,23,27],[0,4,9,13,18,19,28],[0,15,19,24],[0,1,4,7,11,13,15],[0,17,24,29],[0,6,22,23],[0,6,19,20]],"meta":{"kind":"file","slide":"真实数据 · 经典超市小票","files":[{"name":"groceries.csv（一行一张小票，逗号分隔商品名，无表头）","columns":[["(no header)","每行＝一次结账买到的商品列表"]],"rows":[["citrus fruit,semi-finished bread,margarine,ready soups"],["tropical fruit,yogurt,coffee"],["whole milk"],["pip fruit,yogurt,cream cheese ,meat spreads"]]}],"pipeline":["按行读入 9,835 张真实超市小票。","只保留最热门的 30 种商品。","篮长 4–10 的小票里固定随机抽 600 张（seed=7，可复现）：太短的小票没有组合可挖。"],"stats":[["原始小票","9,835 行"],["商品","169 种"],["进页面","600 篮 × 30 项"]]}}};
+
+</script>
+<script>
+(function () {
+  'use strict';
+
+  const M = window.ItemsetMine;
+  const DATA = window.ITEMSET_DATA;
+  const $ = id => document.getElementById(id);
+
+  const SOURCES = {
+    course: {
+      label: '课件 TDB · 4 单',
+      note: 'Slide13 第 35 页的 Database TDB：4 条事务、5 个项（milk/beer/bread/butter/diapers）。32 个项集可以整张画成格图，和课件 p36–38 逐轮对照；格图沿用课件字母 A–E。',
+      hint: '项 = 五种商品，事务 = Tid',
+      ms: [0.05, 1, 0.05], msDefault: 0.3, lattice: true
+    },
+    course20: {
+      label: '构造例 · 20 单',
+      note: '同样 5 个项的 20 条事务（手工构造、可复现）：格图不变，但第 3 轮真的出现剪枝——ABC（milk+beer+bread）因 BC（beer+bread）不频繁被免计数。',
+      hint: '项 = 五种商品，事务 = Tid',
+      ms: [0.05, 1, 0.05], msDefault: 0.3, lattice: true
+    },
+    movie: {
+      label: '观影记录 · 330 篮',
+      note: 'MovieLens：一位用户给出 4 星及以上的热门电影，算作一张"购物篮"。',
+      hint: '项 = 电影，事务 = 用户',
+      ms: [0.02, 0.45, 0.01], msDefault: 0.05
+    },
+    groceries: {
+      label: '超市小票 · 600 篮',
+      note: 'Groceries：一张超市小票上同时买到的商品，构成一张"购物篮"。',
+      hint: '项 = 商品，事务 = 小票',
+      ms: [0.02, 0.60, 0.01], msDefault: 0.05
+    }
+  };
+
+  const PHASES = ['连接', '剪枝', '计数', '筛选'];
+  const PHASE_TITLE = {
+    join: '第 1 步 · 连接：把上一轮的频繁项集两两拼接，生成本轮候选',
+    prune: '第 2 步 · 剪枝：子集不频繁，超集一定不频繁',
+    count: '第 3 步 · 计数：扫描全部事务，只数活下来的候选',
+    select: '第 4 步 · 筛选：支持度达标的成为本轮频繁项集'
+  };
+  const NOTATION = '<p class="muted" style="margin:0 0 10px">记号：C(k)＝本轮候选 k 项集（拼出来、还没数）；L(k)＝本轮频繁 k 项集（数过且达标），也是下一轮连接的原料。</p>';
+  const STATE_TEXT = {
+    root: '空集 null：格图的根，被每条事务包含',
+    idle: '还没轮到：本轮以上的层尚未生成',
+    cand: '本轮候选：连接刚拼出来，还没数',
+    doomed: '剪枝展示：红边连向连累它的不频繁子集，下一步变灰',
+    pruned: '剪枝免计数：某个 (k-1) 子集不在上一轮频繁项集 L(k-1) 里',
+    closed: '闭包排除：含不频繁子集，永远不必数',
+    counted: '已计数：支持度算出来了，等筛选宣判',
+    infreq: '计数后不频繁：支持度 ＜ 阈值',
+    freq: '频繁：进入本轮频繁项集 L(k)，也是下一轮的原料'
+  };
+  const LEVEL_HUE = ['#64748b', '#2563eb', '#7c3aed', '#db2777', '#ea580c', '#15803d'];
+
+  const state = {
+    source: 'course',
+    tab: 'data',
+    minsup: 0.3,
+    minconf: 0.5,
+    dataStep: 0,
+    round: 0,
+    phase: 0,
+    trace: null,
+    ruleSort: 'confidence',
+    rulePick: 0,
+    pick: null,
+    showCount: true,
+    showEdges: true,
+    closure: true,
+    speed: 1000,
+    playing: false
+  };
+  let playTimer = null;
+
+  /* ---------- data helpers ---------- */
+
+  function src() { return DATA[state.source]; }
+  function items() { return src().items; }
+  function nameOf(i) {
+    const it = items()[i];
+    return it.label || it.name;
+  }
+  function fullName(i) {
+    const it = items()[i];
+    return it.name + (it.year ? ' (' + it.year + ')' : '') + (it.genres && it.genres.length ? ' · ' + it.genres.join('/') : '');
+  }
+  function setLabel(arr) { return arr.map(i => nameOf(i)).join(' + '); }
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+  function groups(n) { return Math.ceil(state.minsup * n - 1e-9); }
+  function setChip(i, cls) {
+    return `<span class="chip ${cls || ''}" title="${fullName(i)}">${nameOf(i)}</span>`;
+  }
+  function itemsetChip(arr, cls, sup) {
+    const extra = sup === undefined ? '' : `<span class="sup">${pct(sup)}</span>`;
+    return `<span class="chip ${cls || ''}"><b>${arr.map(i => nameOf(i)).join(' + ') || '∅'}</b>${extra}</span>`;
+  }
+  function ensureTrace() {
+    if (!state.trace || state.trace.source !== state.source || state.trace.minsup !== state.minsup) {
+      const t = M.mine(src().baskets, state.minsup);
+      state.trace = { source: state.source, minsup: state.minsup, trace: t };
+    }
+    return state.trace.trace;
+  }
+  function countedSoFar() {
+    const t = ensureTrace();
+    return t.rounds.slice(0, state.round + 1).reduce((s, r) => s + r.stats.counted, 0);
+  }
+  function universeSize() {
+    const s = new Set();
+    src().baskets.forEach(b => b.forEach(i => s.add(i)));
+    return s.size;
+  }
+  function bruteForceCount(u) {
+    const big = (1n << BigInt(u)) - 1n;
+    return big.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').replace(/,/g, ',<wbr>');
+  }
+  function msSlider(id) {
+    const [lo, hi, step] = SOURCES[state.source].ms;
+    return slider(id, '最小支持度', state.minsup, lo, hi, step);
+  }
+
+  /* ---------- shell ---------- */
+
+  function renderSourceBar() {
+    $('sourceBar').innerHTML = Object.entries(SOURCES).map(([k, v]) =>
+      `<button class="preset-btn" data-source="${k}" aria-pressed="${state.source === k}">${v.label}</button>`).join('');
+    $('sourceNote').textContent = SOURCES[state.source].note;
+  }
+
+  function setOutcome(kind, title, text) {
+    const box = $('outcome');
+    box.className = 'outcome ' + kind;
+    $('outcomeTitle').textContent = title;
+    $('outcomeText').innerHTML = text;
+  }
+
+  function toolbar(html) { $('toolbar').innerHTML = html; }
+
+  function slider(id, label, value, min, max, step) {
+    return `<label class="slider-row">${label}<input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${value}"><output>${pct(value, 0)}</output></label>`;
+  }
+
+  function stepDots(labels, current, attr) {
+    return `<div class="step-dots">${labels.map((s, i) =>
+      `<button class="step-dot ${i < current ? 'done' : ''}" data-${attr}="${i}" aria-current="${i === current}">${typeof s === 'string' && s.length <= 2 ? (i + 1) + ' ' + s : (i + 1)}</button>`).join('')}</div>`;
+  }
+
+  /* ---------- tab 1: raw format, baskets, support ---------- */
+
+  const DATA_STEPS = ['原始记录 → 购物篮', '购物篮与项空间', '单项支持度', '两两组合与阈值'];
+
+  function renderData() {
+    const b = src().baskets, n = b.length, u = universeSize();
+    toolbar(`<div class="playback">
+        <button id="prevBtn" ${state.dataStep === 0 ? 'disabled' : ''}>上一步</button>
+        <button id="nextBtn" class="primary" ${state.dataStep === 3 ? 'disabled' : ''}>下一步</button>
+      </div>
+      ${stepDots(DATA_STEPS, state.dataStep, 'step')}
+      <span class="step-count">${DATA_STEPS[state.dataStep]}</span>
+      ${state.dataStep > 0 ? msSlider('msData') : ''}`);
+
+    const counts = M.itemCounts(b, items().length);
+    const step = state.dataStep;
+
+    if (step === 0) { renderFormat(); return; }
+
+    if (step === 1) {
+      setOutcome('info', `${SOURCES[state.source].hint.replace(' = ', '＝')}：共 ${n} 张购物篮`,
+        `平均每张 ${(b.reduce((s, x) => s + x.length, 0) / n).toFixed(2)} 项。挖关联规则时，一张篮子里的东西视为同时发生，顺序不重要。`);
+      const tids = src().tids;
+      $('sceneRoot').innerHTML = `<div class="grid2 wide-left">
+        <section class="panel"><h2>${n <= 20 ? '全部购物篮' : '前 20 张购物篮'}</h2>
+          <div class="scroll-560">${b.slice(0, 20).map((x, i) =>
+            `<div class="basket-row"><span class="basket-id">${tids ? 'Tid ' + tids[i] : '#' + String(i + 1).padStart(3, '0')}</span>
+             <div class="basket-items">${x.map(j => setChip(j)).join('')}</div></div>`).join('')}</div>
+          <details class="deeper"><summary>这一份数据是怎么来的</summary>
+            <p style="font-size:19px;margin:10px 0">${SOURCES[state.source].note}</p></details>
+        </section>
+        <section class="panel"><h2>项空间有多大</h2>
+          <div class="metrics">
+            <div class="metric"><small>事务数 n</small><b>${n}</b></div>
+            <div class="metric"><small>项数 |U|</small><b>${u}</b></div>
+            <div class="metric ${u > 10 ? 'bad' : 'good'}"><small>全部子集 2^|U|-1</small><b style="font-size:20px">${bruteForceCount(u)}</b></div>
+          </div>
+          ${u > 10 ? `<div class="note blue"><strong>这就是"穷举不现实"</strong>
+            <p>Slide 第 31 页写的 2^|U|-1 在这里是 ${bruteForceCount(u)} 个项集。哪怕一秒数十亿个，也要算上几百年。</p>
+            <p>所以下一页的 Apriori 要靠"向下闭包性"把绝大部分子集直接跳过。</p></div>`
+          : `<div class="note green"><strong>小到可以整张画出来</strong>
+            <p>2^5-1 = 31 个非空项集，加上空集正好 32 个节点——课件第 35 页那张格图就是它。第 ② 页会让 Apriori 在这张图上逐轮点亮。</p>
+            <p>切到上面"观影记录"或"超市小票"，同一个数字会变成 ${bruteForceCount(60)} 和 ${bruteForceCount(30)}，穷举立刻不现实。</p></div>`}
+        </section></div>`;
+      return;
+    }
+
+    if (step === 2) {
+      const need = groups(n);
+      const order = counts.map((c, i) => ({ i, c })).sort((a, z) => z.c - a.c);
+      const freq = order.filter(o => o.c >= need).length;
+      setOutcome('info', `支持度＝出现次数 ÷ 事务总数`,
+        `最小支持度 ${pct(state.minsup, 0)} 意味着一个项至少要出现在 <b>${need}</b> 张篮子里（${n} × ${state.minsup}）。当前有 <b>${freq}</b>／${u} 个单项达标。`);
+      $('sceneRoot').innerHTML = `<div class="grid2 wide-left">
+        <section class="panel"><h2>单项支持度（红线＝最小支持度）</h2>
+          <div class="scroll-560" style="--lab:${u > 10 ? 230 : 110}px">${order.map(o => `<div class="bar-row">
+            <div class="bar-label" title="${fullName(o.i)}">${nameOf(o.i)}</div>
+            <div class="bar-track" style="--cut:${Math.min(100, state.minsup / (order[0].c / n) * 100)}%">
+              <div class="bar-fill ${o.c >= need ? 'freq' : 'weak'}" style="width:${o.c / order[0].c * 100}%"></div>
+              <div class="threshold-line"></div></div>
+            <span class="bar-val">${pct(o.c / n)} · ${o.c}</span></div>`).join('')}</div>
+        </section>
+        <section class="panel"><h2>读这张图</h2>
+          <div class="note"><strong>${u > 10 ? '头尾差得很远' : state.source === 'course20' ? 'D 还是最冷门' : 'D 只出现了一次'}</strong>
+            <p>最热门的项支持度 ${pct(order[0].c / n)}，最冷门只有 ${pct(order[order.length - 1].c / n)}。阈值定在 ${pct(state.minsup, 0)} 就砍掉了 ${u - freq} 个项。</p>
+            <p>阈值定得太高只剩爆款，定得太低候选爆炸——下一页可以亲手感受这个矛盾。</p></div>
+          <div class="formula-card"><div class="formula">support({<span class="nw">${nameOf(order[0].i)}</span>}) = ${order[0].c} / ${n} = ${pct(order[0].c / n, 2)}</div>
+            <div class="formula-sub">${state.source === 'course' ? '课件第 27 页的 support 定义，表格换成第 35 页的 TDB。' : state.source === 'course20' ? '同样用课件第 27 页的 support 定义，事务换成手工构造的 20 单。' : `对应 Slide 第 27 页的 support 定义，只是把 5 条事务换成了 ${n} 条真实事务。`}</div></div>
+        </section></div>`;
+      return;
+    }
+
+    const pairs = [];
+    for (let a = 0; a < items().length; a++) {
+      for (let z = a + 1; z < items().length; z++) {
+        const c = b.filter(x => x.indexOf(a) >= 0 && x.indexOf(z) >= 0).length;
+        pairs.push({ a, z, sup: c / n, c });
+      }
+    }
+    pairs.sort((p, q) => q.sup - p.sup);
+    const ok = pairs.filter(p => p.sup >= state.minsup);
+    const need = groups(n);
+    setOutcome('info', `两两组合一共 ${pairs.length} 个，达标的只有 ${ok.length} 个`,
+      `最小支持度 ${pct(state.minsup, 0)} ＝ 至少同时出现在 ${need} 张篮子里。${pairs.length - ok.length} 个组合被直接否掉——这正是下一页剪枝的依据。`);
+    $('sceneRoot').innerHTML = `<div class="grid2 wide-left">
+      <section class="panel"><h2>二项集（全部 ${pairs.length} 个，按支持度排序）</h2>
+        <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>项集</th><th>共现次数</th><th>支持度</th><th>判定</th></tr></thead>
+        <tbody>${pairs.map(p => `<tr class="${p.sup >= state.minsup ? 'is-frequent' : ''}">
+          <td class="soft">${nameOf(p.a)} + ${nameOf(p.z)}</td><td>${p.c}</td><td>${pct(p.sup, 2)}</td>
+          <td>${p.sup >= state.minsup ? '频繁' : '不频繁'}</td></tr>`).join('')}</tbody></table></div>
+      </section>
+      <section class="panel"><h2>向下闭包性</h2>
+        <div class="note green"><strong>子集的支持度只会更大</strong>
+          <p>{${nameOf(ok[0] ? ok[0].a : 0)}, ${nameOf(ok[0] ? ok[0].z : 1)}} 的支持度是 ${pct(ok[0] ? ok[0].sup : 0, 2)}，而它两个子集的支持度分别不低于这个数。</p>
+          <p>反过来：只要一个子集不频繁，它的所有超集都可以不看。${SOURCES[state.source].lattice ? '格图上那些蓝灰虚线节点，就是被这条性质整片排除的超集锥。' : `三项集有 ${Math.round(pairs.length * (items().length - 2) / 3)} 个候选，靠这条性质能免掉绝大多数计数。`}</p></div>
+        <div class="formula-card"><div class="formula">X ⊆ Y ⟹ support(X) <span class="good">≥</span> support(Y)</div>
+          <div class="formula-sub">Slide 第 27 页"支持度单调性 / 向下闭包性"。</div></div>
+        ${SOURCES[state.source].lattice ? `<button class="primary" data-tab="apriori" style="margin-top:16px">去第 ② 页：在格图上走 Apriori</button>` : ''}
+      </section></div>`;
+  }
+
+  function renderFormat() {
+    const meta = src().meta;
+    const b = src().baskets, n = b.length, u = universeSize();
+    const isCourse = meta.kind === 'course';
+    const isSlide = state.source === 'course';
+    const pick = isSlide ? '课件原表原样保留：4 条事务、5 个项，不做任何截取。'
+      : state.source === 'course20' ? '手工构造 20 条事务，项空间与课件相同（格图字母 A–E），复用同一张格图。'
+      : state.source === 'movie' ? '把评分 ≥4 视为"看过"，按每位观众聚成一张篮，只保留最被喜欢的 60 部电影。'
+      : '读入 9,835 张真实超市小票，只保留最热门的 30 种商品，再抽 600 张含 4–10 件的小票——太短的小票没有组合可挖。';
+    const rawLine = meta.stats ? `原始数据很大（${meta.stats[0][0]} ${meta.stats[0][1]}），我们只选取了一部分：` : '';
+    const tail = `进页面的一共 <b>${n}</b> 张购物篮、<b>${u}</b> 个项，平均每张 ${(b.reduce((s, x) => s + x.length, 0) / n).toFixed(1)} 项。`;
+    setOutcome('info', isCourse ? `一共 ${n} 条事务、${u} 个项：这就是全部数据` : `原始数据很大，只选取了一部分：一共 ${n} 张购物篮`,
+      rawLine + pick + tail);
+    const stats = meta.stats || [['事务', n + ' 单'], ['项', u + ' 个'], ['来源', isSlide ? '课件 p35 原表' : '手工构造']];
+    if (isCourse) {
+      const letterMap = LAT.byLevel[1].map(nd => `${String.fromCharCode(65 + nd.items[0])}=${nameOf(nd.items[0])}`).join('、');
+      const rows = b.map((x, i) => `<tr><td>${src().tids[i]}</td><td class="soft">${x.map(j => nameOf(j)).join(', ')}</td><td>${Array.from({ length: u }, (_, k) => x.includes(k) ? 1 : 0).join('')}</td></tr>`).join('');
+      const cnt = b.filter(x => x.includes(1) && x.includes(4)).length;
+      $('sceneRoot').innerHTML = `<div class="panel">
+        <h2>原始记录 → 购物篮（${isSlide ? '课件 p35 原表' : '构造例 20 单'}）</h2>
+        <p style="font-size:21px;line-height:1.7">${pick}${tail}</p>
+        <div class="metrics">${stats.map(s => `<div class="metric"><small>${s[0]}</small><b style="font-size:22px">${s[1]}</b></div>`).join('')}</div>
+        <div class="table-wrap${n > 8 ? ' scroll-420' : ''}" style="margin-top:14px"><table class="trace"><thead><tr>
+          <th>Tid</th><th>Items（商品名）</th><th>Binary（A–E 顺序）</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <p class="muted" style="margin-top:10px">Tid＝事务编号（一次结账）；Binary 按格图字母顺序写 0/1：${letterMap}。篮内无序，支持度数的是"多少张篮包含它"。</p>
+        <div class="formula-card"><div class="formula">support(X) = 包含 X 的事务数 / 事务总数</div>
+          <div class="formula">support({${nameOf(1)}, ${nameOf(4)}}) = <span class="hl">${cnt} / ${n} = ${pct(cnt / n, 0)}</span></div>
+          <div class="formula-sub">定义即课件 p27；这里直接在本表上手数：逐行看哪些 Tid 同时含 ${nameOf(1)} 与 ${nameOf(4)}。</div></div>
+        <div class="note blue"><strong>${isSlide ? '为什么这份数据值得逐轮走' : '这份构造例补了什么'}</strong>
+          <p>${isSlide
+            ? 'minsup 30% ⇒ 至少 ceil(4×0.3)＝2 单。5 个项只有 2^5＝32 个项集，第 ② 页能整张画成格图，和课件 p36–38 逐轮对照。'
+            : '构造目标：butter 只出现 4 次、beer+bread 只共现 3 次；阈值 30% ⇒ 至少 6 单。于是第 3 轮连接出 ABC／ABE／ACE 三个候选，ABC（milk+beer+bread）因 BC（beer+bread）不频繁被剪——4 单例子里看不到的剪枝在这里出现。把阈值拖到 20%（≥4 单）：butter 与 ACE 翻身进入频繁集，第 4 轮还会再剪一个 ABCE。'}</p></div>
+        <button class="primary" data-tab="apriori" style="margin-top:16px">去第 ② 页：在格图上走 Apriori</button>
+      </div>`;
+      return;
+    }
+    $('sceneRoot').innerHTML = `<div class="panel">
+      <h2>原始记录 → 购物篮</h2>
+      <p style="font-size:21px;line-height:1.7">${rawLine}${pick}${tail}</p>
+      <div class="metrics">${stats.map(s => `<div class="metric"><small>${s[0]}</small><b style="font-size:22px">${s[1]}</b></div>`).join('')}</div>
+      <p class="muted" style="margin-top:12px">一张篮＝视为同时发生的一组东西：篮内无序，支持度数的是"多少张篮包含它"。</p>
+      <button class="primary" data-tab="apriori" style="margin-top:16px">${isCourse ? '去第 ② 页：在格图上走 Apriori' : '去第 ② 页：看 Apriori 逐轮剪枝'}</button>
+    </div>`;
+  }
+
+  /* ---------- lattice model (courseware TDB, 5 items) ---------- */
+
+  const LAT = (function () {
+    const N = 5, W = 1260, H = 680;
+    const rowsY = [48, 158, 278, 398, 518, 628];
+    const inset = [0, 240, 20, 20, 240, 0];
+    const left = 80, right = 1200;
+    const nodes = [];
+    for (let mask = 0; mask < (1 << N); mask++) {
+      const its = [];
+      for (let i = 0; i < N; i++) if (mask & (1 << i)) its.push(i);
+      nodes.push({ key: its.join(','), items: its, level: its.length, mask });
+    }
+    const lex = (a, b) => { for (let i = 0; i < a.items.length; i++) if (a.items[i] !== b.items[i]) return a.items[i] - b.items[i]; return 0; };
+    const byLevel = [];
+    for (let L = 0; L <= N; L++) byLevel.push(nodes.filter(n => n.level === L).sort(lex));
+    byLevel.forEach((row, L) => {
+      const c = row.length;
+      row.forEach((nd, i) => {
+        nd.x = c === 1 ? (left + right) / 2 : left + inset[L] + i * (right - left - 2 * inset[L]) / (c - 1);
+        nd.y = rowsY[L];
+        nd.label = nd.items.map(i => String.fromCharCode(65 + i)).join('') || 'null';
+        nd.rx = 24 + 7 * nd.label.length;
+        nd.ry = 26;
+      });
+    });
+    const byKey = new Map(nodes.map(n => [n.key, n]));
+    const edges = [];
+    nodes.forEach(nd => {
+      if (!nd.level) return;
+      nd.items.forEach((_, t) => {
+        const p = nd.items.filter((_, j) => j !== t).join(',');
+        edges.push({ p, c: nd.key });
+      });
+    });
+    return { nodes, edges, byKey, byLevel, W, H, N };
+  })();
+
+  function allSubsets(its) {
+    const out = [];
+    for (let s = 1; s < (1 << its.length) - 1; s++) {
+      const a = [];
+      for (let i = 0; i < its.length; i++) if (s & (1 << i)) a.push(its[i]);
+      out.push(a);
+    }
+    return out;
+  }
+
+  function latticeStates(t) {
+    const ri0 = state.round, ph = state.phase;
+    const now = ri0 * 4 + ph;
+    const decidedInfreq = new Set();
+    const decidedAt = new Map();
+    t.rounds.forEach((r, ri) => r.cands.forEach(c => {
+      if (!c.pruned && !c.frequent && (ri < ri0 || (ri === ri0 && ph === 3))) {
+        const key = c.items.join(',');
+        decidedInfreq.add(key);
+        const at = ri * 4 + 3;
+        if (!decidedAt.has(key) || decidedAt.get(key) > at) decidedAt.set(key, at);
+      }
+    }));
+    const map = {};
+    LAT.nodes.forEach(nd => {
+      if (!nd.level) { map[nd.key] = { st: 'root', cand: null, ri: -1 }; return; }
+      const ri = nd.level - 1;
+      const r = t.rounds[ri];
+      const c = r ? r.cands.find(x => x.items.join(',') === nd.key) : null;
+      let st = 'idle', flash = false;
+      if (c && ri <= ri0) {
+        if (ri < ri0) st = c.pruned ? 'pruned' : (c.frequent ? 'freq' : 'infreq');
+        else if (ph === 0) st = 'cand';
+        else if (ph === 1) st = c.pruned ? 'doomed' : 'cand';
+        else if (ph === 2) st = c.pruned ? 'pruned' : 'counted';
+        else st = c.pruned ? 'pruned' : (c.frequent ? 'freq' : 'infreq');
+      }
+      if (st === 'idle' && state.closure) {
+        let earliest = Infinity;
+        allSubsets(nd.items).forEach(s => { const at = decidedAt.get(s.join(',')); if (at !== undefined && at < earliest) earliest = at; });
+        if (earliest === now) flash = true;
+        else if (earliest < now) st = 'closed';
+      }
+      map[nd.key] = { st, cand: c, ri, flash };
+    });
+    return { map, decidedInfreq };
+  }
+
+  const LAT_FILL = {
+    root: ['#f1f5f9', '#94a3b8', '#475569', ''],
+    idle: ['#ffffff', '#c3cede', '#94a3b8', ''],
+    cand: ['#fff4dc', '#d97706', '#92400e', ''],
+    doomed: ['#fff4dc', '#b91c1c', '#92400e', ''],
+    pruned: ['#dfe6f3', '#46608c', '#334155', '5 4'],
+    closed: ['#eef2f9', '#a9b8d4', '#64748b', '5 4'],
+    counted: ['#ffe9c2', '#b45309', '#7c2d12', ''],
+    infreq: ['#fbdadd', '#b91c1c', '#7f1d1d', ''],
+    freq: ['#c9ecd8', '#15803d', '#14532d', '']
+  };
+
+  function latticeSVG(t) {
+    const { map } = latticeStates(t);
+    const sel = state.pick;
+    const n = t.db.n;
+    const parts = [];
+    parts.push(`<defs><filter id="latGlow" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#15803d" flood-opacity="0.45"/></filter></defs>`);
+    LAT.byLevel.forEach((row, L) => {
+      parts.push(`<line x1="60" y1="${row[0].y}" x2="1240" y2="${row[0].y}" stroke="${LEVEL_HUE[L]}" stroke-opacity="0.16" stroke-width="1.5" stroke-dasharray="2 7"/>`);
+      parts.push(`<text x="8" y="${row[0].y + 6}" font-size="18" font-weight="700" fill="${LEVEL_HUE[L]}" font-family="ui-monospace,Menlo,monospace">k=${L}</text>`);
+    });
+    LAT.edges.forEach(e => {
+      const cn = map[e.c], pn = map[e.p];
+      if (!state.showEdges && (cn.st === 'idle' || cn.st === 'closed') && !cn.flash && sel !== e.c && sel !== e.p) return;
+      const a = LAT.byKey.get(e.p), b = LAT.byKey.get(e.c);
+      let stroke = '#d5dde9', w = 1.5, dash = '';
+      if (cn.flash && (pn.flash || pn.st === 'infreq' || pn.st === 'closed' || pn.st === 'pruned')) { stroke = '#b91c1c'; w = 2; dash = '6 4'; }
+      else if (cn.st === 'closed' || cn.st === 'pruned') { stroke = '#b7c3d6'; w = 1.6; }
+      else if (cn.st === 'infreq') stroke = '#e4b6ba';
+      else if (cn.st === 'freq') stroke = pn.st === 'freq' ? '#7fbf9a' : '#bcd9c8';
+      else if (cn.st === 'cand' || cn.st === 'counted' || cn.st === 'doomed') stroke = '#e5c689';
+      if (state.phase === 0 && cn.st === 'cand' && cn.cand && cn.cand.from &&
+          cn.cand.from.some(f => f.join(',') === e.p)) { stroke = '#d97706'; w = 2.4; }
+      if (state.phase === 1 && cn.st === 'doomed' && cn.cand && cn.cand.pruned &&
+          cn.cand.pruned.join(',') === e.p) { stroke = '#b91c1c'; w = 2.4; }
+      if (sel === e.p) { stroke = '#b91c1c'; w = 2.2; dash = '6 4'; }
+      else if (sel === e.c) { stroke = '#2563eb'; w = 2.2; dash = ''; }
+      parts.push(`<line x1="${a.x}" y1="${a.y + a.ry}" x2="${b.x}" y2="${b.y - b.ry}" stroke="${stroke}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`);
+    });
+    LAT.nodes.forEach(nd => {
+      const info = map[nd.key];
+      let [fill, stroke, text, dash] = LAT_FILL[info.st];
+      if (info.flash) { stroke = '#b91c1c'; dash = '5 4'; }
+      const showC = state.showCount && info.cand && info.cand.count !== null &&
+        (info.st === 'counted' || info.st === 'freq' || info.st === 'infreq');
+      const glow = info.st === 'freq' ? ' filter="url(#latGlow)"' : '';
+      const ring = sel === nd.key ? `<ellipse cx="${nd.x}" cy="${nd.y}" rx="${nd.rx + 7}" ry="${nd.ry + 7}" fill="none" stroke="#2563eb" stroke-width="2.5"/>` : '';
+      const sup = info.cand && info.cand.count !== null ? `${info.cand.count}/${n}` : '';
+      parts.push(`<g class="lat-node" data-node="${nd.key}" tabindex="0" role="button" aria-label="${nd.label}：${STATE_TEXT[info.st]}${sup ? '，支持度 ' + sup : ''}">
+        ${ring}<ellipse class="lat-body" cx="${nd.x}" cy="${nd.y}" rx="${nd.rx}" ry="${nd.ry}" fill="${fill}" stroke="${stroke}" stroke-width="${info.st === 'freq' ? 2.5 : 2}"${dash ? ` stroke-dasharray="${dash}"` : ''}${glow}/>
+        <text x="${nd.x}" y="${showC ? nd.y - 2 : nd.y + 7}" text-anchor="middle" font-size="19" font-weight="700" fill="${text}" font-family="ui-monospace,Menlo,monospace">${nd.label}</text>
+        ${showC ? `<text x="${nd.x}" y="${nd.y + 18}" text-anchor="middle" font-size="14" fill="${text}" font-family="ui-monospace,Menlo,monospace">${sup}</text>` : ''}
+      </g>`);
+    });
+    parts.push(`<text x="12" y="${LAT.H - 10}" font-size="15" fill="#53647c">${state.source === 'course' ? 'Slide13 p35 项空间' : '构造例 20 单 · 同 p35 项空间'} · minsup=${pct(state.minsup, 0)}（≥${groups(n)} 单）· 第 ${state.round + 1} 轮 ${PHASES[state.phase]}步 · 绿=频繁 红=数过不达标 蓝灰=没数 红边/红虚线=正在展示排除依据</text>`);
+    return `<svg id="latticeSvg" viewBox="0 0 ${LAT.W} ${LAT.H}" role="group" aria-label="项集格图">${parts.join('')}</svg>`;
+  }
+
+  function latticeControls() {
+    return `<div class="lat-controls">
+      <button id="playBtn" class="primary">${state.playing ? '暂停' : '自动播放'}</button>
+      <label class="ctl-select">速度<select id="speedSel">
+        <option value="1600" ${state.speed === 1600 ? 'selected' : ''}>慢</option>
+        <option value="1000" ${state.speed === 1000 ? 'selected' : ''}>中</option>
+        <option value="500" ${state.speed === 500 ? 'selected' : ''}>快</option></select></label>
+      <label class="switch"><input type="checkbox" id="tgCount" ${state.showCount ? 'checked' : ''}>显示计数</label>
+      <label class="switch"><input type="checkbox" id="tgEdges" ${state.showEdges ? 'checked' : ''}>显示全部边</label>
+      <label class="switch"><input type="checkbox" id="tgClosure" ${state.closure ? 'checked' : ''}>闭包锥</label>
+      <button id="exportSvg">导出 SVG</button>
+      <button id="latReset">重置</button>
+    </div>`;
+  }
+
+  function latticeLegend() {
+    const sw = st => { const [f, s] = LAT_FILL[st]; return `<span class="lat-sw" style="background:${f};border-color:${s}"></span>`; };
+    return `<div class="lat-legend">
+      <span>${sw('idle')}还没轮到</span><span>${sw('cand')}本轮候选</span><span>${sw('doomed')}剪枝·先看红边</span><span>${sw('pruned')}剪枝免计数</span>
+      <span><span class="lat-sw" style="background:#fff;border-color:#b91c1c;border-style:dashed"></span>即将整片排除</span><span>${sw('closed')}闭包排除</span><span>${sw('infreq')}数过不达标</span><span>${sw('freq')}频繁</span>
+      <span>格图沿用课件字母：${LAT.byLevel[1].map(nd => `${String.fromCharCode(65 + nd.items[0])}=${nameOf(nd.items[0])}`).join('、')}</span>
+    </div>`;
+  }
+
+  function inspectorHTML(t, states) {
+    if (!state.pick) return `<div class="note blue"><strong>点格图上任意一个节点</strong>
+      <p>这里会给出它的支持度手算、包含它的事务、以及它被剪／被排除的依据。点红节点再看它的超集锥，就是课件 p33 那张"Pruned supersets"图。</p></div>`;
+    const nd = LAT.byKey.get(state.pick);
+    const info = states.map[nd.key];
+    const n = t.db.n;
+    const counted = info.cand && info.cand.count !== null && info.st !== 'cand' && info.st !== 'pruned' && info.st !== 'doomed';
+    const verdict = info.st === 'freq' || info.st === 'infreq';
+    const tids = src().tids || src().baskets.map((_, i) => i + 1);
+    const inT = tids.filter((_, i) => nd.items.every(it => src().baskets[i].indexOf(it) >= 0));
+    const subs = nd.level ? nd.items.map((_, j) => nd.items.filter((_, q) => q !== j)) : [];
+    const killers = info.st === 'closed' || info.flash
+      ? [...states.decidedInfreq].map(k => k.split(',').map(Number))
+          .filter(s => s.every(i => nd.items.indexOf(i) >= 0))
+          .filter(s => ![...states.decidedInfreq].some(k2 => {
+            const o = k2.split(',').map(Number);
+            return o.length < s.length && o.every(i => s.indexOf(i) >= 0);
+          }))
+      : ((info.st === 'pruned' || info.st === 'doomed') && info.cand.pruned ? [info.cand.pruned] : []);
+    const chipCls = st => st === 'freq' ? 'frequent' : st === 'infreq' || st === 'pruned' || st === 'doomed' ? 'pruned' : st === 'counted' ? 'counted' : '';
+    return `<div class="ins-head"><span class="ins-label">${nd.label}</span>${nd.items.length ? `<span class="muted" style="font-size:20px">${setLabel(nd.items)}</span>` : ''}
+      <span class="badge ${info.st === 'freq' ? 'hi' : info.st === 'infreq' || info.st === 'pruned' || info.st === 'doomed' ? 'lo' : 'mid'}">${STATE_TEXT[info.st].split('：')[0]}</span></div>
+      <p class="ins-state">${STATE_TEXT[info.st]}</p>
+      <div class="formula-card"><div class="formula">support(${nd.label || '∅'}) = ${counted ? info.cand.count + ' / ' + n + ' = <span class="' + (verdict ? (info.cand.frequent ? 'good' : 'bad') : 'hl') + '">' + pct(info.cand.support, 2) + '</span>' : (nd.level ? '未计数' : n + ' / ' + n + ' = <span class="good">100%</span>')}</div>
+      <div class="formula-sub">${nd.level ? `阈值 ${pct(state.minsup, 0)} ＝ ≥${groups(n)} 单；${counted ? (verdict ? (info.cand.frequent ? '达标' : '不达标') : '已数出，等第 4 步宣判') : '没有数过，所以没有支持度可言'}` : '空集是每条事务的子集'}</div></div>
+      <h3>包含它的事务（${inT.length}／${n}）</h3>
+      <div class="chips">${inT.length ? inT.map(x => `<span class="chip">Tid ${x}</span>`).join('') : '<span class="muted">一条都没有</span>'}</div>
+      ${subs.length ? `<h3>直接子集（格图上往下一层的边）</h3>
+      <div class="chips">${subs.map(s => { const si = states.map[s.join(',')]; const known = si.st === 'counted' || si.st === 'freq' || si.st === 'infreq'; return itemsetChip(s, chipCls(si.st), known && si.cand ? si.cand.support : undefined); }).join('')}</div>` : ''}
+      ${killers.length ? `<div class="note red"><strong>排除依据</strong>
+        <div class="chips" style="margin:6px 0">${killers.map(k => itemsetChip(k, 'pruned')).join('')}</div>
+        <p>这些子集不频繁 ⇒ 按向下闭包性，${nd.label} 和它的全部 ${Math.pow(2, LAT.N - nd.level) - 1} 个超集都不必计数。格图上从它出发的红虚线边就是这个超集锥。</p></div>` : ''}
+      ${info.st === 'freq' ? `<div class="note green"><strong>它还会继续长大</strong><p>作为 L(${nd.level}) 的成员，下一轮它会和同前缀的兄弟连接，生成 ${nd.level + 1} 项候选。</p></div>` : ''}`;
+  }
+
+  /* ---------- tab 2: apriori rounds ---------- */
+
+  function canStepFwd() {
+    const t = ensureTrace();
+    return state.phase < 3 || state.round < t.rounds.length - 1;
+  }
+
+  function renderApriori() {
+    const t = ensureTrace();
+    const last = Math.max(0, t.rounds.length - 1);
+    const done = !canStepFwd();
+    toolbar(`<div class="playback">
+        <button id="prevBtn" ${state.round === 0 && state.phase === 0 ? 'disabled' : ''}>上一步</button>
+        <button id="nextBtn" class="primary" ${done ? 'disabled' : ''}>下一步</button>
+        <button id="resetBtn">重来</button>
+      </div>
+      ${stepDots(PHASES, state.phase, 'phase')}
+      <span class="step-count">第 ${state.round + 1} 轮（k＝${state.round + 1}）</span>
+      ${msSlider('msApri')}`);
+
+    const r = t.rounds[Math.min(state.round, last)];
+    const st = r.stats, n = t.db.n;
+    const phase = state.phase;
+
+    if (phase === 0) {
+      setOutcome('info', PHASE_TITLE.join,
+        st.k === 1 ? `第一轮没有可连接的集合，候选就是全部 <b>${st.joined}</b> 个单项，它们的支持度必须逐个当场数出来。`
+                   : `上一轮的频繁项集 L(${st.k - 1}) 有 ${t.rounds[state.round - 1].frequent.length} 个成员，两两拼接后得到 <b>${st.joined}</b> 个 ${st.k} 项候选 C(${st.k})。这一步只拼字符串，不碰事务数据。` + (st.joined === 0 ? '一个候选都拼不出来：成员的前缀两两对不上（或只剩 1 个成员），本轮就是终止轮。' : ''));
+    } else if (phase === 1) {
+      setOutcome(st.prunedSubset ? 'warning' : 'info', PHASE_TITLE.prune,
+        st.prunedSubset ? `<b>${st.prunedSubset}</b> 个候选被剪掉，理由是它的某个 ${st.k - 1} 项子集不在 L(${st.k - 1}) 里。剩下的 ${st.counted} 个才需要真的去数。`
+                        : (st.joined === 0 ? '本轮没有候选，无可剪。' : `本轮没有候选被剪：所有 ${st.k} 项候选的子集都已经是频繁的（${st.k === 2 ? '二项集的子集是单项集，而参与连接的单项本来就都频繁。' : ''}）`));
+    } else if (phase === 2) {
+      setOutcome('info', PHASE_TITLE.count,
+        `给 <b>${st.counted}</b> 个候选数出支持度，共比较 ${st.comparisons.toLocaleString()} 次。` + (st.prunedSubset ? `剪枝省下 ${(st.prunedSubset * n).toLocaleString()} 次比较。` : ''));
+    } else {
+      setOutcome(st.frequent ? 'success' : 'danger', PHASE_TITLE.select,
+        st.frequent ? `本轮留下 <b>${st.frequent}</b> 个频繁 ${st.k} 项集，可以作为下一轮连接的原料。`
+                    : `${st.joined === 0 ? '本轮一个候选都拼不出来' : st.counted === 0 ? '本轮候选全被剪枝，一个都没数' : `数过的 ${st.counted} 个候选全部低于阈值`}，L(${st.k})＝∅，算法结束。累计频繁项集 ${t.frequent.length} 个。`);
+    }
+
+    const metrics = `<div class="metrics">
+      <div class="metric"><small>候选 |C(${st.k})|</small><b>${st.joined}</b></div>
+      <div class="metric ${st.prunedSubset ? 'bad' : ''}"><small>剪枝免掉</small><b>${st.prunedSubset}</b></div>
+      <div class="metric"><small>实际计数</small><b>${st.counted}</b></div>
+      <div class="metric good"><small>频繁 |L(${st.k})|</small><b>${st.frequent}</b></div>
+      <div class="metric"><small>累计已计数项集</small><b>${countedSoFar()}</b></div>
+    </div>`;
+
+    if (SOURCES[state.source].lattice) {
+      const states = latticeStates(t);
+      const extra = ['格图上琥珀色节点就是刚拼出来的候选，琥珀色粗边是它的两个连接父集。',
+        '被剪的候选这一步先保持琥珀色、用红粗边连向连累它的不频繁子集——看清"谁连累谁"；下一步它和它的边才一起变灰。' + (state.source === 'course' ? '课件 p36 把 D 的整片超集锥画红，这里把"数过才红、没数就蓝灰"分得更细。' : '第 3 轮点一下格图上的 ABC（milk+beer+bread），看它是被哪个不频繁子集（BC＝beer+bread）连累的。'),
+        '节点里琥珀色分数＝刚数出的支持度。' + (Object.values(states.map).some(i => i.st === 'pruned' || i.st === 'closed') ? '灰节点灰边＝省掉的计数。' : ''),
+        (state.source === 'course' ? '绿节点进入 L(k)；新红节点的不频繁超集锥先用红虚线整片连起来展示，下一步才整体变灰——对照课件 p38 的最后一张格图。'
+          : '绿节点进入 L(k)；新红节点的超集锥先用红虚线连成整片，下一步才变灰。把阈值拖到 20%，D 和 ACE 会翻身变绿。')][phase];
+      $('outcomeText').innerHTML += ' ' + extra;
+      const candChips = r.cands.map(c => {
+        const info = states.map[c.items.join(',')];
+        const cls = info.st === 'freq' ? 'frequent' : info.st === 'infreq' || info.st === 'pruned' ? 'pruned' : info.st === 'counted' ? 'counted' : '';
+        return itemsetChip(c.items, cls, phase >= 2 && c.count !== null ? c.support : undefined);
+      }).join('');
+      const pickItems = state.pick ? state.pick.split(',').map(Number) : null;
+      const pickInfo = state.pick ? states.map[state.pick] : null;
+      const hitN = pickItems ? src().baskets.filter(b => pickItems.every(it => b.indexOf(it) >= 0)).length : 0;
+      const tdbRows = src().baskets.map((b, i) => {
+        const hit = pickItems && pickItems.every(it => b.indexOf(it) >= 0);
+        const bin = items().map((_, j) => b.indexOf(j) >= 0 ? '1' : '0').join('');
+        return `<tr class="${hit ? 'is-hit' : ''}"><td>${src().tids[i]}</td><td>${b.map(j => nameOf(j)).join(', ')}</td><td>${bin}</td></tr>`;
+      }).join('');
+      $('sceneRoot').innerHTML = `
+        <section class="panel lat-panel">
+          <div class="round-head"><h2>项集格图 · 第 ${state.round + 1} 轮</h2>
+            <span class="muted">32 节点 = 2^5 · 80 条子集边 · ${SOURCES[state.source].label}</span></div>
+          ${latticeControls()}
+          <div class="lattice-wrap">${latticeSVG(t)}</div>
+          ${latticeLegend()}
+        </section>
+        <div class="grid3">
+          <section class="panel"><h2>初始数据 · Database TDB</h2>
+            <div class="table-wrap ${src().baskets.length > 8 ? 'scroll-420' : ''}"><table class="trace"><thead><tr><th>Tid</th><th>Items</th><th>Binary</th></tr></thead>
+            <tbody>${tdbRows}</tbody></table></div>
+            <div class="note blue" style="margin-top:12px"><strong>${pickItems ? '蓝底行＝包含选中节点 ' + LAT.byKey.get(state.pick).label + ' 的事务' : '点格图节点，这里高亮包含它的事务'}</strong>
+              <p>${pickItems ? (pickInfo.cand && pickInfo.cand.count !== null
+                ? `支持度的分子就是蓝底行的行数：${pickInfo.cand.count} ／ ${n}。`
+                : `蓝底行共 ${hitN} 行，手算 ${hitN}/${n} = ${pct(hitN / n, 0)}；但它在格图上${pickInfo.st === 'pruned' || pickInfo.st === 'doomed' ? '被剪枝' : pickInfo.st === 'closed' ? '被向下闭包性整片排除' : pickInfo.flash ? '即将被闭包整片排除（红虚线锥）' : '还没轮到计数'}，算法从未数过它。`)
+                : '选中一个节点后，数蓝底行就能手算它的支持度。'}Binary 列按 A B C D E 顺序写 0/1。</p></div>
+          </section>
+          <section class="panel"><h2>本轮在干什么</h2>
+            ${NOTATION}
+            ${metrics}
+            <div class="note blue"><strong>${PHASES[phase]}步</strong><p>${phaseNote(phase, st, r.cands.find(c => c.pruned))}</p></div>
+            <h3>本轮候选（${r.cands.length} 个）</h3>
+            <div class="chips">${candChips}</div>
+            ${phase === 3 && r.frequent.length ? `<h3>L(${st.k}) 全家福</h3><div class="chips">${r.frequent.map(f => itemsetChip(f.items, 'frequent', f.support)).join('')}</div>` : ''}
+          </section>
+          <section class="panel"><h2>节点检查器</h2>${inspectorHTML(t, states)}</section>
+        </div>`;
+      return;
+    }
+
+    const detail = (() => {
+      const cell = c => `<td>${itemsetChip(c.items)}</td>`;
+      if (phase === 0) return {
+        head: '<th>候选</th><th>连接来源</th>',
+        rows: r.cands.map(c => `<tr>${cell(c)}<td class="soft">${c.from ? `{${setLabel(c.from[0])}} ⋈ {${setLabel(c.from[1])}}` : '单项，无连接'}</td></tr>`)
+      };
+      if (phase === 1) {
+        const ord = r.cands.slice().sort((a, z) => (z.pruned ? 1 : 0) - (a.pruned ? 1 : 0));
+        return {
+          head: '<th>候选</th><th>判定</th><th>理由</th>',
+          rows: ord.map(c => c.pruned
+            ? `<tr class="is-pruned">${cell(c)}<td><span class="badge lo">剪枝</span></td><td class="soft">子集 {${setLabel(c.pruned)}} 不频繁，免计数</td></tr>`
+            : `<tr>${cell(c)}<td><span class="badge hi">保留</span></td><td class="soft">${st.k === 1 ? '单项，无子集可查' : st.k === 2 ? '两个单项都频繁' : st.k - 1 + ' 项子集全频繁'}</td></tr>`)
+        };
+      }
+      const counted = r.cands.filter(c => !c.pruned);
+      if (phase === 2) {
+        const ord = counted.slice().sort((a, z) => z.support - a.support);
+        return {
+          head: '<th>候选</th><th>计数</th><th>支持度</th>',
+          rows: ord.map(c => `<tr>${cell(c)}<td>${c.count}</td><td>${pct(c.support, 2)}</td></tr>`)
+        };
+      }
+      const ord = counted.slice().sort((a, z) => (z.frequent ? 1 : 0) - (a.frequent ? 1 : 0) || z.support - a.support);
+      return {
+        head: '<th>候选</th><th>计数</th><th>支持度</th><th>判定</th>',
+        rows: ord.map(c => `<tr class="${c.frequent ? 'is-frequent' : ''}">${cell(c)}<td>${c.count}</td><td>${pct(c.support, 2)}</td><td>${c.frequent ? '<span class="badge hi">频繁</span>' : '<span class="badge lo">不频繁</span>'}</td></tr>`)
+      };
+    })();
+    const prunedExample = r.cands.find(c => c.pruned);
+    $('sceneRoot').innerHTML = `<div class="grid2 wide-left">
+      <section class="panel">
+        <div class="round-head"><h2>第 ${state.round + 1} 轮 · ${st.k} 项集</h2>
+          <span class="muted">阈值 ${pct(state.minsup, 0)} ＝ 至少 ${groups(n)} 张篮子</span></div>
+        ${NOTATION}
+        ${metrics}
+        <div class="note blue"><strong>${PHASES[phase]}步</strong><p>${phaseNote(phase, st, prunedExample)}</p></div>
+        <h3>${PHASES[phase]}步明细（${detail.rows.length} 行${phase === 1 ? '，被剪的排在最前' : phase === 3 ? '，频繁的排在最前' : ''}）</h3>
+        <div class="table-wrap scroll-420"><table class="trace"><thead><tr>${detail.head}</tr></thead>
+          <tbody>${detail.rows.length ? detail.rows.join('') : `<tr><td colspan="4" class="soft">${st.joined === 0 ? '本轮没有拼出候选' : '本轮没有候选被计数'}</td></tr>`}</tbody></table></div>
+      </section>
+      <section class="panel">
+        <h2>逐轮漏斗</h2>
+        <div class="table-wrap"><table class="trace"><thead><tr><th>轮</th><th>候选</th><th>剪枝</th><th>计数</th><th>频繁</th></tr></thead>
+          <tbody>${t.rounds.slice(0, state.round + 1).map((x, i) => {
+            const cur = i === state.round;
+            return `<tr class="${cur ? 'selected' : ''}"><td>k=${x.stats.k}</td><td>${x.stats.joined}</td>
+              <td>${!cur || phase >= 1 ? x.stats.prunedSubset : '·'}</td>
+              <td>${!cur || phase >= 2 ? x.stats.counted : '·'}</td>
+              <td>${!cur || phase >= 3 ? x.stats.frequent : '·'}</td></tr>`;
+          }).join('')}</tbody></table></div>
+        <div class="brute"><b>${bruteForceCount(universeSize())}</b> 个项集是穷举的代价；<br>
+          Apriori 到本轮为止只真的数过 <b>${countedSoFar()}</b> 个，剪枝又免掉 <b>${t.rounds.slice(0, state.round + 1).reduce((s, x) => s + x.stats.prunedSubset, 0)}</b> 个。</div>
+        ${state.phase === 3 && r.frequent.length ? (() => {
+          const sf = r.frequent.slice().sort((a, z) => z.support - a.support);
+          return `<h3>L(${st.k}) 本轮频繁（${sf.length} 个，按支持度排序）</h3>
+            <div class="chips scroll-420">${sf.map(f => itemsetChip(f.items, 'frequent', f.support)).join('')}</div>`;
+        })() : ''}
+      </section></div>`;
+  }
+
+  function phaseNote(phase, st, ex) {
+    if (phase === 0) {
+      if (st.k === 1) return '第一轮没有可连接的集合，候选就是全部 ' + st.joined + ' 个单项。它们的支持度必须当场数出来，这是唯一一次"全表扫描"。';
+      if (st.joined === 0) return 'L(' + (st.k - 1) + ') 的成员前缀两两对不上（或只剩 1 个成员），拼不出新候选。没有候选就没有频繁项集，更长的项集也不可能频繁——Apriori 到此终止。';
+      return '把上一轮频繁项集 L(' + (st.k - 1) + ') 里前 ' + (st.k - 1) + ' 项相同的两个集合拼起来，末项取更大的那个，保证不重复。这一步纯符号运算，代价极小，所以能生成得很快。';
+    }
+    if (phase === 1) {
+      if (!st.prunedSubset) return st.joined === 0 ? '本轮没有候选，无可剪。' : '本轮没有候选被剪。剪枝通常在 k≥3 时才明显：三项目集的候选有 ' + st.joined + ' 个，其中不少是因为某个二项子集不频繁而被免掉计数的。';
+      return '例如候选 {' + setLabel(ex.items) + '}，它的子集 {' + setLabel(ex.pruned) + '} 上一轮就没达标。'
+        + '按向下闭包性，它的支持度不可能超过那个子集，所以连扫都不用扫。'
+        + (SOURCES[state.source].lattice ? '格图上它还是琥珀色，红粗边指向连累它的子集；下一步才变灰。' : '');
+    }
+    if (phase === 2) {
+      if (st.counted === 0) return '本轮没有候选真的去数（' + (st.joined === 0 ? '一个都没拼出来' : '全被剪掉') + '），比较 0 次。';
+      return '这一步是唯一真正读数据的步骤：对每条事务，检查候选是不是它的子集。比较次数＝候选数 × 事务数＝'
+        + st.counted + ' × ' + src().baskets.length + '＝' + (st.counted * src().baskets.length).toLocaleString() + '。剪掉的每一个候选，都省下 ' + src().baskets.length + ' 次比较。';
+    }
+    return '支持度 ≥ 阈值的进入 L(' + st.k + ')，它们既是答案的一部分，也是下一轮连接的原料。若 L(' + st.k + ') 为空，算法终止——因为再长的项集不可能频繁。'
+      + (SOURCES[state.source].lattice ? '新红节点的超集锥此刻用红虚线连成整片（先展示连接），下一步整体变灰＝闭包排除。' : '');
+  }
+
+  /* ---------- playback ---------- */
+
+  function stopPlay() {
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    state.playing = false;
+  }
+  function startPlay() {
+    stopPlay();
+    state.playing = true;
+    playTimer = setInterval(() => {
+      if (!canStepFwd()) { stopPlay(); rerender(); return; }
+      stepFwd();
+      rerender();
+    }, state.speed);
+  }
+  function stepFwd() {
+    const t = ensureTrace();
+    if (state.phase < 3) state.phase++;
+    else if (state.round < t.rounds.length - 1) { state.round++; state.phase = 0; }
+  }
+  function stepBack() {
+    if (state.phase > 0) state.phase--;
+    else if (state.round > 0) { state.round--; state.phase = 3; }
+  }
+
+  function exportSVG() {
+    const svg = $('latticeSvg');
+    if (!svg) return;
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', LAT.W);
+    clone.setAttribute('height', LAT.H);
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', LAT.W); bg.setAttribute('height', LAT.H); bg.setAttribute('fill', '#ffffff');
+    clone.insertBefore(bg, clone.firstChild);
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `itemset-lattice-r${state.round + 1}-${PHASES[state.phase]}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  /* ---------- tab 3: association rules ---------- */
+
+  function currentRules() {
+    const t = ensureTrace();
+    return M.rules(t.frequent, t.db, state.minconf, 4);
+  }
+
+  function renderRules() {
+    const t = ensureTrace();
+    const rules = currentRules();
+    const key = state.ruleSort;
+    rules.sort((a, z) => z[key] - a[key] || z.support - a.support);
+    if (state.rulePick >= rules.length) state.rulePick = 0;
+    toolbar(`<div class="playback">
+        <button id="resetBtn">重跑</button>
+      </div>
+      ${msSlider('msRule')}
+      ${slider('mcRule', '最小置信度', state.minconf, 0.2, 0.95, 0.05)}
+      <div class="sortbar"><span class="muted">排序</span>
+        ${[['confidence', '按置信度'], ['support', '按支持度']].map(([k, l]) =>
+          `<button class="preset-btn" data-sort="${k}" aria-pressed="${key === k}">${l}</button>`).join('')}</div>`);
+
+    if (!rules.length) {
+      const combos = t.frequent.filter(f => f.items.length >= 2);
+      const r2 = t.rounds[1];
+      const topPair = r2 ? Math.max(0, ...r2.cands.filter(c => c.count != null).map(c => c.support)) : 0;
+      const why = !t.frequent.length
+        ? `最小支持度 ${pct(state.minsup, 0)} 下连单项都不频繁，自然没有规则。把支持度调低试试。`
+        : !combos.length
+          ? (r2 && r2.stats.counted > 0
+            ? `频繁项集 ${t.frequent.length} 个全是单项：最热组合的支持度也只有 ${pct(topPair, 1)}，达不到最小支持度 ${pct(state.minsup, 0)}，拼不出任何规则。把支持度调低试试。`
+            : `频繁项集只有 ${t.frequent.length} 个单项，${r2 && r2.stats.joined > 0 ? '拼出的二项候选全被剪枝' : '连二项候选都拼不出来'}，自然没有规则。把支持度调低试试。`)
+          : `频繁项集 ${t.frequent.length} 个（含 ${combos.length} 个组合），但最小置信度 ${pct(state.minconf, 0)} 太高，一条都过不了。把置信度调低试试。`;
+      setOutcome('danger', '没有规则满足当前阈值', why);
+      $('sceneRoot').innerHTML = `<div class="panel"><h2>频繁项集（${t.frequent.length} 个）</h2><div class="chips scroll-420">${t.frequent.map(f => itemsetChip(f.items, 'frequent', f.support)).join('')}</div></div>`;
+      return;
+    }
+    const byConf = rules.slice().sort((a, z) => z.confidence - a.confidence)[0];
+    setOutcome('success', '两阶段框架：先频繁项集，再规则',
+      `从 ${t.frequent.length} 个频繁项集枚举前件，生成 <b>${rules.length}</b> 条 conf ≥ ${pct(state.minconf, 0)} 的规则（课件 p30）。置信度冠军 ${setLabel(byConf.ante)} ⇒ ${setLabel(byConf.cons)}，conf＝${pct(byConf.confidence, 0)}。<b>点下面任意一行可以手算验证。</b>`);
+
+    const sel = rules[state.rulePick] || rules[0];
+    const supOf = arr => { const f = t.frequent.find(x => x.items.join() === arr.join()); return f ? f.support : null; };
+    const sa = supOf(sel.ante), ss = sel.support;
+    const cI = Math.round(ss * t.db.n);
+    const dir = sel.ante.length > 1 ? 'shrink' : sel.cons.length > 1 ? 'grow' : 'none';
+    const moves = dir === 'shrink'
+      ? sel.ante.map(j => ({ tag: `去掉 ${nameOf(j)}`, a: sel.ante.filter(i => i !== j), c: sel.cons.concat([j]).sort((p, q) => p - q) }))
+      : dir === 'grow'
+        ? sel.cons.map(j => ({ tag: `加来 ${nameOf(j)}`, a: sel.ante.concat([j]).sort((p, q) => p - q), c: sel.cons.filter(i => i !== j) }))
+        : [];
+    const rows = [{ tag: '选中这条', a: sel.ante, c: sel.cons }, ...moves].map(x => ({ ...x, conf: ss / supOf(x.a) }));
+    const ladder = dir === 'none'
+      ? `<p class="split-note">这条规则的 I 只有 2 项，前件拆不动，没有单调性例子；请选前件 ≥ 2 项的规则。</p>`
+      : `<div class="table-wrap"><table class="trace"><thead><tr>
+        <th>${dir === 'shrink' ? '前件再拆小一步' : '前件再加一项'}</th><th>分数</th><th>conf</th></tr></thead>
+        <tbody>${rows.map((x, i) => `<tr class="${i === 0 ? 'selected' : ''}">
+          <td class="wrap"><span class="muted" style="font-size:17px">${x.tag}</span> <span class="chip">${setLabel(x.a)} ⇒ ${setLabel(x.c)}</span></td>
+          <td>${cI}/${Math.round(supOf(x.a) * t.db.n)}</td>
+          <td><span class="badge ${x.conf >= state.minconf ? 'hi' : 'lo'}">${pct(x.conf, 0)}</span></td>
+        </tr>`).join('')}</tbody></table></div>
+      <p class="split-note">${dir === 'shrink' ? `前件拆下一项、放进后件：I 不变，分子还是那 ${cI} 张篮子；前件变小＝条件变松＝分母变大，conf 只降不升。`
+        : `从后件移一项进前件：I 不变，分子还是那 ${cI} 张篮子；前件变大＝条件变严＝分母变小，conf 只升不降。`}绿＝达到 minconf ${pct(state.minconf, 0)}，红＝达不到。</p>`;
+    const prevWrap = document.querySelector('#sceneRoot .table-wrap.scroll-560');
+    const keepScroll = prevWrap ? prevWrap.scrollTop : 0;
+
+    $('sceneRoot').innerHTML = `<div class="grid2 wide-left">
+      <section class="panel"><h2>${rules.length} 条强关联规则</h2>
+        <div class="table-wrap scroll-560"><table class="trace"><thead><tr>
+          <th>规则</th><th>支持度</th><th>置信度</th></tr></thead>
+          <tbody>${rules.map((x, i) => `<tr class="${i === state.rulePick ? 'selected' : ''}" data-rule="${i}" tabindex="0">
+            <td class="wrap"><div class="rule-ante">${x.ante.map(j => setChip(j)).join('')}</div>
+              <div class="rule-cons">⇒ ${x.cons.map(j => setChip(j, 'frequent')).join('')}</div></td>
+            <td>${pct(x.support, 2)}</td>
+            <td><span class="badge ${x.confidence >= 0.7 ? 'hi' : x.confidence >= 0.4 ? 'mid' : 'lo'}">${pct(x.confidence, 0)}</span></td>
+          </tr>`).join('')}</tbody></table></div>
+        <details class="deeper"><summary>四份数据互相照</summary>
+          <p style="font-size:19px;margin:10px 0">课件 TDB 只有 4 单、构造例 20 单，规则全靠手算验证；切到"超市小票 600 篮"，同样阈值下规则少一些（14 条）、但全是跨品类：黄油⇒全脂牛奶、猪肉⇒其它蔬菜；切到"观影记录 330 篮"规则多、conf 能到 100%。注意超市这条冠军 conf 也只有 62%——后件全脂牛奶出现在一半小票里，conf 高有一部分是后件热门抬的，正好接课件 p30 的单调性讨论。</p></details>
+      </section>
+      <section class="panel"><h2>手算选中的这条</h2>
+        <div class="chips" style="margin-bottom:10px">${sel.ante.map(j => setChip(j)).join('')} ⇒ ${sel.cons.map(j => setChip(j, 'frequent')).join('')}</div>
+        <div class="formula-card"><div class="formula">support(X∪Y) = ${Math.round(ss * t.db.n)}/${t.db.n} = ${pct(ss, 2)}</div>
+          <div class="formula">support(X) = ${Math.round(sa * t.db.n)}/${t.db.n} = ${pct(sa, 2)}</div>
+          <div class="formula">conf = ${Math.round(ss * t.db.n)} / ${Math.round(sa * t.db.n)} = <span class="hl">${pct(sel.confidence, 1)}</span></div>
+          <div class="formula-sub">公式即课件 p29 conf(X⇒Y) = sup(X∪Y)/sup(X)；阈值 minconf = ${pct(state.minconf, 0)}。</div>
+        </div>
+        <div class="note blue"><strong>置信度单调性（课件 p30）</strong>
+          <p>conf＝含前件的篮子里也含后件的比例。固定 I＝前件∪后件，分子永远是含 I 的同一批篮子；前件越大＝分母越小＝conf 越高。所以最大前件若达不到 minconf，更小的前件更达不到、全部免试——规则生成逐层剪枝。</p>
+        </div>
+        ${ladder}
+      </section></div>`;
+    const ruleWrap = document.querySelector('#sceneRoot .table-wrap.scroll-560');
+    if (ruleWrap) ruleWrap.scrollTop = keepScroll;
+  }
+
+  /* ---------- events ---------- */
+
+  function rerender() {
+    renderSourceBar();
+    $('stage').setAttribute('aria-labelledby', 'tab-' + state.tab);
+    ({ data: renderData, apriori: renderApriori, rules: renderRules })[state.tab]();
+  }
+
+  function resetRun() {
+    state.trace = null;
+    state.round = 0;
+    state.phase = 0;
+    state.rulePick = 0;
+  }
+
+  document.addEventListener('click', e => {
+    const node = e.target.closest && e.target.closest('[data-node]');
+    if (node) { state.pick = node.dataset.node; rerender(); return; }
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.source) {
+      stopPlay();
+      state.source = t.dataset.source;
+      state.minsup = SOURCES[state.source].msDefault;
+      state.pick = null;
+      resetRun(); rerender(); return;
+    }
+    if (t.dataset.tab) {
+      stopPlay();
+      state.tab = t.dataset.tab;
+      document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b === t));
+      rerender(); return;
+    }
+    if (t.dataset.step) { state.dataStep = +t.dataset.step; rerender(); return; }
+    if (t.dataset.phase !== undefined && state.tab === 'apriori') {
+      const last = Math.max(0, ensureTrace().rounds.length - 1);
+      state.round = Math.min(state.round, last);
+      state.phase = +t.dataset.phase; rerender(); return;
+    }
+    if (t.dataset.sort) { state.ruleSort = t.dataset.sort; state.rulePick = 0; rerender(); return; }
+    if (t.id === 'prevBtn') {
+      if (state.tab === 'data') state.dataStep = Math.max(0, state.dataStep - 1);
+      else if (state.tab === 'apriori') { stopPlay(); stepBack(); }
+      rerender(); return;
+    }
+    if (t.id === 'nextBtn') {
+      if (state.tab === 'data') state.dataStep = Math.min(3, state.dataStep + 1);
+      else if (state.tab === 'apriori') { stopPlay(); stepFwd(); }
+      rerender(); return;
+    }
+    if (t.id === 'playBtn') { state.playing ? stopPlay() : startPlay(); rerender(); return; }
+    if (t.id === 'exportSvg') { exportSVG(); return; }
+    if (t.id === 'latReset') { stopPlay(); resetRun(); state.pick = null; rerender(); return; }
+    if (t.id === 'resetBtn') { stopPlay(); resetRun(); rerender(); return; }
+  });
+
+  document.addEventListener('input', e => {
+    const id = e.target.id;
+    if (id === 'msData' || id === 'msApri' || id === 'msRule') {
+      stopPlay();
+      state.minsup = +e.target.value;
+      if (id !== 'msData') resetRun(); else state.trace = null;
+      rerender();
+    } else if (id === 'mcRule') {
+      state.minconf = +e.target.value;
+      state.rulePick = 0;
+      rerender();
+    } else if (id === 'tgCount') { state.showCount = e.target.checked; rerender(); }
+    else if (id === 'tgEdges') { state.showEdges = e.target.checked; rerender(); }
+    else if (id === 'tgClosure') { state.closure = e.target.checked; rerender(); }
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'speedSel') {
+      state.speed = +e.target.value;
+      if (state.playing) startPlay();
+    }
+  });
+
+  document.addEventListener('click', e => {
+    const row = e.target.closest('tr[data-rule]');
+    if (row) { state.rulePick = +row.dataset.rule; rerender(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.closest) {
+      const row = e.target.closest('tr[data-rule]');
+      if (row) { state.rulePick = +row.dataset.rule; rerender(); return; }
+      const node = e.target.closest('[data-node]');
+      if (node) { state.pick = node.dataset.node; rerender(); return; }
+    }
+    if (e.key === 'ArrowRight' && state.tab === 'apriori') { stopPlay(); stepFwd(); rerender(); }
+    if (e.key === 'ArrowLeft' && state.tab === 'apriori') { stopPlay(); stepBack(); rerender(); }
+    if (e.key === ' ' && state.tab === 'apriori' && SOURCES[state.source].lattice &&
+        !/^(input|select|textarea|button)$/i.test(e.target.tagName)) {
+      e.preventDefault();
+      state.playing ? stopPlay() : startPlay();
+      rerender();
+    }
+  });
+
+  resetRun();
+  rerender();
+})();
+</script>
+</body>
+</html>
