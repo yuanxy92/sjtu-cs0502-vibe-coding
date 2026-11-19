@@ -374,6 +374,16 @@ tr.selected td{background:#e7f0ff!important}
     for (let i = 0; i < 80; i++) out.push(P(40 + rng() * 1120, 40 + rng() * 870, 0));
     return out;
   }
+  function genRays() {
+    const out = [];
+    for (let t = 25; t <= 225; t += 25) { out.push(P(4 * t, t, 0)); out.push(P(t, 4 * t, 1)); }
+    return out;
+  }
+  function genGrid() {
+    const out = [];
+    for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) out.push(P(50 + 100 * i, 50 + 100 * j, 0));
+    return out;
+  }
 
   const SHAPES = {
     slide50: {
@@ -399,6 +409,14 @@ tr.selected td{background:#e7f0ff!important}
     stripes: {
       label: '三条横带', kDef: 3, kMax: 8, make: s => genStripes(mulberry32(s)),
       note: '三条细长带：欧氏距离下中心落在带中央，边界却竖着切过三条带。试试曼哈顿距离有没有区别——再想想为什么距离定义改变不了"按中心切"的本质。'
+    },
+    rays: {
+      label: '两条射线', kDef: 2, kMax: 8, initSeedDef: 19, make: () => genRays(),
+      note: '两条整数射线 (4t,t) 与 (t,4t)，t=25…225 各 9 点，专看距离定义的差别。默认初值种子 19：欧氏按"离原点长短"切——近端 10 点一簇、远端 8 点一簇，每簇都混着两条射线；切余弦立刻按"方向"切——两条射线各自完整 9/9，长度完全不影响（p47：余弦只看方向不看大小），loss 直接到 0。曼哈顿又是第三种切法（11/7）。换初值种子试试：欧氏的切法跟着初值变，余弦永远按方向切。'
+    },
+    grid: {
+      label: '方阵对角', kDef: 2, kMax: 2, fixedInit: [[250, 250], [750, 750]], make: () => genGrid(),
+      note: '10×10 方阵，初值固定在对角 (250,250) 与 (750,750)，专看欧氏与曼哈顿的边界差别。欧氏：等距边界是直线 x+y=1000，55/45（线上 10 个点平局归 1 号）；曼哈顿：等距线变成折线，左上角整片三角改归 1 号，70/30。黑板试点 (150,950)：欧氏 √(100²+700²)≈707 > √(600²+200²)≈632 → 2 号；曼哈顿 100+700 = 600+200 = 800，平局归编号小的 1 号。'
     },
     uneven: {
       label: '大小不均', kDef: 5, kMax: 8, make: s => genUneven(mulberry32(s)),
@@ -503,9 +521,12 @@ tr.selected td{background:#e7f0ff!important}
   }
   function labPts() { return SHAPES[state.lab.shape].make(state.lab.seed); }
   function labAutoRun() {
-    const L = state.lab, pts = labPts();
+    const L = state.lab, S = SHAPES[L.shape], pts = labPts();
     labStop(); L.step = null;
-    if (L.initMode === 'random') L.run = computeRun(pts, L.k, randomInit(pts, L.k, L.initSeed), L.metric);
+    if (L.initMode === 'random') {
+      const init = S.fixedInit ? S.fixedInit.slice(0, L.k).map(c => ({ x: c[0], y: c[1] })) : randomInit(pts, L.k, L.initSeed);
+      L.run = computeRun(pts, L.k, init, L.metric);
+    }
     else if (L.manual.length === L.k) L.run = computeRun(pts, L.k, L.manual.map(c => ({ ...c })), L.metric);
     else L.run = null;
   }
@@ -696,7 +717,7 @@ tr.selected td{background:#e7f0ff!important}
       </div>
       ${state.metric === 'euclid' ? `<div class="note green"><strong>为什么一定会停（loss 单调不增）</strong>
         <p>loss＝每个点到其中心距离的平方和。中心固定时，把点归给最近中心使 loss 最小；划分固定时，取均值使 loss 最小。两拍交替、loss 只降不升，中心迟早不再移动——这就是 ④ 的停止条件。</p>
-      </div>` : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按${M_SHORT[state.metric]}算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`}
+      </div>` : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按${M_SHORT[state.metric]}算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。现场对照例子在 ②：「两条射线」（欧氏按长度／余弦按方向）、「方阵对角」（欧氏直线边界／曼哈顿折线边界）。</p></div>`}
       <div class="panel" style="margin-top:20px"><h2>逐拍 loss 账本</h2>
         <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>轮</th><th>拍</th><th>改归属</th><th>最大移动</th><th>loss</th></tr></thead><tbody>${hist.join('')}</tbody></table></div>
       </div>`;
@@ -705,6 +726,7 @@ tr.selected td{background:#e7f0ff!important}
   /* ---------- tab 2: data & config playground ---------- */
   function renderLab() {
     const L = state.lab, S = SHAPES[L.shape], pts = labPts();
+    const fLossL = v => L.metric === 'cosine' ? v.toFixed(4) : f0(v);
     const run = L.run;
     const manual = L.initMode === 'manual';
     const steps = run ? steps1(run) : [];
@@ -731,10 +753,10 @@ tr.selected td{background:#e7f0ff!important}
       const d = maxDrift(pts, run);
       driftTxt = d ? `<div class="note red"><strong>中心被拽偏 ${f1(d.dist)} 米</strong><p>中心 ${d.j + 1} 从 (${f1(d.from.x)}, ${f1(d.from.y)}) 被拉到 (${f1(d.to.x)}, ${f1(d.to.y)})：均值把 ${NOISE.length} 个离群点也算进 Σ（p62 右）。虚线圈＝被拽偏的中心。</p></div>` : '';
     }
-    const metricNote = L.metric === 'euclid' ? '' : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按新距离算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`;
+    const metricNote = L.metric === 'euclid' ? '' : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按新距离算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。想看距离改变划分的现场对照：「两条射线」欧氏按长度切／余弦按方向切；「方阵对角」欧氏直线边界／曼哈顿折线边界。</p></div>`;
 
     const sizes = a ? countsOf(a, L.k) : [];
-    const hist = run ? run.iters.map((x, i) => `<tr class="${st && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>${f0(x.sseA)}</td><td>${f0(x.sseU)}</td><td>${f1(x.moved)}</td></tr>`).join('') : '';
+    const hist = run ? run.iters.map((x, i) => `<tr class="${st && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>${fLossL(x.sseA)}</td><td>${fLossL(x.sseU)}</td><td>${f1(x.moved)}</td></tr>`).join('') : '';
     const presetBtns = L.shape === 'slide50' ? `<button data-kmpreset="good">合理初值</button><button data-kmpreset="bad">不合理初值（p62 左）</button>` : '';
     const beatHead = !st ? null
       : convergedBeat ? ['④ 中心不再更新 · 收敛', `第 ${round} 轮更新后所有中心移动＝0，停止。共 ${run.iters.length} 轮。`]
@@ -743,8 +765,8 @@ tr.selected td{background:#e7f0ff!important}
       : [`③ 更新中心 · 第 ${round} 轮`, `中心＝成员算术均值；虚线＝这一拍的移动，最大 ${f1(it.moved)}。`];
     const bannerCls = st ? (convergedBeat ? 'success' : 'info') : (run ? (run.converged ? 'success' : 'warning') : 'info');
     const bannerHead = st ? beatHead[0] : (run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑');
-    const bannerText = st ? `${beatHead[1]} loss＝${lossNow === null ? '—' : f0(lossNow)}；拍 ${L.step + 1}/${steps.length}。`
-      : (run ? `loss＝${f0(lossNow)}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。');
+    const bannerText = st ? `${beatHead[1]} loss＝${lossNow === null ? '—' : fLossL(lossNow)}；拍 ${L.step + 1}/${steps.length}。`
+      : (run ? `loss＝${fLossL(lossNow)}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。');
 
     $('kmRoot').innerHTML = `
       <div class="toolbar">
@@ -758,9 +780,10 @@ tr.selected td{background:#e7f0ff!important}
           <div class="panel km-ctl"><h2>配置</h2>
             <div class="slider-row"><label for="kmLabK">K</label><input type="range" id="kmLabK" min="1" max="${S.kMax}" step="1" value="${L.k}"><output>${L.k}</output></div>
             <div class="slider-row"><label for="kmLabSeed">数据种子</label><input type="number" id="kmLabSeed" min="0" max="99999" value="${L.seed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"></div>
-            ${manual ? '' : `<div class="slider-row"><label for="kmLabInitSeed">初值种子</label><input type="number" id="kmLabInitSeed" min="0" max="99999" value="${L.initSeed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmLabReseed">重新随机初值</button></div>`}
+            ${manual || S.fixedInit ? '' : `<div class="slider-row"><label for="kmLabInitSeed">初值种子</label><input type="number" id="kmLabInitSeed" min="0" max="99999" value="${L.initSeed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmLabReseed">重新随机初值</button></div>`}
+            ${!manual && S.fixedInit ? `<p class="km-hint">初值固定：${S.fixedInit.map(c => '(' + c[0] + ',' + c[1] + ')').join(' 与 ')}；要换初值请切"手动点放"。</p>` : ''}
             <div class="slider-row"><div class="ctl-select"><label for="kmMetric">距离</label><select id="kmMetric">${Object.keys(METRICS).map(m => `<option value="${m}" ${m === L.metric ? 'selected' : ''}>${METRICS[m].label}</option>`).join('')}</select></div>
-            <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>随机（种子）</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div></div>
+            <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>${S.fixedInit ? '固定初值' : '随机（种子）'}</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div></div>
             ${presetBtns ? `<div class="playback">${presetBtns}</div>` : ''}
             <button id="kmRun" class="primary" style="width:100%" ${manual && L.manual.length < L.k ? 'disabled' : ''}>跑到收敛</button>
             ${run ? `<div class="playback">
@@ -776,7 +799,7 @@ tr.selected td{background:#e7f0ff!important}
             <div class="metrics">
               <div class="metric"><small>${st ? '当前轮次' : '迭代轮数'}</small><b>${run ? (round || '—') : '—'}</b></div>
               <div class="metric"><small>最大簇 / 最小簇</small><b>${a ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
-              <div class="metric ${run && (st ? convergedBeat : run.converged) ? 'good' : 'bad'}"><small>loss</small><b>${lossNow === null ? '—' : f0(lossNow)}</b></div>
+              <div class="metric ${run && (st ? convergedBeat : run.converged) ? 'good' : 'bad'}"><small>loss</small><b>${lossNow === null ? '—' : fLossL(lossNow)}</b></div>
             </div>
             ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 loss</th><th>更新后 loss</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 loss。</p>'}
           </div>
@@ -857,8 +880,9 @@ tr.selected td{background:#e7f0ff!important}
     if (t.dataset.kmsrc) { run1Stop(); state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
     if (t.dataset.kmstep !== undefined) { run1Stop(); state.step = +t.dataset.kmstep; kmRender(); return; }
     if (t.dataset.kmshape) {
-      const L = state.lab;
-      L.shape = t.dataset.kmshape; L.k = SHAPES[L.shape].kDef; L.manual = [];
+      const L = state.lab, S = SHAPES[t.dataset.kmshape];
+      L.shape = t.dataset.kmshape; L.k = S.kDef; L.manual = [];
+      if (S.initSeedDef) L.initSeed = S.initSeedDef;
       labAutoRun(); kmRender(); return;
     }
     if (t.dataset.kmpreset) {
