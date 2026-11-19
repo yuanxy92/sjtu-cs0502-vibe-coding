@@ -258,7 +258,7 @@ tr.selected td{background:#e7f0ff!important}
     </svg>
     <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
     <h1>聚类实验室</h1>
-    <p class="subtitle">Slide13 聚类（p42–73）：K-Means 早餐供应点①分步演示、②数据与配置实验（典型数据生成器，K／初值／距离可调，p62 局限性现场复现）；③DBSCAN（p71–73）核心点／边界点／噪声与逐点扩簇动画。全部数据内嵌，可离线打开。</p>
+    <p class="subtitle">Slide13 聚类（p42–73）：①K-Means 早餐供应点分步演示；②数据与算法实验——12 种典型数据，算法下拉切换 K-Means／DBSCAN，同一份数据两种算法对照（K／初值／距离／Eps／MinPts 可调，p62 局限性、p71–73 核心点／噪声现场复现，动画速度可调）。全部数据内嵌，可离线打开。</p>
   </header>
 
   <nav class="presets" aria-label="数据集">
@@ -269,8 +269,7 @@ tr.selected td{background:#e7f0ff!important}
 
   <nav id="kmTabs" class="tabs kmtabs" role="tablist" aria-label="聚类实验阶段">
     <button data-kmtab="kmrun" role="tab" aria-selected="true">① 分步演示</button>
-    <button data-kmtab="kmlab" role="tab" aria-selected="false">② 数据与配置实验</button>
-    <button data-kmtab="kmdbs" role="tab" aria-selected="false">③ DBSCAN</button>
+    <button data-kmtab="kmlab" role="tab" aria-selected="false">② 数据与算法实验</button>
   </nav>
 
   <section id="kmStage" role="tabpanel">
@@ -279,7 +278,7 @@ tr.selected td{background:#e7f0ff!important}
 
   <footer class="footer">
     <p>数据来源：Slide13 第 48 页散点图逐点读坐标（50 个小区、单位米，近似读数）、12 点手算例（手工构造、整数坐标）。全部数据内嵌在本页，可离线打开。</p>
-    <p class="muted">对应 Slide13 第 42–73 页：早餐供应点 p42–43、距离度量 p46–47、K-Means 四步与逐轮迭代 p48–60、局限性 p62、DBSCAN 定义与动画 p71–73。簇色沿用课件：绿／橙／蓝／红／紫，星＝供应点（聚类中心），圆点＝小区。</p>
+    <p class="muted">对应 Slide13 第 42–73 页：早餐供应点 p42–43、距离度量 p46–47、K-Means 四步与逐轮迭代 p48–60、局限性 p62、DBSCAN 定义与动画 p71–73。簇色沿用课件：绿／橙／蓝／红／紫，星＝供应点（聚类中心），圆点＝小区；DBSCAN 噪声＝黑色虚线点。</p>
   </footer>
 </main>
 <script>
@@ -389,86 +388,77 @@ tr.selected td{background:#e7f0ff!important}
   const SHAPES = {
     slide50: {
       label: '课件 · 50 小区', kDef: 5, kMax: 6, make: () => SLIDE50.map(p => ({ ...p })),
-      note: '课件 p48 原图：50 个小区、5 个早餐供应点。K 拖到 1／2 就是 p42／43 的情况 1／2。手动初值把两个中心放进同一团，复现 p62 左图：一个中心被散点浪费、两团被迫共用一个中心。'
+      epsDef: 100, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '课件 p48 原图：50 个小区、5 个早餐供应点。K 拖到 1／2 就是 p42／43 的情况 1／2。手动初值把两个中心放进同一团，复现 p62 左图：一个中心被散点浪费、两团被迫共用一个中心。',
+      dbsNote: '课件 p48 的 50 小区：Eps=100 米时紧密的三团各成一簇（稀疏边缘点成噪声），中部与右下两团在图上交错、密度相连 → 并成一簇 22 点；4 个桥点全部噪声。DBSCAN 只认密度相连，不认课件的人工分组——调 Eps 看簇合并／碎裂。切算法下拉到 K-Means 对照：硬分 5 簇、桥点必须有归属。'
     },
     hand12: {
       label: '手算例 · 12 点', kDef: 2, kMax: 2, fixedInit: [[12, 12], [46, 42]], make: () => HAND12.map(p => ({ ...p })),
-      note: '整数坐标、初始中心 (12,12) 与 (46,42)：第一轮均值恰为 (15,12) 与 (45,42)，第二轮归属不变即收敛。先在黑板手算，再对照 ① 的每一步。'
+      epsDef: 5, minDef: 3, epsMin: 1, epsMax: 30, epsStep: 0.5,
+      note: '整数坐标、初始中心 (12,12) 与 (46,42)：第一轮均值恰为 (15,12) 与 (45,42)，第二轮归属不变即收敛。先在黑板手算，再对照 ① 的每一步。',
+      dbsNote: '没有游离点的手算例：DBSCAN 与 K-Means 给出同样的 2×6——太干净，看不出差别。切到「手算例＋2 游离」看噪声概念怎么被逼出来。'
+    },
+    hand12n: {
+      label: '手算例＋2 游离', kDef: 2, kMax: 4, fixedInit: [[12, 12], [46, 42]],
+      make: () => [...HAND12.map(p => ({ ...p })), { x: 30, y: 25, g: 6 }, { x: 5, y: 50, g: 6 }],
+      epsDef: 5, minDef: 3, epsMin: 1, epsMax: 30, epsStep: 0.5,
+      note: '12 点手算例外加游离点 (30,25) 与 (5,50)。K-Means（K=2、黑板初值）必须给每个点找归属：两个游离点被硬收进簇 1（8/6），中心 1 从 (15,12) 被拽到 (15.6,18.4)、偏 6.4 米。切算法下拉到 DBSCAN：同一份数据，游离点被标噪声——划分式 vs 密度式的分水岭。',
+      dbsNote: '两条 zigzag 链各 6 点，外加游离点 (30,25) 与 (5,50)。Eps=5、MinPts=3：链上每个点的邻域（含自己）都 ≥3 → 核心点，整条链密度相连成一簇；游离点邻域里只有自己 → 噪声。下方琥珀框对照同一份数据上 K-Means 的做法。'
     },
     blobs3: {
       label: '三团球状', kDef: 3, kMax: 8, make: s => genBlobs3(mulberry32(s)),
-      note: '分得开的球状簇是 K-Means 的主场：几轮就收敛、每团完整。换种子重跑，结果应当几乎一样。'
+      epsDef: 90, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '分得开的球状簇是 K-Means 的主场：几轮就收敛、每团完整。换种子重跑，结果应当几乎一样。',
+      dbsNote: '分得开的球状簇：Eps=90 时 DBSCAN 给出 24/24/24、零噪声，与 K-Means 一致——球状簇上两种算法英雄所见略同；差别在噪声与形状上。Eps 调小到 60 看稀疏边缘点变成噪声。'
     },
     rings: {
       label: '同心双环', kDef: 2, kMax: 8, make: s => genRings(mulberry32(s)),
-      note: '看：每个环被切成几段弧，"一圈"永远不会成为一类。划分式方法按到中心的距离画边界，追不了环形——簇内相似度高不代表离中心近。'
+      epsDef: 120, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '看：每个环被切成几段弧，"一圈"永远不会成为一类。划分式方法按到中心的距离画边界，追不了环形——簇内相似度高不代表离中心近。',
+      dbsNote: '课件 p71 的出发点：可以对任意形状的簇聚类。K-Means 把每个环劈成两段弧（切算法下拉到 K-Means 看同一份数据），DBSCAN 沿密度链把整环收成一簇 36/36；p73 的动画就是这种环状数据上"一段弧慢慢扩满整圈"的过程。Eps 调小到 70 看环断成弧、调大到 160 看两环并成一簇。'
     },
     moons: {
       label: '双月牙', kDef: 2, kMax: 8, make: s => genMoons(mulberry32(s)),
-      note: '两条月牙互相咬合：K-Means 只能沿两中心的中垂线切一刀，把每条月牙各切一半。形状不是凸球状时，"最近中心"不等于"同一簇"。'
+      epsDef: 80, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '两条月牙互相咬合：K-Means 只能沿两中心的中垂线切一刀，把每条月牙各切一半。形状不是凸球状时，"最近中心"不等于"同一簇"。',
+      dbsNote: '与双环同理：K-Means 把每条月牙各切一半（切算法下拉对照），DBSCAN 收整条月牙 36/36——簇内"密度相连"，而不是"离中心近"。'
     },
     stripes: {
       label: '三条横带', kDef: 3, kMax: 8, make: s => genStripes(mulberry32(s)),
-      note: '三条细长带：欧氏距离下中心落在带中央，边界却竖着切过三条带。试试曼哈顿距离有没有区别——再想想为什么距离定义改变不了"按中心切"的本质。'
+      epsDef: 110, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '三条细长带：欧氏距离下中心落在带中央，边界却竖着切过三条带。试试曼哈顿距离有没有区别——再想想为什么距离定义改变不了"按中心切"的本质。',
+      dbsNote: '三条横带内的点是随机撒的：带内空隙忽大忽小，Eps=110 时密度链被空隙切断——7 个簇、零噪声，"看起来一条带"不等于"密度相连"。调 Eps 到 160：两条带并成 60 点大簇，第三条还断着（23＋7）。DBSCAN 对密度变化敏感，这是它和 K-Means 不同的失败方式。'
     },
     rays: {
       label: '文档词频', kDef: 2, kMax: 8, initSeedDef: 19, make: () => genRays(),
+      epsDef: 105, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
       xlab: '词「算法」频次', ylab: '词「篮球」频次',
-      note: '18 篇文档：x＝词「算法」出现次数、y＝词「篮球」出现次数。9 篇科技文词频比 4:1、9 篇体育文 1:4，篇幅有短有长——这就是余弦距离的标准用武之地（文本聚类／搜索／推荐）：主题看词频比例（方向），不看篇幅（大小）。默认初值种子 19：欧氏按"文档长短"切——近端 10 篇／远端 8 篇，每簇混着两个主题；切余弦立刻按"主题"切——科技／体育各 9 篇完整一簇，loss≈0（课件 p47 的电影特征向量同理：看比例不看大小）。曼哈顿又是第三种切法（11/7）。换初值种子试试：欧氏的切法跟着初值变，余弦永远按方向切。'
+      note: '18 篇文档：x＝词「算法」出现次数、y＝词「篮球」出现次数。9 篇科技文词频比 4:1、9 篇体育文 1:4，篇幅有短有长——这就是余弦距离的标准用武之地（文本聚类／搜索／推荐）：主题看词频比例（方向），不看篇幅（大小）。默认初值种子 19：欧氏按"文档长短"切——近端 10 篇／远端 8 篇，每簇混着两个主题；切余弦立刻按"主题"切——科技／体育各 9 篇完整一簇，loss≈0（课件 p47 的电影特征向量同理：看比例不看大小）。曼哈顿又是第三种切法（11/7）。换初值种子试试：欧氏的切法跟着初值变，余弦永远按方向切。',
+      dbsNote: '同一份文档词频数据：Eps=105 时沿每条射线密度相连（相邻文档距离≈103），科技／体育各 9 篇成一簇、端点文档是边界点——DBSCAN 也按"主题"分开，且不用给 K。调到 110：近端两篇跨主题文档距离 106 落进邻域，两簇并成一簇。余弦看方向、DBSCAN 看密度，两种"不按篇幅切"的办法。'
     },
     grid: {
       label: '方阵对角', kDef: 2, kMax: 2, fixedInit: [[250, 250], [750, 750]], make: () => genGrid(),
-      note: '10×10 方阵，初值固定在对角 (250,250) 与 (750,750)，专看欧氏与曼哈顿的边界差别。欧氏：等距边界是直线 x+y=1000，55/45（线上 10 个点平局归 1 号）；曼哈顿：等距线变成折线，左上角整片三角改归 1 号，70/30。黑板试点 (150,950)：欧氏 √(100²+700²)≈707 > √(600²+200²)≈632 → 2 号；曼哈顿 100+700 = 600+200 = 800，平局归编号小的 1 号。'
+      epsDef: 100, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '10×10 方阵，初值固定在对角 (250,250) 与 (750,750)，专看欧氏与曼哈顿的边界差别。欧氏：等距边界是直线 x+y=1000，55/45（线上 10 个点平局归 1 号）；曼哈顿：等距线变成折线，左上角整片三角改归 1 号，70/30。黑板试点 (150,950)：欧氏 √(100²+700²)≈707 > √(600²+200²)≈632 → 2 号；曼哈顿 100+700 = 600+200 = 800，平局归编号小的 1 号。',
+      dbsNote: '10×10 方阵、间距恰好 100：Eps=100 时每点邻域 ≥3（角点也有 2 邻居＋自己），全图密度相连成 1 簇 100 点；Eps 调到 90，所有点邻域只剩自己 → 100 个全噪声。参数差 10 米，结果天壤之别——Eps 必须和数据尺度匹配。'
     },
     uneven: {
       label: '大小不均', kDef: 5, kMax: 8, make: s => genUneven(mulberry32(s)),
-      note: '一大团稀疏 + 四小团紧密：对照看大团是否被拆、小团是否完整。均值＋最近中心倾向按面积切大团，而不是按"天然的一团"切。'
+      epsDef: 110, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '一大团稀疏 + 四小团紧密：对照看大团是否被拆、小团是否完整。均值＋最近中心倾向按面积切大团，而不是按"天然的一团"切。',
+      dbsNote: '一大团稀疏＋四小团紧密：Eps=110 时四小团各 12 点完整成簇，大团收 47 点、1 个稀疏边缘点成噪声。同一个 Eps 对不同密度的簇并不公平：调到 140 大团全收（60 点）、零噪声。密度不均时 DBSCAN 也吃力——课堂追问点。'
     },
     outliers: {
       label: '带离群点', kDef: 3, kMax: 8, make: s => genOutliers(mulberry32(s)),
-      note: '课件 p62 右图：红圈点是离群点。均值把离群点也算进 Σ，中心被拽向噪声方向；下方给出被拽偏的中心与偏移米数。'
+      epsDef: 85, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '课件 p62 右图：黑圈点是离群点。均值把离群点也算进 Σ，中心被拽向噪声方向；下方给出被拽偏的中心与偏移米数。',
+      dbsNote: '课件 p62 右的 6 个离群点：Eps=85 时全部标噪声（切算法下拉到 K-Means 对照：把它们算进均值、中心拽偏 36.9 米）；但第三团偏稀，也有 2 个主簇边缘点被标噪声——DBSCAN 只认邻域密度，不认"属于哪团"的人工标签。Eps 调到 100：稀疏点回簇，却有 2 个离群点离主簇边缘够近、被收为边界点。噪声名单由 Eps/MinPts 决定。'
     },
     uniform: {
       label: '均匀无结构', kDef: 4, kMax: 8, make: s => genUniform(mulberry32(s)),
-      note: '数据没有天然簇：任何划分都"差不多合理"，结果完全由初值和 K 决定。多点几次重新随机，看划分跟着初值变。'
-    }
-  };
-
-  const DBSSRC = {
-    hand12n: {
-      label: '手算例＋2 游离', epsDef: 5, minDef: 3, epsMin: 1, epsMax: 30, epsStep: 0.5,
-      make: () => [...HAND12.map(p => ({ ...p })), { x: 30, y: 25, g: 6 }, { x: 5, y: 50, g: 6 }],
-      note: '两条 zigzag 链各 6 点，外加游离点 (30,25) 与 (5,50)。Eps=5、MinPts=3：链上每个点的邻域（含自己）都 ≥3 → 核心点，整条链密度相连成一簇；游离点邻域里只有自己 → 噪声。下方琥珀框对照同一份数据上 K-Means 的做法。'
-    },
-    hand12: {
-      label: '手算例 12 点', epsDef: 5, minDef: 3, epsMin: 1, epsMax: 30, epsStep: 0.5,
-      make: () => HAND12.map(p => ({ ...p })),
-      note: '没有游离点的手算例：DBSCAN 与 K-Means 给出同样的 2×6——太干净，看不出差别。切到「手算例＋2 游离」看噪声概念怎么被逼出来。'
-    },
-    blobs3: {
-      label: '三团球状', epsDef: 90, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
-      make: () => genBlobs3(mulberry32(11)),
-      note: '分得开的球状簇：Eps=90 时 DBSCAN 给出 24/24/24、零噪声，与 K-Means 一致——球状簇上两种算法英雄所见略同；差别在噪声与形状上。Eps 调小到 60 看稀疏边缘点变成噪声。'
-    },
-    rings: {
-      label: '同心双环', epsDef: 120, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
-      make: () => genRings(mulberry32(11)),
-      note: '课件 p71 的出发点：可以对任意形状的簇聚类。K-Means 把每个环劈成两段弧（见 ② 同一份数据），DBSCAN 沿密度链把整环收成一簇 36/36；p73 的动画就是这种环状数据上"一段弧慢慢扩满整圈"的过程。Eps 调小到 70 看环断成弧、调大到 160 看两环并成一簇。'
-    },
-    moons: {
-      label: '双月牙', epsDef: 80, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
-      make: () => genMoons(mulberry32(11)),
-      note: '与双环同理：K-Means 把每条月牙各切一半，DBSCAN 收整条月牙 36/36——簇内"密度相连"，而不是"离中心近"。'
-    },
-    outliers: {
-      label: '带离群点', epsDef: 85, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
-      make: () => genOutliers(mulberry32(11)),
-      note: '课件 p62 右的 6 个离群点：Eps=85 时全部标噪声（对照 ②：K-Means 把它们算进均值、中心拽偏 36.9 米）；但第三团偏稀，也有 2 个主簇边缘点被标噪声——DBSCAN 只认邻域密度，不认"属于哪团"的人工标签。Eps 调到 100：稀疏点回簇，却有 2 个离群点离主簇边缘够近、被收为边界点。噪声名单由 Eps/MinPts 决定。'
-    },
-    slide50: {
-      label: '课件 50 小区', epsDef: 100, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
-      make: () => SLIDE50.map(p => ({ ...p })),
-      note: '课件 p48 的 50 小区：Eps=100 米时紧密的三团各成一簇（稀疏边缘点成噪声），中部与右下两团在图上交错、密度相连 → 并成一簇 22 点；4 个桥点全部噪声。DBSCAN 只认密度相连，不认课件的人工分组——调 Eps 看簇合并／碎裂。对照 ①：K-Means 硬分 5 簇、桥点必须有归属。'
+      epsDef: 120, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '数据没有天然簇：任何划分都"差不多合理"，结果完全由初值和 K 决定。多点几次重新随机，看划分跟着初值变。',
+      dbsNote: '数据没有天然簇：Eps=120 时 DBSCAN 给出 6 个大小随意的簇（36/8/9/7/11/3）＋6 噪声——它不"硬分 K 块"，但也不会告诉你"这里没有结构"。Eps 60 几乎全噪声（58 个），Eps 160 并成 3 大块。结果完全由 Eps 决定，和 K-Means 由初值决定一样任意。'
     }
   };
 
@@ -567,7 +557,7 @@ tr.selected td{background:#e7f0ff!important}
     return { neigh, beats, clusters: c, labels, core };
   }
 
-  const core = { SHAPES, METRICS, COLORS, SLIDE50, HAND12, NOISE, GOOD_INIT, BAD_INIT, mulberry32, computeRun, assign, meansOf, sseOf, randomInit, domainOf, dbscan, DBSSRC };
+  const core = { SHAPES, METRICS, COLORS, SLIDE50, HAND12, NOISE, GOOD_INIT, BAD_INIT, mulberry32, computeRun, assign, meansOf, sseOf, randomInit, domainOf, dbscan };
   if (typeof window !== 'undefined') window.KMeansCore = core;
   if (typeof module !== 'undefined' && module.exports) module.exports = core;
   if (typeof document === 'undefined') return;
@@ -580,8 +570,11 @@ tr.selected td{background:#e7f0ff!important}
 
   const state = {
     tab: 'kmrun', src: 'slide50', k: 5, seed: 7, step: 0, pickPt: null, pickC: null, metric: 'euclid', playing: false,
-    lab: { shape: 'blobs3', k: 3, seed: 11, initSeed: 11, metric: 'euclid', initMode: 'random', manual: [], run: null, step: null, playing: false },
-    dbs: { src: 'hand12n', eps: 5, minPts: 3, run: null, step: null, playing: false, pick: null }
+    lab: {
+      algo: 'kmeans', shape: 'blobs3', k: 3, seed: 11, initSeed: 11, metric: 'euclid', initMode: 'random', manual: [],
+      run: null, step: null, playing: false, speed: 300,
+      eps: 90, minPts: 3, drun: null, dpick: null
+    }
   };
 
   function src1() { return SHAPES[state.src]; }
@@ -597,32 +590,41 @@ tr.selected td{background:#e7f0ff!important}
     return st;
   }
   function labPts() { return SHAPES[state.lab.shape].make(state.lab.seed); }
+  const labName = (shape, i) => shape === 'slide50' ? nameOf('slide50', i)
+    : shape === 'rays' ? '文档 ' + (i + 1)
+    : (shape === 'hand12' || shape === 'hand12n') ? (i < 12 ? 'P' + (i + 1) : '游离 ' + (i - 11))
+    : '点 ' + (i + 1);
   function labAutoRun() {
     const L = state.lab, S = SHAPES[L.shape], pts = labPts();
-    labStop(); L.step = null;
+    labStop(); L.step = null; L.dpick = null;
     if (L.initMode === 'random') {
       const init = S.fixedInit ? S.fixedInit.slice(0, L.k).map(c => ({ x: c[0], y: c[1] })) : randomInit(pts, L.k, L.initSeed);
       L.run = computeRun(pts, L.k, init, L.metric);
     }
     else if (L.manual.length === L.k) L.run = computeRun(pts, L.k, L.manual.map(c => ({ ...c })), L.metric);
     else L.run = null;
+    L.drun = dbscan(pts, L.eps, L.minPts);
   }
   let labTimer = null;
   function labStop() { if (labTimer) { clearInterval(labTimer); labTimer = null; } state.lab.playing = false; }
-  function labSteps() { return state.lab.run ? steps1(state.lab.run) : []; }
+  function labBeats() {
+    const L = state.lab;
+    return L.algo === 'kmeans' ? (L.run ? steps1(L.run) : []) : (L.drun ? L.drun.beats : []);
+  }
   function labPlay() {
     const L = state.lab;
     labStop();
-    if (!L.run) return;
-    if (L.step === null || L.step >= labSteps().length - 1) L.step = 0;
+    const beats = labBeats();
+    if (!beats.length) return;
+    if (L.step === null || L.step >= beats.length - 1) L.step = 0;
     L.playing = true;
     labTimer = setInterval(() => {
-      const last = labSteps().length - 1;
+      const last = labBeats().length - 1;
       if (state.lab.step >= last) { labStop(); kmRender(); return; }
       state.lab.step += 1;
       if (state.lab.step >= last) labStop();
       kmRender();
-    }, 900);
+    }, L.speed);
     kmRender();
   }
 
@@ -679,7 +681,7 @@ tr.selected td{background:#e7f0ff!important}
       const col = stt ? stt.fill : (o.colorOf ? o.colorOf(i) : '#7d8ba1');
       const ring = o.pick === i ? ' stroke="#102344" stroke-width="3.5"'
         : stt ? ` stroke="${stt.stroke}" stroke-width="${stt.sw || 2}"${stt.dash ? ` stroke-dasharray="${stt.dash}"` : ''}`
-        : (o.noise && p.g === 6 ? ' stroke="#b91c1c" stroke-width="3" stroke-dasharray="4 3"' : ' stroke="#ffffff" stroke-width="1.5"');
+        : (o.noise && p.g === 6 ? ' stroke="#1f2937" stroke-width="3" stroke-dasharray="4 3"' : ' stroke="#ffffff" stroke-width="1.5"');
       g += `<circle class="km-pt" data-kmpt="${i}" cx="${sx(p.x)}" cy="${sy(p.y)}" r="8" fill="${col}"${ring}><title>${o.name ? o.name(i) : i} (${p.x}, ${p.y})</title></circle>`;
     });
     (o.centers || []).forEach((c, j) => {
@@ -810,9 +812,24 @@ tr.selected td{background:#e7f0ff!important}
       </div>`;
   }
 
-  /* ---------- tab 2: data & config playground ---------- */
+  /* ---------- tab 2: data & algorithm playground (K-Means / DBSCAN switch) ---------- */
+  const SPEEDS = [[1500, '慢'], [800, '中'], [300, '快'], [100, '极速']];
+  const algoSelect = L => `<div class="slider-row"><div class="ctl-select"><label for="kmAlgo">算法</label><select id="kmAlgo"><option value="kmeans" ${L.algo === 'kmeans' ? 'selected' : ''}>K-Means（划分式）</option><option value="dbscan" ${L.algo === 'dbscan' ? 'selected' : ''}>DBSCAN（密度式）</option></select></div></div>`;
+  const speedSelect = L => `<div class="slider-row"><div class="ctl-select"><label for="kmSpeed">速度</label><select id="kmSpeed">${SPEEDS.map(([v, t]) => `<option value="${v}" ${v === L.speed ? 'selected' : ''}>${t}（${v / 1000} s/拍）</option>`).join('')}</select></div></div>`;
+  const labToolbar = L => `<div class="toolbar">
+        <span class="preset-label">典型数据</span>
+        <div class="preset-buttons">${Object.keys(SHAPES).map(key => `<button class="preset-btn" data-kmshape="${key}" aria-pressed="${key === L.shape}">${SHAPES[key].label}</button>`).join('')}</div>
+      </div>`;
+  const labPlayback = (L, st, last) => `<div class="playback">
+              <button id="kmLabSteps" ${st ? 'disabled' : ''}>分步演示</button>
+              <button id="kmLabPrev" ${!st || L.step === 0 ? 'disabled' : ''}>上一步</button>
+              <button id="kmLabNext" ${!st || L.step >= last ? 'disabled' : ''}>下一步</button>
+              <button id="kmLabEnd" ${!st ? 'disabled' : ''}>${L.algo === 'kmeans' ? '跳到收敛' : '跳到结果'}</button>
+              <button id="kmLabPlay">${L.playing ? '暂停' : '播放动画'}</button>
+            </div>${speedSelect(L)}`;
   function renderLab() {
     const L = state.lab, S = SHAPES[L.shape], pts = labPts();
+    if (L.algo === 'dbscan') { renderLabDbs(L, S, pts); return; }
     const fLossL = v => L.metric === 'cosine' ? v.toFixed(4) : f0(v);
     const run = L.run;
     const manual = L.initMode === 'manual';
@@ -831,7 +848,7 @@ tr.selected td{background:#e7f0ff!important}
     const plot = scatter({
       pts, centers, a, trail, noise: L.shape === 'outliers', placeable: manual && !st,
       colorOf: a ? i => COLORS[a[i] % COLORS.length] : null,
-      name: i => (L.shape === 'slide50' ? nameOf('slide50', i) : L.shape === 'rays' ? '文档 ' + (i + 1) : '点 ' + (i + 1)),
+      name: i => labName(L.shape, i),
       xlab: S.xlab, ylab: S.ylab,
       circles: run && L.shape === 'outliers' && (!st || L.step >= lastBeat) ? driftCircle(pts, run) : []
     });
@@ -856,16 +873,20 @@ tr.selected td{background:#e7f0ff!important}
     const bannerText = st ? `${beatHead[1]} loss＝${lossNow === null ? '—' : fLossL(lossNow)}；拍 ${L.step + 1}/${steps.length}。`
       : (run ? `loss＝${fLossL(lossNow)}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。');
 
+    const cmpNoteKm = L.shape === 'hand12n' && L.drun ? (() => {
+      const dr = L.drun, sz = Array.from({ length: dr.clusters }, (_, j) => dr.labels.filter(v => v === j).length);
+      const nz = dr.labels.filter(v => v === -1).length;
+      return `<div class="note"><strong>同一份数据，DBSCAN 怎么做（Eps=${L.eps}、MinPts=${L.minPts}）</strong><p>DBSCAN 不给每个点硬找归属：${sz.join('/')} 成簇、${nz} 个游离点标噪声，没有"中心"可以被拽偏。把算法下拉切到 DBSCAN，看逐点扩簇与噪声判定。</p></div>`;
+    })() : '';
+
     $('kmRoot').innerHTML = `
-      <div class="toolbar">
-        <span class="preset-label">典型数据</span>
-        <div class="preset-buttons">${Object.keys(SHAPES).map(key => `<button class="preset-btn" data-kmshape="${key}" aria-pressed="${key === L.shape}">${SHAPES[key].label}</button>`).join('')}</div>
-      </div>
+      ${labToolbar(L)}
       <div class="outcome ${bannerCls}"><div><strong>${bannerHead}</strong><p>${bannerText}</p></div></div>
       <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>${S.label} · ${pts.length} 点 · K=${L.k}</h2>${plot}${a ? legend(sizes) : (st ? '<p class="km-hint">灰点＝尚未分配；星＝初始中心。</p>' : '<p class="km-hint">灰点＝数据；星＝已放的中心。</p>')}</div>
         <div class="km-side">
-          <div class="panel km-ctl"><h2>配置</h2>
+          <div class="panel km-ctl"><h2>配置 · K-Means</h2>
+            ${algoSelect(L)}
             <div class="slider-row"><label for="kmLabK">K</label><input type="range" id="kmLabK" min="1" max="${S.kMax}" step="1" value="${L.k}"><output>${L.k}</output></div>
             <div class="slider-row"><label for="kmLabSeed">数据种子</label><input type="number" id="kmLabSeed" min="0" max="99999" value="${L.seed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"></div>
             ${manual || S.fixedInit ? '' : `<div class="slider-row"><label for="kmLabInitSeed">初值种子</label><input type="number" id="kmLabInitSeed" min="0" max="99999" value="${L.initSeed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmLabReseed">重新随机初值</button></div>`}
@@ -874,12 +895,7 @@ tr.selected td{background:#e7f0ff!important}
             <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>${S.fixedInit ? '固定初值' : '随机（种子）'}</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div></div>
             ${presetBtns ? `<div class="playback">${presetBtns}</div>` : ''}
             <button id="kmRun" class="primary" style="width:100%" ${manual && L.manual.length < L.k ? 'disabled' : ''}>跑到收敛</button>
-            ${run ? `<div class="playback">
-              <button id="kmLabSteps" ${st ? 'disabled' : ''}>分步演示</button>
-              <button id="kmLabPrev" ${!st || L.step === 0 ? 'disabled' : ''}>上一步</button>
-              <button id="kmLabNext" ${!st || L.step >= lastBeat ? 'disabled' : ''}>下一步</button>
-              <button id="kmLabPlay">${L.playing ? '暂停' : '播放动画'}</button>
-            </div>` : ''}
+            ${run ? labPlayback(L, st, lastBeat) : ''}
             ${st ? `<p class="km-hint">分步演示中：拍 ${L.step + 1}/${steps.length}；"跑到收敛"直接看终态。改任何配置会回到终态视图。</p>` : ''}
             ${manual ? `<p class="km-hint">手动初值：在图里点空白处或圆点，依次放 ${L.k} 个中心（已放 ${L.manual.length} 个）；放满后再点＝移动最近的中心。把两个中心放进同一团试试（p62 左）。</p>` : ''}
           </div>
@@ -894,7 +910,7 @@ tr.selected td{background:#e7f0ff!important}
         </div>
       </div>
       <div class="note blue"><strong>这份数据在看什么</strong><p>${S.note}</p></div>
-      ${metricNote}${driftTxt}`;
+      ${metricNote}${driftTxt}${cmpNoteKm}`;
   }
   function cleanRunFor(pts, run) {
     const clean = pts.filter(p => p.g !== 6);
@@ -915,36 +931,11 @@ tr.selected td{background:#e7f0ff!important}
     return d ? [{ x: d.to.x, y: d.to.y, r: 90 }] : [];
   }
 
-  /* ---------- shell ---------- */
-  /* ---------- tab 3: DBSCAN (Slide13 p71-73) ---------- */
-  function dbsPts() { return DBSSRC[state.dbs.src].make(); }
-  function dbsAutoRun() {
-    const D = state.dbs;
-    dbsStop(); D.step = null; D.pick = null;
-    D.run = dbscan(dbsPts(), D.eps, D.minPts);
-  }
-  let dbsTimer = null;
-  function dbsStop() { if (dbsTimer) { clearInterval(dbsTimer); dbsTimer = null; } state.dbs.playing = false; }
-  function dbsPlay() {
-    const D = state.dbs;
-    dbsStop();
-    if (!D.run) return;
-    if (D.step === null || D.step >= D.run.beats.length - 1) D.step = 0;
-    D.playing = true;
-    dbsTimer = setInterval(() => {
-      const last = state.dbs.run.beats.length - 1;
-      if (state.dbs.step >= last) { dbsStop(); kmRender(); return; }
-      state.dbs.step += 1;
-      if (state.dbs.step >= last) dbsStop();
-      kmRender();
-    }, 900);
-    kmRender();
-  }
-  const dbsName = (src, i) => src === 'hand12n' || src === 'hand12' ? (i < 12 ? 'P' + (i + 1) : '游离 ' + (i - 11)) : src === 'slide50' ? nameOf('slide50', i) : '点 ' + (i + 1);
-  function renderDbs() {
-    const D = state.dbs, S = DBSSRC[D.src], pts = dbsPts(), run = D.run;
+  /* ---------- tab 2, DBSCAN branch (Slide13 p71-73) ---------- */
+  function renderLabDbs(L, S, pts) {
+    const run = L.drun;
     const beats = run.beats, last = beats.length - 1;
-    const st = D.step === null ? null : beats[Math.min(D.step, last)];
+    const st = L.step === null ? null : beats[Math.min(L.step, last)];
     const labels = st ? st.labels : run.labels;
     const cores = st ? st.core : run.core;
     const done = !st || st.kind === 'done';
@@ -957,65 +948,63 @@ tr.selected td{background:#e7f0ff!important}
     const statusOf = i => {
       const l = labels[i];
       if (l === null) return { fill: '#e8edf4', stroke: '#8fa2bd', sw: 1.5 };
-      if (l === -1) return { fill: '#b91c1c', stroke: '#7f1d1d', sw: 2, dash: '4 3' };
+      if (l === -1) return { fill: '#1f2937', stroke: '#1f2937', sw: 2, dash: '4 3' };
       const col = COLORS[l % COLORS.length];
       return cores[i] ? { fill: col, stroke: '#102344', sw: 2 } : { fill: col + '55', stroke: col, sw: 2.5 };
     };
     const focus = st && st.i >= 0 ? st.i : null;
     const plot = scatter({
-      pts, statusOf, pick: D.pick,
-      name: i => dbsName(D.src, i),
-      epsCircle: focus === null ? null : { x: pts[focus].x, y: pts[focus].y, eps: D.eps },
+      pts, statusOf, pick: L.dpick,
+      name: i => labName(L.shape, i),
+      xlab: S.xlab, ylab: S.ylab,
+      epsCircle: focus === null ? null : { x: pts[focus].x, y: pts[focus].y, eps: L.eps },
       links: focus === null ? [] : run.neigh[focus].filter(x => x.j !== focus).map(x => ({ a: pts[focus], b: pts[x.j] }))
     });
 
     const doneHead = [`完成 · ${run.clusters} 个簇 + ${nNoise} 个噪声`, `核心点 ${nCore} 个、边界点 ${nBorder} 个。没有事先给 K：簇数由密度（Eps、MinPts）自己决定。`];
     const headOf = s => {
-      if (s.kind === 'core') return [`核心点 · 开簇 ${s.c + 1}`, `点 ${dbsName(D.src, s.i)} 的 Eps 邻域有 ${s.n} 个点（含自己）≥ MinPts=${D.minPts} → 核心点，开簇 ${s.c + 1}，沿邻域链向外扩张。`];
-      if (s.kind === 'grow') return [`密度可达 · 扩到点 ${dbsName(D.src, s.i)}`, `它的邻域有 ${s.n} 个点 ≥ MinPts → 也是核心点，邻域入队继续扩（簇 ${s.c + 1}）。课件 p71：从核心点出发不断向密度可达的区域扩张。`];
-      if (s.kind === 'border') return [`边界点 · 收进簇 ${s.c + 1}`, `点 ${dbsName(D.src, s.i)} 邻域只有 ${s.n} 个点 < MinPts，但落在核心点的 Eps 内 → 边界点，归簇 ${s.c + 1}（不再向外扩）。`];
-      if (s.kind === 'noise') return ['暂标噪声', `点 ${dbsName(D.src, s.i)} 邻域只有 ${s.n} 个点 < MinPts，且没有核心点收它 → 暂标噪声；之后若落进某核心点的 Eps 会被回收为边界点。`];
-      if (s.kind === 'reclaim') return [`噪声回收为边界点 · 簇 ${s.c + 1}`, `点 ${dbsName(D.src, s.i)} 先前被标噪声，现在落进簇 ${s.c + 1} 核心点的 Eps → 回收为边界点。`];
+      if (s.kind === 'core') return [`核心点 · 开簇 ${s.c + 1}`, `点 ${labName(L.shape, s.i)} 的 Eps 邻域有 ${s.n} 个点（含自己）≥ MinPts=${L.minPts} → 核心点，开簇 ${s.c + 1}，沿邻域链向外扩张。`];
+      if (s.kind === 'grow') return [`密度可达 · 扩到点 ${labName(L.shape, s.i)}`, `它的邻域有 ${s.n} 个点 ≥ MinPts → 也是核心点，邻域入队继续扩（簇 ${s.c + 1}）。课件 p71：从核心点出发不断向密度可达的区域扩张。`];
+      if (s.kind === 'border') return [`边界点 · 收进簇 ${s.c + 1}`, `点 ${labName(L.shape, s.i)} 邻域只有 ${s.n} 个点 < MinPts，但落在核心点的 Eps 内 → 边界点，归簇 ${s.c + 1}（不再向外扩）。`];
+      if (s.kind === 'noise') return ['暂标噪声', `点 ${labName(L.shape, s.i)} 邻域只有 ${s.n} 个点 < MinPts，且没有核心点收它 → 暂标噪声；之后若落进某核心点的 Eps 会被回收为边界点。`];
+      if (s.kind === 'reclaim') return [`噪声回收为边界点 · 簇 ${s.c + 1}`, `点 ${labName(L.shape, s.i)} 先前被标噪声，现在落进簇 ${s.c + 1} 核心点的 Eps → 回收为边界点。`];
       return doneHead;
     };
     const head = st ? headOf(st) : doneHead;
-    const banner = done ? 'success' : st.kind === 'noise' ? 'warning' : 'info';
+    const banner = done ? (nNoise ? 'warning' : 'success') : st.kind === 'noise' ? 'warning' : 'info';
 
     const legendItems = clusterIds.map(j => `<span><span class="lat-sw" style="border-color:${COLORS[j % COLORS.length]};background:${COLORS[j % COLORS.length]}33"></span>簇 ${j + 1}：${nOf(j)} 点</span>`);
-    if (nNoise) legendItems.push(`<span><span class="lat-sw" style="border-color:#b91c1c;background:#b91c1c33"></span>噪声：${nNoise} 点</span>`);
+    if (nNoise) legendItems.push(`<span><span class="lat-sw" style="border-color:#1f2937;background:#1f293733"></span>噪声：${nNoise} 点</span>`);
     if (nUnvisited) legendItems.push(`<span><span class="lat-sw" style="border-color:#8fa2bd;background:#e8edf4"></span>未访问：${nUnvisited} 点</span>`);
 
     let inspector;
-    if (D.pick !== null) {
-      const i = D.pick, p = pts[i], N = run.neigh[i];
+    if (L.dpick !== null) {
+      const i = L.dpick, p = pts[i], N = run.neigh[i];
       const l = labels[i];
-      const verdict = l === null ? '尚未访问' : l === -1 ? '噪声点：既不是核心点也不是边界点（课件 p71）' : cores[i] ? `核心点：邻域 ${N.length} ≥ MinPts=${D.minPts}，簇 ${l + 1}` : `边界点：邻域 ${N.length} < MinPts，但被核心点收进簇 ${l + 1}`;
+      const verdict = l === null ? '尚未访问' : l === -1 ? '噪声点：既不是核心点也不是边界点（课件 p71）' : cores[i] ? `核心点：邻域 ${N.length} ≥ MinPts=${L.minPts}，簇 ${l + 1}` : `边界点：邻域 ${N.length} < MinPts，但被核心点收进簇 ${l + 1}`;
       const rows = pts.map((q, j) => {
         const dist = Math.hypot(p.x - q.x, p.y - q.y);
-        const inEps = dist <= D.eps + 1e-9;
-        return `<tr class="${inEps ? 'is-hit' : ''}"><td>${dbsName(D.src, j)}</td><td>(${q.x}, ${q.y})</td><td>${f1(dist)}</td><td>${inEps ? '≤ Eps ✓' : '—'}</td></tr>`;
+        const inEps = dist <= L.eps + 1e-9;
+        return `<tr class="${inEps ? 'is-hit' : ''}"><td>${labName(L.shape, j)}</td><td>(${q.x}, ${q.y})</td><td>${f1(dist)}</td><td>${inEps ? '≤ Eps ✓' : '—'}</td></tr>`;
       }).join('');
-      inspector = `<div class="panel"><h2>检查器 · ${dbsName(D.src, i)} (${p.x}, ${p.y})</h2>
-        <p class="km-hint">${verdict}。蓝底行＝Eps=${D.eps} 邻域内的点（含自己），共 ${N.length} 个，与 MinPts=${D.minPts} 比大小即定核心／边界。</p>
+      inspector = `<div class="panel"><h2>检查器 · ${labName(L.shape, i)} (${p.x}, ${p.y})</h2>
+        <p class="km-hint">${verdict}。蓝底行＝Eps=${L.eps} 邻域内的点（含自己），共 ${N.length} 个，与 MinPts=${L.minPts} 比大小即定核心／边界。</p>
         <div class="table-wrap scroll-420" style="margin-top:10px"><table class="trace"><thead><tr><th>点</th><th>坐标</th><th>距离</th><th>邻域</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     } else {
-      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点任意圆点：全量距离表＋Eps 邻域判定（邻域点数 vs MinPts → 核心／边界／噪声）。<br>实心＝核心点，半透明＝边界点，红虚线＝噪声，灰＝未访问；蓝虚线圈＝当前点的 Eps 邻域。</p></div>`;
+      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点任意圆点：全量距离表＋Eps 邻域判定（邻域点数 vs MinPts → 核心／边界／噪声）。<br>实心＝核心点，半透明＝边界点，黑虚线＝噪声，灰＝未访问；蓝虚线圈＝当前点的 Eps 邻域。</p></div>`;
     }
 
     let cmpNote = '';
-    if (D.src === 'hand12n') {
+    if (L.shape === 'hand12n') {
       const kr = computeRun(pts, 2, [{ x: 12, y: 12 }, { x: 46, y: 42 }], 'euclid');
       const ks = [0, 1].map(j => kr.a.filter(v => v === j).length);
       const drift = Math.hypot(kr.cs[0].x - 15, kr.cs[0].y - 12);
-      cmpNote = `<div class="note"><strong>同一份数据，K-Means 怎么做（K=2、黑板初值）</strong><p>K-Means 必须给每个点找归属：两个游离点被硬收进簇 1（${ks.join('/')}），中心 1 从 (15,12) 被拽到 (${f1(kr.cs[0].x)}, ${f1(kr.cs[0].y)})，偏 ${f1(drift)} 米。DBSCAN（Eps=${D.eps}、MinPts=${D.minPts}）保持两条链 ${clusterIds.map(j => nOf(j)).join('/')}、游离点标噪声——划分式 vs 密度式：一个硬分，一个敢于说噪声。</p></div>`;
+      cmpNote = `<div class="note"><strong>同一份数据，K-Means 怎么做（K=2、黑板初值）</strong><p>K-Means 必须给每个点找归属：两个游离点被硬收进簇 1（${ks.join('/')}），中心 1 从 (15,12) 被拽到 (${f1(kr.cs[0].x)}, ${f1(kr.cs[0].y)})，偏 ${f1(drift)} 米。DBSCAN（Eps=${L.eps}、MinPts=${L.minPts}）保持两条链 ${clusterIds.map(j => nOf(j)).join('/')}、游离点标噪声——划分式 vs 密度式：一个硬分，一个敢于说噪声。切算法下拉即可回看 K-Means 逐轮过程。</p></div>`;
     }
-    const shapeNote = (D.src === 'rings' || D.src === 'moons') ? `<div class="note green"><strong>任意形状的簇（课件 p71 出发点）</strong><p>K-Means 只认"离中心近"，环和月牙必被劈开（② 里同一份数据）；DBSCAN 认"密度相连"，整环整月牙收成一簇。p73 的动画演的就是这里"播放动画"的扩张过程。</p></div>` : '';
+    const shapeNote = (L.shape === 'rings' || L.shape === 'moons') ? `<div class="note green"><strong>任意形状的簇（课件 p71 出发点）</strong><p>K-Means 只认"离中心近"，环和月牙必被劈开（切算法下拉到 K-Means 看同一份数据）；DBSCAN 认"密度相连"，整环整月牙收成一簇。p73 的动画演的就是这里"播放动画"的扩张过程。</p></div>` : '';
 
     $('kmRoot').innerHTML = `
-      <div class="toolbar">
-        <span class="preset-label">数据源</span>
-        <div class="preset-buttons">${Object.keys(DBSSRC).map(key => `<button class="preset-btn" data-dbssrc="${key}" aria-pressed="${key === D.src}">${DBSSRC[key].label}</button>`).join('')}</div>
-      </div>
+      ${labToolbar(L)}
       <div class="outcome ${banner}" style="margin-top:16px"><div><strong>${head[0]}</strong><p>${head[1]}</p></div></div>
       <div class="metrics">
         <div class="metric"><small>簇数</small><b>${clusterIds.length}</b></div>
@@ -1025,19 +1014,20 @@ tr.selected td{background:#e7f0ff!important}
         <div class="metric"><small>未访问</small><b>${nUnvisited}</b></div>
       </div>
       <div class="grid2 wide-left km-grid">
-        <div class="panel"><h2>${S.label} · ${pts.length} 点 · Eps=${D.eps} · MinPts=${D.minPts}</h2>${plot}<div class="lat-legend">${legendItems.join('')}</div></div>
+        <div class="panel"><h2>${S.label} · ${pts.length} 点 · Eps=${L.eps} · MinPts=${L.minPts}</h2>${plot}<div class="lat-legend">${legendItems.join('')}</div></div>
         <div class="km-side">
-          <div class="panel km-ctl"><h2>控制 · ${st ? '拍 ' + (D.step + 1) + '/' + beats.length : '终态'}</h2>
-            <div class="slider-row"><label for="dbsEps">Eps 半径</label><input type="range" id="dbsEps" min="${S.epsMin}" max="${S.epsMax}" step="${S.epsStep}" value="${D.eps}"><output>${D.eps}</output></div>
-            <div class="slider-row"><label for="dbsMin">MinPts（密度 τ）</label><input type="range" id="dbsMin" min="2" max="8" step="1" value="${D.minPts}"><output>${D.minPts}</output></div>
-            <div class="playback"><button id="dbsSteps" ${st ? 'disabled' : ''}>分步演示</button><button id="dbsPrev" ${!st || D.step === 0 ? 'disabled' : ''}>上一步</button><button id="dbsNext" ${!st || D.step >= last ? 'disabled' : ''}>下一步</button><button id="dbsEnd" ${!st ? 'disabled' : ''}>跳到结果</button><button id="dbsPlay">${D.playing ? '暂停' : '播放动画'}</button></div>
-            <p class="km-hint">${st ? '分步演示中：改 Eps／MinPts 会重算并回到终态。' : '默认看终态；点"分步演示"从第一个点逐拍看扩簇，或"播放动画"每 0.9 s 一拍、做完自动停。'} 已归簇的点不再重复访问。</p>
+          <div class="panel km-ctl"><h2>控制 · DBSCAN · ${st ? '拍 ' + (L.step + 1) + '/' + beats.length : '终态'}</h2>
+            ${algoSelect(L)}
+            <div class="slider-row"><label for="dbsEps">Eps 半径</label><input type="range" id="dbsEps" min="${S.epsMin}" max="${S.epsMax}" step="${S.epsStep}" value="${L.eps}"><output>${L.eps}</output></div>
+            <div class="slider-row"><label for="dbsMin">MinPts（密度 τ）</label><input type="range" id="dbsMin" min="2" max="8" step="1" value="${L.minPts}"><output>${L.minPts}</output></div>
+            ${labPlayback(L, st, last)}
+            <p class="km-hint">${st ? '分步演示中：改 Eps／MinPts 会重算并回到终态。' : '默认看终态；点"分步演示"从第一个点逐拍看扩簇，或"播放动画"按所选速度自动走、做完自动停。'} 已归簇的点不再重复访问。</p>
           </div>
           ${inspector}
         </div>
       </div>
       <div class="note blue"><strong>三种点（课件 p71）</strong><p>核心点：Eps 邻域内至少 MinPts 个点（含自己）；边界点：邻域不足 MinPts、但半径内至少 1 个核心点（被收进簇、不再外扩）；噪声点：既非核心也非边界。从核心点出发沿密度可达扩张，簇内任意两点密度相连——所以不用事先给 K，也能收任意形状的簇。</p></div>
-      <div class="note blue"><strong>这份数据在看什么</strong><p>${S.note}</p></div>
+      <div class="note blue"><strong>这份数据在看什么</strong><p>${S.dbsNote}</p></div>
       ${cmpNote}${shapeNote}`;
   }
 
@@ -1046,7 +1036,7 @@ tr.selected td{background:#e7f0ff!important}
     $('kmSourceNote').textContent = SHAPES[state.src].note;
     document.querySelector('nav[aria-label="数据集"]').style.display = state.tab === 'kmrun' ? '' : 'none';
     document.querySelectorAll('#kmTabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.kmtab === state.tab));
-    if (state.tab === 'kmrun') renderRun(); else if (state.tab === 'kmlab') renderLab(); else renderDbs();
+    if (state.tab === 'kmrun') renderRun(); else renderLab();
   }
   function resetRun1() { state.step = 0; state.pickPt = null; state.pickC = null; }
 
@@ -1073,7 +1063,7 @@ tr.selected td{background:#e7f0ff!important}
     if (pt && !t) {
       const i = +pt.dataset.kmpt;
       if (state.tab === 'kmrun') { run1Stop(); state.pickPt = i; state.pickC = null; kmRender(); }
-      else if (state.tab === 'kmdbs') { dbsStop(); state.dbs.pick = i; kmRender(); }
+      else if (state.lab.algo === 'dbscan') { labStop(); state.lab.dpick = i; kmRender(); }
       else if (state.lab.initMode === 'manual') {
         const L = state.lab, p = labPts()[i];
         if (L.manual.length < L.k) L.manual.push({ x: p.x, y: p.y });
@@ -1091,17 +1081,13 @@ tr.selected td{background:#e7f0ff!important}
       return;
     }
     if (!t) return;
-    if (t.dataset.kmtab) { labStop(); run1Stop(); dbsStop(); state.tab = t.dataset.kmtab; kmRender(); return; }
-    if (t.dataset.dbssrc) {
-      const D = state.dbs, S = DBSSRC[t.dataset.dbssrc];
-      D.src = t.dataset.dbssrc; D.eps = S.epsDef; D.minPts = S.minDef;
-      dbsAutoRun(); kmRender(); return;
-    }
+    if (t.dataset.kmtab) { labStop(); run1Stop(); state.tab = t.dataset.kmtab; kmRender(); return; }
     if (t.dataset.kmsrc) { run1Stop(); state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
     if (t.dataset.kmstep !== undefined) { run1Stop(); state.step = +t.dataset.kmstep; kmRender(); return; }
     if (t.dataset.kmshape) {
       const L = state.lab, S = SHAPES[t.dataset.kmshape];
       L.shape = t.dataset.kmshape; L.k = S.kDef; L.manual = [];
+      L.eps = S.epsDef; L.minPts = S.minDef;
       if (S.initSeedDef) L.initSeed = S.initSeedDef;
       labAutoRun(); kmRender(); return;
     }
@@ -1121,13 +1107,9 @@ tr.selected td{background:#e7f0ff!important}
     if (t.id === 'kmRun') { labAutoRun(); kmRender(); return; }
     if (t.id === 'kmLabSteps') { labStop(); state.lab.step = 0; kmRender(); return; }
     if (t.id === 'kmLabPrev') { labStop(); state.lab.step = Math.max(0, state.lab.step - 1); kmRender(); return; }
-    if (t.id === 'kmLabNext') { labStop(); state.lab.step = Math.min(labSteps().length - 1, state.lab.step + 1); kmRender(); return; }
+    if (t.id === 'kmLabNext') { labStop(); state.lab.step = Math.min(labBeats().length - 1, state.lab.step + 1); kmRender(); return; }
+    if (t.id === 'kmLabEnd') { labStop(); state.lab.step = null; kmRender(); return; }
     if (t.id === 'kmLabPlay') { if (state.lab.playing) { labStop(); kmRender(); } else labPlay(); return; }
-    if (t.id === 'dbsSteps') { dbsStop(); state.dbs.step = 0; kmRender(); return; }
-    if (t.id === 'dbsPrev') { dbsStop(); state.dbs.step = Math.max(0, state.dbs.step - 1); kmRender(); return; }
-    if (t.id === 'dbsNext') { dbsStop(); state.dbs.step = Math.min(state.dbs.run.beats.length - 1, state.dbs.step + 1); kmRender(); return; }
-    if (t.id === 'dbsEnd') { dbsStop(); state.dbs.step = null; kmRender(); return; }
-    if (t.id === 'dbsPlay') { if (state.dbs.playing) { dbsStop(); kmRender(); } else dbsPlay(); return; }
   });
   document.addEventListener('input', e => {
     const id = e.target.id;
@@ -1136,18 +1118,19 @@ tr.selected td{background:#e7f0ff!important}
     else if (id === 'kmLabK') { state.lab.k = +e.target.value; state.lab.manual = []; labAutoRun(); kmRender(); }
     else if (id === 'kmLabSeed') { state.lab.seed = Math.max(0, Math.min(99999, +e.target.value || 0)); state.lab.manual = []; labAutoRun(); kmRender(); }
     else if (id === 'kmLabInitSeed') { state.lab.initSeed = Math.max(0, Math.min(99999, +e.target.value || 0)); labAutoRun(); kmRender(); }
-    else if (id === 'dbsEps') { state.dbs.eps = +e.target.value; dbsAutoRun(); kmRender(); }
-    else if (id === 'dbsMin') { state.dbs.minPts = +e.target.value; dbsAutoRun(); kmRender(); }
+    else if (id === 'dbsEps') { state.lab.eps = +e.target.value; labAutoRun(); kmRender(); }
+    else if (id === 'dbsMin') { state.lab.minPts = +e.target.value; labAutoRun(); kmRender(); }
   });
   document.addEventListener('change', e => {
     const id = e.target.id;
-    if (id === 'kmMetric') { state.lab.metric = e.target.value; labAutoRun(); kmRender(); }
+    if (id === 'kmAlgo') { labStop(); state.lab.algo = e.target.value; state.lab.step = null; state.lab.dpick = null; kmRender(); }
+    else if (id === 'kmSpeed') { state.lab.speed = +e.target.value; if (state.lab.playing) labPlay(); }
+    else if (id === 'kmMetric') { state.lab.metric = e.target.value; labAutoRun(); kmRender(); }
     else if (id === 'kmMetric1') { state.metric = e.target.value; run1Stop(); resetRun1(); kmRender(); }
     else if (id === 'kmInitMode') { state.lab.initMode = e.target.value; state.lab.manual = []; labAutoRun(); kmRender(); }
   });
 
   labAutoRun();
-  dbsAutoRun();
   kmRender();
 })();
 </script>
