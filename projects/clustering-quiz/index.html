@@ -222,18 +222,18 @@ table.trace td.soft{white-space:normal;overflow-wrap:anywhere;min-width:200px;ma
     {
       id: 'q4', title: '第 4 题', tag: 'DBSCAN 进阶 · 7 点 · 桥接与 Eps 敏感性',
       points: [
-        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 4, y: 1 }, { name: 'C', x: 1, y: 5 },
+        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 4, y: 1 }, { name: 'C', x: 1, y: 6 },
         { name: 'D', x: 10, y: 1 }, { name: 'E', x: 13, y: 1 }, { name: 'F', x: 10, y: 5 },
         { name: 'G', x: 7, y: 1 }
       ],
       parts: [
         {
           eps: 5, minPts: 3, label: '(a) Eps=5',
-          insight: '7 个点全是核心。G 同时在 B 和 D 的邻域里（d² 都是 9），两个三角经桥点 G 密度相连 → 并成一簇。K-Means 在这里会硬切成两半；DBSCAN 只认密度相连。'
+          insight: 'G 同时在 B 和 D 的邻域里（d² 都是 9），两个三角经桥点 G 密度相连 → 并成一簇。C 的邻域只有 {A,C}=2 点（A–C 的 d²=25 恰好等于 Eps²），是边界点，经核心 A 收编、收编即止。K-Means 在这里会硬切成两半；DBSCAN 只认密度相连。'
         },
         {
           eps: 3, minPts: 3, label: '(b) Eps=3',
-          insight: 'Eps 从 5 缩到 3：A、E 从核心降为边界（邻域只剩 2 点），C、F 直接成噪声（半径内没有核心）。同一份数据，参数不同结果不同——DBSCAN 的参数敏感性（聚类实验室里拖 Eps 滑杆可现场复现）。'
+          insight: 'Eps 从 5 缩到 3：A、E 从核心降为边界（邻域只剩 2 点），C 从边界、F 从核心直接掉成噪声（半径内没有核心）。同一份数据，参数不同结果不同——DBSCAN 的参数敏感性（聚类实验室里拖 Eps 滑杆可现场复现）。'
         }
       ],
       prompt: '7 个点的坐标在下表直接给出，MinPts=3。分别手算两种参数下的 DBSCAN：(a) Eps=5；(b) Eps=3。各写出邻域、判核心／边界／噪声、扩簇，最后对照：Eps 变小改变了什么？'
@@ -481,7 +481,7 @@ table.trace td.soft{white-space:normal;overflow-wrap:anywhere;min-width:200px;ma
     }).join('');
     return '<div class="step-block"><h3>最终对照 · 同一份数据，两种 Eps</h3>' +
       '<div class="table-wrap"><table class="trace"><thead><tr><th>参数</th><th>簇数</th><th>簇成员</th><th>核心</th><th>边界</th><th>噪声</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      '<div class="note"><strong>Eps 变小改变了什么？</strong><p>桥还在：(b) 里 B–G–D 仍相连（d²=9≤9），所以还是一个簇；但外围的 A、E 从核心降为边界，C、F 整个掉成噪声。邻域半径决定密度链连不连得上——这就是参数敏感性。图按 (b) 着色：黑虚线＝噪声 C、F。</p></div></div>';
+      '<div class="note"><strong>Eps 变小改变了什么？</strong><p>桥还在：(b) 里 B–G–D 仍相连（d²=9≤9），所以还是一个簇；但 A、E 从核心降为边界，C（原边界）、F（原核心）掉成噪声。邻域半径决定密度链连不连得上——这就是参数敏感性。图按 (b) 着色：黑虚线＝噪声 C、F。</p></div></div>';
   }
 
   function buildKmeansSteps(q, sol) {
