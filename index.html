@@ -572,39 +572,79 @@
       </div>
     </details>
 
-    <details class="course-project-card" id="data-mining-lab">
+    <details class="course-project-card" id="association-lab">
       <summary class="course-project-card__toggle">
         <span class="course-project-card__number">10</span>
         <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="datamining" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
-          <strong data-language-heading="datamining" data-zh="数据挖掘实验室" data-en="Data Mining Lab">Data Mining Lab</strong>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="zh" hidden>一页两个模块：02 关联规则——课件 4 单与 20 单构造例的整张项集格图、观影 330 篮与超市小票 600 篮的 Apriori 逐轮剪枝、置信度单调性手算；03 聚类 K-Means——课件 50 小区早餐供应点分步迭代、典型数据生成器与初值／距离定义对照。</span>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="en">One page, two modules: association rules (full itemset lattice on the courseware 4-basket toy and a 20-basket constructed example, Apriori rounds on 330 movie baskets and 600 receipts, hand-computed confidence monotonicity) and K-Means clustering (step-by-step iterations on the courseware 50-neighbourhood breakfast supply points, plus a typical-data generator with adjustable initials and distance definitions).</span>
+          <span class="course-project-card__meta"><span data-language-heading="association" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
+          <strong data-language-heading="association" data-zh="关联模式挖掘实验室" data-en="Association Mining Lab">Association Mining Lab</strong>
+          <span class="course-project-card__summary" data-language-content="association" data-language="zh" hidden>课件 4 单与 20 单构造例的整张项集格图、观影 330 篮与超市小票 600 篮的 Apriori 逐轮剪枝（连接→剪枝→计数→筛选）、关联规则与置信度单调性手算（课件 p26–38）。</span>
+          <span class="course-project-card__summary" data-language-content="association" data-language="en">Full itemset lattice on the courseware 4-basket toy and a 20-basket constructed example, Apriori rounds (join, prune, count, filter) on 330 movie baskets and 600 supermarket receipts, and hand-computed rule confidence with one-step monotonicity (slides p26–38).</span>
         </span>
         <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="datamining" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="datamining" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="association" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="association" data-zh="收起实验室" data-en="Close lab">Close lab</span>
           <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
         </span>
       </summary>
       <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="datamining" aria-label="Data mining lab language">
+        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="association" aria-label="Association mining lab language">
           <button type="button" data-language="zh" aria-pressed="false">中文</button>
           <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
         </div>
         <div class="course-project-note">
           <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="datamining" data-language="zh" hidden>课堂演示：关联规则页格图配色对照课件 p36–38，候选账本＋逐轮漏斗（第 3 轮 909 剪 521），规则置信度手算与一步单调性（p29–30）。K-Means 页①按课件 p48–60 每轮拆"分配／更新"两拍：点圆点看距离代入、点星看均值代入，逐拍 loss 账本说明为什么必收敛；②生成球状／双环／月牙／横带／大小不均／带离群点／均匀等典型数据，K、初值（随机种子或手动点放）、欧氏／曼哈顿／余弦距离均可调，对照 p62 两条局限性。全部数据内嵌、可离线投影，界面为中文。</p>
-          <p data-language-content="datamining" data-language="en">Classroom demo: the association-rules page colours the lattice against slides p36–38 and uses a candidate ledger plus per-round funnel (round 3: 909 candidates, 521 pruned), with hand-computed rule confidence and one-step monotonicity (p29–30). K-Means tab 1 splits each round into assign/update beats following slides p48–60: click a point for distance substitution, click a star for mean substitution, and a per-beat loss ledger shows why it must converge; tab 2 generates typical data (blobs, rings, moons, stripes, uneven sizes, outliers, uniform) with adjustable K, initials (random seed or manual placement), and Euclidean/Manhattan/cosine distance, contrasting the two limitations on p62. All data embedded for offline projection; Chinese interface.</p>
+          <p data-language-content="association" data-language="zh" hidden>课堂演示：格图配色对照课件 p36–38，点节点看支持度手算与包含事务；真实数据走候选账本＋逐轮漏斗（第 3 轮 909 剪 521），规则页手算 conf 并用一步前件拆分演示置信度单调性（p29–30），不引入 lift。全部数据内嵌、可离线投影，界面为中文。</p>
+          <p data-language-content="association" data-language="en">Classroom demo: lattice colours follow slides p36–38; click a node for hand-computed support and its covering transactions. Real datasets use a candidate ledger plus per-round funnel (round 3: 909 candidates, 521 pruned); the rules page hand-computes confidence and demonstrates monotonicity by splitting one antecedent item (p29–30), without lift. All data embedded for offline projection; Chinese interface.</p>
         </div>
-        <div class="course-video-chapters" aria-label="Data mining lab">
-          <a class="course-video-chapter" href="./projects/data-mining-lab/index.html">
+        <div class="course-video-chapters" aria-label="Association mining lab">
+          <a class="course-video-chapter" href="./projects/association-lab/index.html">
             <span class="course-video-chapter__number">↗</span>
             <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开数据挖掘实验室</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Data Mining Lab</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>关联规则格图与 Apriori 账本＋K-Means 分步迭代与典型数据对照</small>
-              <small data-language-content="datamining" data-language="en">Association-rule lattice and Apriori ledger plus K-Means step player and typical-data comparisons</small>
+              <strong data-language-content="association" data-language="zh" hidden>打开关联模式挖掘实验室</strong>
+              <strong data-language-content="association" data-language="en">Open the Association Mining Lab</strong>
+              <small data-language-content="association" data-language="zh" hidden>项集格图、Apriori 逐轮账本与置信度单调性手算</small>
+              <small data-language-content="association" data-language="en">Itemset lattice, per-round Apriori ledger and hand-computed confidence monotonicity</small>
+            </span>
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </details>
+
+    <details class="course-project-card" id="clustering-lab">
+      <summary class="course-project-card__toggle">
+        <span class="course-project-card__number">11</span>
+        <span class="course-project-card__main">
+          <span class="course-project-card__meta"><span data-language-heading="clustering" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
+          <strong data-language-heading="clustering" data-zh="聚类实验室" data-en="Clustering Lab">Clustering Lab</strong>
+          <span class="course-project-card__summary" data-language-content="clustering" data-language="zh" hidden>K-Means 两页：①课件 50 小区早餐供应点逐拍分步演示（点／中心检查器手算距离与均值、逐拍 loss 账本）；②9 种典型数据生成器，K／初值／距离度量可调，p62 两条局限性现场复现，支持逐拍播放动画。DBSCAN（p71–73）将作为第二个模块加入。</span>
+          <span class="course-project-card__summary" data-language-content="clustering" data-language="en">K-Means in two tabs: (1) beat-by-beat walkthrough of the courseware 50-neighbourhood breakfast supply points with point/center inspectors for hand-computed distances and means plus a per-beat loss ledger; (2) nine typical-data generators with adjustable K, initials and distance metric, reproducing both limitations on p62, with step playback animation. DBSCAN (p71–73) will join as the second module.</span>
+        </span>
+        <span class="course-project-card__action" aria-hidden="true">
+          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="clustering" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="clustering" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+        </span>
+      </summary>
+      <div class="course-project-card__details">
+        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="clustering" aria-label="Clustering lab language">
+          <button type="button" data-language="zh" aria-pressed="false">中文</button>
+          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+        </div>
+        <div class="course-project-note">
+          <i class="fas fa-diagram-project" aria-hidden="true"></i>
+          <p data-language-content="clustering" data-language="zh" hidden>课堂演示：①按课件 p48–60 每轮拆"分配／更新"两拍，点圆点看距离代入、点星看均值代入，逐拍 loss 账本说明为什么必收敛；②生成球状／双环／月牙／横带／大小不均／带离群点／均匀等典型数据，K、数据种子与初值种子分开、欧氏／曼哈顿／余弦距离、随机或手动点放初值均可调，「合理／不合理初值」一键对照 p62 左图，离群点漂移点名 p62 右图；可逐拍播放动画（0.9 s 一拍、收敛自动停）。16:9 投影整幅可见，全部数据内嵌、可离线，界面为中文。</p>
+          <p data-language-content="clustering" data-language="en">Classroom demo: tab 1 splits each round into assign/update beats following slides p48–60 — click a point for distance substitution, click a star for mean substitution, and a per-beat loss ledger shows why it must converge. Tab 2 generates typical data (blobs, rings, moons, stripes, uneven sizes, outliers, uniform) with adjustable K, separate data/init seeds, Euclidean/Manhattan/cosine distance, and random or manually placed initials; good/bad-init presets reproduce p62 left and the outlier-drift note names p62 right. Step playback animation runs one beat per 0.9 s and auto-stops at convergence. Fits a 16:9 projector without scrolling; all data embedded for offline use; Chinese interface.</p>
+        </div>
+        <div class="course-video-chapters" aria-label="Clustering lab">
+          <a class="course-video-chapter" href="./projects/clustering-lab/index.html">
+            <span class="course-video-chapter__number">↗</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="clustering" data-language="zh" hidden>打开聚类实验室</strong>
+              <strong data-language-content="clustering" data-language="en">Open the Clustering Lab</strong>
+              <small data-language-content="clustering" data-language="zh" hidden>K-Means 分步迭代、典型数据对照与 p62 局限性复现（DBSCAN 即将加入）</small>
+              <small data-language-content="clustering" data-language="en">K-Means step player, typical-data comparisons and p62 limitation reproductions (DBSCAN coming)</small>
             </span>
             <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
           </a>
