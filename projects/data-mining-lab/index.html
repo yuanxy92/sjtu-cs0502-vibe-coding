@@ -313,7 +313,7 @@ tr.selected td{background:#e7f0ff!important}
   </section>
 
   <footer class="footer">
-    <p>数据来源：Slide13 第 48 页散点图逐点读坐标（50 个小区、单位米，近似读数）、12 点手算例（手工构造、整数坐标）；客户表 p45、电影余弦 p47 均为课件原数。全部数据内嵌在本页，可离线打开。</p>
+    <p>数据来源：Slide13 第 48 页散点图逐点读坐标（50 个小区、单位米，近似读数）、12 点手算例（手工构造、整数坐标）。全部数据内嵌在本页，可离线打开。</p>
     <p class="muted">对应 Slide13 第 42–62 页：早餐供应点 p42–43、距离度量 p46–47、K-Means 四步与逐轮迭代 p48–60、局限性 p62。簇色沿用课件：绿／橙／蓝／红／紫，星＝供应点（聚类中心），圆点＝小区。</p>
   </footer>
   </div>
@@ -1755,23 +1755,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       </div>
       <div class="panel" style="margin-top:20px"><h2>逐拍 SSE 账本</h2>
         <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>轮</th><th>拍</th><th>改归属</th><th>最大移动</th><th>SSE</th></tr></thead><tbody>${hist.join('')}</tbody></table></div>
-      </div>
-      <details class="deeper"><summary>课件原数手算：距离与余弦（p45–47）</summary>
-        <div class="table-wrap" style="margin-top:10px"><table class="trace"><thead><tr><th>客户</th><th>年龄</th><th>薪资</th></tr></thead><tbody>
-          <tr><td>小美</td><td>26</td><td>¥5,000</td></tr><tr><td>小庄</td><td>29</td><td>¥10,000</td></tr><tr><td>小贺</td><td>23</td><td>¥8,000</td></tr>
-        </tbody></table></div>
-        <p class="km-hint">p45：每个客户＝二维点 (年龄, 薪资)；距离小＝相似度大。</p>
-        <div class="formula-card">
-          <div class="formula">欧氏 d(P1,P7) = √((10−40)² + (10−40)²) = √1800 ≈ <span class="hl">42.4</span></div>
-          <div class="formula">曼哈顿 d(P1,P7) = |10−40| + |10−40| = <span class="hl">60</span></div>
-          <div class="formula-sub">手算例 12 点里的 P1(10,10) 与 P7(40,40)；曼哈顿＝"街区距离"（p46 地图折线）。</div>
-        </div>
-        <div class="formula-card">
-          <div class="formula">cosSim(电影3,电影1) = (3×5+4×1)/(√(3²+4²)·√(5²+1²)) = 19/(5×√26) ≈ <span class="hl">0.75</span></div>
-          <div class="formula">cosSim(电影3,电影2) = (3×2+4×5)/(5×√29) = 26/(5×√29) ≈ <span class="hl">0.97</span></div>
-          <div class="formula-sub">p47 原数：电影1(5,1)、电影2(2,5)、电影3(3,4)。0.97 &gt; 0.75 ⇒ 电影3 与电影2 更相似。</div>
-        </div>
-      </details>`;
+      </div>`;
   }
 
   /* ---------- tab 2: data & config playground ---------- */
