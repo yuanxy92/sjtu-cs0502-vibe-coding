@@ -485,7 +485,7 @@ tr.selected td{background:#e7f0ff!important}
   const nameOf = (src, i) => src === 'hand12' ? 'P' + (i + 1) : '小区 ' + String(i + 1).padStart(2, '0');
 
   const state = {
-    tab: 'kmrun', src: 'slide50', k: 5, seed: 7, step: 0, pickPt: null, pickC: null,
+    tab: 'kmrun', src: 'slide50', k: 5, seed: 7, step: 0, pickPt: null, pickC: null, metric: 'euclid', playing: false,
     lab: { shape: 'blobs3', k: 3, seed: 11, initSeed: 11, metric: 'euclid', initMode: 'random', manual: [], run: null, step: null, playing: false }
   };
 
@@ -495,7 +495,7 @@ tr.selected td{background:#e7f0ff!important}
     const s = src1();
     return s.fixedInit ? s.fixedInit.slice(0, state.k).map(c => ({ x: c[0], y: c[1] })) : randomInit(pts1(), state.k, state.seed);
   }
-  function run1() { return computeRun(pts1(), state.k, init1(), 'euclid'); }
+  function run1() { return computeRun(pts1(), state.k, init1(), state.metric); }
   function steps1(r) {
     const st = [{ t: 'init' }];
     r.iters.forEach((_, i) => { st.push({ t: 'assign', i }); st.push({ t: 'update', i }); });
@@ -523,6 +523,24 @@ tr.selected td{background:#e7f0ff!important}
       if (state.lab.step >= last) { labStop(); kmRender(); return; }
       state.lab.step += 1;
       if (state.lab.step >= last) labStop();
+      kmRender();
+    }, 900);
+    kmRender();
+  }
+
+  const M_SHORT = { euclid: '欧氏距离', manhattan: '曼哈顿距离', cosine: '余弦距离（1−cosSim）' };
+  const M_PAGE = { euclid: 'p46', manhattan: 'p46', cosine: 'p47' };
+  let run1Timer = null;
+  function run1Stop() { if (run1Timer) { clearInterval(run1Timer); run1Timer = null; } state.playing = false; }
+  function run1Play() {
+    run1Stop();
+    if (state.step >= steps1(run1()).length - 1) state.step = 0;
+    state.playing = true;
+    run1Timer = setInterval(() => {
+      const last = steps1(run1()).length - 1;
+      if (state.step >= last) { run1Stop(); kmRender(); return; }
+      state.step += 1;
+      if (state.step >= last) run1Stop();
       kmRender();
     }, 900);
     kmRender();
@@ -582,10 +600,11 @@ tr.selected td{background:#e7f0ff!important}
     const sse = st.t === 'init' ? null : st.t === 'assign' ? it.sseA : it.sseU;
     const changed = st.t === 'assign' ? it.changed : st.t === 'update' ? it.changed : null;
     const moved = st.t === 'update' ? it.moved : null;
+    const fLoss = v => state.metric === 'cosine' ? v.toFixed(4) : f0(v);
 
     const titles = {
       init: ['① 初始化 · 随机放 K 个中心', `种子 ${state.seed} 可复现；课件 p49 的 Random Centers。星＝供应点（聚类中心）。`],
-      assign: [`② 分配样本点 · 第 ${round} 轮`, '每个点算到 K 个中心的欧氏距离，归给最近的那个（课件 p48／p50）。点圆点看距离代入式。'],
+      assign: [`② 分配样本点 · 第 ${round} 轮`, `每个点算到 K 个中心的${M_SHORT[state.metric]}，归给最近的那个（课件 p48／p50；距离定义 ${M_PAGE[state.metric]}）。点圆点看距离代入式。`],
       update: [`③ 更新中心 · 第 ${round} 轮`, '新中心＝簇内成员点的算术均值（课件 p48／p51）。虚线＝中心这一拍的移动；点星看均值代入式。'],
     };
     const head = converged ? ['④ 中心不再更新 · 收敛', `第 ${round} 轮更新后所有中心移动＝0，停止迭代（课件 p60）。共 ${r.iters.length} 轮。`] : titles[st.t];
@@ -607,13 +626,29 @@ tr.selected td{background:#e7f0ff!important}
     if (state.pickPt !== null) {
       const p = pts[state.pickPt];
       const rows = centers.map((c, j) => {
-        const dx = p.x - c.x, dy = p.y - c.y, s = dx * dx + dy * dy, d = Math.sqrt(s);
+        const dx = p.x - c.x, dy = p.y - c.y;
+        let sub, d, dText;
+        if (state.metric === 'manhattan') {
+          d = Math.abs(dx) + Math.abs(dy);
+          sub = `|${p.x}−${f1(c.x)}| + |${p.y}−${f1(c.y)}| = ${f1(Math.abs(dx))} + ${f1(Math.abs(dy))}`;
+          dText = f1(d);
+        } else if (state.metric === 'cosine') {
+          const np = Math.hypot(p.x, p.y), nc = Math.hypot(c.x, c.y);
+          d = (!np || !nc) ? 1 : 1 - (p.x * c.x + p.y * c.y) / (np * nc);
+          sub = `1 − (${p.x}×${f1(c.x)} + ${p.y}×${f1(c.y)}) / (${f1(np)}×${f1(nc)})`;
+          dText = d.toFixed(3);
+        } else {
+          const s = dx * dx + dy * dy;
+          d = Math.sqrt(s);
+          sub = `√((${p.x}−${f1(c.x)})² + (${p.y}−${f1(c.y)})²) = √${f0(s)}`;
+          dText = f1(d);
+        }
         const best = a ? a[state.pickPt] === j : false;
         return `<tr class="${best ? 'is-hit' : ''}"><td><span class="chip" style="border-color:${COLORS[j % COLORS.length]};background:${COLORS[j % COLORS.length]}22">中心 ${j + 1}</span></td>
-          <td class="soft">√((${p.x}−${f1(c.x)})² + (${p.y}−${f1(c.y)})²) = √${f0(s)}</td><td>${f1(d)}</td></tr>`;
+          <td class="soft">${sub}</td><td>${dText}</td></tr>`;
       }).join('');
       inspector = `<div class="panel"><h2>检查器 · ${nameOf(state.src, state.pickPt)} (${p.x}, ${p.y})</h2>
-        <p class="km-hint">到各中心的欧氏距离（课件 p46）；${a ? '蓝底＝本轮归属的最近中心。' : '下一拍 ② 才分配，先比大小。'}</p>
+        <p class="km-hint">到各中心的${M_SHORT[state.metric]}（课件 ${M_PAGE[state.metric]}）；${a ? '蓝底＝本轮归属的最近中心。' : '下一拍 ② 才分配，先比大小。'}</p>
         <div class="table-wrap" style="margin-top:10px"><table class="trace"><thead><tr><th>中心</th><th>代入式</th><th>d</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     } else if (state.pickC !== null) {
       const j = state.pickC, c = centers[j];
@@ -629,13 +664,13 @@ tr.selected td{background:#e7f0ff!important}
         <p class="km-hint">成员 ${mem.length} 个；均值＝Σ/n（课件 p48 红字）。</p>${meanCard}
         ${mem.length ? `<div class="table-wrap scroll-420" style="margin-top:12px"><table class="trace"><thead><tr><th>成员</th><th>x</th><th>y</th></tr></thead><tbody>${mem.map(x => `<tr><td>${nameOf(state.src, x.i)}</td><td>${x.p.x}</td><td>${x.p.y}</td></tr>`).join('')}</tbody></table></div>` : ''}</div>`;
     } else {
-      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点图里的圆点：看到 K 个中心的距离逐行代入，最小行＝归属。<br>点星（中心）：看成员全列表与均值代入式 Σx/n、Σy/n。<br>① 的距离固定欧氏（课件 p48 红字）；换距离定义去 ②。</p></div>`;
+      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点图里的圆点：看到 K 个中心的距离逐行代入，最小行＝归属。<br>点星（中心）：看成员全列表与均值代入式 Σx/n、Σy/n。<br>距离定义在右侧控制区切换：欧氏／曼哈顿／余弦，代入式跟着换。</p></div>`;
     }
 
     const hist = [];
     r.iters.forEach((x, i) => {
-      hist.push(`<tr class="${st.t === 'assign' && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>② 分配</td><td>${x.changed}</td><td>—</td><td>${f0(x.sseA)}</td></tr>`);
-      hist.push(`<tr class="${st.t === 'update' && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>③ 更新</td><td>${x.changed}</td><td>${f1(x.moved)}</td><td>${f0(x.sseU)}</td></tr>`);
+      hist.push(`<tr class="${st.t === 'assign' && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>② 分配</td><td>${x.changed}</td><td>—</td><td>${fLoss(x.sseA)}</td></tr>`);
+      hist.push(`<tr class="${st.t === 'update' && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>③ 更新</td><td>${x.changed}</td><td>${f1(x.moved)}</td><td>${fLoss(x.sseU)}</td></tr>`);
     });
 
     $('kmRoot').innerHTML = `
@@ -644,7 +679,7 @@ tr.selected td{background:#e7f0ff!important}
         <div class="metric"><small>轮次</small><b>${round || '—'}</b></div>
         <div class="metric"><small>本轮改归属</small><b>${changed === null ? '—' : changed}</b></div>
         <div class="metric"><small>最大中心移动（米）</small><b>${moved === null ? '—' : f1(moved)}</b></div>
-        <div class="metric ${converged ? 'good' : ''}"><small>loss 簇内距离²和</small><b>${sse === null ? '—' : f0(sse)}</b></div>
+        <div class="metric ${converged ? 'good' : ''}"><small>loss 簇内距离²和</small><b>${sse === null ? '—' : fLoss(sse)}</b></div>
       </div>
       <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>早餐供应点位置示意</h2>${plot}${a ? legend(countsOf(a, state.k)) : '<p class="km-hint">灰点＝尚未分配；星＝初始中心。</p>'}</div>
@@ -652,15 +687,16 @@ tr.selected td{background:#e7f0ff!important}
           <div class="panel km-ctl"><h2>控制 · 拍 ${state.step + 1}/${steps.length}</h2>
             <div class="slider-row"><label for="kmK">K</label><input type="range" id="kmK" min="1" max="${src1().kMax}" step="1" value="${state.k}"><output>${state.k}</output></div>
             <div class="slider-row"><label for="kmSeed">种子</label><input type="number" id="kmSeed" min="0" max="99999" value="${state.seed}" ${src1().fixedInit ? 'disabled' : ''} style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmReseed" ${src1().fixedInit ? 'disabled' : ''}>重新随机</button></div>
-            <div class="playback"><button id="kmPrev" ${state.step === 0 ? 'disabled' : ''}>上一步</button><button id="kmNext" class="primary" ${state.step === steps.length - 1 ? 'disabled' : ''}>下一步</button><button id="kmEnd" ${state.step === steps.length - 1 ? 'disabled' : ''}>跳到收敛</button><button id="kmReset" ${state.step === 0 ? 'disabled' : ''}>重置</button></div>
+            <div class="slider-row"><div class="ctl-select"><label for="kmMetric1">距离</label><select id="kmMetric1">${Object.keys(METRICS).map(m => `<option value="${m}" ${m === state.metric ? 'selected' : ''}>${METRICS[m].label}</option>`).join('')}</select></div></div>
+            <div class="playback"><button id="kmPrev" ${state.step === 0 ? 'disabled' : ''}>上一步</button><button id="kmNext" class="primary" ${state.step === steps.length - 1 ? 'disabled' : ''}>下一步</button><button id="kmEnd" ${state.step === steps.length - 1 ? 'disabled' : ''}>跳到收敛</button><button id="kmReset" ${state.step === 0 ? 'disabled' : ''}>重置</button><button id="kmPlay1">${state.playing ? '暂停' : '播放动画'}</button></div>
             <div class="step-dots">${dots}</div>
           </div>
           ${inspector}
         </div>
       </div>
-      <div class="note green"><strong>为什么一定会停（loss 单调不增）</strong>
+      ${state.metric === 'euclid' ? `<div class="note green"><strong>为什么一定会停（loss 单调不增）</strong>
         <p>loss＝每个点到其中心距离的平方和。中心固定时，把点归给最近中心使 loss 最小；划分固定时，取均值使 loss 最小。两拍交替、loss 只降不升，中心迟早不再移动——这就是 ④ 的停止条件。</p>
-      </div>
+      </div>` : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按${M_SHORT[state.metric]}算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`}
       <div class="panel" style="margin-top:20px"><h2>逐拍 loss 账本</h2>
         <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>轮</th><th>拍</th><th>改归属</th><th>最大移动</th><th>loss</th></tr></thead><tbody>${hist.join('')}</tbody></table></div>
       </div>`;
@@ -799,7 +835,7 @@ tr.selected td{background:#e7f0ff!important}
     const ct = e.target.closest && e.target.closest('[data-kmc]');
     if (pt && !t) {
       const i = +pt.dataset.kmpt;
-      if (state.tab === 'kmrun') { state.pickPt = i; state.pickC = null; kmRender(); }
+      if (state.tab === 'kmrun') { run1Stop(); state.pickPt = i; state.pickC = null; kmRender(); }
       else if (state.lab.initMode === 'manual') {
         const L = state.lab, p = labPts()[i];
         if (L.manual.length < L.k) L.manual.push({ x: p.x, y: p.y });
@@ -813,13 +849,13 @@ tr.selected td{background:#e7f0ff!important}
       return;
     }
     if (ct && !t) {
-      if (state.tab === 'kmrun') { state.pickC = +ct.dataset.kmc; state.pickPt = null; kmRender(); }
+      if (state.tab === 'kmrun') { run1Stop(); state.pickC = +ct.dataset.kmc; state.pickPt = null; kmRender(); }
       return;
     }
     if (!t) return;
-    if (t.dataset.kmtab) { labStop(); state.tab = t.dataset.kmtab; kmRender(); return; }
-    if (t.dataset.kmsrc) { state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
-    if (t.dataset.kmstep !== undefined) { state.step = +t.dataset.kmstep; kmRender(); return; }
+    if (t.dataset.kmtab) { labStop(); run1Stop(); state.tab = t.dataset.kmtab; kmRender(); return; }
+    if (t.dataset.kmsrc) { run1Stop(); state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
+    if (t.dataset.kmstep !== undefined) { run1Stop(); state.step = +t.dataset.kmstep; kmRender(); return; }
     if (t.dataset.kmshape) {
       const L = state.lab;
       L.shape = t.dataset.kmshape; L.k = SHAPES[L.shape].kDef; L.manual = [];
@@ -831,11 +867,12 @@ tr.selected td{background:#e7f0ff!important}
       L.manual = (t.dataset.kmpreset === 'good' ? GOOD_INIT : BAD_INIT).map(c => ({ x: c[0], y: c[1] }));
       labAutoRun(); kmRender(); return;
     }
-    if (t.id === 'kmPrev') { state.step = Math.max(0, state.step - 1); kmRender(); return; }
-    if (t.id === 'kmNext') { state.step += 1; kmRender(); return; }
-    if (t.id === 'kmEnd') { state.step = steps1(run1()).length - 1; kmRender(); return; }
-    if (t.id === 'kmReset') { resetRun1(); kmRender(); return; }
-    if (t.id === 'kmReseed') { state.seed = 1 + Math.floor(Math.random() * 99998); resetRun1(); kmRender(); return; }
+    if (t.id === 'kmPrev') { run1Stop(); state.step = Math.max(0, state.step - 1); kmRender(); return; }
+    if (t.id === 'kmNext') { run1Stop(); state.step += 1; kmRender(); return; }
+    if (t.id === 'kmEnd') { run1Stop(); state.step = steps1(run1()).length - 1; kmRender(); return; }
+    if (t.id === 'kmReset') { run1Stop(); resetRun1(); kmRender(); return; }
+    if (t.id === 'kmReseed') { run1Stop(); state.seed = 1 + Math.floor(Math.random() * 99998); resetRun1(); kmRender(); return; }
+    if (t.id === 'kmPlay1') { if (state.playing) { run1Stop(); kmRender(); } else run1Play(); return; }
     if (t.id === 'kmLabReseed') { state.lab.initSeed = 1 + Math.floor(Math.random() * 99998); labAutoRun(); kmRender(); return; }
     if (t.id === 'kmRun') { labAutoRun(); kmRender(); return; }
     if (t.id === 'kmLabSteps') { labStop(); state.lab.step = 0; kmRender(); return; }
@@ -845,8 +882,8 @@ tr.selected td{background:#e7f0ff!important}
   });
   document.addEventListener('input', e => {
     const id = e.target.id;
-    if (id === 'kmK') { state.k = +e.target.value; resetRun1(); kmRender(); }
-    else if (id === 'kmSeed') { state.seed = Math.max(0, Math.min(99999, +e.target.value || 0)); resetRun1(); kmRender(); }
+    if (id === 'kmK') { run1Stop(); state.k = +e.target.value; resetRun1(); kmRender(); }
+    else if (id === 'kmSeed') { run1Stop(); state.seed = Math.max(0, Math.min(99999, +e.target.value || 0)); resetRun1(); kmRender(); }
     else if (id === 'kmLabK') { state.lab.k = +e.target.value; state.lab.manual = []; labAutoRun(); kmRender(); }
     else if (id === 'kmLabSeed') { state.lab.seed = Math.max(0, Math.min(99999, +e.target.value || 0)); state.lab.manual = []; labAutoRun(); kmRender(); }
     else if (id === 'kmLabInitSeed') { state.lab.initSeed = Math.max(0, Math.min(99999, +e.target.value || 0)); labAutoRun(); kmRender(); }
@@ -854,6 +891,7 @@ tr.selected td{background:#e7f0ff!important}
   document.addEventListener('change', e => {
     const id = e.target.id;
     if (id === 'kmMetric') { state.lab.metric = e.target.value; labAutoRun(); kmRender(); }
+    else if (id === 'kmMetric1') { state.metric = e.target.value; run1Stop(); resetRun1(); kmRender(); }
     else if (id === 'kmInitMode') { state.lab.initMode = e.target.value; state.lab.manual = []; labAutoRun(); kmRender(); }
   });
 
