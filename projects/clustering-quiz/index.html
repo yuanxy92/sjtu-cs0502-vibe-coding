@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>K-Means 课堂小测</title>
+<title>聚类课堂小测</title>
 <style>
 :root{
   font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -92,6 +92,19 @@ table.trace.d2 td.is-hit{background:#dbeafe}
 .badge.flip{background:#ffe0e2;color:#991b1b;font-size:18px}
 .assign-sum{font-size:20px;margin-top:10px;font-weight:650}
 
+.sec-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:34px}
+.sec-head h2{font-size:30px}
+.sec-head span{font-size:20px;color:var(--muted)}
+table.trace.matrix th,table.trace.matrix td{padding:7px 11px;font-size:19px;text-align:center}
+table.trace.matrix td.is-hit{background:#dbeafe}
+table.trace.matrix td.diag{color:#8c99ab}
+table.trace td.soft{white-space:normal;overflow-wrap:anywhere;min-width:200px;max-width:430px;font-size:19px}
+.badge.core{background:#d8f3e3;color:#116149}
+.badge.border{background:#fff0cd;color:#854d0e}
+.badge.noise{background:#e5e7eb;color:#1f2937}
+.reason{display:block;font-family:inherit;font-size:18px;font-weight:500;color:var(--muted);white-space:normal;min-width:230px;margin-top:4px}
+.formula-card.noisecard{border-color:#9ca3af;background:#f3f4f6}
+
 .formula-card{display:grid;gap:7px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:16px 20px;margin-top:14px}
 .formula{font-family:var(--mono);font-size:26px;font-weight:700;color:#17427a;overflow-wrap:anywhere}
 .formula-sub{font-size:20px;color:var(--muted)}
@@ -132,26 +145,28 @@ table.trace.d2 td.is-hit{background:#dbeafe}
       <g fill="#15803d"><path d="M52 38 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
       <g fill="#b45309"><path d="M156 34 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
       <g fill="#22b1e8"><path d="M110 86 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
+      <circle cx="196" cy="98" r="6" fill="#1f2937" stroke="#1f2937" stroke-width="1.4" stroke-dasharray="3 2"/>
     </svg>
     <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
-    <h1>K-Means 课堂小测</h1>
-    <p class="subtitle">两道手算题：整数坐标直接给出、初始中心给定、欧氏距离。先在纸上算，再逐步揭示答案对照。全部数据内嵌，可离线打开。</p>
+    <h1>聚类课堂小测</h1>
+    <p class="subtitle">四道手算题：K-Means 两道＋DBSCAN 两道。整数坐标直接给出、参数给定，先在纸上算，再逐步揭示答案对照。全部数据内嵌，可离线打开。</p>
   </header>
 
   <div id="quizRoot"></div>
 
   <footer class="footer">
-    <p class="muted">配套演示：<a href="../clustering-lab/">聚类实验室 ↗</a>（K-Means 逐拍分步＋16 种数据上 K-Means／DBSCAN 对照）。星＝中心，圆点＝数据点；绿＝簇 1，橙＝簇 2。</p>
+    <p class="muted">配套演示：<a href="../clustering-lab/">聚类实验室 ↗</a>（K-Means 逐拍分步＋16 种数据上 K-Means／DBSCAN 对照）。星＝中心，圆点＝数据点；绿＝簇 1，橙＝簇 2，黑虚线＝噪声（DBSCAN）。</p>
   </footer>
 </main>
 <script>
-/* K-Means 课堂小测：两道可手算的题，答案逐步揭示。坐标全整数、每轮 d² 无平局、均值全整数。 */
+/* 聚类课堂小测：K-Means 两道＋DBSCAN 两道，可手算，答案逐步揭示。
+   坐标全整数、d² 全整数、K-Means 每轮无平局且均值全整数；DBSCAN 邻域含自己、d≤Eps 取等号算。 */
 (function () {
   'use strict';
 
   const QUESTIONS = [
     {
-      id: 'q1', title: '第 1 题', tag: '基础 · 6 点 · K=2',
+      id: 'q1', title: '第 1 题', tag: 'K-Means 基础 · 6 点 · K=2',
       points: [
         { name: 'A', x: 1, y: 1 }, { name: 'B', x: 3, y: 1 }, { name: 'C', x: 2, y: 4 },
         { name: 'D', x: 7, y: 7 }, { name: 'E', x: 9, y: 7 }, { name: 'F', x: 8, y: 10 }
@@ -160,7 +175,7 @@ table.trace.d2 td.is-hit{background:#dbeafe}
       prompt: '6 个点的坐标在下表直接给出。K=2，初始中心 c₁=(1,1)、c₂=(9,7)，欧氏距离。手算 K-Means：逐轮写出分配与更新，直到收敛，给出最终的簇、中心与 loss。'
     },
     {
-      id: 'q2', title: '第 2 题', tag: '进阶 · 8 点 · K=2',
+      id: 'q2', title: '第 2 题', tag: 'K-Means 进阶 · 8 点 · K=2',
       points: [
         { name: 'A', x: 1, y: 1 }, { name: 'B', x: 5, y: 1 }, { name: 'C', x: 3, y: 4 },
         { name: 'D', x: 7, y: 8 }, { name: 'E', x: 11, y: 8 }, { name: 'F', x: 7, y: 12 },
@@ -168,6 +183,41 @@ table.trace.d2 td.is-hit{background:#dbeafe}
       ],
       init: [[1, 1], [4, 6]],
       prompt: '8 个点的坐标在下表直接给出。K=2，初始中心 c₁=(1,1)、c₂=(4,6)，欧氏距离。手算 K-Means：逐轮写出分配与更新，直到收敛，给出最终的簇、中心与 loss。'
+    }
+  ];
+
+  const DBS_QUESTIONS = [
+    {
+      id: 'q3', title: '第 3 题', tag: 'DBSCAN 基础 · 8 点 · 核心/边界/噪声',
+      points: [
+        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 4, y: 1 }, { name: 'C', x: 1, y: 5 },
+        { name: 'D', x: 12, y: 1 }, { name: 'E', x: 15, y: 1 }, { name: 'F', x: 12, y: 5 },
+        { name: 'G', x: 4, y: 8 }, { name: 'H', x: 9, y: 10 }
+      ],
+      parts: [{
+        eps: 5, minPts: 3, label: 'Eps=5',
+        insight: '边界点 G 被核心点 C 收进簇 1，但 G 自己不是核心——它的邻居 H 不会跟着被收进来（边界点不再向外扩），H 仍是噪声。'
+      }],
+      prompt: '8 个点的坐标在下表直接给出。DBSCAN 参数 Eps=5、MinPts=3（邻域含自己，d≤Eps 算邻居，恰好等于也算）。手算：① 逐对算 d²，标出每个点的邻域；② 数邻域点数，判核心／边界／噪声；③ 从核心点扩簇，给出最终的簇与噪声。'
+    },
+    {
+      id: 'q4', title: '第 4 题', tag: 'DBSCAN 进阶 · 7 点 · 桥接与 Eps 敏感性',
+      points: [
+        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 4, y: 1 }, { name: 'C', x: 1, y: 5 },
+        { name: 'D', x: 10, y: 1 }, { name: 'E', x: 13, y: 1 }, { name: 'F', x: 10, y: 5 },
+        { name: 'G', x: 7, y: 1 }
+      ],
+      parts: [
+        {
+          eps: 5, minPts: 3, label: '(a) Eps=5',
+          insight: '7 个点全是核心。G 同时在 B 和 D 的邻域里（d² 都是 9），两个三角经桥点 G 密度相连 → 并成一簇。K-Means 在这里会硬切成两半；DBSCAN 只认密度相连。'
+        },
+        {
+          eps: 3, minPts: 3, label: '(b) Eps=3',
+          insight: 'Eps 从 5 缩到 3：A、E 从核心降为边界（邻域只剩 2 点），C、F 直接成噪声（半径内没有核心）。同一份数据，参数不同结果不同——DBSCAN 的参数敏感性（聚类实验室里拖 Eps 滑杆可现场复现）。'
+        }
+      ],
+      prompt: '7 个点的坐标在下表直接给出，MinPts=3。分别手算两种参数下的 DBSCAN：(a) Eps=5；(b) Eps=3。各写出邻域、判核心／边界／噪声、扩簇，最后对照：Eps 变小改变了什么？'
     }
   ];
 
@@ -198,15 +248,55 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     return { rounds, loss, lossParts, final: { centers: last.centers, assign: last.assign, clusters: last.clusters } };
   }
 
-  const core = { QUESTIONS, solve, d2 };
+  function dbscan(points, eps, minPts) {
+    const n = points.length;
+    const D = points.map(p => points.map(q => d2(p, [q.x, q.y])));
+    const eps2 = eps * eps;
+    const neigh = D.map(row => row.map((v, j) => (v <= eps2 ? j : -1)).filter(j => j >= 0));
+    const core = neigh.map(ns => ns.length >= minPts);
+    const verdicts = [], borderVia = [];
+    for (let i = 0; i < n; i++) {
+      if (core[i]) { verdicts.push('core'); borderVia.push(-1); }
+      else {
+        const via = neigh[i].find(j => core[j]);
+        if (via !== undefined) { verdicts.push('border'); borderVia.push(via); }
+        else { verdicts.push('noise'); borderVia.push(-1); }
+      }
+    }
+    const labels = new Array(n).fill(null);
+    const clusters = [];
+    for (let i = 0; i < n; i++) {
+      if (labels[i] !== null || !core[i]) continue;
+      const cid = clusters.length;
+      const members = [i];
+      labels[i] = cid;
+      const expanded = new Set();
+      const queued = new Set([i].concat(neigh[i]));
+      const queue = neigh[i].slice();
+      while (queue.length) {
+        const j = queue.shift();
+        if (labels[j] === null) { labels[j] = cid; members.push(j); }
+        if (core[j] && !expanded.has(j)) { expanded.add(j); neigh[j].forEach(k => { if (!queued.has(k)) { queued.add(k); queue.push(k); } }); }
+      }
+      clusters.push(members);
+    }
+    const noise = [];
+    for (let i = 0; i < n; i++) if (labels[i] === null) { labels[i] = -1; noise.push(i); }
+    return { D, neigh, core, verdicts, borderVia, labels, clusters, noise };
+  }
+
+  const core = { QUESTIONS, DBS_QUESTIONS, solve, dbscan, d2 };
   if (typeof module !== 'undefined' && module.exports) module.exports = core;
   if (typeof window === 'undefined') return;
-  window.KMeansQuizCore = core;
+  window.ClusteringQuizCore = core;
 
   const COLORS = ['#2fbe6e', '#f0a13a'];
   const DARK = ['#15803d', '#b45309'];
+  const NOISE = '#1f2937';
+  const ALL = QUESTIONS.concat(DBS_QUESTIONS);
   const SOL = QUESTIONS.map(solve);
-  const state = { step: [0, 0] };
+  const DBS_SOL = DBS_QUESTIONS.map(q => q.parts.map(p => dbscan(q.points, p.eps, p.minPts)));
+  const state = { step: [0, 0, 0, 0] };
 
   const fmtC = c => '(' + c[0] + ', ' + c[1] + ')';
   const names = (q, cl) => cl.map(i => q.points[i].name).join('、');
@@ -228,10 +318,7 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     return 'M' + pts.join('L') + 'Z';
   }
 
-  function scatter(q, sol, revealed) {
-    const pts = q.points;
-    const xs = pts.map(p => p.x).concat(q.init.map(c => c[0]), sol.final.centers.map(c => c[0]));
-    const ys = pts.map(p => p.y).concat(q.init.map(c => c[1]), sol.final.centers.map(c => c[1]));
+  function plotFrame(xs, ys) {
     const xmin = Math.min.apply(null, xs) - 1, xmax = Math.max.apply(null, xs) + 1;
     const ymin = Math.min.apply(null, ys) - 1, ymax = Math.max.apply(null, ys) + 1;
     const X = v => 56 + (v - xmin) / (xmax - xmin) * 560;
@@ -250,6 +337,20 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     g += '<line x1="56" y1="24" x2="56" y2="474" stroke="#94a3b8" stroke-width="2"/>';
     g += '<text x="622" y="480" font-size="20" font-weight="700" fill="#53647c">x</text>';
     g += '<text x="40" y="20" font-size="20" font-weight="700" fill="#53647c">y</text>';
+    return { X, Y, g };
+  }
+
+  function pointLabels(pts, X, Y) {
+    return pts.map(p => '<text x="' + (X(p.x) + 13) + '" y="' + (Y(p.y) - 11) + '" font-size="20" font-weight="700" fill="#102344">' + p.name + '</text>').join('');
+  }
+
+  function scatter(q, sol, revealed) {
+    const pts = q.points;
+    const xs = pts.map(p => p.x).concat(q.init.map(c => c[0]), sol.final.centers.map(c => c[0]));
+    const ys = pts.map(p => p.y).concat(q.init.map(c => c[1]), sol.final.centers.map(c => c[1]));
+    const fr = plotFrame(xs, ys);
+    const X = fr.X, Y = fr.Y;
+    let g = fr.g;
     const fin = revealed ? sol.final : null;
     if (fin) q.init.forEach(c => {
       g += '<path d="' + starPath(X(c[0]), Y(c[1]), 13) + '" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3"/>';
@@ -262,13 +363,29 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     cs.forEach((c, k) => {
       g += '<path d="' + starPath(X(c[0]), Y(c[1]), 15) + '" fill="' + COLORS[k] + '" stroke="' + DARK[k] + '" stroke-width="1.5"/>';
     });
-    pts.forEach(p => {
-      g += '<text x="' + (X(p.x) + 13) + '" y="' + (Y(p.y) - 11) + '" font-size="20" font-weight="700" fill="#102344">' + p.name + '</text>';
-    });
+    g += pointLabels(pts, X, Y);
     cs.forEach((c, k) => {
       g += '<text x="' + (X(c[0]) + 17) + '" y="' + (Y(c[1]) + 22) + '" font-size="20" font-weight="800" fill="' + DARK[k] + '">c' + (k + 1) + '</text>';
     });
     return '<div class="km-wrap"><svg viewBox="0 0 640 520" role="img" aria-label="题目数据点与中心的散点图">' + g + '</svg></div>';
+  }
+
+  function dbsScatter(q, res, revealed) {
+    const pts = q.points;
+    const fr = plotFrame(pts.map(p => p.x), pts.map(p => p.y));
+    const X = fr.X, Y = fr.Y;
+    let g = fr.g;
+    pts.forEach((p, i) => {
+      let fill = '#64748b', extra = ' stroke="#fff" stroke-width="2"';
+      if (revealed) {
+        const l = res.labels[i];
+        if (l === -1) { fill = NOISE; extra = ' stroke="' + NOISE + '" stroke-width="2" stroke-dasharray="4 3"'; }
+        else fill = COLORS[l] || COLORS[0];
+      }
+      g += '<circle cx="' + X(p.x) + '" cy="' + Y(p.y) + '" r="9" fill="' + fill + '"' + extra + '/>';
+    });
+    g += pointLabels(pts, X, Y);
+    return '<div class="km-wrap"><svg viewBox="0 0 640 520" role="img" aria-label="题目数据点的散点图">' + g + '</svg></div>';
   }
 
   function assignStep(q, sol, r, ri) {
@@ -323,7 +440,7 @@ table.trace.d2 td.is-hit{background:#dbeafe}
       '<div class="note green"><strong>对照检查</strong><p>你的纸上结果：簇成员、中心、收敛轮数、loss 四项都对上了吗？上方散点图已按最终簇着色，空心虚线星＝初始中心。</p></div></div>';
   }
 
-  function buildSteps(q, sol) {
+  function buildKmeansSteps(q, sol) {
     const steps = [];
     sol.rounds.forEach((r, ri) => {
       steps.push(assignStep(q, sol, r, ri));
@@ -333,9 +450,99 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     return steps;
   }
 
-  const STEPS = QUESTIONS.map((q, i) => buildSteps(q, SOL[i]));
+  function dbsMatrixStep(q, part, res) {
+    const eps2 = part.eps * part.eps;
+    const head = '<h3>' + part.label + ' · 第 1 步：逐对算 d²（蓝底＝d²≤Eps²=' + eps2 + '，即邻域）</h3>';
+    const header = '<tr><th>点</th>' + q.points.map(p => '<th>' + p.name + '</th>').join('') + '</tr>';
+    const rows = q.points.map((p, i) => '<tr><td>' + p.name + '</td>' + res.D[i].map((v, j) => '<td class="' + (v <= eps2 ? 'is-hit' : '') + (i === j ? ' diag' : '') + '">' + v + '</td>').join('') + '</tr>').join('');
+    let exTxt = '';
+    let ex = null;
+    for (let i = 0; i < q.points.length && !ex; i++) {
+      for (let j = i + 1; j < q.points.length; j++) {
+        if (res.D[i][j] === eps2) { ex = [i, j]; break; }
+      }
+    }
+    if (ex) exTxt = '示例 ' + q.points[ex[0]].name + '–' + q.points[ex[1]].name + '：' + sub(q.points[ex[0]], [q.points[ex[1]].x, q.points[ex[1]].y]) + '，恰好等于 Eps²=' + eps2 + ' → 算邻域（≤ 含等号）。';
+    const note = '<div class="note blue"><strong>怎么比</strong><p>d≤Eps ⇔ d²≤Eps²，不必开方。' + exTxt + '对角线上的 0 是自己——邻域含自己。</p></div>';
+    return '<div class="step-block">' + head + '<div class="table-wrap"><table class="trace matrix"><thead>' + header + '</thead><tbody>' + rows + '</tbody></table></div>' + note + '</div>';
+  }
 
-  function renderQ(qi) {
+  function dbsClassifyStep(q, part, res) {
+    const head = '<h3>' + part.label + ' · 第 2 步：数邻域（含自己），与 MinPts=' + part.minPts + ' 比，判类型</h3>';
+    const rows = q.points.map((p, i) => {
+      const ns = res.neigh[i];
+      const members = ns.map(j => q.points[j].name + '(' + res.D[i][j] + ')').join('、');
+      const v = res.verdicts[i];
+      let bdg, reason;
+      if (v === 'core') { bdg = '<span class="badge core">核心</span>'; reason = ns.length + '≥' + part.minPts + ' → 核心，可开簇／扩簇'; }
+      else if (v === 'border') { bdg = '<span class="badge border">边界</span>'; reason = ns.length + '&lt;' + part.minPts + '，但半径内有核心 ' + q.points[res.borderVia[i]].name + ' → 边界，被收进簇'; }
+      else { bdg = '<span class="badge noise">噪声</span>'; reason = ns.length + '&lt;' + part.minPts + '，半径内无核心 → 噪声'; }
+      return '<tr><td>' + p.name + '</td><td class="soft">' + members + '</td><td>' + ns.length + '</td><td>' + bdg + '<span class="reason">' + reason + '</span></td></tr>';
+    }).join('');
+    const note = '<div class="note blue"><strong>三种点（p71 定义）</strong><p>核心点：邻域点数 ≥ MinPts（含自己）。边界点：邻域点数 &lt; MinPts，但半径内至少 1 个核心点——被收进簇，不再外扩。噪声：既非核心也非边界，不属于任何簇。</p></div>';
+    return '<div class="step-block">' + head + '<div class="table-wrap"><table class="trace"><thead><tr><th>点</th><th>邻域成员（d²）</th><th>点数</th><th>判定</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + note + '</div>';
+  }
+
+  function dbsExpandStep(q, part, res) {
+    const head = '<h3>' + part.label + ' · 第 3 步：从核心点扩簇（密度可达链）</h3>';
+    const cards = res.clusters.map((raw, k) => {
+      const cl = raw.slice().sort((a, b) => a - b);
+      const cores = cl.filter(i => res.core[i]).map(i => q.points[i].name);
+      const borders = cl.filter(i => !res.core[i]).map(i => q.points[i].name + '（经 ' + q.points[res.borderVia[i]].name + '）');
+      return '<div class="formula-card c' + (k + 1) + 'card"><div class="formula-sub">簇 ' + (k + 1) + ' · ' + cl.length + ' 点</div><div class="formula">' + cl.map(i => q.points[i].name).join('、') + '</div><div class="formula-sub">核心：' + cores.join('、') + (borders.length ? '；边界：' + borders.join('、') + '（收编即止）' : '') + '</div></div>';
+    }).join('');
+    const noiseTxt = res.noise.length ? '<div class="formula-card noisecard"><div class="formula-sub">噪声 · ' + res.noise.length + ' 点（不属于任何簇）</div><div class="formula">' + res.noise.map(i => q.points[i].name).join('、') + '</div></div>' : '';
+    const insight = part.insight ? '<div class="note green"><strong>看点</strong><p>' + part.insight + '</p></div>' : '';
+    return '<div class="step-block">' + head + cards + noiseTxt + insight + '</div>';
+  }
+
+  function dbsFinalStep(q, parts, results) {
+    if (parts.length === 1) {
+      const res = results[0];
+      const cards = res.clusters.map((raw, k) => {
+        const cl = raw.slice().sort((a, b) => a - b);
+        const members = cl.map(i => q.points[i].name + '(' + q.points[i].x + ',' + q.points[i].y + ')').join('、');
+        return '<div class="formula-card c' + (k + 1) + 'card"><div class="formula-sub">簇 ' + (k + 1) + ' · ' + cl.length + ' 点</div><div class="formula">' + members + '</div></div>';
+      }).join('');
+      const noiseCard = res.noise.length ? '<div class="formula-card noisecard"><div class="formula-sub">噪声 · ' + res.noise.length + ' 点</div><div class="formula">' + res.noise.map(i => q.points[i].name + '(' + q.points[i].x + ',' + q.points[i].y + ')').join('、') + '</div></div>' : '';
+      return '<div class="step-block"><h3>最终结果 · ' + parts[0].label + '，MinPts=' + parts[0].minPts + '</h3>' + cards + noiseCard +
+        '<div class="note green"><strong>对照检查</strong><p>不用给 K、敢标噪声、认任意形状——这是 DBSCAN 的出发点（p71）。你的纸上结果：核心／边界／噪声名单、簇成员都对上了吗？散点图已着色：绿＝簇 1，橙＝簇 2，黑虚线＝噪声。</p></div></div>';
+    }
+    const rows = parts.map((part, pi) => {
+      const res = results[pi];
+      const cls = res.clusters.map(cl => '{' + cl.slice().sort((a, b) => a - b).map(i => q.points[i].name).join(',') + '}').join(' ＋ ');
+      const nCore = res.core.filter(Boolean).length;
+      const nBorder = res.verdicts.filter(v => v === 'border').length;
+      return '<tr><td>' + part.label + '</td><td>' + res.clusters.length + '</td><td class="soft">' + cls + '</td><td>' + nCore + '</td><td>' + nBorder + '</td><td>' + (res.noise.length ? res.noise.map(i => q.points[i].name).join('、') : '无') + '</td></tr>';
+    }).join('');
+    return '<div class="step-block"><h3>最终对照 · 同一份数据，两种 Eps</h3>' +
+      '<div class="table-wrap"><table class="trace"><thead><tr><th>参数</th><th>簇数</th><th>簇成员</th><th>核心</th><th>边界</th><th>噪声</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="note"><strong>Eps 变小改变了什么？</strong><p>桥还在：(b) 里 B–G–D 仍相连（d²=9≤9），所以还是一个簇；但外围的 A、E 从核心降为边界，C、F 整个掉成噪声。邻域半径决定密度链连不连得上——这就是参数敏感性。散点图按 (b) 着色：黑虚线＝噪声 C、F。</p></div></div>';
+  }
+
+  function buildDbsSteps(q, results) {
+    const steps = [];
+    q.parts.forEach((part, pi) => {
+      steps.push(dbsMatrixStep(q, part, results[pi]));
+      steps.push(dbsClassifyStep(q, part, results[pi]));
+      steps.push(dbsExpandStep(q, part, results[pi]));
+    });
+    steps.push(dbsFinalStep(q, q.parts, results));
+    return steps;
+  }
+
+  const STEPS = QUESTIONS.map((q, i) => buildKmeansSteps(q, SOL[i]))
+    .concat(DBS_QUESTIONS.map((q, i) => buildDbsSteps(q, DBS_SOL[i])));
+
+  function revealBar(qi, n, total) {
+    return '<div class="reveal-bar">' +
+      '<button class="primary" data-act="next" data-q="' + qi + '"' + (n >= total ? ' disabled' : '') + '>揭示下一步</button>' +
+      '<button data-act="all" data-q="' + qi + '"' + (n >= total ? ' disabled' : '') + '>展开全部</button>' +
+      '<button data-act="reset" data-q="' + qi + '"' + (n === 0 ? ' disabled' : '') + '>收起答案</button>' +
+      '<span class="step-count">已揭示 ' + n + ' / ' + total + ' 步</span></div>';
+  }
+
+  function renderKmQ(qi) {
     const q = QUESTIONS[qi], sol = SOL[qi], steps = STEPS[qi];
     const n = state.step[qi];
     const given = '<div class="chips given"><span class="chip"><b>K</b>&nbsp;= 2</span><span class="chip"><b>初始中心</b>&nbsp;c₁ = ' + fmtC(q.init[0]) + '，c₂ = ' + fmtC(q.init[1]) + '</span><span class="chip"><b>距离</b>&nbsp;欧氏（比 d² 即可）</span></div>';
@@ -347,23 +554,49 @@ table.trace.d2 td.is-hit{background:#dbeafe}
       '<p class="km-hint">星＝中心（c₁ 绿／c₂ 橙），圆点＝数据点；揭示最终结果后按簇着色。</p></div>' +
       '<div><div class="table-wrap"><table class="trace"><thead><tr><th>点</th><th>坐标 (x, y)</th></tr></thead><tbody>' + ptRows + '</tbody></table></div>' +
       '<div class="note blue tasks"><strong>手算任务</strong><p>① 逐轮：算 d²、分配 → 求均值、更新中心；</p><p>② 每轮检查有没有点改归属，哪一轮收敛？</p><p>③ 写出最终两个簇的成员与中心；</p><p>④ 算 loss＝每个点到其中心距离的平方和。</p></div></div></div>' +
-      '<div class="reveal-bar">' +
-      '<button class="primary" data-act="next" data-q="' + qi + '"' + (n >= steps.length ? ' disabled' : '') + '>揭示下一步</button>' +
-      '<button data-act="all" data-q="' + qi + '"' + (n >= steps.length ? ' disabled' : '') + '>展开全部</button>' +
-      '<button data-act="reset" data-q="' + qi + '"' + (n === 0 ? ' disabled' : '') + '>收起答案</button>' +
-      '<span class="step-count">已揭示 ' + n + ' / ' + steps.length + ' 步</span></div>' +
+      revealBar(qi, n, steps.length) +
       '<div class="answers">' + steps.slice(0, n).join('') + '</div></section>';
   }
 
+  function renderDbsQ(qi) {
+    const q = DBS_QUESTIONS[qi - 2], results = DBS_SOL[qi - 2], steps = STEPS[qi];
+    const n = state.step[qi];
+    const last = results[results.length - 1];
+    const given = '<div class="chips given"><span class="chip"><b>MinPts</b>&nbsp;= ' + q.parts[0].minPts + '</span>' +
+      q.parts.map(p => '<span class="chip"><b>' + p.label + '</b></span>').join('') +
+      '<span class="chip"><b>邻域</b>&nbsp;d≤Eps，含自己，取等号算</span></div>';
+    const ptRows = q.points.map(p => '<tr><td>' + p.name + '</td><td>(' + p.x + ', ' + p.y + ')</td></tr>').join('');
+    const hint = '圆点＝数据点；揭示最终结果后：绿＝簇 1，橙＝簇 2，黑虚线＝噪声。' + (q.parts.length > 1 ? '散点按 ' + q.parts[q.parts.length - 1].label + ' 着色。' : '');
+    return '<section class="panel qpanel" id="' + q.id + '">' +
+      '<div class="qhead"><h2>' + q.title + '</h2><span class="qtag">' + q.tag + '</span></div>' +
+      '<p class="qprompt">' + q.prompt + '</p>' + given +
+      '<div class="grid2 qgrid"><div>' + dbsScatter(q, last, n === steps.length) +
+      '<p class="km-hint">' + hint + '</p></div>' +
+      '<div><div class="table-wrap"><table class="trace"><thead><tr><th>点</th><th>坐标 (x, y)</th></tr></thead><tbody>' + ptRows + '</tbody></table></div>' +
+      '<div class="note blue tasks"><strong>手算任务</strong><p>① 逐对算 d²，标出邻域（d²≤Eps²）；</p><p>② 数邻域点数（含自己），与 MinPts 比，判核心／边界／噪声；</p><p>③ 从核心点沿密度可达链扩簇，边界收编、噪声排除；</p><p>④ 给出最终的簇与噪声名单。</p></div></div></div>' +
+      revealBar(qi, n, steps.length) +
+      '<div class="answers">' + steps.slice(0, n).join('') + '</div></section>';
+  }
+
+  function renderQ(qi) { return qi < 2 ? renderKmQ(qi) : renderDbsQ(qi); }
+
   function render() {
     document.getElementById('quizRoot').innerHTML =
-      '<div class="note blue howto"><strong>怎么手算（做题前先看）</strong>' +
+      '<div class="note blue howto"><strong>K-Means 怎么手算（第 1–2 题前先看）</strong>' +
       '<p>① 欧氏距离 d = √((x−cₓ)²+(y−c_y)²)。比较远近只需比 d²，不必开方。</p>' +
       '<p>② 每轮两步：分配（每个点归最近中心）→ 更新（中心＝成员坐标的算术均值）。</p>' +
       '<p>③ 停止条件：某一轮没有任何点改归属——中心不再变化，算法收敛。</p>' +
       '<p>④ loss＝每个点到其所属中心距离的平方和。</p>' +
       '<p>⑤ 先在纸上算，再点「揭示下一步」逐步对照；答案不会一次全给。</p></div>' +
-      QUESTIONS.map((q, i) => renderQ(i)).join('');
+      '<div class="sec-head"><h2>A · K-Means 手算</h2><span>第 1–2 题 · 每轮两步：分配 → 更新</span></div>' +
+      renderQ(0) + renderQ(1) +
+      '<div class="note blue howto"><strong>DBSCAN 怎么手算（第 3–4 题前先看）</strong>' +
+      '<p>① 邻域＝d≤Eps 的点（含自己，恰好等于也算）；比较用 d²≤Eps²。</p>' +
+      '<p>② 核心点＝邻域点数 ≥ MinPts；边界点＝不足但半径内有核心；噪声＝既非核心也非边界。</p>' +
+      '<p>③ 从核心点沿密度可达链扩簇；边界点被收编但不再外扩；噪声不进任何簇。</p>' +
+      '<p>④ 不用给 K——簇数由密度决定。</p></div>' +
+      '<div class="sec-head"><h2>B · DBSCAN 手算</h2><span>第 3–4 题 · 邻域 → 判定 → 扩簇</span></div>' +
+      renderQ(2) + renderQ(3);
   }
 
   document.addEventListener('click', e => {
@@ -375,7 +608,7 @@ table.trace.d2 td.is-hit{background:#dbeafe}
     else if (act === 'reset') state.step[qi] = 0;
     render();
     if (act === 'next') {
-      const blocks = document.querySelectorAll('#' + QUESTIONS[qi].id + ' .step-block');
+      const blocks = document.querySelectorAll('#' + ALL[qi].id + ' .step-block');
       const lastB = blocks[blocks.length - 1];
       if (lastB) lastB.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

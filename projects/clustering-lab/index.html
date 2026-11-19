@@ -67,6 +67,8 @@ html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
   position:sticky;top:0;z-index:20;background:rgba(246,248,252,.93);backdrop-filter:blur(8px);padding-top:6px}
 .tabs button,.kmtabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px;white-space:nowrap;transition:none}
 .tabs button[aria-selected="true"],.kmtabs button[aria-selected="true"]{background:var(--blue);color:#fff}
+.kmtabs .quiz-link{margin-left:auto;align-self:center;display:inline-flex;align-items:center;min-height:44px;padding:8px 20px;border-radius:8px;background:#fff9eb;border:1px solid #e6be66;color:#854d0e;font-size:21px;font-weight:750;text-decoration:none;white-space:nowrap}
+.kmtabs .quiz-link:hover{background:#fff3d6;border-color:#d9a93f}
 .modules{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
 .modules button{font-size:24px;padding:12px 26px;border-radius:10px}
 .modules button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -270,6 +272,7 @@ tr.selected td{background:#e7f0ff!important}
   <nav id="kmTabs" class="tabs kmtabs" role="tablist" aria-label="聚类实验阶段">
     <button data-kmtab="kmrun" role="tab" aria-selected="true">① 分步演示</button>
     <button data-kmtab="kmlab" role="tab" aria-selected="false">② 数据与算法实验</button>
+    <a class="quiz-link" href="../clustering-quiz/">课堂小测 ↗</a>
   </nav>
 
   <section id="kmStage" role="tabpanel">
@@ -277,7 +280,7 @@ tr.selected td{background:#e7f0ff!important}
   </section>
 
   <footer class="footer">
-    <p class="muted">对应 Slide13 第 42–73 页：早餐供应点 p42–43、距离度量 p46–47、K-Means 四步与逐轮迭代 p48–60、局限性 p62、DBSCAN 定义与动画 p71–73。簇色沿用课件：绿／橙／蓝／红／紫，星＝供应点（聚类中心），圆点＝小区；DBSCAN 噪声＝黑色虚线点。配套课堂小测：<a href="../kmeans-quiz/">K-Means 手算两题 ↗</a>。</p>
+    <p class="muted">对应 Slide13 第 42–73 页：早餐供应点 p42–43、距离度量 p46–47、K-Means 四步与逐轮迭代 p48–60、局限性 p62、DBSCAN 定义与动画 p71–73。簇色沿用课件：绿／橙／蓝／红／紫，星＝供应点（聚类中心），圆点＝小区；DBSCAN 噪声＝黑色虚线点。配套课堂小测：<a href="../clustering-quiz/">聚类课堂小测（K-Means＋DBSCAN 手算四题）↗</a>。</p>
   </footer>
 </main>
 <script>
