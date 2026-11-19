@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>决策树实验室</title>
+<style>
+:root{
+  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:22px;
+  line-height:1.45;
+  color:#102344;
+  background:#f6f8fc;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --red:#b91c1c;
+  --amber:#b45309;
+  --green:#15803d;
+  --line:#d6deea;
+  --muted:#53647c;
+  --card:#fff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(900px 420px at 8% -60px, rgba(37,99,235,.09), transparent 60%),
+  radial-gradient(760px 380px at 96% -40px, rgba(180,83,9,.08), transparent 60%),
+  radial-gradient(1000px 520px at 50% 108%, rgba(21,128,61,.07), transparent 62%),
+  #f6f8fc;
+  background-attachment:fixed}
+button,select,input{font:inherit;color:inherit}
+button,select,summary{cursor:pointer}
+button{min-height:44px;padding:8px 18px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-weight:650;transition:background-color .15s,transform .15s}
+button:hover:not(:disabled){background:#eff5ff;border-color:#6c96e8}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{cursor:not-allowed;background:#f0f3f7;color:#8c99ab;border-color:#e1e7f0}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}
+.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.primary:hover:not(:disabled){background:var(--blue-dark)}
+h1,h2,h3,p{margin:0}
+h1{font-size:43px;line-height:1.15;letter-spacing:-.03em;text-wrap:balance}
+h2{font-size:26px;line-height:1.25}
+h3{font-size:22px}
+html{scrollbar-width:thin;scrollbar-color:#b9c8de #eef2f8}
+html::-webkit-scrollbar{width:10px}
+html::-webkit-scrollbar-track{background:#eef2f8}
+html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
+.app{max-width:1460px;margin:auto;padding:30px 34px 40px}
+.app-header{position:relative;overflow:hidden;display:grid;gap:8px;padding:22px 26px;border:1px solid #c7d7ef;border-radius:14px;
+  background:linear-gradient(115deg,#eaf1ff 0%,#f7f9fd 42%,#fdf4e7 76%,#eaf7ef 100%)}
+.header-motif{position:absolute;right:20px;top:14px;width:220px;height:132px;opacity:.6;pointer-events:none}
+.eyebrow{color:var(--blue);font-size:19px;font-weight:750;letter-spacing:.08em}
+.subtitle{color:var(--muted);font-size:23px;max-width:64ch}
+.muted{color:var(--muted)}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:24px;overflow-x:auto;
+  position:sticky;top:0;z-index:20;background:rgba(246,248,252,.93);backdrop-filter:blur(8px);padding-top:6px}
+.tabs button{border:0;border-radius:8px 8px 0 0;background:#edf1f7;padding:12px 22px;font-size:22px;white-space:nowrap;transition:none}
+.tabs button[aria-selected="true"]{background:var(--blue);color:#fff}
+.tabs .sib-link{margin-left:auto;align-self:center;display:inline-flex;align-items:center;min-height:44px;padding:8px 20px;border-radius:8px;background:#fff9eb;border:1px solid #e6be66;color:#854d0e;font-size:21px;font-weight:750;text-decoration:none;white-space:nowrap}
+.tabs .sib-link:hover{background:#fff3d6;border-color:#d9a93f}
+
+/* Layout */
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:20px}
+.grid2.dt-grid{grid-template-columns:minmax(0,1fr) 440px}
+.dt-side{display:grid;gap:16px;align-content:start;min-width:0;position:sticky;top:70px;max-height:calc(100vh - 90px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
+.dt-side>*{min-width:0}
+.dt-side table.trace th,.dt-side table.trace td{padding:6px 10px}
+.dt-side .scroll-420{max-height:300px}
+.dt-side .scroll-260{max-height:240px}
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:22px 24px;min-width:0}
+.panel h2{margin-bottom:12px}
+.panel h3{margin:16px 0 8px}
+.panel .muted{font-size:19px}
+.note{border-left:4px solid #e6be66;background:#fff9eb;padding:14px 18px;font-size:20px;line-height:1.6;color:#854d0e;border-radius:0 6px 6px 0;margin-top:16px}
+.note strong{display:block;font-size:21px;margin-bottom:6px}
+.note p+p{margin-top:8px}
+.note.blue{border-color:#93b4e6;background:#f0f6ff;color:#17427a}
+.note.green{border-color:#86c9a9;background:#f0fbf5;color:#116149}
+.note.red{border-color:#e9a2a8;background:#fff1f2;color:#991b1b}
+.formula-card{display:grid;gap:7px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:16px 20px;margin-top:14px}
+.formula{font-family:var(--mono);font-size:25px;font-weight:700;color:#17427a;overflow-wrap:anywhere}
+.formula-sub{font-size:20px;color:var(--muted)}
+.formula .hl{color:var(--blue);background:#dbeafe;border-radius:4px;padding:0 5px}
+.formula .bad{color:var(--red);background:#ffe0e2;border-radius:4px;padding:0 5px}
+.formula .good{color:var(--green);background:#d8f3e3;border-radius:4px;padding:0 5px}
+
+/* Outcome banner + metrics */
+.outcome{display:flex;align-items:center;min-height:92px;padding:16px 22px;border:1px solid #c7d7ef;border-radius:8px;background:#f0f6ff;transition:background-color .25s,border-color .25s;margin-top:18px}
+.outcome strong{display:block;font-size:28px}
+.outcome p{font-size:22px;margin-top:4px}
+.outcome.success{border-color:#a6d5c3;background:#effaf4;color:#116149}
+.outcome.warning{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.outcome.danger{border-color:#f1a5ab;background:#fff1f2;color:#991b1b}
+.outcome.info{border-color:#c7d7ef;background:#f0f6ff;color:#17427a}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
+.metric{border:1px solid var(--line);border-radius:9px;background:#f8fafd;padding:12px 15px}
+.metric small{display:block;font-size:18px;color:var(--muted);font-weight:700}
+.metric b{font-family:var(--mono);font-size:29px;color:#17427a}
+.metric.bad b{color:var(--red)}
+.metric.good b{color:var(--green)}
+
+/* Controls */
+.dt-ctl{display:grid;gap:12px;justify-items:start}
+.dt-ctl .ctl-select{width:100%}
+.ctl-select{display:flex;gap:8px;align-items:center;font-size:19px;color:var(--muted);font-weight:650;flex-wrap:wrap}
+.ctl-select select{min-height:42px;padding:2px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-size:19px;max-width:100%}
+.ctl-select select:disabled{background:#f0f3f7;color:#8c99ab}
+.slider-row{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:650;color:var(--muted);flex-wrap:wrap}
+.slider-row input[type=range]{width:180px;accent-color:var(--blue)}
+.slider-row output{font-family:var(--mono);font-size:23px;font-weight:750;color:var(--blue-dark);min-width:40px}
+.playback{display:flex;gap:10px;width:100%;flex-wrap:wrap}
+.playback button{flex:1 1 auto;padding:8px 10px}
+.step-count{color:var(--muted);font-size:20px}
+.step-dots{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.step-dot{min-height:0;height:34px;width:auto;min-width:34px;padding:0 9px;border-radius:17px;font-size:18px;font-weight:750;color:var(--muted);background:#eef2f8;border:1px solid var(--line)}
+.step-dot[aria-current="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.step-dot.done{background:#dbeafe;border-color:#a9c6f5;color:var(--blue-dark)}
+
+/* Tree SVG */
+.tree-wrap{overflow-x:auto;margin-top:6px;scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
+.tree-wrap::-webkit-scrollbar{width:9px;height:9px}
+.tree-wrap::-webkit-scrollbar-track{background:#eef2f8}
+.tree-wrap::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
+.tree-wrap::-webkit-scrollbar-thumb:hover{background:#6c96e8}
+.tree-wrap svg{display:block;width:100%;height:auto}
+.dt-node{cursor:pointer}
+.tree-wrap svg [data-role]{cursor:default}
+.dt-node .dt-box{transition:stroke .2s,fill .3s,opacity .4s}
+.dt-node:hover .dt-box{stroke-width:3.2}
+.dt-node.off{opacity:0;pointer-events:none}
+.dt-node{transition:opacity .45s}
+.dt-node.pending .dt-box{stroke-dasharray:7 5}
+.dt-node.active .dt-box{stroke:var(--blue);stroke-width:4}
+.dt-node.onpath .dt-box{stroke:var(--green);stroke-width:4}
+.dt-edge{transition:opacity .45s,stroke .3s}
+.dt-edge.off{opacity:0}
+.dt-edge.onpath{stroke:var(--green);stroke-width:4}
+.dt-legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:18px;color:var(--muted);margin-top:10px}
+.dt-sw{display:inline-block;width:26px;height:16px;border:2px solid;border-radius:5px;vertical-align:-3px;margin-right:6px}
+.dt-hint{font-size:19px;color:var(--muted);margin-top:8px}
+
+/* Single in-place step panel (demo tab) */
+.step-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.step-title{font-size:23px;font-weight:800;color:var(--blue-dark)}
+.step-view{min-height:340px;max-height:600px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:18px 20px}
+.step-view::-webkit-scrollbar{width:9px}
+.step-view::-webkit-scrollbar-track{background:#eef2f8}
+.step-view::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
+.step-view::-webkit-scrollbar-thumb:hover{background:#6c96e8}
+.step-view h3{margin:0 0 10px}
+.step-view h3+p,.step-view p+p{margin-top:8px}
+.step-view .formula-card{margin-top:12px}
+.step-view .note{margin-top:12px}
+.step-view .table-wrap{margin-top:12px}
+.swap-in{animation:stepIn .35s ease-out}
+@keyframes stepIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table.trace{border-collapse:collapse;width:100%;font-size:20px}
+table.trace th,table.trace td{border-bottom:1px solid #e6ebf3;padding:9px 14px;text-align:left;white-space:nowrap}
+table.trace th{background:#f4f7fc;color:var(--muted);font-size:18px;font-weight:700;position:sticky;top:0}
+table.trace td{font-family:var(--mono)}
+table.trace tr:last-child td{border-bottom:0}
+table.trace td.wrap{white-space:normal;font-family:inherit;min-width:220px;width:38%}
+table.trace td.soft{white-space:normal;overflow-wrap:anywhere;min-width:140px;max-width:320px}
+table.trace tr.is-hit td{background:#e7f0ff}
+table.trace tr.is-pruned td{background:#fff1f2;color:#991b1b}
+table.trace tr.is-leaf td{background:#effaf4;color:#116149}
+table.trace tbody tr:hover td{filter:brightness(.985)}
+.num{color:var(--muted);font-variant-numeric:tabular-nums}
+.scroll-420{max-height:420px;overflow-y:auto}
+.scroll-560{max-height:560px;overflow-y:auto}
+.scroll-260{max-height:260px;overflow-y:auto}
+.scroll-420,.scroll-560,.scroll-260,.table-wrap{scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
+.scroll-420::-webkit-scrollbar,.scroll-560::-webkit-scrollbar,.scroll-260::-webkit-scrollbar,.table-wrap::-webkit-scrollbar{width:9px;height:9px}
+.scroll-420::-webkit-scrollbar-track,.scroll-560::-webkit-scrollbar-track,.scroll-260::-webkit-scrollbar-track,.table-wrap::-webkit-scrollbar-track{background:#eef2f8}
+.scroll-420::-webkit-scrollbar-thumb,.scroll-560::-webkit-scrollbar-thumb,.scroll-260::-webkit-scrollbar-thumb,.table-wrap::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
+.scroll-420::-webkit-scrollbar-thumb:hover,.scroll-560::-webkit-scrollbar-thumb:hover,.scroll-260::-webkit-scrollbar-thumb:hover,.table-wrap::-webkit-scrollbar-thumb:hover{background:#6c96e8}
+
+/* Chips / badges */
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #c3d3ea;background:#f2f6fc;border-radius:16px;padding:2px 11px;font-size:19px;line-height:1.5;white-space:normal}
+.chip b{font-weight:750}
+.chip.yes{border-color:#86c9a9;background:#effaf4;color:#116149}
+.chip.no{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.badge{display:inline-block;border-radius:5px;padding:1px 8px;font-family:var(--mono);font-size:19px;font-weight:750}
+.badge.hi{background:#d8f3e3;color:#116149}
+.badge.mid{background:#fff0cd;color:#854d0e}
+.badge.lo{background:#ffe0e2;color:#991b1b}
+.badge.core{background:#dbeafe;color:#1d4ed8}
+
+/* Tracer */
+.tracer{display:grid;gap:10px}
+.tracer .tr-row{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:650;color:var(--muted);flex-wrap:wrap}
+.tracer input[type=number]{width:120px;min-height:42px;padding:2px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-family:var(--mono);font-size:20px}
+.tracer select{min-height:42px;padding:2px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-size:19px}
+.tr-path{display:grid;gap:8px;margin-top:12px}
+.tr-step{border:1px solid #c7d7ef;border-left:5px solid var(--blue);border-radius:7px;background:#f0f6ff;padding:10px 14px;font-size:20px}
+.tr-step b{font-family:var(--mono)}
+.tr-verdict{border-radius:8px;padding:12px 16px;font-size:22px;font-weight:750;margin-top:12px}
+.tr-verdict.yes{background:#effaf4;border:1px solid #86c9a9;color:#116149}
+.tr-verdict.no{background:#fff9eb;border:1px solid #e6be66;color:#854d0e}
+
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-size:19px;color:var(--muted);display:grid;gap:6px}
+.footer a{color:var(--blue-dark);font-weight:650}
+@media (max-width:1100px){
+  .grid2,.grid2.dt-grid{grid-template-columns:minmax(0,1fr)}
+  :root{font-size:20px}
+  .header-motif{display:none}
+  .dt-side{position:static;max-height:none;overflow:visible}
+  .step-view{max-height:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app-header">
+    <svg class="header-motif" viewBox="0 0 220 132" aria-hidden="true">
+      <g stroke="#1d4ed8" stroke-width="2.4" fill="none">
+        <path d="M110 26 L64 62 M110 26 L156 62 M64 62 L40 100 M64 62 L88 100"/>
+      </g>
+      <rect x="88" y="12" width="44" height="26" rx="7" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+      <rect x="42" y="50" width="44" height="26" rx="7" fill="#fff" stroke="#1d4ed8" stroke-width="2"/>
+      <rect x="134" y="50" width="44" height="26" rx="7" fill="#d8f3e3" stroke="#15803d" stroke-width="2"/>
+      <rect x="18" y="88" width="44" height="26" rx="7" fill="#fff0cd" stroke="#b45309" stroke-width="2"/>
+      <rect x="66" y="88" width="44" height="26" rx="7" fill="#d8f3e3" stroke="#15803d" stroke-width="2"/>
+      <g font-size="15" font-weight="700" text-anchor="middle" font-family="system-ui,sans-serif">
+        <text x="110" y="30" fill="#1d4ed8">薪资?</text>
+        <text x="64" y="68" fill="#1d4ed8">年龄?</text>
+        <text x="156" y="68" fill="#116149">捐赠</text>
+        <text x="40" y="106" fill="#854d0e">不捐</text>
+        <text x="88" y="106" fill="#116149">捐赠</text>
+      </g>
+    </svg>
+    <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
+    <h1>决策树实验室</h1>
+    <p class="subtitle">Slide13 分类·决策树（p78–94）：①分步演示——课件 p79 捐赠例 11 人，错误率平局（2/11）→ 基尼系数破局（0.297 对 0.260）→ p88 黑板树逐节点生长 → Cindy 预测路径；②数据与算法实验——4 份内嵌数据，划分准则（错误率／基尼／信息增益）、最大深度、停止样本阈值、阈值候选可调，节点检查器全量代入，样本预测沿树高亮。全部数据内嵌，可离线打开。</p>
+  </header>
+
+  <nav id="dtTabs" class="tabs" role="tablist" aria-label="决策树实验阶段">
+    <button data-dttab="demo" role="tab" aria-selected="true">① 分步演示</button>
+    <button data-dttab="lab" role="tab" aria-selected="false">② 数据与算法实验</button>
+    <a class="sib-link" href="../clustering-lab/">聚类实验室 ↗</a>
+  </nav>
+
+  <section id="dtStage" role="tabpanel">
+    <div id="dtRoot"></div>
+  </section>
+
+  <footer class="footer">
+    <p class="muted">对应 Slide13 第 78–94 页：决策树概念 p78、捐赠例与四步算法 p79–85、新样本预测 p86–87、黑板树 p88、核心问题 p89、错误率 p90–91、基尼系数 p92–93、停止条件 p94。叶节点颜色＝类别：绿＝捐赠／是，琥珀＝不捐赠／否；内部节点＝白底蓝框，当前节点＝蓝色粗框，预测路径＝绿色粗框。</p>
+    <p class="muted">同卡片姊妹页面：<a href="../association-lab/">频繁项集与关联规则实验室 ↗</a> · <a href="../clustering-lab/">聚类实验室（K-Means＋DBSCAN）↗</a> · <a href="../clustering-quiz/">聚类课堂小测 ↗</a></p>
+  </footer>
+</main>
+<script>
+/* 决策树实验室 · Slide13 p78–94
+   核心：错误率(p91)／基尼(p92)／信息增益(拓展) 三种划分准则 + 递归建树 + 逐拍演示。
+   全部数据内嵌；core 导出供 node 回归测试。 */
+(function () {
+'use strict';
+
+/* ---------------- 数据 ---------------- */
+const DATASETS = [
+  {
+    id: 'donate', name: '课件捐赠例', tag: 'p79 · 11 人 · 数值',
+    desc: 'Slide13 p79 原表：11 人，年龄与薪资为数值特征，标签为是否捐赠（Y／N）。分步演示沿用课件给定的两个候选阈值（年龄≤50、薪资≤60,000）以便手算；实验 tab 可切换为自动扫描全部中点阈值。',
+    features: [
+      { key: 'age', label: '年龄', type: 'num' },
+      { key: 'salary', label: '薪资', type: 'num' }
+    ],
+    classes: ['Y', 'N'], className: { Y: '捐赠', N: '不捐赠' }, labelKey: 'label',
+    slideThr: { age: 50, salary: 60000 },
+    rows: [
+      { name: 'Nancy', age: 21, salary: 37000, label: 'N' },
+      { name: 'Jim', age: 27, salary: 41000, label: 'N' },
+      { name: 'Allen', age: 43, salary: 61000, label: 'Y' },
+      { name: 'Jane', age: 38, salary: 55000, label: 'N' },
+      { name: 'Steve', age: 44, salary: 30000, label: 'N' },
+      { name: 'Peter', age: 51, salary: 56000, label: 'Y' },
+      { name: 'Sayani', age: 53, salary: 70000, label: 'Y' },
+      { name: 'Lata', age: 56, salary: 74000, label: 'Y' },
+      { name: 'Mary', age: 59, salary: 25000, label: 'N' },
+      { name: 'Victor', age: 61, salary: 68000, label: 'Y' },
+      { name: 'Dale', age: 63, salary: 51000, label: 'Y' }
+    ],
+    cindy: { name: 'Cindy（新样本 p86）', age: 27, salary: 37000 }
+  },
+  {
+    id: 'weather', name: '打球天气例', tag: '14 天 · 类别',
+    desc: '14 天的天气记录： outlook／温度／湿度／有风 四个类别特征，标签为是否去打球。类别特征按取值多路划分（一个取值一条分支），与数值特征的二分阈值对照。',
+    features: [
+      { key: 'outlook', label: 'outlook', type: 'cat', values: ['晴', '阴', '雨'] },
+      { key: 'temp', label: '温度', type: 'cat', values: ['热', '温', '凉'] },
+      { key: 'humidity', label: '湿度', type: 'cat', values: ['高', '正常'] },
+      { key: 'windy', label: '有风', type: 'cat', values: ['否', '是'] }
+    ],
+    classes: ['Y', 'N'], className: { Y: '去打球', N: '不去' }, labelKey: 'label',
+    rows: [
+      { name: '天1', outlook: '晴', temp: '热', humidity: '高', windy: '否', label: 'N' },
+      { name: '天2', outlook: '晴', temp: '热', humidity: '高', windy: '是', label: 'N' },
+      { name: '天3', outlook: '阴', temp: '热', humidity: '高', windy: '否', label: 'Y' },
+      { name: '天4', outlook: '雨', temp: '温', humidity: '高', windy: '否', label: 'Y' },
+      { name: '天5', outlook: '雨', temp: '凉', humidity: '正常', windy: '否', label: 'Y' },
+      { name: '天6', outlook: '雨', temp: '凉', humidity: '正常', windy: '是', label: 'N' },
+      { name: '天7', outlook: '阴', temp: '凉', humidity: '正常', windy: '是', label: 'Y' },
+      { name: '天8', outlook: '晴', temp: '温', humidity: '高', windy: '否', label: 'N' },
+      { name: '天9', outlook: '晴', temp: '凉', humidity: '正常', windy: '否', label: 'Y' },
+      { name: '天10', outlook: '雨', temp: '温', humidity: '正常', windy: '否', label: 'Y' },
+      { name: '天11', outlook: '晴', temp: '温', humidity: '正常', windy: '是', label: 'Y' },
+      { name: '天12', outlook: '阴', temp: '温', humidity: '高', windy: '是', label: 'Y' },
+      { name: '天13', outlook: '阴', temp: '热', humidity: '正常', windy: '否', label: 'Y' },
+      { name: '天14', outlook: '雨', temp: '温', humidity: '高', windy: '是', label: 'N' }
+    ]
+  },
+  {
+    id: 'approve', name: '办卡审批例', tag: '14 人 · 类别',
+    desc: '14 位申请人：收入／信用／负债 三个类别特征，标签为是否批准发卡。信用 Good 分支几乎全批准，Fair 分支里高收入者仍有多数批准的小叶——停止条件 3 与多数表决的现场例子。',
+    features: [
+      { key: 'income', label: '收入', type: 'cat', values: ['高', '中', '低'] },
+      { key: 'credit', label: '信用', type: 'cat', values: ['Good', 'Fair'] },
+      { key: 'debt', label: '负债', type: 'cat', values: ['低', '高'] }
+    ],
+    classes: ['Y', 'N'], className: { Y: '批准', N: '拒绝' }, labelKey: 'label',
+    rows: [
+      { name: '申请人01', income: '高', credit: 'Good', debt: '低', label: 'Y' },
+      { name: '申请人02', income: '高', credit: 'Good', debt: '高', label: 'Y' },
+      { name: '申请人03', income: '高', credit: 'Good', debt: '低', label: 'Y' },
+      { name: '申请人04', income: '高', credit: 'Fair', debt: '低', label: 'Y' },
+      { name: '申请人05', income: '高', credit: 'Fair', debt: '高', label: 'Y' },
+      { name: '申请人06', income: '高', credit: 'Fair', debt: '高', label: 'N' },
+      { name: '申请人07', income: '中', credit: 'Good', debt: '低', label: 'Y' },
+      { name: '申请人08', income: '中', credit: 'Good', debt: '高', label: 'Y' },
+      { name: '申请人09', income: '中', credit: 'Fair', debt: '低', label: 'N' },
+      { name: '申请人10', income: '中', credit: 'Fair', debt: '高', label: 'N' },
+      { name: '申请人11', income: '低', credit: 'Good', debt: '低', label: 'Y' },
+      { name: '申请人12', income: '低', credit: 'Fair', debt: '低', label: 'N' },
+      { name: '申请人13', income: '低', credit: 'Fair', debt: '高', label: 'N' },
+      { name: '申请人14', income: '低', credit: 'Fair', debt: '高', label: 'N' }
+    ]
+  },
+  {
+    id: 'noisy', name: '二维噪声例', tag: '24 点 · 数值 · 过拟合',
+    desc: '两团二维点（左团多为 Y、右团多为 N），各混入 2 个反标签噪声点。把停止样本阈值调小、深度放开，树会为每个噪声点单开小叶——训练错误率归零但叶数暴涨，即过拟合；调回阈值 4 看树如何"放过"噪声。',
+    features: [
+      { key: 'x', label: '指标 x', type: 'num' },
+      { key: 'y', label: '指标 y', type: 'num' }
+    ],
+    classes: ['Y', 'N'], className: { Y: 'Y 类', N: 'N 类' }, labelKey: 'label',
+    rows: [
+      { name: '点01', x: 5, y: 9, label: 'Y' }, { name: '点02', x: 6, y: 11, label: 'Y' },
+      { name: '点03', x: 7, y: 8, label: 'Y' }, { name: '点04', x: 6, y: 9, label: 'Y' },
+      { name: '点05', x: 8, y: 10, label: 'Y' }, { name: '点06', x: 7, y: 12, label: 'Y' },
+      { name: '点07', x: 5, y: 11, label: 'Y' }, { name: '点08', x: 8, y: 8, label: 'Y' },
+      { name: '点09', x: 6, y: 10, label: 'Y' }, { name: '点10', x: 7, y: 10, label: 'Y' },
+      { name: '点11', x: 12, y: 9, label: 'N' }, { name: '点12', x: 13, y: 11, label: 'N' },
+      { name: '点13', x: 14, y: 8, label: 'N' }, { name: '点14', x: 13, y: 9, label: 'N' },
+      { name: '点15', x: 15, y: 10, label: 'N' }, { name: '点16', x: 12, y: 12, label: 'N' },
+      { name: '点17', x: 14, y: 11, label: 'N' }, { name: '点18', x: 15, y: 8, label: 'N' },
+      { name: '点19', x: 13, y: 10, label: 'N' }, { name: '点20', x: 14, y: 10, label: 'N' },
+      { name: '点21', x: 7, y: 9, label: 'N' }, { name: '点22', x: 8, y: 11, label: 'N' },
+      { name: '点23', x: 13, y: 8, label: 'Y' }, { name: '点24', x: 14, y: 12, label: 'Y' }
+    ]
+  }
+];
+const DS = {}; DATASETS.forEach(d => { DS[d.id] = d; });
+
+const CRITS = {
+  gini: { name: '基尼系数', ref: '课件 p92', def: 'Gini(S) = 1 − Σ pₖ²', pick: '选加权基尼最小的划分' },
+  error: { name: '错误率', ref: '课件 p91', def: 'Error(S) = 1 − p（p 为主导类别比例）', pick: '选加权错误率最小的划分' },
+  entropy: { name: '信息增益', ref: '拓展 · 课件未讲', def: 'Ent(S) = −Σ pₖ·log₂pₖ', pick: '选加权熵最小（增益最大）的划分' }
+};
+
+/* ---------------- 核心 ---------------- */
+function fmtNum(v) {
+  if (!Number.isFinite(v)) return String(v);
+  if (Number.isInteger(v)) return Math.abs(v) >= 1000 ? v.toLocaleString('en-US') : String(v);
+  return String(Math.round(v * 10) / 10);
+}
+function countsOf(rows, ds) {
+  const c = {}; ds.classes.forEach(k => { c[k] = 0; });
+  rows.forEach(r => { c[r[ds.labelKey]]++; });
+  return c;
+}
+function impurity(counts, total, crit) {
+  if (!total) return 0;
+  if (crit === 'error') {
+    let m = 0; for (const k in counts) m = Math.max(m, counts[k]);
+    return 1 - m / total;
+  }
+  if (crit === 'gini') {
+    let s = 0; for (const k in counts) s += (counts[k] / total) ** 2;
+    return 1 - s;
+  }
+  let s = 0;
+  for (const k in counts) if (counts[k] > 0) { const p = counts[k] / total; s -= p * Math.log2(p); }
+  return s;
+}
+function impSub(counts, total, crit) {
+  const v = impurity(counts, total, crit);
+  if (crit === 'error') {
+    let m = 0; for (const k in counts) m = Math.max(m, counts[k]);
+    return `1 − ${m}/${total} = ${v.toFixed(3)}`;
+  }
+  if (crit === 'gini') {
+    return '1 − ' + Object.keys(counts).map(k => `(${counts[k]}/${total})²`).join(' − ') + ` = ${v.toFixed(3)}`;
+  }
+  const terms = Object.keys(counts).filter(k => counts[k] > 0)
+    .map(k => `−(${counts[k]}/${total})·log₂(${counts[k]}/${total})`);
+  return (terms.length ? terms.join(' ') : '0') + ` = ${v.toFixed(3)}`;
+}
+function groupsFor(rows, f, thr) {
+  if (f.type === 'num') {
+    return [
+      { key: 'le', label: `${f.label} ≤ ${fmtNum(thr)}`, rows: rows.filter(r => r[f.key] <= thr) },
+      { key: 'gt', label: `${f.label} > ${fmtNum(thr)}`, rows: rows.filter(r => r[f.key] > thr) }
+    ].filter(g => g.rows.length);
+  }
+  return f.values.map(v => ({ key: v, label: `${f.label} = ${v}`, rows: rows.filter(r => r[f.key] === v) }))
+    .filter(g => g.rows.length);
+}
+function candidates(rows, ds, crit, thrMode) {
+  const total = rows.length, out = [];
+  ds.features.forEach((f, fi) => {
+    const vals = Array.from(new Set(rows.map(r => r[f.key])));
+    if (vals.length < 2) return;
+    let thrs;
+    if (f.type === 'num') {
+      if (thrMode === 'slide' && ds.slideThr && ds.slideThr[f.key] != null) thrs = [ds.slideThr[f.key]];
+      else {
+        const s = vals.slice().sort((a, b) => a - b);
+        thrs = s.slice(0, -1).map((v, i) => (v + s[i + 1]) / 2);
+      }
+    } else thrs = f.values.filter(v => vals.includes(v));
+    thrs.forEach((thr, ti) => {
+      const groups = groupsFor(rows, f, thr);
+      if (groups.length < 2) return;
+      let score = 0;
+      groups.forEach(g => { score += (g.rows.length / total) * impurity(countsOf(g.rows, ds), g.rows.length, crit); });
+      out.push({ fi, ti, f, thr, groups, score });
+    });
+  });
+  out.sort((a, b) => (a.score - b.score) || (a.fi - b.fi) || (a.ti - b.ti));
+  return out;
+}
+let NID = 0;
+function buildTree(rows, ds, opts, depth) {
+  depth = depth || 0;
+  if (depth === 0) NID = 0;
+  const counts = countsOf(rows, ds), total = rows.length;
+  const imp = impurity(counts, total, opts.crit);
+  const node = { id: NID++, depth, rows, counts, total, imp, leaf: false, children: null };
+  const majority = () => {
+    let best = ds.classes[0];
+    ds.classes.forEach(k => { if (counts[k] > counts[best]) best = k; });
+    return best;
+  };
+  const stop = (code) => { node.leaf = true; node.stop = code; node.label = majority(); return node; };
+  const pure = ds.classes.every(k => counts[k] === 0 || counts[k] === total);
+  if (pure) return stop(1);
+  if (total < opts.minSamples) return stop(3);
+  if (depth >= opts.maxDepth) return stop(4);
+  const cands = candidates(rows, ds, opts.crit, opts.thrMode);
+  node.cands = cands;
+  if (!cands.length) return stop(2);
+  const best = cands[0];
+  if (best.score >= imp - 1e-9) return stop(5);
+  node.feature = best.f; node.thr = best.thr; node.groups = best.groups; node.best = best;
+  node.children = best.groups.map(g => buildTree(g.rows, ds, opts, depth + 1));
+  return node;
+}
+function predict(root, sample) {
+  const path = []; let n = root;
+  while (!n.leaf) {
+    const v = sample[n.feature.key];
+    const gi = n.feature.type === 'num' ? (v <= n.thr ? 0 : 1) : n.groups.findIndex(g => g.key === v);
+    const branch = n.groups[gi];
+    path.push({ node: n, branch });
+    n = n.children[gi];
+  }
+  return { path, leaf: n };
+}
+function trainMis(root, ds) {
+  return ds.rows.filter(r => predict(root, r).leaf.label !== r[ds.labelKey]);
+}
+function treeStats(root) {
+  let leaves = 0, maxD = 0;
+  (function walk(n) { maxD = Math.max(maxD, n.depth); if (n.leaf) leaves++; else n.children.forEach(walk); })(root);
+  return { leaves, maxD };
+}
+const STOP_TXT = {
+  1: '停止条件 1（p94）：样本全属于同一类别，无需划分',
+  2: '停止条件 2（p94）：属性取值都相同或无可用划分',
+  3: '停止条件 3（p94）：样本量少于阈值，不再划分',
+  4: '停止条件 4（实验室扩展）：达到最大深度上限',
+  5: '停止条件 5（实验室扩展）：任何划分都不能降低不纯度'
+};
+
+const CORE = { DATASETS, DS, CRITS, fmtNum, countsOf, impurity, impSub, groupsFor, candidates, buildTree, predict, trainMis, treeStats, STOP_TXT };
+if (typeof module !== 'undefined' && module.exports) module.exports = CORE;
+if (typeof window === 'undefined') return;
+window.DecisionTreeCore = CORE;
+
+/* ---------------- 状态 ---------------- */
+const state = {
+  tab: 'demo', beat: 0, playing: false, speed: 800, timer: null,
+  lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null }
+};
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/* ---------------- 分步演示（tab ①） ---------------- */
+NID = 0;
+const DEMO = buildTree(DS.donate.rows, DS.donate, { crit: 'gini', maxDepth: 6, minSamples: 4, thrMode: 'slide' });
+const ROLE = { root: DEMO, L: DEMO.children[0], R: DEMO.children[1], LL: DEMO.children[0].children[0], LR: DEMO.children[0].children[1] };
+const DPOS = { root: [480, 70], L: [268, 232], R: [706, 232], LL: [150, 398], LR: [402, 398] };
+const DEDGES = [
+  { from: 'root', to: 'L', label: '≤ 60,000' },
+  { from: 'root', to: 'R', label: '> 60,000' },
+  { from: 'L', to: 'LL', label: '≤ 50' },
+  { from: 'L', to: 'LR', label: '> 50' }
+];
+
+function rowTable(ds, rows, mark) {
+  const head = '<tr><th>姓名</th>' + ds.features.map(f => `<th>${esc(f.label)}</th>`).join('') + `<th>${esc(ds.className.Y)}?</th></tr>`;
+  const body = rows.map(r => {
+    const cls = mark && mark(r) ? ' class="is-pruned"' : '';
+    return `<tr${cls}><td>${esc(r.name)}</td>` + ds.features.map(f => `<td>${esc(f.type === 'num' ? fmtNum(r[f.key]) : r[f.key])}</td>`).join('') +
+      `<td><span class="badge ${r[ds.labelKey] === ds.classes[0] ? 'hi' : 'mid'}">${esc(r[ds.labelKey])}</span></td></tr>`;
+  }).join('');
+  return `<div class="table-wrap${rows.length > 8 ? ' scroll-420' : ''}"><table class="trace"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+function countChips(ds, counts) {
+  return '<div class="chips">' + ds.classes.map(k =>
+    `<span class="chip ${k === ds.classes[0] ? 'yes' : 'no'}"><b>${esc(ds.className[k])} ${k}</b> ${counts[k]} 人</span>`).join('') + '</div>';
+}
+function groupTable(ds, g) {
+  return `<h3>${esc(g.label)} · ${g.rows.length} 人</h3>` + countChips(ds, countsOf(g.rows, ds)) + rowTable(ds, g.rows);
+}
+function weightedSub(ds, groups, total, crit) {
+  return groups.map(g => `${g.rows.length}/${total} × ${impurity(countsOf(g.rows, ds), g.rows.length, crit).toFixed(3)}`).join(' + ');
+}
+
+const BEATS = (function () {
+  const ds = DS.donate, rows = ds.rows;
+  const cAll = countsOf(rows, ds);
+  const ageG = groupsFor(rows, ds.features[0], 50);
+  const salG = groupsFor(rows, ds.features[1], 60000);
+  const gAge = candidates(rows, ds, 'gini', 'slide').find(c => c.f.key === 'age');
+  const gSal = candidates(rows, ds, 'gini', 'slide').find(c => c.f.key === 'salary');
+  const eAge = candidates(rows, ds, 'error', 'slide').find(c => c.f.key === 'age');
+  const eSal = candidates(rows, ds, 'error', 'slide').find(c => c.f.key === 'salary');
+  const L = ROLE.L, LR = ROLE.LR;
+  const lAge = candidates(L.rows, ds, 'gini', 'slide').find(c => c.f.key === 'age');
+  const B = [];
+  const push = (title, tag, html, show, active, ins, ledger, path) =>
+    B.push({ title, tag, html, show: show || {}, active: active || null, ins: ins === undefined ? active : ins, ledger: ledger || null, path: path || null });
+
+  push('空白卷 · 任务与数据', 'p79',
+    `<p>11 位校友的<b>年龄</b>与<b>薪资</b>已知，标签是<b>是否捐赠</b>（Y／N）。决策树要学出一组"如果…就…"的划分规则，使每个分支里的样本尽可能同类（p78）。</p>` +
+    countChips(ds, cAll) + rowTable(ds, rows) +
+    `<div class="note blue"><strong>两个核心问题（p89）</strong><p>① 如何选择分裂特征？② 何时停止节点分裂？本演示用课件给定的候选阈值手算回答①，用 p94 三条停止条件回答②。</p></div>`,
+    {}, null, null);
+
+  push('步骤① 把所有数据看作一个节点', 'p81',
+    `<p>根节点包含样本全集：11 人，6 Y ／ 5 N，混杂程度最高。三种准则下的根不纯度（代入即算）：</p>` +
+    countChips(ds, cAll) +
+    `<div class="formula-card"><div class="formula">Gini(S) = ${impSub(cAll, 11, 'gini')}</div><div class="formula-sub">基尼系数（p92）：随机抽两人标签不一致的概率</div></div>` +
+    `<div class="formula-card"><div class="formula">Error(S) = ${impSub(cAll, 11, 'error')}</div><div class="formula-sub">错误率（p91）：全判多数类 N 会错 5 人</div></div>` +
+    `<div class="formula-card"><div class="formula">Ent(S) = ${impSub(cAll, 11, 'entropy')}</div><div class="formula-sub">熵（拓展准则）：越接近 1 越混杂</div></div>`,
+    { root: 'active' }, 'root', 'root');
+
+  push('步骤② 列出候选划分', 'p82 · p90',
+    `<p>课件给定两个候选阈值：<b>年龄 ≤ 50</b> 与 <b>薪资 ≤ 60,000</b>。各自把 11 人切成两堆（p90 两种划分示例）：</p>` +
+    `<h3>候选 A：年龄 ≤ 50</h3>` + ageG.map(g => groupTable(ds, g)).join('') +
+    `<h3>候选 B：薪资 ≤ 60,000</h3>` + salG.map(g => groupTable(ds, g)).join('') +
+    `<div class="note blue"><strong>为什么阈值是 50 与 60,000？</strong><p>课件为手算固定了这两个阈值。真实算法会扫描排序后相邻取值的中点（实验 tab 的"自动扫描"），本演示先按课件手算。</p></div>`,
+    { root: 'active' }, 'root', 'root');
+
+  push('准则一：错误率（p91）——平局！', 'p91',
+    `<p>每堆判多数类，数错的人：年龄划分左堆多数 N 错 <b>Allen(Y)</b>、右堆多数 Y 错 <b>Mary(N)</b>；薪资划分左堆多数 N 错 <b>Peter(Y)、Dale(Y)</b>、右堆全 Y 错 0 人。</p>` +
+    `<div class="formula-card"><div class="formula">Error(S, 年龄=50) = (1+1)/11 = <span class="hl">2/11 ≈ 0.182</span></div><div class="formula-sub">左堆 1/5 + 右堆 1/6 加权：5/11×1/5 + 6/11×1/6 = 2/11</div></div>` +
+    `<div class="formula-card"><div class="formula">Error(S, 薪资=60,000) = (2+0)/11 = <span class="hl">2/11 ≈ 0.182</span></div><div class="formula-sub">7/11×2/7 + 4/11×0 = 2/11</div></div>` +
+    `<div class="note red"><strong>两种划分错误率相同，选不出来</strong><p>错误率只看多数类、粒度太粗（p91 原页两个 2/11）。需要更细的准则 → 基尼系数。</p></div>`,
+    { root: 'active' }, 'root', 'root');
+
+  push('准则二：基尼系数（p92–93）——薪资胜出', 'p92–93',
+    `<div class="formula-card"><div class="formula">Gini(S) = 1 − Σ pₖ²　·　GiniSplit(S,a) = Σ |Sᵢ|/|S| · Gini(Sᵢ)</div><div class="formula-sub">选 GiniSplit 最小的划分（p92 argmin）</div></div>` +
+    `<div class="formula-card"><div class="formula">年龄=50：5/11×(1−(1/5)²−(4/5)²) + 6/11×(1−(5/6)²−(1/6)²)</div><div class="formula">= 5/11×0.320 + 6/11×0.278 = <span class="bad">0.297</span></div></div>` +
+    `<div class="formula-card"><div class="formula">薪资=60,000：7/11×(1−(2/7)²−(5/7)²) + 4/11×(1−(4/4)²−(0/4)²)</div><div class="formula">= 7/11×0.408 + 4/11×0 = <span class="good">0.260</span> ✓</div></div>` +
+    `<div class="note green"><strong>0.260 &lt; 0.297 → 根节点选薪资 ≤ 60,000</strong><p>与课件 p93 的红勾一致：右堆 4 人全 Y，基尼为 0，把不纯度压得更低。</p></div>`,
+    { root: 'active' }, 'root', 'root');
+
+  push('步骤②③ 根节点分裂：薪资 ≤ 60,000', 'p82–83',
+    `<p>根节点定为<b>薪资 ≤ 60,000?</b>，生成两个子节点（步骤③），依次判断是否满足停止条件：</p>` +
+    salG.map(g => groupTable(ds, g)).join('') +
+    `<div class="note blue"><strong>右堆 4 人全 Y</strong><p>下一拍触发停止条件 1；左堆 2 Y ／ 5 N 仍混杂，继续递归（跳回步骤②）。</p></div>`,
+    { root: 'done', L: 'active', R: 'pending' }, 'L', 'L',
+    { node: '根节点', dec: '薪资 ≤ 60,000', n: 2, score: '0.260', res: '分裂 7 ／ 4' });
+
+  push('右子节点：停止条件 1 → 叶「捐赠」', 'p84④ · p94①',
+    `<p>右子节点 4 人：Allen、Sayani、Lata、Victor，全为 Y。</p>` +
+    `<div class="formula-card"><div class="formula">Gini = 1 − (4/4)² − (0/4)² = <span class="good">0</span></div><div class="formula-sub">纯节点：无需划分（停止条件 1）</div></div>` +
+    `<div class="note green"><strong>步骤④ 设叶节点</strong><p>类别＝训练数据中占比最大的类别（p84）：4/4 Y → 叶「捐赠」。</p></div>`,
+    { root: 'done', L: 'pending', R: 'leaf' }, 'R', 'R',
+    { node: '右子节点', dec: '停止① 纯 4Y', n: '—', score: '0', res: '叶「捐赠」' });
+
+  push('左子节点：再列候选（递归步骤②）', 'p83 跳回②',
+    `<p>左子节点 7 人（2 Y ／ 5 N），Gini = ${impSub(L.counts, 7, 'gini')}。候选阈值里薪资 60,000 把 7 人全放同一侧（切不开，弃用），只剩<b>年龄 ≤ 50</b>：</p>` +
+    lAge.groups.map(g => groupTable(ds, g)).join('') +
+    `<div class="formula-card"><div class="formula">GiniSplit = 4/7×(1−(0/4)²−(4/4)²) + 3/7×(1−(2/3)²−(1/3)²)</div><div class="formula">= 4/7×0 + 3/7×0.444 = <span class="good">0.190</span> &lt; 0.408 ✓</div></div>`,
+    { root: 'done', L: 'active', R: 'leaf' }, 'L', 'L');
+
+  push('左子节点分裂：年龄 ≤ 50', 'p82–83',
+    `<p>左子节点定为<b>年龄 ≤ 50?</b>：≤50 的 4 人全 N；&gt;50 的 3 人 2 Y ／ 1 N（Peter、Mary、Dale）。</p>` +
+    lAge.groups.map(g => groupTable(ds, g)).join(''),
+    { root: 'done', L: 'done', R: 'leaf', LL: 'pending', LR: 'active' }, 'L', 'L',
+    { node: '左子节点', dec: '年龄 ≤ 50', n: 1, score: '0.190', res: '分裂 4 ／ 3' });
+
+  push('左左子节点：停止条件 1 → 叶「不捐赠」', 'p94①',
+    `<p>Nancy、Jim、Jane、Steve 全 N：Gini = 0 → 叶「不捐赠」。</p>` +
+    `<div class="formula-card"><div class="formula">Gini = 1 − (0/4)² − (4/4)² = <span class="good">0</span></div></div>`,
+    { root: 'done', L: 'done', R: 'leaf', LL: 'leaf', LR: 'active' }, 'LL', 'LL',
+    { node: '左左子节点', dec: '停止① 纯 4N', n: '—', score: '0', res: '叶「不捐赠」' });
+
+  push('左右子节点：停止条件 3 → 多数表决', 'p94③ · p84④',
+    `<p>Peter(Y)、Mary(N)、Dale(Y) 共 3 人，少于停止阈值 4 → 不再划分（停止条件 3）。叶类别取多数：<b>2 Y ／ 1 N → 捐赠</b>。</p>` +
+    countChips(ds, LR.counts) +
+    `<div class="formula-card"><div class="formula">多数表决：Y 2/3 &gt; N 1/3 → <span class="good">捐赠</span></div><div class="formula-sub">Mary 被"错判"——训练错误率 1/11 的来源</div></div>` +
+    `<div class="note"><strong>为什么不继续切？</strong><p>再切一刀就能把 Mary 单独关进小叶、训练全对——但那是在<b>背噪声</b>（过拟合）。实验 tab 的二维噪声例可现场复现：停止阈值调小，叶数暴涨。</p></div>`,
+    { root: 'done', L: 'done', R: 'leaf', LL: 'leaf', LR: 'leaf' }, 'LR', 'LR',
+    { node: '左右子节点', dec: '停止③ 3&lt;4', n: '—', score: '0.444', res: '叶「捐赠」2Y1N' });
+
+  push('成树：p88 黑板树 + 训练账本', 'p88 · p94',
+    `<p>递归结束，得到与课件 p88 黑板一致的树：根薪资、左支年龄、三个叶。</p>` +
+    `<div class="table-wrap"><table class="trace"><thead><tr><th>节点</th><th>测试／停止</th><th>样本</th><th>结果</th></tr></thead><tbody>` +
+    `<tr><td>根</td><td>薪资 ≤ 60,000?</td><td>11（6Y5N）</td><td>分裂 7／4</td></tr>` +
+    `<tr><td>左</td><td>年龄 ≤ 50?</td><td>7（2Y5N）</td><td>分裂 4／3</td></tr>` +
+    `<tr class="is-leaf"><td>右</td><td>停止① 纯</td><td>4（4Y）</td><td>叶 捐赠</td></tr>` +
+    `<tr class="is-leaf"><td>左左</td><td>停止① 纯</td><td>4（4N）</td><td>叶 不捐赠</td></tr>` +
+    `<tr class="is-leaf"><td>左右</td><td>停止③ 3&lt;4</td><td>3（2Y1N）</td><td>叶 捐赠（多数）</td></tr>` +
+    `</tbody></table></div>` +
+    `<div class="formula-card"><div class="formula">训练正确率 = <span class="hl">10/11</span>（错 Mary：25,000 薪资却落在 &gt;50 岁多数 Y 叶）</div></div>` +
+    `<div class="note blue"><strong>停止条件三条（p94）</strong><p>① 全同类，无需划分；② 属性取值都相同或属性集为空，不能划分；③ 样本量少于阈值，不再划分。实验室另加两条扩展：深度上限、无增益即停。</p></div>`,
+    { root: 'done', L: 'done', R: 'leaf', LL: 'leaf', LR: 'leaf' }, null, null);
+
+  push('新样本 Cindy：沿树预测（p86–87）', 'p86–87',
+    `<div class="table-wrap"><table class="trace"><thead><tr><th>姓名</th><th>年龄</th><th>薪资</th><th>是否捐赠</th></tr></thead><tbody><tr><td>Cindy</td><td>27</td><td>37,000</td><td><span class="badge mid">?</span></td></tr></tbody></table></div>` +
+    `<div class="tr-path">` +
+    `<div class="tr-step">根：<b>薪资 37,000 ≤ 60,000</b> 成立 → 走左分支（7 人子集）</div>` +
+    `<div class="tr-step">左：<b>年龄 27 ≤ 50</b> 成立 → 走左分支（4 人子集）</div>` +
+    `<div class="tr-step">叶：4 人全 N（停止①）→ 预测 <b>不捐赠</b></div>` +
+    `</div>` +
+    `<div class="tr-verdict no">预测结果：不捐赠（与课件 p87 一致）</div>` +
+    `<div class="note green"><strong>分类阶段（p77）</strong><p>学习阶段建树、分类阶段用树：新样本不带标签，沿测试走到叶即得预测。实验 tab 可任填样本复现这条绿色路径。</p></div>`,
+    { root: 'done', L: 'done', R: 'leaf', LL: 'leaf', LR: 'leaf' }, 'LL', 'LL', null, ['root', 'L', 'LL']);
+  return B;
+})();
+
+function demoNodeBox(role, st, beat) {
+  const n = ROLE[role], ds = DS.donate;
+  const [cx, cy] = DPOS[role];
+  const leafNow = st === 'leaf';
+  let line1, fill = '#fff', stroke = '#1d4ed8', tcol = '#17427a';
+  if (leafNow) {
+    line1 = ds.className[n.label];
+    fill = n.label === 'Y' ? '#d8f3e3' : '#fff0cd';
+    stroke = n.label === 'Y' ? '#15803d' : '#b45309';
+    tcol = n.label === 'Y' ? '#116149' : '#854d0e';
+  } else if (role === 'root') line1 = beat >= 5 ? '薪资 ≤ 60,000?' : '根节点 · 全集';
+  else if (role === 'L') line1 = beat >= 8 ? '年龄 ≤ 50?' : `子集 · ${n.total} 人`;
+  else line1 = `子集 · ${n.total} 人`;
+  if (st === 'pending') stroke = '#8c99ab';
+  const cls = ['dt-node', st === 'off' ? 'off' : st, beat.path && beat.path.includes(role) ? 'onpath' : ''].join(' ');
+  const counts = ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ');
+  return `<g class="${cls}" data-role="${role}">` +
+    `<rect class="dt-box" x="${cx - 105}" y="${cy - 44}" width="210" height="88" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2.2"/>` +
+    `<text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="21" font-weight="750" fill="${tcol}">${esc(line1)}</text>` +
+    `<text x="${cx}" y="${cy + 22}" text-anchor="middle" font-size="18" fill="#53647c">${esc(counts)}</text></g>`;
+}
+function demoSvg(beat) {
+  const edges = DEDGES.map(e => {
+    const [x1, y1] = DPOS[e.from], [x2, y2] = DPOS[e.to];
+    const off = !beat.show[e.to] || beat.show[e.to] === 'off';
+    const on = beat.path && beat.path.includes(e.from) && beat.path.includes(e.to);
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    return `<line class="dt-edge${off ? ' off' : ''}${on ? ' onpath' : ''}" x1="${x1}" y1="${y1 + 44}" x2="${x2}" y2="${y2 - 44}" stroke="${on ? '#15803d' : '#94a3b8'}" stroke-width="2.4"/>` +
+      `<text class="dt-edge${off ? ' off' : ''}" x="${mx + (x2 < x1 ? -14 : 14)}" y="${my}" text-anchor="${x2 < x1 ? 'end' : 'start'}" font-size="19" font-weight="700" fill="#17427a">${esc(e.label)}</text>`;
+  }).join('');
+  const nodes = Object.keys(DPOS).map(r => demoNodeBox(r, beat.show[r] || 'off', beat)).join('');
+  return `<div class="tree-wrap"><svg viewBox="0 0 960 452" style="min-width:640px" role="img" aria-label="决策树生长图">${edges}${nodes}</svg></div>` +
+    `<div class="dt-legend"><span><span class="dt-sw" style="border-color:#1d4ed8;background:#fff"></span>内部节点</span>` +
+    `<span><span class="dt-sw" style="border-color:#15803d;background:#d8f3e3"></span>叶 · 捐赠</span>` +
+    `<span><span class="dt-sw" style="border-color:#b45309;background:#fff0cd"></span>叶 · 不捐赠</span>` +
+    `<span><span class="dt-sw" style="border-color:#2563eb;background:#fff;border-width:4px"></span>当前节点</span>` +
+    `<span><span class="dt-sw" style="border-color:#15803d;background:#fff;border-width:4px"></span>预测路径</span></div>`;
+}
+function demoInspector(beat) {
+  const ds = DS.donate;
+  if (!beat.ins) return `<div class="panel"><h2>节点检查器</h2><p class="muted">本拍为总览：点步骤圆点跳到任意节点拍，这里显示该节点的全量样本与不纯度代入。</p></div>`;
+  const n = ROLE[beat.ins];
+  return `<div class="panel"><h2>节点检查器 · ${esc(beat.ins === 'root' ? '根节点' : beat.ins === 'L' ? '左子节点' : beat.ins === 'R' ? '右子节点' : beat.ins === 'LL' ? '左左子节点' : '左右子节点')}</h2>` +
+    countChips(ds, n.counts) +
+    `<div class="formula-card"><div class="formula">Gini = ${impSub(n.counts, n.total, 'gini')}</div></div>` +
+    (n.leaf ? `<div class="note green"><strong>${esc(STOP_TXT[n.stop])}</strong><p>叶类别＝${esc(ds.className[n.label])}（${n.counts[n.label]}/${n.total}）。</p></div>` : '') +
+    `<h3>全量样本 ${n.total} 人</h3>` + rowTable(ds, n.rows) + `</div>`;
+}
+function renderDemo() {
+  const b = BEATS[state.beat];
+  const ledger = [];
+  BEATS.forEach((x, i) => { if (i <= state.beat && x.ledger) ledger.push(x.ledger); });
+  const dots = BEATS.map((x, i) =>
+    `<button class="step-dot${i < state.beat ? ' done' : ''}" data-dot="${i}" aria-current="${i === state.beat}" title="${esc(x.title)}">${i === 0 ? '卷' : i}</button>`).join('');
+  $('#dtRoot').innerHTML =
+    `<div class="outcome info"><div><strong>${esc(b.title)}</strong><p>${esc(b.tag)} · 第 ${state.beat} / ${BEATS.length - 1} 拍</p></div></div>` +
+    `<div class="grid2 dt-grid"><div style="min-width:0">` +
+    `<div class="panel"><h2>树生长图</h2>${demoSvg(b)}<p class="dt-hint">虚线框＝待判断子集；蓝粗框＝当前拍节点；绿粗框＝Cindy 预测路径。</p></div>` +
+    `<div class="panel" style="margin-top:20px"><div class="step-head"><span class="step-title">本拍推导</span><span class="step-count">原地更新 · 不往下堆</span></div>` +
+    `<div class="step-view swap-in" id="dtStepView">${b.html}</div></div>` +
+    `</div><aside class="dt-side">` +
+    `<div class="panel dt-ctl"><h2>播放控制</h2>` +
+    `<div class="playback"><button data-act="prev" ${state.beat === 0 ? 'disabled' : ''}>上一拍</button>` +
+    `<button data-act="play" class="primary">${state.playing ? '暂停' : '播放动画'}</button>` +
+    `<button data-act="next" ${state.beat === BEATS.length - 1 ? 'disabled' : ''}>下一拍</button>` +
+    `<button data-act="reset">重置</button></div>` +
+    `<div class="ctl-select"><span>速度</span><select id="dtSpeed">` +
+    [[1500, '慢 1.5s'], [800, '中 0.8s'], [300, '快 0.3s'], [100, '极速 0.1s']].map(([v, l]) => `<option value="${v}"${state.speed === v ? ' selected' : ''}>${l}</option>`).join('') +
+    `</select></div>` +
+    `<div class="step-dots">${dots}</div>` +
+    `<p class="muted" style="font-size:18px">教师驱动：不点不动。圆点可跳拍，「卷」＝空白卷。</p></div>` +
+    demoInspector(b) +
+    `</aside></div>` +
+    `<div class="panel" style="margin-top:20px"><h2>分裂与停止账本（随拍追加）</h2>` +
+    (ledger.length ? `<div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>节点</th><th>决策</th><th>候选数</th><th>准则值</th><th>结果</th></tr></thead><tbody>` +
+      ledger.map(r => `<tr><td>${esc(r.node)}</td><td>${r.dec}</td><td>${r.n}</td><td>${r.score}</td><td>${r.res}</td></tr>`).join('') +
+      `</tbody></table></div>` : `<p class="muted">尚未产生分裂：前两拍先看数据与根不纯度。</p>`) +
+    `</div>`;
+}
+
+/* ---------------- 实验（tab ②） ---------------- */
+function labTree() {
+  const L = state.lab;
+  return buildTree(DS[L.ds].rows, DS[L.ds], { crit: L.crit, maxDepth: L.depth, minSamples: L.min, thrMode: L.thrMode });
+}
+function layout(root) {
+  const SLOT = 176, ROW = 132, PAD = 56;
+  let slot = 0, maxD = 0; const pos = new Map();
+  (function walk(n) {
+    maxD = Math.max(maxD, n.depth);
+    if (n.leaf) { pos.set(n.id, { x: (slot + 0.5) * SLOT + 16, y: n.depth * ROW + PAD }); slot++; }
+    else {
+      n.children.forEach(walk);
+      const xs = n.children.map(c => pos.get(c.id).x);
+      pos.set(n.id, { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: n.depth * ROW + PAD });
+    }
+  })(root);
+  return { pos, W: slot * SLOT + 32, H: maxD * ROW + PAD + 64, maxD, leaves: slot };
+}
+function nodeById(root, id) {
+  let hit = null;
+  (function walk(n) { if (n.id === id) hit = n; else if (n.children) n.children.forEach(walk); })(root);
+  return hit;
+}
+function labSvg(root, lay, stale) {
+  const ds = DS[state.lab.ds];
+  const pathIds = new Set(), pathEdges = new Set();
+  if (state.lab.pred && !stale) {
+    state.lab.pred.path.forEach(p => { pathIds.add(p.node.id); pathEdges.add(p.node.id + '>' + p.branch.key); });
+    pathIds.add(state.lab.pred.leaf.id);
+  }
+  let edges = '', nodes = '';
+  (function walk(n) {
+    const p = lay.pos.get(n.id);
+    if (n.children) n.children.forEach((c, i) => {
+      const q = lay.pos.get(c.id);
+      const key = n.id + '>' + n.groups[i].key;
+      const on = pathEdges.has(key);
+      const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
+      edges += `<line class="dt-edge${on ? ' onpath' : ''}" x1="${p.x}" y1="${p.y + 40}" x2="${q.x}" y2="${q.y - 40}" stroke="${on ? '#15803d' : '#94a3b8'}" stroke-width="${on ? 4 : 2.2}"/>` +
+        `<text x="${mx + (q.x < p.x ? -10 : 10)}" y="${my}" text-anchor="${q.x < p.x ? 'end' : 'start'}" font-size="18" font-weight="700" fill="#17427a">${esc(n.groups[i].label.replace(/^(.*?)( ≤ | > | = )/, '$2'))}</text>`;
+      walk(c);
+    });
+    const on = pathIds.has(n.id), sel = state.lab.sel === n.id;
+    let fill = '#fff', stroke = sel ? '#2563eb' : '#1d4ed8', tcol = '#17427a', line1;
+    if (n.leaf) {
+      fill = n.label === ds.classes[0] ? '#d8f3e3' : '#fff0cd';
+      stroke = on ? '#15803d' : (sel ? '#2563eb' : (n.label === ds.classes[0] ? '#15803d' : '#b45309'));
+      tcol = n.label === ds.classes[0] ? '#116149' : '#854d0e';
+      line1 = ds.className[n.label];
+    } else {
+      line1 = n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}?` : `${n.feature.label}?`;
+      if (on) stroke = '#15803d';
+    }
+    const counts = ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ');
+    nodes += `<g class="dt-node${sel ? ' active' : ''}${on ? ' onpath' : ''}" data-node="${n.id}" tabindex="0" role="button" aria-label="节点 ${n.id}，${esc(line1)}，${n.total} 样本">` +
+      `<rect class="dt-box" x="${p.x - 78}" y="${p.y - 40}" width="156" height="80" rx="9" fill="${fill}" stroke="${stroke}" stroke-width="${sel || on ? 4 : 2.2}"/>` +
+      `<text x="${p.x}" y="${p.y - 6}" text-anchor="middle" font-size="19" font-weight="750" fill="${tcol}">${esc(line1)}</text>` +
+      `<text x="${p.x}" y="${p.y + 20}" text-anchor="middle" font-size="18" fill="#53647c">${esc(counts)}</text></g>`;
+  })(root);
+  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${lay.W}px;min-width:100%" role="img" aria-label="决策树结构图">${edges}${nodes}</svg></div>`;
+}
+function candTable(ds, n) {
+  if (!n.cands || !n.cands.length) return `<p class="muted">无可用候选（属性取值都相同）。</p>`;
+  const crit = state.lab.crit;
+  return `<div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>特征</th><th>阈值／取值</th><th>分支样本</th><th>${crit === 'entropy' ? '加权熵' : crit === 'gini' ? '加权基尼' : '加权错误率'}</th><th>不纯度下降</th><th></th></tr></thead><tbody>` +
+    n.cands.map((c, i) => `<tr${i === 0 && !n.leaf ? ' class="is-hit"' : ''}><td>${esc(c.f.label)}</td><td>${c.f.type === 'num' ? '≤ ' + fmtNum(c.thr) : '= ' + esc(c.thr)}</td>` +
+      `<td>${c.groups.map(g => g.rows.length).join(' ／ ')}</td><td>${c.score.toFixed(3)}</td><td>${(n.imp - c.score).toFixed(3)}</td>` +
+      `<td>${i === 0 && !n.leaf ? '<span class="badge core">选用</span>' : ''}</td></tr>`).join('') +
+    `</tbody></table></div>`;
+}
+function labInspector(root) {
+  const ds = DS[state.lab.ds], L = state.lab;
+  const n = nodeById(root, L.sel) || root;
+  const crit = L.crit;
+  const tie = n.leaf && ds.classes.some(k => k !== n.label && n.counts[k] === n.counts[n.label]);
+  return `<div class="panel"><h2>节点检查器 · #${n.id}</h2>` +
+    `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换</p>` +
+    countChips(ds, n.counts) +
+    `<div class="formula-card"><div class="formula">${crit === 'gini' ? 'Gini' : crit === 'error' ? 'Error' : 'Ent'} = ${impSub(n.counts, n.total, crit)}</div><div class="formula-sub">${esc(CRITS[crit].name)}（${esc(CRITS[crit].ref)}）</div></div>` +
+    (n.leaf
+      ? `<div class="note ${n.stop === 3 || n.stop === 4 ? '' : 'green'}"><strong>${esc(STOP_TXT[n.stop])}${n.stop === 3 ? `（${n.total} &lt; ${L.min}）` : n.stop === 4 ? `（${L.depth}）` : ''}</strong><p>叶类别＝${esc(ds.className[n.label])}（${n.counts[n.label]}/${n.total} 多数）${tie ? '；多数平局取类别序第一类 ' + ds.classes[0] : ''}。</p></div>`
+      : `<div class="note blue"><strong>选用划分：${esc(n.best.f.label)} ${n.best.f.type === 'num' ? '≤ ' + fmtNum(n.best.thr) : '= ' + esc(n.best.thr)}</strong><p>准则值 ${n.best.score.toFixed(3)}，不纯度下降 ${(n.imp - n.best.score).toFixed(3)}；共 ${n.cands.length} 个候选，全量见下表。</p></div>`) +
+    `<h3>全量样本 ${n.total}</h3>` + rowTable(ds, n.rows) +
+    `<h3>候选划分全量（${n.cands ? n.cands.length : 0}）</h3>` + candTable(ds, n) + `</div>`;
+}
+function tracerPanel(ds, stale) {
+  const L = state.lab;
+  if (!L.sample) {
+    L.sample = {};
+    ds.features.forEach(f => { L.sample[f.key] = ds.cindy ? ds.cindy[f.key] : ds.rows[0][f.key]; });
+  }
+  const opts = (ds.cindy ? [`<option value="cindy">${esc(ds.cindy.name)}</option>`] : [])
+    .concat(ds.rows.map((r, i) => `<option value="${i}">${esc(r.name)}（${ds.features.map(f => fmtNum(r[f.key])).join(', ')}）</option>`)).join('');
+  const inputs = ds.features.map(f => f.type === 'num'
+    ? `<div class="tr-row"><span>${esc(f.label)}</span><input type="number" step="1" id="tr-${f.key}" value="${esc(L.sample[f.key])}"></div>`
+    : `<div class="tr-row"><span>${esc(f.label)}</span><select id="tr-${f.key}">${f.values.map(v => `<option${L.sample[f.key] === v ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></div>`).join('');
+  let predHtml = '';
+  if (L.pred && stale) {
+    predHtml = '<div class="note"><strong>样本已修改</strong><p>点「沿树预测」重新走树，更新绿色路径与预测结果。</p></div>';
+  } else if (L.pred) {
+    predHtml = `<div class="tr-path">` + L.pred.path.map(p => {
+      const v = L.sample[p.node.feature.key];
+      const test = p.node.feature.type === 'num'
+        ? `${fmtNum(v)} ≤ ${fmtNum(p.node.thr)} ${v <= p.node.thr ? '成立' : '不成立'}`
+        : `取值 ${esc(v)}`;
+      return `<div class="tr-step"><b>${esc(p.node.feature.label)}</b>：${test} → ${esc(p.branch.label)}</div>`;
+    }).join('') +
+      `<div class="tr-step">叶 #${L.pred.leaf.id}：${L.pred.leaf.counts[L.pred.leaf.label]}/${L.pred.leaf.total} 多数（${esc(STOP_TXT[L.pred.leaf.stop].split('：')[0])}）</div></div>` +
+      `<div class="tr-verdict ${L.pred.leaf.label === ds.classes[0] ? 'yes' : 'no'}">预测：${esc(ds.className[L.pred.leaf.label])}</div>`;
+  }
+  return `<div class="panel"><h2>样本预测（p86–87）</h2><div class="tracer">` +
+    `<div class="tr-row"><span>取样本</span><select id="trPick">${opts}</select></div>` + inputs +
+    `<button class="primary" data-act="predict">沿树预测</button></div>` + predHtml +
+    `<p class="muted" style="font-size:18px;margin-top:10px">预测路径在树上以绿色粗框高亮；改配置后需重新预测。</p></div>`;
+}
+function labNotes(root, mis) {
+  const ds = DS[state.lab.ds], L = state.lab;
+  const st = treeStats(root);
+  let html = `<div class="panel"><h2>数据与准则说明</h2><p>${esc(ds.desc)}</p>` +
+    `<div class="formula-card"><div class="formula">${esc(CRITS[L.crit].def)}</div><div class="formula-sub">${esc(CRITS[L.crit].name)}（${esc(CRITS[L.crit].ref)}）：${esc(CRITS[L.crit].pick)}；数值特征扫中点阈值二分，类别特征按取值多路分。</div></div>`;
+  if (L.ds === 'donate' && L.thrMode === 'slide') {
+    html += `<div class="note blue"><strong>阈值候选＝课件给定</strong><p>年龄 50 ／ 薪资 60,000，与分步演示完全同树。切到"自动扫描中点"看真实算法的搜索结果。</p></div>`;
+  }
+  if (L.ds === 'donate' && L.thrMode === 'auto' && root.best) {
+    const b = root.best;
+    html += `<div class="note blue"><strong>自动扫描找到更纯的阈值</strong><p>根节点选 ${esc(b.f.label)} ≤ ${fmtNum(b.thr)}（准则值 ${b.score.toFixed(3)}），比课件手算阈值 60,000 的 0.260 更低——课件固定阈值只为手算，扫描中点才是完整算法。</p></div>`;
+  }
+  if (L.crit === 'error') html += `<div class="note"><strong>错误率粒度粗</strong><p>只看多数类，容易平局（课件 p91 两个 2/11 选不出）；对照基尼看同一数据的不同选择。</p></div>`;
+  if (L.crit === 'entropy') html += `<div class="note blue"><strong>信息增益＝拓展准则</strong><p>Gain = Ent(父) − 加权 Ent(子)；表中"准则值"为加权熵（越小越好），"不纯度下降"即增益。课件主讲基尼。</p></div>`;
+  if (L.ds === 'noisy') {
+    html += mis.length === 0 && st.leaves >= 8
+      ? `<div class="note"><strong>过拟合现场</strong><p>训练错误 0，但 ${st.leaves} 个叶——4 个噪声点被单开小叶"背"了下来。把停止样本阈值调回 4 或降深度，看树如何放过噪声、叶数回落。</p></div>`
+      : `<div class="note green"><strong>当前树放过了噪声</strong><p>训练错 ${mis.length}/${ds.rows.length}（${mis.map(r => esc(r.name)).join('、') || '无'}）：噪声留在多数叶里，比逐点 memorize 更泛化。调小停止阈值可复现过拟合。</p></div>`;
+  }
+  if (L.ds === 'weather') html += `<div class="note blue"><strong>类别特征多路划分</strong><p>outlook 一个取值一条分支（晴／阴／雨），与数值二分对照；阴分支 4 天全 Y，一步成叶。</p></div>`;
+  html += `<div class="note blue"><strong>停止条件（p94 三条＋实验室两条）</strong><p>① 全同类；② 属性取值都相同或无可用划分；③ 样本量少于阈值（当前 ${L.min}）；④ 深度上限（当前 ${L.depth}）；⑤ 无划分能降低不纯度。</p></div></div>`;
+  return html;
+}
+function labParts() {
+  const L = state.lab, ds = DS[L.ds];
+  const root = labTree();
+  const lay = layout(root);
+  const st = treeStats(root);
+  const mis = trainMis(root, ds);
+  if (!nodeById(root, L.sel)) L.sel = root.id;
+  const stale = !!(L.pred && JSON.stringify(L.pred.sample || {}) !== JSON.stringify(L.sample || {}));
+  const misNames = new Set(mis.map(r => r.name));
+  return {
+    root, mis,
+    metrics: `<div class="outcome ${mis.length ? 'warning' : 'success'}" id="dtMetrics"><div><strong>${esc(ds.name)} · ${esc(CRITS[L.crit].name)}</strong>` +
+      `<p>叶 ${st.leaves} 个 · 深度 ${st.maxD} · 训练正确率 ${ds.rows.length - mis.length}/${ds.rows.length}${mis.length ? '（错 ' + mis.map(r => esc(r.name)).join('、') + '）' : '（全对）'}</p></div></div>`,
+    tree: `<div class="panel" id="dtTreePanel"><h2>决策树（点节点看检查器）</h2>${labSvg(root, lay, stale)}` +
+      `<div class="dt-legend"><span><span class="dt-sw" style="border-color:#1d4ed8;background:#fff"></span>内部节点</span>` +
+      `<span><span class="dt-sw" style="border-color:#15803d;background:#d8f3e3"></span>叶 · ${esc(ds.className[ds.classes[0]])}</span>` +
+      `<span><span class="dt-sw" style="border-color:#b45309;background:#fff0cd"></span>叶 · ${esc(ds.className[ds.classes[1]])}</span>` +
+      `<span><span class="dt-sw" style="border-color:#2563eb;background:#fff;border-width:4px"></span>选中</span>` +
+      `<span><span class="dt-sw" style="border-color:#15803d;background:#fff;border-width:4px"></span>预测路径</span></div>` +
+      `<p class="dt-hint">树宽超出面板时横向滚动（字号不缩）；叶框色＝多数类别。</p></div>`,
+    data: `<div class="panel" style="margin-top:20px" id="dtDataPanel"><h2>训练数据全量 ${ds.rows.length} 行</h2>` +
+      rowTable(ds, ds.rows, r => misNames.has(r.name)) +
+      `<p class="muted" style="margin-top:8px">红底行＝当前树训练错分的样本。</p></div>`,
+    inspector: `<div id="dtInspector">${labInspector(root)}</div>`,
+    tracer: `<div id="dtTracer">${tracerPanel(ds, stale)}</div>`,
+    notes: `<div style="margin-top:20px" id="dtNotes">${labNotes(root, mis)}</div>`
+  };
+}
+function renderLab() {
+  const L = state.lab;
+  const p = labParts();
+  $('#dtRoot').innerHTML =
+    p.metrics +
+    `<div class="grid2 dt-grid"><div style="min-width:0">` + p.tree + p.data +
+    `</div><aside class="dt-side">` +
+    `<div class="panel dt-ctl"><h2>实验配置</h2>` +
+    `<div class="ctl-select"><span>数据</span><select id="dtDs">${DATASETS.map(d => `<option value="${d.id}"${L.ds === d.id ? ' selected' : ''}>${esc(d.name)}（${esc(d.tag)}）</option>`).join('')}</select></div>` +
+    `<div class="ctl-select"><span>准则</span><select id="dtCrit">${Object.keys(CRITS).map(k => `<option value="${k}"${L.crit === k ? ' selected' : ''}>${esc(CRITS[k].name)}（${esc(CRITS[k].ref)}）</option>`).join('')}</select></div>` +
+    `<div class="ctl-select"><span>阈值候选</span><select id="dtThr"${L.ds === 'donate' ? '' : ' disabled'}><option value="slide"${L.thrMode === 'slide' ? ' selected' : ''}>课件给定（50／60,000）</option><option value="auto"${L.thrMode === 'auto' ? ' selected' : ''}>自动扫描中点</option></select></div>` +
+    `<div class="slider-row"><span>最大深度</span><input type="range" id="dtDepth" min="1" max="6" step="1" value="${L.depth}"><output>${L.depth}</output></div>` +
+    `<div class="slider-row"><span>停止样本阈值</span><input type="range" id="dtMin" min="2" max="8" step="1" value="${L.min}"><output>${L.min}</output></div>` +
+    `<button data-act="labreset">恢复默认配置</button>` +
+    `<p class="muted" style="font-size:18px">改配置立即重建树；选中节点与预测路径重置。</p></div>` +
+    p.inspector + p.tracer +
+    `</aside></div>` + p.notes;
+}
+/* 滑杆拖动时只补丁树／指标／检查器等区域，不重建控件面板，拖动不被打断 */
+function labLive() {
+  const p = labParts();
+  ['dtMetrics', 'dtTreePanel', 'dtDataPanel', 'dtInspector', 'dtTracer', 'dtNotes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.outerHTML = p[{ dtMetrics: 'metrics', dtTreePanel: 'tree', dtDataPanel: 'data', dtInspector: 'inspector', dtTracer: 'tracer', dtNotes: 'notes' }[id]];
+  });
+}
+
+/* ---------------- 播放与事件 ---------------- */
+function stopPlay() {
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+  state.playing = false;
+}
+function startPlay() {
+  stopPlay();
+  if (state.beat >= BEATS.length - 1) state.beat = 0;
+  state.playing = true;
+  state.timer = setInterval(() => {
+    if (state.beat >= BEATS.length - 1) { stopPlay(); renderDemo(); return; }
+    state.beat++;
+    renderDemo();
+    if (state.beat >= BEATS.length - 1) { stopPlay(); renderDemo(); }
+  }, state.speed);
+}
+function render() { state.tab === 'demo' ? renderDemo() : renderLab(); }
+function labRebuild() {
+  state.lab.sel = 0; state.lab.pred = null; state.lab.sample = null;
+  renderLab();
+}
+document.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-dttab]');
+  if (tab) {
+    stopPlay();
+    state.tab = tab.getAttribute('data-dttab');
+    document.querySelectorAll('[data-dttab]').forEach(b => b.setAttribute('aria-selected', String(b === tab)));
+    render();
+    return;
+  }
+  const dot = e.target.closest('[data-dot]');
+  if (dot) { stopPlay(); state.beat = +dot.getAttribute('data-dot'); renderDemo(); return; }
+  const nd = e.target.closest('[data-node]');
+  if (nd) { state.lab.sel = +nd.getAttribute('data-node'); renderLab(); return; }
+  const act = e.target.closest('[data-act]');
+  if (!act) return;
+  const a = act.getAttribute('data-act');
+  if (a === 'prev') { stopPlay(); state.beat = Math.max(0, state.beat - 1); renderDemo(); }
+  else if (a === 'next') { stopPlay(); state.beat = Math.min(BEATS.length - 1, state.beat + 1); renderDemo(); }
+  else if (a === 'reset') { stopPlay(); state.beat = 0; renderDemo(); }
+  else if (a === 'play') { state.playing ? (stopPlay(), renderDemo()) : (startPlay(), renderDemo()); }
+  else if (a === 'labreset') { Object.assign(state.lab, { crit: 'gini', depth: 6, min: 4, thrMode: state.lab.ds === 'donate' ? 'slide' : 'auto' }); labRebuild(); }
+  else if (a === 'predict') {
+    const ds = DS[state.lab.ds];
+    ds.features.forEach(f => {
+      const el = document.getElementById('tr-' + f.key);
+      state.lab.sample[f.key] = f.type === 'num' ? Number(el.value) : el.value;
+    });
+    const root = buildTree(ds.rows, ds, { crit: state.lab.crit, maxDepth: state.lab.depth, minSamples: state.lab.min, thrMode: state.lab.thrMode });
+    state.lab.pred = predict(root, state.lab.sample);
+    state.lab.pred.sample = Object.assign({}, state.lab.sample);
+    renderLab();
+  }
+});
+document.addEventListener('keydown', (e) => {
+  const nd = e.target.closest && e.target.closest('[data-node]');
+  if (nd && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.lab.sel = +nd.getAttribute('data-node'); renderLab(); }
+});
+document.addEventListener('input', (e) => {
+  const id = e.target.id;
+  if (id === 'dtDepth' || id === 'dtMin') {
+    state.lab[id === 'dtDepth' ? 'depth' : 'min'] = +e.target.value;
+    const out = e.target.parentElement.querySelector('output');
+    if (out) out.textContent = e.target.value;
+    state.lab.sel = 0; state.lab.pred = null;
+    labLive();
+  }
+});
+document.addEventListener('change', (e) => {
+  const id = e.target.id;
+  if (id === 'dtSpeed') { state.speed = +e.target.value; if (state.playing) startPlay(); return; }
+  if (id === 'dtDs') { state.lab.ds = e.target.value; state.lab.thrMode = e.target.value === 'donate' ? 'slide' : 'auto'; labRebuild(); return; }
+  if (id === 'dtCrit') { state.lab.crit = e.target.value; labRebuild(); return; }
+  if (id === 'dtThr') { state.lab.thrMode = e.target.value; labRebuild(); return; }
+  if (id === 'trPick') {
+    const ds = DS[state.lab.ds], v = e.target.value;
+    const src = v === 'cindy' ? ds.cindy : ds.rows[+v];
+    state.lab.sample = {};
+    ds.features.forEach(f => { state.lab.sample[f.key] = src[f.key]; });
+    state.lab.pred = null;
+    renderLab();
+    return;
+  }
+  if (id && id.startsWith('tr-')) {
+    const ds = DS[state.lab.ds], key = id.slice(3);
+    const f = ds.features.find(x => x.key === key);
+    state.lab.sample[key] = f.type === 'num' ? Number(e.target.value) : e.target.value;
+    labLive();
+  }
+});
+render();
+})();
+</script>
+</body>
+</html>
