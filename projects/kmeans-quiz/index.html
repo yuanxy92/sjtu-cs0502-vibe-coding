@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>K-Means 课堂小测</title>
+<style>
+:root{
+  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:22px;
+  line-height:1.45;
+  color:#102344;
+  background:#f6f8fc;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --red:#b91c1c;
+  --amber:#b45309;
+  --green:#15803d;
+  --line:#d6deea;
+  --muted:#53647c;
+  --card:#fff;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(900px 420px at 8% -60px, rgba(37,99,235,.09), transparent 60%),
+  radial-gradient(760px 380px at 96% -40px, rgba(180,83,9,.08), transparent 60%),
+  radial-gradient(1000px 520px at 50% 108%, rgba(21,128,61,.07), transparent 62%),
+  #f6f8fc;
+  background-attachment:fixed}
+button,select,input{font:inherit;color:inherit}
+button{min-height:44px;padding:8px 18px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-weight:650;transition:background-color .15s,transform .15s;cursor:pointer}
+button:hover:not(:disabled){background:#eff5ff;border-color:#6c96e8}
+button:active:not(:disabled){transform:scale(.97)}
+button:disabled{cursor:not-allowed;background:#f0f3f7;color:#8c99ab;border-color:#e1e7f0}
+button:focus-visible{outline:3px solid #8eaff4;outline-offset:3px}
+.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.primary:hover:not(:disabled){background:var(--blue-dark)}
+h1,h2,h3,p{margin:0}
+h1{font-size:43px;line-height:1.15;letter-spacing:-.03em;text-wrap:balance}
+h2{font-size:28px;line-height:1.25}
+h3{font-size:23px}
+a{color:var(--blue-dark)}
+html{scrollbar-width:thin;scrollbar-color:#b9c8de #eef2f8}
+.app{max-width:1460px;margin:auto;padding:30px 34px 40px}
+.app-header{position:relative;overflow:hidden;display:grid;gap:8px;padding:22px 26px;border:1px solid #c7d7ef;border-radius:14px;
+  background:linear-gradient(115deg,#eaf1ff 0%,#f7f9fd 42%,#fdf4e7 76%,#eaf7ef 100%)}
+.header-motif{position:absolute;right:20px;top:14px;width:220px;height:132px;opacity:.55;pointer-events:none}
+.eyebrow{color:var(--blue);font-size:19px;font-weight:750;letter-spacing:.08em}
+.subtitle{color:var(--muted);font-size:23px;max-width:64ch}
+.muted{color:var(--muted)}
+
+.note{border-left:4px solid #e6be66;background:#fff9eb;padding:14px 18px;font-size:20px;line-height:1.6;color:#854d0e;border-radius:0 6px 6px 0;margin-top:16px}
+.note strong{display:block;font-size:21px;margin-bottom:6px}
+.note p+p{margin-top:6px}
+.note.blue{border-color:#93b4e6;background:#f0f6ff;color:#17427a}
+.note.green{border-color:#86c9a9;background:#f0fbf5;color:#116149}
+.howto{margin-top:22px}
+
+.panel{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:22px 24px;min-width:0}
+.qpanel{margin-top:26px}
+.qhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.qtag{font-size:19px;font-weight:750;color:var(--muted);border:1px solid var(--line);border-radius:14px;padding:2px 12px}
+.qprompt{font-size:22px;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.given{margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #c3d3ea;background:#f2f6fc;border-radius:16px;padding:2px 11px;font-size:19px;line-height:1.5}
+.chip b{font-weight:750}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;margin-top:20px}
+.grid2.qgrid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.km-wrap{overflow-x:auto;margin-top:6px}
+.km-wrap svg{display:block;width:100%;min-width:640px;height:auto;max-height:560px}
+.km-hint{font-size:19px;color:var(--muted);margin-top:8px}
+.tasks p{font-size:20px}
+
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table.trace{border-collapse:collapse;width:100%;font-size:20px}
+table.trace th,table.trace td{border-bottom:1px solid #e6ebf3;padding:9px 14px;text-align:left;white-space:nowrap}
+table.trace th{background:#f4f7fc;color:var(--muted);font-size:18px;font-weight:700}
+table.trace td{font-family:var(--mono)}
+table.trace tr:last-child td{border-bottom:0}
+table.trace.d2 td{font-size:19px}
+tr.is-flip td{background:#fff9eb}
+table.trace.d2 td.is-hit{background:#dbeafe}
+.badge{display:inline-block;border-radius:5px;padding:1px 8px;font-family:var(--mono);font-size:19px;font-weight:750;white-space:nowrap}
+.badge.c1{background:#d8f3e3;color:#116149}
+.badge.c2{background:#fff0cd;color:#854d0e}
+.badge.flip{background:#ffe0e2;color:#991b1b;font-size:18px}
+.assign-sum{font-size:20px;margin-top:10px;font-weight:650}
+
+.formula-card{display:grid;gap:7px;border:1px solid #c7d7ef;border-radius:9px;background:#f0f6ff;padding:16px 20px;margin-top:14px}
+.formula{font-family:var(--mono);font-size:26px;font-weight:700;color:#17427a;overflow-wrap:anywhere}
+.formula-sub{font-size:20px;color:var(--muted)}
+.formula-card.c1card{border-color:#86c9a9;background:#f0fbf5}
+.formula-card.c2card{border-color:#e6be66;background:#fff9eb}
+
+.reveal-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;border-top:1px dashed var(--line);padding-top:16px}
+.step-count{color:var(--muted);font-size:20px;margin-left:auto}
+.answers{display:grid;gap:18px;margin-top:16px}
+.step-block{border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:18px 20px;min-width:0}
+.step-block h3{margin-bottom:10px}
+.loss-h{margin-top:18px}
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-size:19px;color:var(--muted);display:grid;gap:6px}
+@media (max-width:1100px){
+  .grid2,.grid2.qgrid{grid-template-columns:minmax(0,1fr)}
+  :root{font-size:20px}
+  .header-motif{display:none}
+  .km-wrap svg{max-height:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app-header">
+    <svg class="header-motif" viewBox="0 0 220 132" aria-hidden="true">
+      <g fill="#c9ecd8" stroke="#15803d" stroke-width="1.4">
+        <circle cx="46" cy="40" r="6"/><circle cx="62" cy="52" r="6"/><circle cx="40" cy="60" r="6"/><circle cx="58" cy="30" r="6"/>
+      </g>
+      <g fill="#fde4c8" stroke="#b45309" stroke-width="1.4">
+        <circle cx="150" cy="36" r="6"/><circle cx="168" cy="48" r="6"/><circle cx="146" cy="56" r="6"/><circle cx="166" cy="26" r="6"/>
+      </g>
+      <g fill="#d3ecfa" stroke="#22b1e8" stroke-width="1.4">
+        <circle cx="96" cy="96" r="6"/><circle cx="116" cy="104" r="6"/><circle cx="104" cy="82" r="6"/><circle cx="126" cy="90" r="6"/>
+      </g>
+      <g fill="#15803d"><path d="M52 38 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
+      <g fill="#b45309"><path d="M156 34 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
+      <g fill="#22b1e8"><path d="M110 86 l4 8 9 1 -6.5 6 1.5 9 -8 -4.5 -8 4.5 1.5 -9 -6.5 -6 9 -1 z"/></g>
+    </svg>
+    <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
+    <h1>K-Means 课堂小测</h1>
+    <p class="subtitle">两道手算题：整数坐标直接给出、初始中心给定、欧氏距离。先在纸上算，再逐步揭示答案对照。全部数据内嵌，可离线打开。</p>
+  </header>
+
+  <div id="quizRoot"></div>
+
+  <footer class="footer">
+    <p class="muted">配套演示：<a href="../clustering-lab/">聚类实验室 ↗</a>（K-Means 逐拍分步＋16 种数据上 K-Means／DBSCAN 对照）。星＝中心，圆点＝数据点；绿＝簇 1，橙＝簇 2。</p>
+  </footer>
+</main>
+<script>
+/* K-Means 课堂小测：两道可手算的题，答案逐步揭示。坐标全整数、每轮 d² 无平局、均值全整数。 */
+(function () {
+  'use strict';
+
+  const QUESTIONS = [
+    {
+      id: 'q1', title: '第 1 题', tag: '基础 · 6 点 · K=2',
+      points: [
+        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 3, y: 1 }, { name: 'C', x: 2, y: 4 },
+        { name: 'D', x: 7, y: 7 }, { name: 'E', x: 9, y: 7 }, { name: 'F', x: 8, y: 10 }
+      ],
+      init: [[1, 1], [9, 7]],
+      prompt: '6 个点的坐标在下表直接给出。K=2，初始中心 c₁=(1,1)、c₂=(9,7)，欧氏距离。手算 K-Means：逐轮写出分配与更新，直到收敛，给出最终的簇、中心与 loss。'
+    },
+    {
+      id: 'q2', title: '第 2 题', tag: '进阶 · 8 点 · K=2',
+      points: [
+        { name: 'A', x: 1, y: 1 }, { name: 'B', x: 5, y: 1 }, { name: 'C', x: 3, y: 4 },
+        { name: 'D', x: 7, y: 8 }, { name: 'E', x: 11, y: 8 }, { name: 'F', x: 7, y: 12 },
+        { name: 'G', x: 11, y: 12 }, { name: 'H', x: 9, y: 10 }
+      ],
+      init: [[1, 1], [4, 6]],
+      prompt: '8 个点的坐标在下表直接给出。K=2，初始中心 c₁=(1,1)、c₂=(4,6)，欧氏距离。手算 K-Means：逐轮写出分配与更新，直到收敛，给出最终的簇、中心与 loss。'
+    }
+  ];
+
+  function d2(p, c) { const dx = p.x - c[0], dy = p.y - c[1]; return dx * dx + dy * dy; }
+
+  function solve(q) {
+    const pts = q.points;
+    let centers = q.init.map(c => [c[0], c[1]]);
+    const rounds = [];
+    let prev = null;
+    for (let r = 0; r < 12; r++) {
+      const table = pts.map(p => centers.map(c => d2(p, c)));
+      const assign = table.map(row => (row[0] <= row[1] ? 0 : 1));
+      const clusters = [[], []];
+      assign.forEach((a, i) => clusters[a].push(i));
+      const sums = clusters.map(cl => [cl.reduce((s, i) => s + pts[i].x, 0), cl.reduce((s, i) => s + pts[i].y, 0)]);
+      const next = clusters.map((cl, k) => (cl.length ? [sums[k][0] / cl.length, sums[k][1] / cl.length] : [centers[k][0], centers[k][1]]));
+      const flips = prev ? assign.map((a, i) => (a !== prev[i] ? i : -1)).filter(i => i >= 0) : [];
+      const changed = prev ? flips.length > 0 : true;
+      rounds.push({ centers: centers.map(c => [c[0], c[1]]), table, assign, clusters, sums, next, flips, changed });
+      if (prev && !changed) break;
+      prev = assign;
+      centers = next;
+    }
+    const last = rounds[rounds.length - 1];
+    const lossParts = pts.map((p, i) => ({ i, d2: d2(p, last.centers[last.assign[i]]) }));
+    const loss = lossParts.reduce((s, t) => s + t.d2, 0);
+    return { rounds, loss, lossParts, final: { centers: last.centers, assign: last.assign, clusters: last.clusters } };
+  }
+
+  const core = { QUESTIONS, solve, d2 };
+  if (typeof module !== 'undefined' && module.exports) module.exports = core;
+  if (typeof window === 'undefined') return;
+  window.KMeansQuizCore = core;
+
+  const COLORS = ['#2fbe6e', '#f0a13a'];
+  const DARK = ['#15803d', '#b45309'];
+  const SOL = QUESTIONS.map(solve);
+  const state = { step: [0, 0] };
+
+  const fmtC = c => '(' + c[0] + ', ' + c[1] + ')';
+  const names = (q, cl) => cl.map(i => q.points[i].name).join('、');
+  const badge = k => '<span class="badge c' + (k + 1) + '">簇 ' + (k + 1) + '</span>';
+
+  function sub(p, c) {
+    const dx = p.x - c[0], dy = p.y - c[1];
+    const sq = v => (v < 0 ? '(−' + (-v) + ')²' : v + '²');
+    return '(' + p.x + '−' + c[0] + ')²+(' + p.y + '−' + c[1] + ')² = ' + sq(dx) + '+' + sq(dy) + ' = ' + dx * dx + '+' + dy * dy + ' = ' + (dx * dx + dy * dy);
+  }
+
+  function starPath(cx, cy, r) {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const rr = i % 2 ? r * 0.45 : r;
+      pts.push((cx + rr * Math.cos(a)).toFixed(1) + ',' + (cy + rr * Math.sin(a)).toFixed(1));
+    }
+    return 'M' + pts.join('L') + 'Z';
+  }
+
+  function scatter(q, sol, revealed) {
+    const pts = q.points;
+    const xs = pts.map(p => p.x).concat(q.init.map(c => c[0]), sol.final.centers.map(c => c[0]));
+    const ys = pts.map(p => p.y).concat(q.init.map(c => c[1]), sol.final.centers.map(c => c[1]));
+    const xmin = Math.min.apply(null, xs) - 1, xmax = Math.max.apply(null, xs) + 1;
+    const ymin = Math.min.apply(null, ys) - 1, ymax = Math.max.apply(null, ys) + 1;
+    const X = v => 56 + (v - xmin) / (xmax - xmin) * 560;
+    const Y = v => 474 - (v - ymin) / (ymax - ymin) * 450;
+    const tick = xmax - xmin <= 13 ? 1 : 2;
+    let g = '';
+    for (let t = Math.ceil(xmin); t <= Math.floor(xmax); t += tick) {
+      g += '<line x1="' + X(t) + '" y1="24" x2="' + X(t) + '" y2="474" stroke="#e6ebf3" stroke-width="1"/>';
+      g += '<text x="' + X(t) + '" y="500" font-size="18" fill="#53647c" text-anchor="middle">' + t + '</text>';
+    }
+    for (let t = Math.ceil(ymin); t <= Math.floor(ymax); t += tick) {
+      g += '<line x1="56" y1="' + Y(t) + '" x2="616" y2="' + Y(t) + '" stroke="#e6ebf3" stroke-width="1"/>';
+      g += '<text x="44" y="' + (Y(t) + 6) + '" font-size="18" fill="#53647c" text-anchor="end">' + t + '</text>';
+    }
+    g += '<line x1="56" y1="474" x2="616" y2="474" stroke="#94a3b8" stroke-width="2"/>';
+    g += '<line x1="56" y1="24" x2="56" y2="474" stroke="#94a3b8" stroke-width="2"/>';
+    g += '<text x="622" y="480" font-size="20" font-weight="700" fill="#53647c">x</text>';
+    g += '<text x="40" y="20" font-size="20" font-weight="700" fill="#53647c">y</text>';
+    const fin = revealed ? sol.final : null;
+    if (fin) q.init.forEach(c => {
+      g += '<path d="' + starPath(X(c[0]), Y(c[1]), 13) + '" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3"/>';
+    });
+    pts.forEach((p, i) => {
+      const fill = fin ? COLORS[fin.assign[i]] : '#64748b';
+      g += '<circle cx="' + X(p.x) + '" cy="' + Y(p.y) + '" r="9" fill="' + fill + '" stroke="#fff" stroke-width="2"/>';
+    });
+    const cs = fin ? fin.centers : q.init;
+    cs.forEach((c, k) => {
+      g += '<path d="' + starPath(X(c[0]), Y(c[1]), 15) + '" fill="' + COLORS[k] + '" stroke="' + DARK[k] + '" stroke-width="1.5"/>';
+    });
+    pts.forEach(p => {
+      g += '<text x="' + (X(p.x) + 13) + '" y="' + (Y(p.y) - 11) + '" font-size="20" font-weight="700" fill="#102344">' + p.name + '</text>';
+    });
+    cs.forEach((c, k) => {
+      g += '<text x="' + (X(c[0]) + 17) + '" y="' + (Y(c[1]) + 22) + '" font-size="20" font-weight="800" fill="' + DARK[k] + '">c' + (k + 1) + '</text>';
+    });
+    return '<div class="km-wrap"><svg viewBox="0 0 640 520" role="img" aria-label="题目数据点与中心的散点图">' + g + '</svg></div>';
+  }
+
+  function assignStep(q, sol, r, ri) {
+    const head = '<h3>第 ' + (ri + 1) + ' 轮 · 分配：每个点归最近中心（c₁=' + fmtC(r.centers[0]) + '，c₂=' + fmtC(r.centers[1]) + '）</h3>';
+    const rows = q.points.map((p, i) => {
+      const win = r.table[i][0] <= r.table[i][1] ? 0 : 1;
+      const flip = r.flips.indexOf(i) >= 0;
+      return '<tr' + (flip ? ' class="is-flip"' : '') + '><td>' + p.name + (flip ? ' <span class="badge flip">改归属</span>' : '') + '</td><td>(' + p.x + ', ' + p.y + ')</td><td class="' + (win === 0 ? 'is-hit' : '') + '">' + sub(p, r.centers[0]) + '</td><td class="' + (win === 1 ? 'is-hit' : '') + '">' + sub(p, r.centers[1]) + '</td><td>' + badge(win) + '</td></tr>';
+    }).join('');
+    let note = '';
+    if (ri === 0) note += '<div class="note blue"><strong>为什么只比 d²？</strong><p>开方是单调的：d² 小 ⇔ 距离近。手算时把平方和比出来就够了，不必开方。</p></div>';
+    if (r.flips.length) {
+      const txt = r.flips.map(i => {
+        const p = q.points[i];
+        const prevA = sol.rounds[ri - 1].assign[i];
+        return p.name + '(' + p.x + ',' + p.y + ')：上一轮归簇 ' + (prevA + 1) + '，这一轮 d² 到 c₁=' + r.table[i][0] + '、到 c₂=' + r.table[i][1] + ' → 改归簇 ' + (r.assign[i] + 1);
+      }).join('；');
+      note += '<div class="note"><strong>有点改归属！</strong><p>' + txt + '。中心移动后归属可能变化——所以要一轮一轮迭代，不能只算一轮就停。</p></div>';
+    }
+    if (ri > 0 && !r.flips.length) note += '<div class="note green"><strong>收敛</strong><p>所有点归属与上一轮完全相同 → 均值算出的中心不变 → 算法停止。中心保持 c₁=' + fmtC(r.centers[0]) + '、c₂=' + fmtC(r.centers[1]) + '。</p></div>';
+    const summary = '<p class="assign-sum">本轮划分：簇 1 ' + names(q, r.clusters[0]) + '（' + r.clusters[0].length + ' 点）｜ 簇 2 ' + names(q, r.clusters[1]) + '（' + r.clusters[1].length + ' 点）</p>';
+    return '<div class="step-block">' + head + '<div class="table-wrap"><table class="trace d2"><thead><tr><th>点</th><th>坐标</th><th>d² 到 c₁</th><th>d² 到 c₂</th><th>归属（蓝底＝更近）</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + summary + note + '</div>';
+  }
+
+  function updateStep(q, r, ri) {
+    const cards = r.clusters.map((cl, k) => {
+      if (!cl.length) return '';
+      const n = cl.length;
+      const xs = cl.map(i => q.points[i].x).join('+');
+      const ys = cl.map(i => q.points[i].y).join('+');
+      const c = k === 0 ? 'c₁' : 'c₂';
+      return '<div class="formula-card"><div class="formula-sub">簇 ' + (k + 1) + '（' + names(q, cl) + '，n=' + n + '）：中心＝成员坐标的算术均值</div>' +
+        '<div class="formula">' + c + 'x = (' + xs + ')/' + n + ' = ' + r.sums[k][0] + '/' + n + ' = ' + r.next[k][0] + '</div>' +
+        '<div class="formula">' + c + 'y = (' + ys + ')/' + n + ' = ' + r.sums[k][1] + '/' + n + ' = ' + r.next[k][1] + '</div>' +
+        '<div class="formula-sub">' + c + '：' + fmtC(r.centers[k]) + ' → <b>' + fmtC(r.next[k]) + '</b></div></div>';
+    }).join('');
+    return '<div class="step-block"><h3>第 ' + (ri + 1) + ' 轮 · 更新：中心＝成员的算术均值</h3>' + cards + '</div>';
+  }
+
+  function finalStep(q, sol) {
+    const f = sol.final;
+    const cards = f.clusters.map((cl, k) => {
+      const members = cl.map(i => q.points[i].name + '(' + q.points[i].x + ',' + q.points[i].y + ')').join('、');
+      return '<div class="formula-card c' + (k + 1) + 'card"><div class="formula-sub">簇 ' + (k + 1) + ' · ' + cl.length + ' 点</div><div class="formula">' + members + '</div><div class="formula-sub">中心 ' + (k === 0 ? 'c₁' : 'c₂') + ' = ' + fmtC(f.centers[k]) + '</div></div>';
+    }).join('');
+    const lossRows = q.points.map((p, i) => '<tr><td>' + p.name + '</td><td>' + badge(f.assign[i]) + '</td><td>' + sub(p, f.centers[f.assign[i]]) + '</td></tr>').join('');
+    const per = [0, 1].map(k => sol.lossParts.filter(t => f.assign[t.i] === k).reduce((s, t) => s + t.d2, 0));
+    return '<div class="step-block"><h3>最终结果 · 共 ' + sol.rounds.length + ' 轮（第 ' + sol.rounds.length + ' 轮复核：无点改归属）</h3>' + cards +
+      '<h3 class="loss-h">loss＝每个点到其所属中心距离的平方和</h3>' +
+      '<div class="table-wrap"><table class="trace d2"><thead><tr><th>点</th><th>所属簇</th><th>到所属中心的 d²</th></tr></thead><tbody>' + lossRows + '</tbody></table></div>' +
+      '<div class="formula-card"><div class="formula">loss = ' + per[0] + ' + ' + per[1] + ' = ' + sol.loss + '</div><div class="formula-sub">簇 1 贡献 ' + per[0] + '，簇 2 贡献 ' + per[1] + '。</div></div>' +
+      '<div class="note green"><strong>对照检查</strong><p>你的纸上结果：簇成员、中心、收敛轮数、loss 四项都对上了吗？上方散点图已按最终簇着色，空心虚线星＝初始中心。</p></div></div>';
+  }
+
+  function buildSteps(q, sol) {
+    const steps = [];
+    sol.rounds.forEach((r, ri) => {
+      steps.push(assignStep(q, sol, r, ri));
+      if (r.changed) steps.push(updateStep(q, r, ri));
+    });
+    steps.push(finalStep(q, sol));
+    return steps;
+  }
+
+  const STEPS = QUESTIONS.map((q, i) => buildSteps(q, SOL[i]));
+
+  function renderQ(qi) {
+    const q = QUESTIONS[qi], sol = SOL[qi], steps = STEPS[qi];
+    const n = state.step[qi];
+    const given = '<div class="chips given"><span class="chip"><b>K</b>&nbsp;= 2</span><span class="chip"><b>初始中心</b>&nbsp;c₁ = ' + fmtC(q.init[0]) + '，c₂ = ' + fmtC(q.init[1]) + '</span><span class="chip"><b>距离</b>&nbsp;欧氏（比 d² 即可）</span></div>';
+    const ptRows = q.points.map(p => '<tr><td>' + p.name + '</td><td>(' + p.x + ', ' + p.y + ')</td></tr>').join('');
+    return '<section class="panel qpanel" id="' + q.id + '">' +
+      '<div class="qhead"><h2>' + q.title + '</h2><span class="qtag">' + q.tag + '</span></div>' +
+      '<p class="qprompt">' + q.prompt + '</p>' + given +
+      '<div class="grid2 qgrid"><div>' + scatter(q, sol, n === steps.length) +
+      '<p class="km-hint">星＝中心（c₁ 绿／c₂ 橙），圆点＝数据点；揭示最终结果后按簇着色。</p></div>' +
+      '<div><div class="table-wrap"><table class="trace"><thead><tr><th>点</th><th>坐标 (x, y)</th></tr></thead><tbody>' + ptRows + '</tbody></table></div>' +
+      '<div class="note blue tasks"><strong>手算任务</strong><p>① 逐轮：算 d²、分配 → 求均值、更新中心；</p><p>② 每轮检查有没有点改归属，哪一轮收敛？</p><p>③ 写出最终两个簇的成员与中心；</p><p>④ 算 loss＝每个点到其中心距离的平方和。</p></div></div></div>' +
+      '<div class="reveal-bar">' +
+      '<button class="primary" data-act="next" data-q="' + qi + '"' + (n >= steps.length ? ' disabled' : '') + '>揭示下一步</button>' +
+      '<button data-act="all" data-q="' + qi + '"' + (n >= steps.length ? ' disabled' : '') + '>展开全部</button>' +
+      '<button data-act="reset" data-q="' + qi + '"' + (n === 0 ? ' disabled' : '') + '>收起答案</button>' +
+      '<span class="step-count">已揭示 ' + n + ' / ' + steps.length + ' 步</span></div>' +
+      '<div class="answers">' + steps.slice(0, n).join('') + '</div></section>';
+  }
+
+  function render() {
+    document.getElementById('quizRoot').innerHTML =
+      '<div class="note blue howto"><strong>怎么手算（做题前先看）</strong>' +
+      '<p>① 欧氏距离 d = √((x−cₓ)²+(y−c_y)²)。比较远近只需比 d²，不必开方。</p>' +
+      '<p>② 每轮两步：分配（每个点归最近中心）→ 更新（中心＝成员坐标的算术均值）。</p>' +
+      '<p>③ 停止条件：某一轮没有任何点改归属——中心不再变化，算法收敛。</p>' +
+      '<p>④ loss＝每个点到其所属中心距离的平方和。</p>' +
+      '<p>⑤ 先在纸上算，再点「揭示下一步」逐步对照；答案不会一次全给。</p></div>' +
+      QUESTIONS.map((q, i) => renderQ(i)).join('');
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const qi = +b.dataset.q, act = b.dataset.act, total = STEPS[qi].length;
+    if (act === 'next') state.step[qi] = Math.min(total, state.step[qi] + 1);
+    else if (act === 'all') state.step[qi] = total;
+    else if (act === 'reset') state.step[qi] = 0;
+    render();
+    if (act === 'next') {
+      const blocks = document.querySelectorAll('#' + QUESTIONS[qi].id + ' .step-block');
+      const lastB = blocks[blocks.length - 1];
+      if (lastB) lastB.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

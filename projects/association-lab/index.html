@@ -285,7 +285,6 @@ tr.selected td{background:#e7f0ff!important}
   </section>
 
   <footer class="footer">
-    <p>数据来源：Slide13 第 35 页 Database TDB（课件原表）、20 单构造例（手工设计、make-data.py 可复现）、MovieLens 610K-small（GroupLens）、Groceries 经典超市小票（9,835 张）。真实数据为课堂演示各截取热门前 60／30 项，全部数据内嵌在本页，可离线打开。</p>
     <p class="muted">对应 Slide13 第 26–38 页（关联规则与置信度 p29–30）。格图配色对照 p36–38：绿＝频繁，红＝计数后不达标，蓝灰＝被剪枝或向下闭包排除、从未计数；红边／红虚线＝正在展示排除依据。</p>
   </footer>
 </main>
@@ -699,7 +698,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     const tail = `进页面的一共 <b>${n}</b> 张购物篮、<b>${u}</b> 个项，平均每张 ${(b.reduce((s, x) => s + x.length, 0) / n).toFixed(1)} 项。`;
     setOutcome('info', isCourse ? `一共 ${n} 条事务、${u} 个项：这就是全部数据` : `原始数据很大，只选取了一部分：一共 ${n} 张购物篮`,
       rawLine + pick + tail);
-    const stats = meta.stats || [['事务', n + ' 单'], ['项', u + ' 个'], ['来源', isSlide ? '课件 p35 原表' : '手工构造']];
+    const stats = meta.stats || [['事务', n + ' 单'], ['项', u + ' 个']];
     if (isCourse) {
       const letterMap = LAT.byLevel[1].map(nd => `${String.fromCharCode(65 + nd.items[0])}=${nameOf(nd.items[0])}`).join('、');
       const rows = b.map((x, i) => `<tr><td>${src().tids[i]}</td><td class="soft">${x.map(j => nameOf(j)).join(', ')}</td><td>${Array.from({ length: u }, (_, k) => x.includes(k) ? 1 : 0).join('')}</td></tr>`).join('');
