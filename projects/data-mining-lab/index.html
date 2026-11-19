@@ -71,12 +71,22 @@ html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
 .modules button{font-size:24px;padding:12px 26px;border-radius:10px}
 .modules button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
 .km-wrap{overflow-x:auto;margin-top:6px}
-.km-wrap svg{display:block;width:100%;min-width:720px;height:auto}
+.km-wrap svg{display:block;width:100%;min-width:640px;height:auto;max-height:calc(100vh - 245px)}
 .km-pt{cursor:pointer}
 .km-pt:hover{stroke:#102344;stroke-width:3}
 .km-c{cursor:pointer}
 .km-c:hover{filter:brightness(1.12)}
 .km-hint{font-size:19px;color:var(--muted);margin-top:8px}
+.grid2.km-grid{grid-template-columns:minmax(0,1fr) 440px}
+.km-side{display:grid;gap:16px;align-content:start;min-width:0;position:sticky;top:70px;max-height:calc(100vh - 90px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
+.km-side table.trace th,.km-side table.trace td{padding:6px 10px}
+.km-side .scroll-420{max-height:260px}
+.km-ctl{display:grid;gap:10px;justify-items:start}
+.km-ctl .slider-row{flex-wrap:wrap;gap:8px}
+.km-ctl .slider-row input[type=range]{width:170px}
+.km-ctl .playback,.km-ctl .step-dots{width:100%;flex-wrap:wrap}
+.km-ctl .playback button{flex:1 1 auto;padding:8px 10px}
+.km-ctl .step-dot{font-size:17px;padding:0 8px}
 
 /* Toolbar, stepper, outcome banner */
 .toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:16px;padding:18px 0 16px}
@@ -193,9 +203,11 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
 tr.selected td{background:#e7f0ff!important}
 .footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-size:19px;color:var(--muted);display:grid;gap:6px}
 @media (max-width:1100px){
-  .grid2,.grid2.wide-left,.grid3{grid-template-columns:minmax(0,1fr)}
+  .grid2,.grid2.wide-left,.grid3,.grid2.km-grid{grid-template-columns:minmax(0,1fr)}
   :root{font-size:20px}
   .header-motif{display:none}
+  .km-wrap svg{max-height:none}
+  .km-side{position:static;max-height:none;overflow:visible}
 }
 
 /* Itemset lattice (tab 2, courseware source) */
@@ -1719,13 +1731,6 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     });
 
     $('kmRoot').innerHTML = `
-      <div class="toolbar">
-        <div class="slider-row"><label for="kmK">K</label><input type="range" id="kmK" min="1" max="${src1().kMax}" step="1" value="${state.k}"><output>${state.k}</output></div>
-        <div class="slider-row"><label for="kmSeed">种子</label><input type="number" id="kmSeed" min="0" max="99999" value="${state.seed}" ${src1().fixedInit ? 'disabled' : ''} style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmReseed" ${src1().fixedInit ? 'disabled' : ''}>重新随机</button></div>
-        <div class="playback"><button id="kmPrev" ${state.step === 0 ? 'disabled' : ''}>上一步</button><button id="kmNext" class="primary" ${state.step === steps.length - 1 ? 'disabled' : ''}>下一步</button><button id="kmEnd" ${state.step === steps.length - 1 ? 'disabled' : ''}>跳到收敛</button><button id="kmReset" ${state.step === 0 ? 'disabled' : ''}>重置</button></div>
-        <span class="step-count">拍 ${state.step + 1}/${steps.length}</span>
-      </div>
-      <div class="step-dots">${dots}</div>
       <div class="outcome ${banner}" style="margin-top:16px"><div><strong>${head[0]}</strong><p>${head[1]}</p></div></div>
       <div class="metrics">
         <div class="metric"><small>轮次</small><b>${round || '—'}</b></div>
@@ -1733,9 +1738,17 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
         <div class="metric"><small>最大中心移动（米）</small><b>${moved === null ? '—' : f1(moved)}</b></div>
         <div class="metric ${converged ? 'good' : ''}"><small>SSE 簇内距离²和</small><b>${sse === null ? '—' : f0(sse)}</b></div>
       </div>
-      <div class="grid2 wide-left">
+      <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>早餐供应点位置示意</h2>${plot}${a ? legend(countsOf(a, state.k)) : '<p class="km-hint">灰点＝尚未分配；星＝初始中心。</p>'}</div>
-        ${inspector}
+        <div class="km-side">
+          <div class="panel km-ctl"><h2>控制 · 拍 ${state.step + 1}/${steps.length}</h2>
+            <div class="slider-row"><label for="kmK">K</label><input type="range" id="kmK" min="1" max="${src1().kMax}" step="1" value="${state.k}"><output>${state.k}</output></div>
+            <div class="slider-row"><label for="kmSeed">种子</label><input type="number" id="kmSeed" min="0" max="99999" value="${state.seed}" ${src1().fixedInit ? 'disabled' : ''} style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmReseed" ${src1().fixedInit ? 'disabled' : ''}>重新随机</button></div>
+            <div class="playback"><button id="kmPrev" ${state.step === 0 ? 'disabled' : ''}>上一步</button><button id="kmNext" class="primary" ${state.step === steps.length - 1 ? 'disabled' : ''}>下一步</button><button id="kmEnd" ${state.step === steps.length - 1 ? 'disabled' : ''}>跳到收敛</button><button id="kmReset" ${state.step === 0 ? 'disabled' : ''}>重置</button></div>
+            <div class="step-dots">${dots}</div>
+          </div>
+          ${inspector}
+        </div>
       </div>
       <div class="note green"><strong>为什么一定会停（SSE 单调不增）</strong>
         <p>SSE＝每个点到其中心距离的平方和。中心固定时，把点归给最近中心使 SSE 最小；划分固定时，取均值使 SSE 最小。两拍交替、SSE 只降不升，中心迟早不再移动——这就是 ④ 的停止条件。</p>
@@ -1791,26 +1804,28 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
         <span class="preset-label">典型数据</span>
         <div class="preset-buttons">${Object.keys(SHAPES).map(key => `<button class="preset-btn" data-kmshape="${key}" aria-pressed="${key === L.shape}">${SHAPES[key].label}</button>`).join('')}</div>
       </div>
-      <div class="toolbar">
-        <div class="slider-row"><label for="kmLabK">K</label><input type="range" id="kmLabK" min="1" max="${S.kMax}" step="1" value="${L.k}"><output>${L.k}</output></div>
-        <div class="slider-row"><label for="kmLabSeed">数据种子</label><input type="number" id="kmLabSeed" min="0" max="99999" value="${L.seed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"></div>
-        ${manual ? '' : `<div class="slider-row"><label for="kmLabInitSeed">初值种子</label><input type="number" id="kmLabInitSeed" min="0" max="99999" value="${L.initSeed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmLabReseed">重新随机初值</button></div>`}
-        <div class="ctl-select"><label for="kmMetric">距离</label><select id="kmMetric">${Object.keys(METRICS).map(m => `<option value="${m}" ${m === L.metric ? 'selected' : ''}>${METRICS[m].label}</option>`).join('')}</select></div>
-        <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>随机（种子）</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div>
-        ${presetBtns}
-        <button id="kmRun" class="primary" ${manual && L.manual.length < L.k ? 'disabled' : ''}>跑到收敛</button>
-      </div>
-      ${manual ? `<p class="km-hint">手动初值：在图里点空白处或圆点，依次放 ${L.k} 个中心（已放 ${L.manual.length} 个）；放满后再点＝移动最近的中心。把两个中心放进同一团试试（p62 左）。</p>` : ''}
       <div class="outcome ${run ? (run.converged ? 'success' : 'warning') : 'info'}"><div><strong>${run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑'}</strong><p>${run ? `SSE＝${f0(sseOf(pts, run.a, run.cs, L.metric))}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。'}</p></div></div>
-      <div class="grid2 wide-left">
+      <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>${S.label} · ${pts.length} 点 · K=${L.k}</h2>${plot}${run ? legend(sizes) : '<p class="km-hint">灰点＝数据；星＝已放的中心。</p>'}</div>
-        <div class="panel"><h2>效果与账本</h2>
-          <div class="metrics">
-            <div class="metric"><small>迭代轮数</small><b>${run ? run.iters.length : '—'}</b></div>
-            <div class="metric"><small>最大簇 / 最小簇</small><b>${run ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
-            <div class="metric ${run && run.converged ? 'good' : 'bad'}"><small>SSE</small><b>${run ? f0(sseOf(pts, run.a, run.cs, L.metric)) : '—'}</b></div>
+        <div class="km-side">
+          <div class="panel km-ctl"><h2>配置</h2>
+            <div class="slider-row"><label for="kmLabK">K</label><input type="range" id="kmLabK" min="1" max="${S.kMax}" step="1" value="${L.k}"><output>${L.k}</output></div>
+            <div class="slider-row"><label for="kmLabSeed">数据种子</label><input type="number" id="kmLabSeed" min="0" max="99999" value="${L.seed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"></div>
+            ${manual ? '' : `<div class="slider-row"><label for="kmLabInitSeed">初值种子</label><input type="number" id="kmLabInitSeed" min="0" max="99999" value="${L.initSeed}" style="width:110px;min-height:40px;border:1px solid #bac8da;border-radius:7px;padding:2px 10px;font-family:var(--mono)"><button id="kmLabReseed">重新随机初值</button></div>`}
+            <div class="slider-row"><div class="ctl-select"><label for="kmMetric">距离</label><select id="kmMetric">${Object.keys(METRICS).map(m => `<option value="${m}" ${m === L.metric ? 'selected' : ''}>${METRICS[m].label}</option>`).join('')}</select></div>
+            <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>随机（种子）</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div></div>
+            ${presetBtns ? `<div class="playback">${presetBtns}</div>` : ''}
+            <button id="kmRun" class="primary" style="width:100%" ${manual && L.manual.length < L.k ? 'disabled' : ''}>跑到收敛</button>
+            ${manual ? `<p class="km-hint">手动初值：在图里点空白处或圆点，依次放 ${L.k} 个中心（已放 ${L.manual.length} 个）；放满后再点＝移动最近的中心。把两个中心放进同一团试试（p62 左）。</p>` : ''}
           </div>
-          ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 SSE</th><th>更新后 SSE</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 SSE。</p>'}
+          <div class="panel"><h2>效果与账本</h2>
+            <div class="metrics">
+              <div class="metric"><small>迭代轮数</small><b>${run ? run.iters.length : '—'}</b></div>
+              <div class="metric"><small>最大簇 / 最小簇</small><b>${run ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
+              <div class="metric ${run && run.converged ? 'good' : 'bad'}"><small>SSE</small><b>${run ? f0(sseOf(pts, run.a, run.cs, L.metric)) : '—'}</b></div>
+            </div>
+            ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 SSE</th><th>更新后 SSE</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 SSE。</p>'}
+          </div>
         </div>
       </div>
       <div class="note blue"><strong>这份数据在看什么</strong><p>${S.note}</p></div>
