@@ -1597,7 +1597,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
 
   const state = {
     tab: 'kmrun', src: 'slide50', k: 5, seed: 7, step: 0, pickPt: null, pickC: null,
-    lab: { shape: 'blobs3', k: 3, seed: 11, initSeed: 11, metric: 'euclid', initMode: 'random', manual: [], run: null }
+    lab: { shape: 'blobs3', k: 3, seed: 11, initSeed: 11, metric: 'euclid', initMode: 'random', manual: [], run: null, step: null, playing: false }
   };
 
   function src1() { return SHAPES[state.src]; }
@@ -1615,9 +1615,28 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
   function labPts() { return SHAPES[state.lab.shape].make(state.lab.seed); }
   function labAutoRun() {
     const L = state.lab, pts = labPts();
+    labStop(); L.step = null;
     if (L.initMode === 'random') L.run = computeRun(pts, L.k, randomInit(pts, L.k, L.initSeed), L.metric);
     else if (L.manual.length === L.k) L.run = computeRun(pts, L.k, L.manual.map(c => ({ ...c })), L.metric);
     else L.run = null;
+  }
+  let labTimer = null;
+  function labStop() { if (labTimer) { clearInterval(labTimer); labTimer = null; } state.lab.playing = false; }
+  function labSteps() { return state.lab.run ? steps1(state.lab.run) : []; }
+  function labPlay() {
+    const L = state.lab;
+    labStop();
+    if (!L.run) return;
+    if (L.step === null || L.step >= labSteps().length - 1) L.step = 0;
+    L.playing = true;
+    labTimer = setInterval(() => {
+      const last = labSteps().length - 1;
+      if (state.lab.step >= last) { labStop(); kmRender(); return; }
+      state.lab.step += 1;
+      if (state.lab.step >= last) labStop();
+      kmRender();
+    }, 900);
+    kmRender();
   }
 
   function starPath(cx, cy, R, r) {
@@ -1763,34 +1782,53 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     const L = state.lab, S = SHAPES[L.shape], pts = labPts();
     const run = L.run;
     const manual = L.initMode === 'manual';
-    const centers = run ? run.cs : (manual ? L.manual : []);
-    const trail = run ? run.init.map((c, j) => ({ from: c, to: run.cs[j], color: COLORS[j % COLORS.length] })).filter(t => Math.hypot(t.from.x - t.to.x, t.from.y - t.to.y) > 0.5) : [];
+    const steps = run ? steps1(run) : [];
+    const st = run && L.step !== null ? steps[Math.min(L.step, steps.length - 1)] : null;
+    const it = st && st.i !== undefined ? run.iters[st.i] : null;
+    const convergedBeat = !!st && st.t === 'update' && it.moved < 1e-6;
+    const round = st ? (st.t === 'init' ? 0 : st.i + 1) : (run ? run.iters.length : 0);
+    const centers = run ? (st ? (st.t === 'init' ? run.init : st.t === 'assign' ? it.old : it.neu) : run.cs) : (manual ? L.manual : []);
+    const a = st ? (st.t === 'init' ? null : it.a) : (run ? run.a : null);
+    const lossNow = st ? (st.t === 'init' ? null : st.t === 'assign' ? it.sseA : it.sseU) : (run ? sseOf(pts, run.a, run.cs, L.metric) : null);
+    const trail = st
+      ? (st.t === 'update' ? it.old.map((c, j) => ({ from: c, to: it.neu[j], color: COLORS[j % COLORS.length] })).filter(t => Math.hypot(t.from.x - t.to.x, t.from.y - t.to.y) > 0.05) : [])
+      : (run ? run.init.map((c, j) => ({ from: c, to: run.cs[j], color: COLORS[j % COLORS.length] })).filter(t => Math.hypot(t.from.x - t.to.x, t.from.y - t.to.y) > 0.5) : []);
+    const lastBeat = steps.length - 1;
     const plot = scatter({
-      pts, centers, trail, noise: L.shape === 'outliers', placeable: manual,
-      colorOf: run ? i => COLORS[run.a[i] % COLORS.length] : null,
+      pts, centers, a, trail, noise: L.shape === 'outliers', placeable: manual && !st,
+      colorOf: a ? i => COLORS[a[i] % COLORS.length] : null,
       name: i => (L.shape === 'slide50' ? nameOf('slide50', i) : '点 ' + (i + 1)),
-      circles: run && L.shape === 'outliers' ? driftCircle(pts, run) : []
+      circles: run && L.shape === 'outliers' && (!st || L.step >= lastBeat) ? driftCircle(pts, run) : []
     });
 
     let driftTxt = '';
-    if (L.shape === 'outliers' && run) {
+    if (L.shape === 'outliers' && run && (!st || L.step >= lastBeat)) {
       const d = maxDrift(pts, run);
       driftTxt = d ? `<div class="note red"><strong>中心被拽偏 ${f1(d.dist)} 米</strong><p>中心 ${d.j + 1} 从 (${f1(d.from.x)}, ${f1(d.from.y)}) 被拉到 (${f1(d.to.x)}, ${f1(d.to.y)})：均值把 ${NOISE.length} 个离群点也算进 Σ（p62 右）。虚线圈＝被拽偏的中心。</p></div>` : '';
     }
     const metricNote = L.metric === 'euclid' ? '' : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按新距离算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`;
 
-    const sizes = run ? countsOf(run.a, L.k) : [];
-    const hist = run ? run.iters.map((x, i) => `<tr><td>${i + 1}</td><td>${f0(x.sseA)}</td><td>${f0(x.sseU)}</td><td>${f1(x.moved)}</td></tr>`).join('') : '';
+    const sizes = a ? countsOf(a, L.k) : [];
+    const hist = run ? run.iters.map((x, i) => `<tr class="${st && st.i === i ? 'selected' : ''}"><td>${i + 1}</td><td>${f0(x.sseA)}</td><td>${f0(x.sseU)}</td><td>${f1(x.moved)}</td></tr>`).join('') : '';
     const presetBtns = L.shape === 'slide50' ? `<button data-kmpreset="good">合理初值</button><button data-kmpreset="bad">不合理初值（p62 左）</button>` : '';
+    const beatHead = !st ? null
+      : convergedBeat ? ['④ 中心不再更新 · 收敛', `第 ${round} 轮更新后所有中心移动＝0，停止。共 ${run.iters.length} 轮。`]
+      : st.t === 'init' ? ['① 初始化 · 放 K 个中心', '星＝初始中心（随机种子或手动点放）；灰点还没归属。']
+      : st.t === 'assign' ? [`② 分配样本点 · 第 ${round} 轮`, `每个点按当前距离归给最近中心；改归属 ${it.changed} 个点。`]
+      : [`③ 更新中心 · 第 ${round} 轮`, `中心＝成员算术均值；虚线＝这一拍的移动，最大 ${f1(it.moved)}。`];
+    const bannerCls = st ? (convergedBeat ? 'success' : 'info') : (run ? (run.converged ? 'success' : 'warning') : 'info');
+    const bannerHead = st ? beatHead[0] : (run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑');
+    const bannerText = st ? `${beatHead[1]} loss＝${lossNow === null ? '—' : f0(lossNow)}；拍 ${L.step + 1}/${steps.length}。`
+      : (run ? `loss＝${f0(lossNow)}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。');
 
     $('kmRoot').innerHTML = `
       <div class="toolbar">
         <span class="preset-label">典型数据</span>
         <div class="preset-buttons">${Object.keys(SHAPES).map(key => `<button class="preset-btn" data-kmshape="${key}" aria-pressed="${key === L.shape}">${SHAPES[key].label}</button>`).join('')}</div>
       </div>
-      <div class="outcome ${run ? (run.converged ? 'success' : 'warning') : 'info'}"><div><strong>${run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑'}</strong><p>${run ? `loss＝${f0(sseOf(pts, run.a, run.cs, L.metric))}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。'}</p></div></div>
+      <div class="outcome ${bannerCls}"><div><strong>${bannerHead}</strong><p>${bannerText}</p></div></div>
       <div class="grid2 wide-left km-grid">
-        <div class="panel"><h2>${S.label} · ${pts.length} 点 · K=${L.k}</h2>${plot}${run ? legend(sizes) : '<p class="km-hint">灰点＝数据；星＝已放的中心。</p>'}</div>
+        <div class="panel"><h2>${S.label} · ${pts.length} 点 · K=${L.k}</h2>${plot}${a ? legend(sizes) : (st ? '<p class="km-hint">灰点＝尚未分配；星＝初始中心。</p>' : '<p class="km-hint">灰点＝数据；星＝已放的中心。</p>')}</div>
         <div class="km-side">
           <div class="panel km-ctl"><h2>配置</h2>
             <div class="slider-row"><label for="kmLabK">K</label><input type="range" id="kmLabK" min="1" max="${S.kMax}" step="1" value="${L.k}"><output>${L.k}</output></div>
@@ -1800,13 +1838,20 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
             <div class="ctl-select"><label for="kmInitMode">初值</label><select id="kmInitMode"><option value="random" ${!manual ? 'selected' : ''}>随机（种子）</option><option value="manual" ${manual ? 'selected' : ''}>手动点放</option></select></div></div>
             ${presetBtns ? `<div class="playback">${presetBtns}</div>` : ''}
             <button id="kmRun" class="primary" style="width:100%" ${manual && L.manual.length < L.k ? 'disabled' : ''}>跑到收敛</button>
+            ${run ? `<div class="playback">
+              <button id="kmLabSteps" ${st ? 'disabled' : ''}>分步演示</button>
+              <button id="kmLabPrev" ${!st || L.step === 0 ? 'disabled' : ''}>上一步</button>
+              <button id="kmLabNext" ${!st || L.step >= lastBeat ? 'disabled' : ''}>下一步</button>
+              <button id="kmLabPlay">${L.playing ? '暂停' : '播放动画'}</button>
+            </div>` : ''}
+            ${st ? `<p class="km-hint">分步演示中：拍 ${L.step + 1}/${steps.length}；"跑到收敛"直接看终态。改任何配置会回到终态视图。</p>` : ''}
             ${manual ? `<p class="km-hint">手动初值：在图里点空白处或圆点，依次放 ${L.k} 个中心（已放 ${L.manual.length} 个）；放满后再点＝移动最近的中心。把两个中心放进同一团试试（p62 左）。</p>` : ''}
           </div>
           <div class="panel"><h2>效果与账本</h2>
             <div class="metrics">
-              <div class="metric"><small>迭代轮数</small><b>${run ? run.iters.length : '—'}</b></div>
-              <div class="metric"><small>最大簇 / 最小簇</small><b>${run ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
-              <div class="metric ${run && run.converged ? 'good' : 'bad'}"><small>loss</small><b>${run ? f0(sseOf(pts, run.a, run.cs, L.metric)) : '—'}</b></div>
+              <div class="metric"><small>${st ? '当前轮次' : '迭代轮数'}</small><b>${run ? (round || '—') : '—'}</b></div>
+              <div class="metric"><small>最大簇 / 最小簇</small><b>${a ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
+              <div class="metric ${run && (st ? convergedBeat : run.converged) ? 'good' : 'bad'}"><small>loss</small><b>${lossNow === null ? '—' : f0(lossNow)}</b></div>
             </div>
             ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 loss</th><th>更新后 loss</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 loss。</p>'}
           </div>
@@ -1851,6 +1896,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       document.querySelectorAll('.modules button').forEach(b => b.setAttribute('aria-selected', b === mod));
       $('modItemset').hidden = m !== 'itemset';
       $('modKmeans').hidden = m !== 'kmeans';
+      if (m !== 'kmeans') labStop();
       if (m === 'kmeans') kmRender();
       return;
     }
@@ -1894,7 +1940,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       return;
     }
     if (!t) return;
-    if (t.dataset.kmtab) { state.tab = t.dataset.kmtab; kmRender(); return; }
+    if (t.dataset.kmtab) { labStop(); state.tab = t.dataset.kmtab; kmRender(); return; }
     if (t.dataset.kmsrc) { state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
     if (t.dataset.kmstep !== undefined) { state.step = +t.dataset.kmstep; kmRender(); return; }
     if (t.dataset.kmshape) {
@@ -1915,6 +1961,10 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     if (t.id === 'kmReseed') { state.seed = 1 + Math.floor(Math.random() * 99998); resetRun1(); kmRender(); return; }
     if (t.id === 'kmLabReseed') { state.lab.initSeed = 1 + Math.floor(Math.random() * 99998); labAutoRun(); kmRender(); return; }
     if (t.id === 'kmRun') { labAutoRun(); kmRender(); return; }
+    if (t.id === 'kmLabSteps') { labStop(); state.lab.step = 0; kmRender(); return; }
+    if (t.id === 'kmLabPrev') { labStop(); state.lab.step = Math.max(0, state.lab.step - 1); kmRender(); return; }
+    if (t.id === 'kmLabNext') { labStop(); state.lab.step = Math.min(labSteps().length - 1, state.lab.step + 1); kmRender(); return; }
+    if (t.id === 'kmLabPlay') { if (state.lab.playing) { labStop(); kmRender(); } else labPlay(); return; }
   });
   document.addEventListener('input', e => {
     if (document.body.dataset.module !== 'kmeans') return;
