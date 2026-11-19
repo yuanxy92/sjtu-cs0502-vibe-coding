@@ -578,8 +578,8 @@
         <span class="course-project-card__main">
           <span class="course-project-card__meta"><span data-language-heading="datamining" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
           <strong data-language-heading="datamining" data-zh="数据挖掘实验室" data-en="Data Mining Lab">Data Mining Lab</strong>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="zh" hidden>一页两个模块：02 关联规则——课件 4 单与 20 单构造例的整张项集格图、观影 330 篮与超市小票 600 篮的 Apriori 逐轮剪枝、置信度单调性手算；03 聚类 K-Means——课件 50 小区早餐供应点分步迭代、典型数据生成器与初值／距离定义对照。</span>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="en">One page, two modules: association rules (full itemset lattice on the courseware 4-basket toy and a 20-basket constructed example, Apriori rounds on 330 movie baskets and 600 receipts, hand-computed confidence monotonicity) and K-Means clustering (step-by-step iterations on the courseware 50-neighbourhood breakfast supply points, plus a typical-data generator with adjustable initials and distance definitions).</span>
+          <span class="course-project-card__summary" data-language-content="datamining" data-language="zh" hidden>两个实验页：① 频繁项集与关联规则（Apriori）；② 聚类（K-Means，DBSCAN 后续加入）。</span>
+          <span class="course-project-card__summary" data-language-content="datamining" data-language="en">Two lab pages: frequent itemsets &amp; association rules (Apriori), and clustering (K-Means; DBSCAN coming).</span>
         </span>
         <span class="course-project-card__action" aria-hidden="true">
           <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="datamining" data-zh="打开实验室" data-en="Open lab">Open lab</span>
@@ -594,17 +594,27 @@
         </div>
         <div class="course-project-note">
           <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="datamining" data-language="zh" hidden>课堂演示：关联规则页格图配色对照课件 p36–38，候选账本＋逐轮漏斗（第 3 轮 909 剪 521），规则置信度手算与一步单调性（p29–30）。K-Means 页①按课件 p48–60 每轮拆"分配／更新"两拍：点圆点看距离代入、点星看均值代入，逐拍 loss 账本说明为什么必收敛；②生成球状／双环／月牙／横带／大小不均／带离群点／均匀等典型数据，K、初值（随机种子或手动点放）、欧氏／曼哈顿／余弦距离均可调，对照 p62 两条局限性。全部数据内嵌、可离线投影，界面为中文。</p>
-          <p data-language-content="datamining" data-language="en">Classroom demo: the association-rules page colours the lattice against slides p36–38 and uses a candidate ledger plus per-round funnel (round 3: 909 candidates, 521 pruned), with hand-computed rule confidence and one-step monotonicity (p29–30). K-Means tab 1 splits each round into assign/update beats following slides p48–60: click a point for distance substitution, click a star for mean substitution, and a per-beat loss ledger shows why it must converge; tab 2 generates typical data (blobs, rings, moons, stripes, uneven sizes, outliers, uniform) with adjustable K, initials (random seed or manual placement), and Euclidean/Manhattan/cosine distance, contrasting the two limitations on p62. All data embedded for offline projection; Chinese interface.</p>
+          <p data-language-content="datamining" data-language="zh" hidden>课堂演示：频繁项集页逐轮走 Apriori 连接／剪枝／计数／筛选（课件项集格图＋真实购物篮候选账本），置信度单调性手算；聚类页 K-Means 逐拍分步与典型数据实验（K／初值／距离可调，p62 局限性复现）。全部数据内嵌、可离线投影，界面为中文。</p>
+          <p data-language-content="datamining" data-language="en">Classroom demos: the frequent-itemset page walks Apriori join/prune/count/filter round by round (courseware lattice plus a real-basket candidate ledger) with hand-computed confidence monotonicity; the clustering page plays K-Means beat by beat and experiments with typical data (adjustable K, initials and distance, p62 reproduced). All data embedded for offline projection; Chinese interface.</p>
         </div>
         <div class="course-video-chapters" aria-label="Data mining lab">
-          <a class="course-video-chapter" href="./projects/data-mining-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
+          <a class="course-video-chapter" href="./projects/association-lab/index.html">
+            <span class="course-video-chapter__number">①</span>
             <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开数据挖掘实验室</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Data Mining Lab</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>关联规则格图与 Apriori 账本＋K-Means 分步迭代与典型数据对照</small>
-              <small data-language-content="datamining" data-language="en">Association-rule lattice and Apriori ledger plus K-Means step player and typical-data comparisons</small>
+              <strong data-language-content="datamining" data-language="zh" hidden>频繁项集与关联规则</strong>
+              <strong data-language-content="datamining" data-language="en">Frequent itemsets &amp; association rules</strong>
+              <small data-language-content="datamining" data-language="zh" hidden>项集格图、Apriori 逐轮账本、置信度单调性手算</small>
+              <small data-language-content="datamining" data-language="en">Itemset lattice, per-round Apriori ledger, hand-computed confidence monotonicity</small>
+            </span>
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          </a>
+          <a class="course-video-chapter" href="./projects/clustering-lab/index.html">
+            <span class="course-video-chapter__number">②</span>
+            <span class="course-video-chapter__content">
+              <strong data-language-content="datamining" data-language="zh" hidden>聚类（K-Means）</strong>
+              <strong data-language-content="datamining" data-language="en">Clustering (K-Means)</strong>
+              <small data-language-content="datamining" data-language="zh" hidden>逐拍分步演示＋典型数据实验；DBSCAN 后续加入</small>
+              <small data-language-content="datamining" data-language="en">Beat-by-beat player plus typical-data experiments; DBSCAN coming</small>
             </span>
             <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
           </a>
