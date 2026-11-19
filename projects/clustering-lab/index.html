@@ -258,7 +258,7 @@ tr.selected td{background:#e7f0ff!important}
     </svg>
     <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
     <h1>聚类实验室</h1>
-    <p class="subtitle">Slide13 聚类（p42–73）：①K-Means 早餐供应点分步演示；②数据与算法实验——12 种典型数据，算法下拉切换 K-Means／DBSCAN，同一份数据两种算法对照（K／初值／距离／Eps／MinPts 可调，p62 局限性、p71–73 核心点／噪声现场复现，动画速度可调）。全部数据内嵌，可离线打开。</p>
+    <p class="subtitle">Slide13 聚类（p42–73）：①K-Means 早餐供应点分步演示；②数据与算法实验——16 种典型数据，算法下拉切换 K-Means／DBSCAN，同一份数据两种算法对照（K／初值／距离／Eps／MinPts 可调，p62 局限性、p71–73 核心点／噪声现场复现，动画速度可调）。全部数据内嵌，可离线打开。</p>
   </header>
 
   <nav class="presets" aria-label="数据集">
@@ -384,6 +384,31 @@ tr.selected td{background:#e7f0ff!important}
     for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) out.push(P(50 + 100 * i, 50 + 100 * j, 0));
     return out;
   }
+  function genSpirals(rng) {
+    const out = [];
+    for (let g = 0; g < 2; g++) for (let i = 0; i < 36; i++) {
+      const t = 0.5 * Math.PI + 2.3 * Math.PI * i / 35, r = 45 * t;
+      out.push(P(600 + r * Math.cos(t + g * Math.PI) + gauss(rng, 0, 6), 470 + r * Math.sin(t + g * Math.PI) + gauss(rng, 0, 6), g));
+    }
+    return out;
+  }
+  function genDumbbell(rng) {
+    const out = [];
+    [[250, 470], [950, 470]].forEach((c, g) => { for (let i = 0; i < 24; i++) out.push(P(gauss(rng, c[0], 45), gauss(rng, c[1], 45), g)); });
+    for (let i = 0; i < 10; i++) out.push(P(340 + i * (520 / 9), 470 + gauss(rng, 0, 8), 2));
+    return out;
+  }
+  function genCross(rng) {
+    const out = [];
+    for (let i = 0; i < 30; i++) out.push(P(100 + i * (1000 / 29), 470 + gauss(rng, 0, 12), 0));
+    for (let i = 0; i < 30; i++) out.push(P(600 + gauss(rng, 0, 12), 100 + i * (740 / 29), 1));
+    return out;
+  }
+  function genTouching(rng) {
+    const out = [];
+    [[450, 470], [750, 470]].forEach((c, g) => { for (let i = 0; i < 36; i++) out.push(P(gauss(rng, c[0], 80), gauss(rng, c[1], 80), g)); });
+    return out;
+  }
 
   const SHAPES = {
     slide50: {
@@ -459,6 +484,30 @@ tr.selected td{background:#e7f0ff!important}
       epsDef: 120, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
       note: '数据没有天然簇：任何划分都"差不多合理"，结果完全由初值和 K 决定。多点几次重新随机，看划分跟着初值变。',
       dbsNote: '数据没有天然簇：Eps=120 时 DBSCAN 给出 6 个大小随意的簇（36/8/9/7/11/3）＋6 噪声——它不"硬分 K 块"，但也不会告诉你"这里没有结构"。Eps 60 几乎全噪声（58 个），Eps 160 并成 3 大块。结果完全由 Eps 决定，和 K-Means 由初值决定一样任意。'
+    },
+    spirals: {
+      label: '双螺旋', kDef: 2, kMax: 8, make: s => genSpirals(mulberry32(s)),
+      epsDef: 100, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '两条互相缠绕的螺旋：K-Means 按到中心的距离切，每条螺旋都被切成几段、两螺旋混在一起。"簇内相似"是沿着螺旋走，不是离中心近——划分式方法的死角。切算法下拉到 DBSCAN 看沿链收簇。',
+      dbsNote: 'Eps=100 时沿螺旋链密度相连，两条螺旋各 36 点完整成簇——任意形状的极端例子（切算法下拉到 K-Means 看同一份数据被切成 44/28、两螺旋混杂）。Eps 调小到 80 看外圈断链（34/35＋3 噪声）、调大到 120 看两螺旋并成一簇。'
+    },
+    dumbbell: {
+      label: '哑铃桥接', kDef: 2, kMax: 8, make: s => genDumbbell(mulberry32(s)),
+      epsDef: 70, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '两团＋一座桥：K-Means（K=2）从桥中间切一刀，桥点被劈成两半。均值＋最近中心只认"离哪团中心近"，不认"桥把两团连起来了"。切算法下拉到 DBSCAN 对照。',
+      dbsNote: 'Eps=70 时桥点间距≈58 ≤ Eps，两团＋桥密度相连成 1 簇 58 点——DBSCAN 认"连通"，桥就是簇的一部分；K-Means 却从桥中间切成 29/29（切算法下拉对照）。Eps 调到 50：桥断成两簇（25/21），12 个桥点／边缘点成噪声。'
+    },
+    cross: {
+      label: '十字交叉', kDef: 2, kMax: 8, make: s => genCross(mulberry32(s)),
+      epsDef: 60, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '十字交叉的两条带：K-Means 按中心切，无论 K=2 还是 4 都把每条带截断。交叉点在几何上属于两条带——划分式只能给一个归属。切算法下拉到 DBSCAN 对照。',
+      dbsNote: 'Eps=60 时交叉点把两条带连成 1 簇 60 点：密度相连不管"看起来是几条"。K-Means 永远按中心切（切算法下拉对照，K=2 得 30/30、每条带都被截断）。Eps 调小：50 时只剩一条链相连（47/13），30 时彻底断开、大半成噪声。'
+    },
+    touching: {
+      label: '相邻双团', kDef: 2, kMax: 8, make: s => genTouching(mulberry32(s)),
+      epsDef: 110, minDef: 3, epsMin: 10, epsMax: 400, epsStep: 5,
+      note: '两团挨得很近、边缘交错：K-Means 仍能硬分成两簇。但"该不该分"取决于业务定义——切算法下拉到 DBSCAN 看它按密度相连并成一簇，两种答案对照着讨论。',
+      dbsNote: '两团边缘交错、密度相连：Eps=110 时 DBSCAN 并成 1 簇 72 点，K-Means 硬分两簇（37/35，切算法下拉对照）。谁对？没有标准答案——聚类是业务定义问题，这正是课堂讨论点。Eps 调小到 90 有 1 个边缘点成噪声、60 两团分开（37/27＋8 噪声）。'
     }
   };
 
