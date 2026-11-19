@@ -1736,7 +1736,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
         <div class="metric"><small>轮次</small><b>${round || '—'}</b></div>
         <div class="metric"><small>本轮改归属</small><b>${changed === null ? '—' : changed}</b></div>
         <div class="metric"><small>最大中心移动（米）</small><b>${moved === null ? '—' : f1(moved)}</b></div>
-        <div class="metric ${converged ? 'good' : ''}"><small>SSE 簇内距离²和</small><b>${sse === null ? '—' : f0(sse)}</b></div>
+        <div class="metric ${converged ? 'good' : ''}"><small>loss 簇内距离²和</small><b>${sse === null ? '—' : f0(sse)}</b></div>
       </div>
       <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>早餐供应点位置示意</h2>${plot}${a ? legend(countsOf(a, state.k)) : '<p class="km-hint">灰点＝尚未分配；星＝初始中心。</p>'}</div>
@@ -1750,11 +1750,11 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
           ${inspector}
         </div>
       </div>
-      <div class="note green"><strong>为什么一定会停（SSE 单调不增）</strong>
-        <p>SSE＝每个点到其中心距离的平方和。中心固定时，把点归给最近中心使 SSE 最小；划分固定时，取均值使 SSE 最小。两拍交替、SSE 只降不升，中心迟早不再移动——这就是 ④ 的停止条件。</p>
+      <div class="note green"><strong>为什么一定会停（loss 单调不增）</strong>
+        <p>loss＝每个点到其中心距离的平方和。中心固定时，把点归给最近中心使 loss 最小；划分固定时，取均值使 loss 最小。两拍交替、loss 只降不升，中心迟早不再移动——这就是 ④ 的停止条件。</p>
       </div>
-      <div class="panel" style="margin-top:20px"><h2>逐拍 SSE 账本</h2>
-        <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>轮</th><th>拍</th><th>改归属</th><th>最大移动</th><th>SSE</th></tr></thead><tbody>${hist.join('')}</tbody></table></div>
+      <div class="panel" style="margin-top:20px"><h2>逐拍 loss 账本</h2>
+        <div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>轮</th><th>拍</th><th>改归属</th><th>最大移动</th><th>loss</th></tr></thead><tbody>${hist.join('')}</tbody></table></div>
       </div>`;
   }
 
@@ -1777,7 +1777,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       const d = maxDrift(pts, run);
       driftTxt = d ? `<div class="note red"><strong>中心被拽偏 ${f1(d.dist)} 米</strong><p>中心 ${d.j + 1} 从 (${f1(d.from.x)}, ${f1(d.from.y)}) 被拉到 (${f1(d.to.x)}, ${f1(d.to.y)})：均值把 ${NOISE.length} 个离群点也算进 Σ（p62 右）。虚线圈＝被拽偏的中心。</p></div>` : '';
     }
-    const metricNote = L.metric === 'euclid' ? '' : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按新距离算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 SSE 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`;
+    const metricNote = L.metric === 'euclid' ? '' : `<div class="note"><strong>距离定义已换</strong><p>只有 ② 分配步的"最近"按新距离算；③ 更新仍是课件的算术均值。均值只是欧氏距离下的最优更新，所以 loss 不再保证单调下降，停止条件仍是"中心不变"或 ${MAXITER} 轮上限。</p></div>`;
 
     const sizes = run ? countsOf(run.a, L.k) : [];
     const hist = run ? run.iters.map((x, i) => `<tr><td>${i + 1}</td><td>${f0(x.sseA)}</td><td>${f0(x.sseU)}</td><td>${f1(x.moved)}</td></tr>`).join('') : '';
@@ -1788,7 +1788,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
         <span class="preset-label">典型数据</span>
         <div class="preset-buttons">${Object.keys(SHAPES).map(key => `<button class="preset-btn" data-kmshape="${key}" aria-pressed="${key === L.shape}">${SHAPES[key].label}</button>`).join('')}</div>
       </div>
-      <div class="outcome ${run ? (run.converged ? 'success' : 'warning') : 'info'}"><div><strong>${run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑'}</strong><p>${run ? `SSE＝${f0(sseOf(pts, run.a, run.cs, L.metric))}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。'}</p></div></div>
+      <div class="outcome ${run ? (run.converged ? 'success' : 'warning') : 'info'}"><div><strong>${run ? (run.converged ? `收敛 · ${run.iters.length} 轮` : `到 ${MAXITER} 轮上限中心仍在动`) : '配置就绪后自动跑'}</strong><p>${run ? `loss＝${f0(sseOf(pts, run.a, run.cs, L.metric))}（按当前距离的簇内距离²和）；虚线＝初始中心→终态中心。` : '随机初值下改任何配置立即重跑；手动初值放满 K 个中心后点"跑到收敛"。'}</p></div></div>
       <div class="grid2 wide-left km-grid">
         <div class="panel"><h2>${S.label} · ${pts.length} 点 · K=${L.k}</h2>${plot}${run ? legend(sizes) : '<p class="km-hint">灰点＝数据；星＝已放的中心。</p>'}</div>
         <div class="km-side">
@@ -1806,9 +1806,9 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
             <div class="metrics">
               <div class="metric"><small>迭代轮数</small><b>${run ? run.iters.length : '—'}</b></div>
               <div class="metric"><small>最大簇 / 最小簇</small><b>${run ? Math.max(...sizes) + ' / ' + Math.min(...sizes) : '—'}</b></div>
-              <div class="metric ${run && run.converged ? 'good' : 'bad'}"><small>SSE</small><b>${run ? f0(sseOf(pts, run.a, run.cs, L.metric)) : '—'}</b></div>
+              <div class="metric ${run && run.converged ? 'good' : 'bad'}"><small>loss</small><b>${run ? f0(sseOf(pts, run.a, run.cs, L.metric)) : '—'}</b></div>
             </div>
-            ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 SSE</th><th>更新后 SSE</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 SSE。</p>'}
+            ${run ? `<div class="table-wrap scroll-420" style="margin-top:14px"><table class="trace"><thead><tr><th>轮</th><th>分配后 loss</th><th>更新后 loss</th><th>最大移动</th></tr></thead><tbody>${hist}</tbody></table></div>` : '<p class="km-hint">跑起来后这里逐轮列 loss。</p>'}
           </div>
         </div>
       </div>
