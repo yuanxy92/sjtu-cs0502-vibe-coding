@@ -209,12 +209,59 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
 
 .footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;font-size:19px;color:var(--muted);display:grid;gap:6px}
 .footer a{color:var(--blue-dark);font-weight:650}
+
+/* Phone entry (QR) */
+.phone-entry{margin-top:14px;border:1px dashed #93b4e6;border-radius:10px;background:rgba(255,255,255,.72);padding:4px 16px;max-width:760px}
+.phone-entry summary{font-size:20px;font-weight:750;color:var(--blue-dark);padding:10px 0}
+.phone-entry[open]{border-style:solid}
+.phone-body{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;padding:6px 0 16px}
+.phone-body svg{flex:0 0 auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.phone-copy{display:grid;gap:8px;font-size:19px;color:var(--muted);min-width:0;max-width:52ch}
+.phone-copy code{font-family:var(--mono);font-size:18px;color:#17427a;background:#f0f6ff;border:1px solid #c7d7ef;border-radius:6px;padding:6px 10px;overflow-wrap:anywhere}
+
+/* Manual build mode (tab ③, mobile-first) */
+.man-wrap{display:grid;gap:18px;margin-top:18px}
+.man-wrap>.outcome{margin-top:0}
+.man-ctl h2{margin-bottom:10px}
+.man-ctl-row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.man-btns{display:flex;flex-wrap:wrap;gap:8px}
+.man-btns button{min-height:46px;font-size:19px}
+.man-btns button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.man-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+.man-node{cursor:pointer}
+.man-node rect{transition:stroke .15s,fill .2s}
+.man-node:hover rect{stroke-width:3.2}
+.man-node:focus{outline:none}
+.man-node:focus-visible rect{stroke:var(--blue);stroke-width:4}
+.cand-list{display:grid;gap:10px;margin-top:12px}
+.cand-card{display:grid;gap:5px;text-align:left;width:100%;min-height:64px;padding:12px 16px;border:1.5px solid #bac8da;border-radius:10px;background:#fff;font-weight:400}
+.cand-card:hover:not(:disabled){border-color:#6c96e8;background:#eff5ff}
+.cand-card.pure-hit{border-color:#86c9a9;background:#f0fbf5}
+.cand-card.pure-hit:hover:not(:disabled){border-color:#4ea87c;background:#e4f6ec}
+.cc-title{font-size:21px;font-weight:750;color:#17427a}
+.cc-groups{font-size:18px;color:var(--muted);line-height:1.5}
+.cc-score{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-dark)}
+.leaf-btn{width:100%;min-height:56px;margin-top:14px;border:1.5px dashed #86c9a9;background:#f0fbf5;color:#116149;font-size:20px;font-weight:750;border-radius:10px}
+.leaf-btn:hover:not(:disabled){background:#e4f6ec;border-color:#4ea87c}
+.leaf-btn.reopen{border-color:#e6be66;background:#fff9eb;color:#854d0e}
+.leaf-btn.reopen:hover:not(:disabled){background:#fff3d6;border-color:#d9a93f}
+#manEditor .table-wrap{margin-top:8px}
+@media (min-width:1101px){
+  .man-grid{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}
+}
 @media (max-width:1100px){
   .grid2,.grid2.dt-grid{grid-template-columns:minmax(0,1fr)}
   :root{font-size:20px}
   .header-motif{display:none}
   .dt-side{position:static;max-height:none;overflow:visible}
   .step-view{max-height:none}
+  .app{padding:20px 16px 32px}
+  .panel{padding:18px 16px}
+  .outcome{padding:14px 16px}
+  .outcome strong{font-size:24px}
+  .outcome p{font-size:20px}
+  .tabs button{padding:12px 16px;font-size:20px}
+  .phone-body svg{width:140px;height:140px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -243,12 +290,24 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
     </svg>
     <p class="eyebrow">计算机科学导论 · 数据挖掘</p>
     <h1>决策树实验室</h1>
-    <p class="subtitle">Slide13 分类·决策树（p78–94）：①分步演示——课件 p79 捐赠例 11 人，错误率平局（2/11）→ 基尼系数破局（0.297 对 0.260）→ p88 黑板树逐节点生长 → Cindy 预测路径；②数据与算法实验——4 份内嵌数据，划分准则（错误率／基尼／信息增益）、最大深度、停止样本阈值、阈值候选可调，节点检查器全量代入，样本预测沿树高亮。全部数据内嵌，可离线打开。</p>
+    <p class="subtitle">Slide13 分类·决策树（p78–94）：①分步演示——课件 p79 捐赠例 11 人，错误率平局（2/11）→ 基尼系数破局（0.297 对 0.260）→ p88 黑板树逐节点生长 → Cindy 预测路径；②数据与算法实验——4 份内嵌数据，划分准则（错误率／基尼／信息增益）、最大深度、停止样本阈值、阈值候选可调，节点检查器全量代入，样本预测沿树高亮；③自己画树——每个节点选哪一刀由学生自己决定，手机扫码即玩，画完与算法树比正确率与叶数。全部数据内嵌，可离线打开。</p>
+    <details class="phone-entry">
+      <summary>学生手机入口 · 扫码打开（课堂投影用）</summary>
+      <div class="phone-body">
+        <svg xmlns="http://www.w3.org/2000/svg" width="168" height="168" viewBox="0 0 45 45" shape-rendering="crispEdges" role="img" aria-label="决策树实验室网址二维码"><path fill="#ffffff" d="M0 0h45v45H0z"/><path stroke="#000000" d="M4 4.5h7m2 0h3m6 0h4m1 0h1m1 0h2m1 0h1m1 0h7M4 5.5h1m5 0h1m3 0h1m2 0h3m1 0h2m1 0h3m4 0h1m2 0h1m5 0h1M4 6.5h1m1 0h3m1 0h1m1 0h1m3 0h1m1 0h1m6 0h3m2 0h3m1 0h1m1 0h3m1 0h1M4 7.5h1m1 0h3m1 0h1m1 0h4m2 0h1m2 0h2m1 0h1m1 0h7m1 0h1m1 0h3m1 0h1M4 8.5h1m1 0h3m1 0h1m1 0h3m2 0h1m1 0h1m3 0h2m1 0h2m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1M4 9.5h1m5 0h1m1 0h3m2 0h1m3 0h2m1 0h1m1 0h1m1 0h2m1 0h2m1 0h1m5 0h1M4 10.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M12 11.5h2m3 0h1m2 0h1m1 0h2m1 0h1m1 0h1m2 0h1m1 0h1M4 12.5h1m1 0h5m4 0h1m2 0h5m4 0h3m2 0h1m1 0h5M5 13.5h2m1 0h1m2 0h1m1 0h2m1 0h4m2 0h4m1 0h1m4 0h2m1 0h1m1 0h1m1 0h1M4 14.5h2m3 0h4m2 0h1m1 0h1m1 0h2m1 0h1m2 0h2m3 0h3m1 0h3m1 0h3M7 15.5h1m7 0h1m3 0h1m2 0h1m1 0h2m2 0h1m1 0h1m3 0h3m3 0h1M6 16.5h5m4 0h1m1 0h3m1 0h3m3 0h5m1 0h8M5 17.5h2m2 0h1m2 0h1m4 0h1m2 0h2m1 0h2m2 0h1m1 0h1m2 0h1m2 0h1M7 18.5h2m1 0h1m1 0h1m2 0h7m2 0h3m1 0h5m1 0h4m1 0h2M4 19.5h2m5 0h1m2 0h1m1 0h4m4 0h4m2 0h2m2 0h3m2 0h2M9 20.5h2m2 0h1m2 0h1m1 0h1m3 0h2m2 0h6m1 0h2m1 0h1m1 0h2M6 21.5h1m4 0h1m2 0h3m2 0h2m1 0h3m1 0h2m1 0h1m2 0h2m4 0h2M5 22.5h1m4 0h1m2 0h1m2 0h1m1 0h2m1 0h1m5 0h1m1 0h1m2 0h4m2 0h2m1 0h3M5 23.5h1m1 0h1m4 0h1m2 0h1m1 0h1m1 0h2m1 0h3m1 0h5m2 0h5m4 0h1M4 24.5h2m4 0h1m1 0h4m1 0h2m2 0h3m2 0h1m1 0h4m2 0h1m1 0h3M5 25.5h1m2 0h1m4 0h2m1 0h1m1 0h1m1 0h2m1 0h1m1 0h4m1 0h1m1 0h1m4 0h1M6 26.5h1m2 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m2 0h3m1 0h1m1 0h3m1 0h4m2 0h1M4 27.5h6m1 0h1m1 0h2m1 0h2m2 0h3m1 0h2m1 0h1m3 0h1m3 0h2m2 0h2M4 28.5h1m1 0h2m1 0h3m1 0h1m3 0h1m1 0h2m5 0h2m1 0h2m2 0h2m1 0h1m1 0h3M4 29.5h1m6 0h2m5 0h2m2 0h2m1 0h3m1 0h1m2 0h1m2 0h1M4 30.5h1m1 0h1m2 0h2m3 0h1m4 0h2m1 0h1m1 0h1m6 0h1m1 0h1m2 0h2m1 0h2M4 31.5h1m1 0h1m5 0h1m2 0h3m1 0h1m2 0h1m1 0h3m1 0h1m1 0h1m4 0h2M4 32.5h1m1 0h1m3 0h2m5 0h6m1 0h1m1 0h5m1 0h8M12 33.5h1m4 0h1m2 0h1m2 0h3m1 0h1m2 0h3m3 0h2M4 34.5h7m2 0h4m2 0h2m1 0h1m7 0h1m1 0h1m1 0h1m1 0h1m1 0h3M4 35.5h1m5 0h1m1 0h2m1 0h1m1 0h4m3 0h2m2 0h1m1 0h1m1 0h1m3 0h2M4 36.5h1m1 0h3m1 0h1m1 0h2m2 0h2m4 0h1m3 0h1m1 0h9m1 0h1m1 0h1M4 37.5h1m1 0h3m1 0h1m1 0h2m4 0h3m2 0h2m2 0h1m3 0h1m1 0h2m1 0h3m1 0h1M4 38.5h1m1 0h3m1 0h1m1 0h4m1 0h1m3 0h2m1 0h1m5 0h4m5 0h2M4 39.5h1m5 0h1m2 0h1m2 0h3m1 0h1m1 0h1m1 0h2m1 0h2m1 0h4m2 0h1m3 0h1M4 40.5h7m1 0h1m3 0h3m2 0h2m1 0h1m1 0h1m1 0h3m2 0h1m2 0h5"/></svg>
+        <div class="phone-copy">
+          <p><strong>扫码，或输入网址：</strong></p>
+          <code>pi.xiaoyunyuan.net/sjtu-cs0502-vibe-coding/projects/decision-tree-lab/</code>
+          <p>打开后切到「③ 自己画树」：每个节点选哪一刀划分由学生自己决定，设叶、撤销、提示、对比算法树都在手机上完成。无需安装、无需登录。</p>
+        </div>
+      </div>
+    </details>
   </header>
 
   <nav id="dtTabs" class="tabs" role="tablist" aria-label="决策树实验阶段">
     <button data-dttab="demo" role="tab" aria-selected="true">① 分步演示</button>
     <button data-dttab="lab" role="tab" aria-selected="false">② 数据与算法实验</button>
+    <button data-dttab="man" role="tab" aria-selected="false">③ 自己画树</button>
     <a class="sib-link" href="../clustering-lab/">聚类实验室 ↗</a>
   </nav>
 
@@ -257,7 +316,7 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   </section>
 
   <footer class="footer">
-    <p class="muted">对应 Slide13 第 78–94 页：决策树概念 p78、捐赠例与四步算法 p79–85、新样本预测 p86–87、黑板树 p88、核心问题 p89、错误率 p90–91、基尼系数 p92–93、停止条件 p94。叶节点颜色＝类别：绿＝捐赠／是，琥珀＝不捐赠／否；内部节点＝白底蓝框，当前节点＝蓝色粗框，预测路径＝绿色粗框。</p>
+    <p class="muted">对应 Slide13 第 78–94 页：决策树概念 p78、捐赠例与四步算法 p79–85、新样本预测 p86–87、黑板树 p88、核心问题 p89、错误率 p90–91、基尼系数 p92–93、停止条件 p94。叶节点颜色＝类别：绿＝捐赠／是，琥珀＝不捐赠／否；内部节点＝白底蓝框，当前节点＝蓝色粗框，预测路径＝绿色粗框。「③ 自己画树」中学生手选每一刀划分，琥珀虚线框＝待划分节点，画完自动与算法树对比正确率与叶数。</p>
     <p class="muted">同卡片姊妹页面：<a href="../association-lab/">频繁项集与关联规则实验室 ↗</a> · <a href="../clustering-lab/">聚类实验室（K-Means＋DBSCAN）↗</a> · <a href="../clustering-quiz/">聚类课堂小测 ↗</a></p>
   </footer>
 </main>
@@ -438,6 +497,10 @@ function candidates(rows, ds, crit, thrMode) {
       else {
         const s = vals.slice().sort((a, b) => a - b);
         thrs = s.slice(0, -1).map((v, i) => (v + s[i + 1]) / 2);
+        if (thrMode === 'both' && ds.slideThr && ds.slideThr[f.key] != null && !thrs.includes(ds.slideThr[f.key])) {
+          thrs.push(ds.slideThr[f.key]);
+          thrs.sort((a, b) => a - b);
+        }
       }
     } else thrs = f.values.filter(v => vals.includes(v));
     thrs.forEach((thr, ti) => {
@@ -504,7 +567,45 @@ const STOP_TXT = {
   5: '停止条件 5（实验室扩展）：任何划分都不能降低不纯度'
 };
 
-const CORE = { DATASETS, DS, CRITS, fmtNum, countsOf, impurity, impSub, groupsFor, candidates, buildTree, predict, trainMis, treeStats, STOP_TXT };
+/* ---------------- 自己画树（tab ③）核心：学生手选划分，节点形状与自动树兼容 ---------------- */
+let MID = 0;
+function majorityOf(counts, ds) {
+  let best = ds.classes[0];
+  ds.classes.forEach(k => { if (counts[k] > counts[best]) best = k; });
+  return best;
+}
+function manualNode(rows, ds, depth) {
+  const counts = countsOf(rows, ds);
+  return { id: MID++, depth, rows, counts, total: rows.length, leaf: false, children: null };
+}
+function manualRoot(ds) { MID = 0; return manualNode(ds.rows, ds, 0); }
+function manualSplit(node, cand, ds) {
+  node.feature = cand.f; node.thr = cand.thr; node.groups = cand.groups;
+  node.children = cand.groups.map(g => manualNode(g.rows, ds, node.depth + 1));
+  return node.children;
+}
+function manualLeaf(node, ds) {
+  node.leaf = true; node.label = majorityOf(node.counts, ds); node.stop = 'man';
+  node.children = null; delete node.feature; delete node.thr; delete node.groups;
+}
+function manualReopen(node) {
+  node.leaf = false; node.children = null;
+  delete node.label; delete node.stop; delete node.feature; delete node.thr; delete node.groups;
+}
+function manualPending(root) {
+  const out = [];
+  (function walk(n) { if (!n.leaf && !n.children) out.push(n); else if (n.children) n.children.forEach(walk); })(root);
+  return out;
+}
+function manualComplete(root) { return manualPending(root).length === 0; }
+function manStats(root, ds) {
+  let leaves = 0, maxD = 0;
+  (function walk(n) { maxD = Math.max(maxD, n.depth); if (n.leaf) leaves++; else if (n.children) n.children.forEach(walk); })(root);
+  const done = manualComplete(root);
+  return { leaves, maxD, done, pending: manualPending(root).length, mis: done ? trainMis(root, ds) : null };
+}
+
+const CORE = { DATASETS, DS, CRITS, fmtNum, countsOf, impurity, impSub, groupsFor, candidates, buildTree, predict, trainMis, treeStats, STOP_TXT, majorityOf, manualRoot, manualNode, manualSplit, manualLeaf, manualReopen, manualPending, manualComplete, manStats };
 if (typeof module !== 'undefined' && module.exports) module.exports = CORE;
 if (typeof window === 'undefined') return;
 window.DecisionTreeCore = CORE;
@@ -512,7 +613,8 @@ window.DecisionTreeCore = CORE;
 /* ---------------- 状态 ---------------- */
 const state = {
   tab: 'demo', beat: 0, playing: false, speed: 800, timer: null,
-  lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null }
+  lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null },
+  man: { ds: 'donate', crit: 'gini', root: manualRoot(DS.donate), sel: 0, hist: [], hint: false, compare: false }
 };
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -939,6 +1041,166 @@ function labLive() {
   });
 }
 
+/* ---------------- 自己画树（tab ③，手机优先） ---------------- */
+function manNodeById(root, id) {
+  let hit = null;
+  (function walk(n) { if (n.id === id) hit = n; else if (n.children) n.children.forEach(walk); })(root);
+  return hit;
+}
+function manAlgo() {
+  const M = state.man;
+  return buildTree(DS[M.ds].rows, DS[M.ds], { crit: M.crit, maxDepth: 6, minSamples: 2, thrMode: 'auto' });
+}
+function manLayout(root) {
+  const SLOT = 150, ROW = 118, PAD = 46;
+  let slot = 0, maxD = 0; const pos = new Map();
+  (function walk(n) {
+    maxD = Math.max(maxD, n.depth);
+    if (n.leaf || !n.children) { pos.set(n.id, { x: (slot + 0.5) * SLOT + 12, y: n.depth * ROW + PAD }); slot++; }
+    else {
+      n.children.forEach(walk);
+      const xs = n.children.map(c => pos.get(c.id).x);
+      pos.set(n.id, { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: n.depth * ROW + PAD });
+    }
+  })(root);
+  return { pos, W: Math.max(slot * SLOT + 24, 320), H: maxD * ROW + PAD + 58 };
+}
+function manSvg(root, selId, crit, interactive) {
+  const ds = DS[state.man.ds];
+  const lay = manLayout(root);
+  let edges = '', nodes = '';
+  (function walk(n) {
+    const p = lay.pos.get(n.id);
+    if (n.children) n.children.forEach((c, i) => {
+      const q = lay.pos.get(c.id);
+      const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
+      edges += `<line x1="${p.x}" y1="${p.y + 34}" x2="${q.x}" y2="${q.y - 34}" stroke="#94a3b8" stroke-width="2.2"/>` +
+        `<text x="${mx + (q.x < p.x ? -10 : 10)}" y="${my}" text-anchor="${q.x < p.x ? 'end' : 'start'}" font-size="16" font-weight="700" fill="#17427a">${esc(n.groups[i].label.replace(/^[^≤>=]+[≤>=]\s*/, ''))}</text>`;
+      walk(c);
+    });
+    const pending = !n.leaf && !n.children;
+    let line1, line2, fill = '#fff', stroke = '#1d4ed8', tcol = '#17427a', dash = '';
+    if (pending) {
+      line1 = '待划分'; line2 = `${n.total}人 · ${impurity(n.counts, n.total, crit).toFixed(3)}`;
+      fill = '#fff9eb'; stroke = '#b45309'; tcol = '#854d0e'; dash = ' stroke-dasharray="6 4"';
+    } else if (n.leaf) {
+      const pure = n.counts[n.label] === n.total;
+      line1 = ds.className[n.label]; line2 = `${n.counts[n.label]}/${n.total} ${pure ? '纯' : '多数'}`;
+      fill = n.label === ds.classes[0] ? '#d8f3e3' : '#fff0cd';
+      stroke = n.label === ds.classes[0] ? '#15803d' : '#b45309';
+      tcol = n.label === ds.classes[0] ? '#116149' : '#854d0e';
+    } else {
+      line1 = n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}` : `${n.feature.label}？`;
+      line2 = `${n.total}人 · ${n.groups.length} 分支`;
+    }
+    const sel = interactive && n.id === selId;
+    nodes += `<g class="man-node${pending ? ' pending' : ''}" ${interactive ? `data-mannode="${n.id}" tabindex="0" role="button" aria-label="节点${n.id}：${esc(line1)}，${esc(line2)}"` : ''}>` +
+      (sel ? `<rect x="${p.x - 72}" y="${p.y - 38}" width="144" height="76" rx="13" fill="none" stroke="#2563eb" stroke-width="4"/>` : '') +
+      `<rect x="${p.x - 68}" y="${p.y - 34}" width="136" height="68" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2.2"${dash}/>` +
+      `<text x="${p.x}" y="${p.y - 6}" text-anchor="middle" font-size="18" font-weight="750" fill="${tcol}">${esc(line1)}</text>` +
+      `<text x="${p.x}" y="${p.y + 20}" text-anchor="middle" font-size="16" fill="#53647c">${esc(line2)}</text></g>`;
+  })(root);
+  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${lay.W}px;min-width:100%" role="img" aria-label="${interactive ? '你画的决策树' : '算法自动建的决策树'}">${edges}${nodes}</svg></div>`;
+}
+function manCandCards(node, ds, cands, imp, hint) {
+  if (!cands.length) return `<div class="note"><strong>无法再分（停止条件 2）</strong><p>这个节点里所有样本的属性取值都相同，没有可用的划分——只能设为叶子。</p></div>`;
+  return `<div class="cand-list">` + cands.map((c, i) => {
+    const groups = c.groups.map(g => {
+      const cc = countsOf(g.rows, ds);
+      return `${g.label}：${g.rows.length}人（${ds.classes.map(k => `${k}${cc[k]}`).join('·')}）`;
+    }).join('　');
+    const drop = imp - c.score;
+    const pureHit = c.score <= 1e-9;
+    return `<button class="cand-card${pureHit ? ' pure-hit' : ''}" data-mancand="${i}">` +
+      `<span class="cc-title">${esc(c.f.type === 'num' ? `${c.f.label} ≤ ${fmtNum(c.thr)}` : `按 ${c.f.label} 分（${c.groups.length} 路）`)}` +
+      (hint && i === 0 ? ' <span class="badge core">算法之选</span>' : '') + (pureHit ? ' <span class="badge hi">一刀全纯</span>' : '') + `</span>` +
+      `<span class="cc-groups">${esc(groups)}</span>` +
+      `<span class="cc-score">${CRITS[state.man.crit].name} ${c.score.toFixed(3)} · 不纯度下降 ${drop.toFixed(3)}</span></button>`;
+  }).join('') + `</div>`;
+}
+function manEditor() {
+  const M = state.man, ds = DS[M.ds];
+  const node = manNodeById(M.root, M.sel) || M.root;
+  const imp = impurity(node.counts, node.total, M.crit);
+  const maj = majorityOf(node.counts, ds);
+  const pure = node.counts[maj] === node.total;
+  const misNames = new Set((manStats(M.root, ds).mis || []).map(r => r.name));
+  let body = '';
+  if (!node.leaf && !node.children) {
+    const cands = candidates(node.rows, ds, M.crit, ds.slideThr ? 'both' : 'auto');
+    body = `<h3>选一刀划分（点卡片即生效）</h3>` +
+      `<p class="muted">共 ${cands.length} 个候选，按${CRITS[M.crit].name}从优到劣排列${M.ds === 'donate' ? '；含全部相邻中点＋课件给定的两个阈值（年龄 50／薪资 60,000）' : ''}。</p>` +
+      manCandCards(node, ds, cands, imp, M.hint) +
+      `<button class="leaf-btn" data-act="manleaf">设为叶子 → ${esc(ds.className[maj])}（${node.counts[maj]}/${node.total}${pure ? '，纯' : '，多数'}）</button>`;
+  } else if (node.children) {
+    body = `<div class="note blue"><strong>此节点已划分：${esc(node.feature.type === 'num' ? `${node.feature.label} ≤ ${fmtNum(node.thr)}` : node.feature.label)}</strong><p>${node.groups.map(g => `${esc(g.label)} → ${g.rows.length}人`).join('；')}。点孩子节点继续画，或撤销这一刀重选。</p></div>` +
+      `<button class="leaf-btn reopen" data-act="manreopen">撤销此划分，重新选</button>`;
+  } else {
+    body = `<div class="note ${pure ? 'green' : ''}"><strong>叶子：${esc(ds.className[node.label])}</strong><p>${node.counts[node.label]}/${node.total} ${pure ? '全同类（停止条件 1）' : '多数表决'}${misNames.size && node.rows.some(r => misNames.has(r.name)) ? '；此叶有错分样本（下表红底）' : ''}。</p></div>` +
+      `<button class="leaf-btn reopen" data-act="manreopen">改主意：重新划分此节点</button>`;
+  }
+  return `<div class="panel" id="manEditor"><h2>节点 #${node.id} · 深度 ${node.depth} · ${node.total} 人</h2>` +
+    countChips(ds, node.counts) +
+    `<div class="formula-card"><div class="formula">${CRITS[M.crit].name} = ${impSub(node.counts, node.total, M.crit)}</div><div class="formula-sub">${esc(CRITS[M.crit].def)} · ${esc(CRITS[M.crit].pick)}</div></div>` +
+    body +
+    `<h3>此节点样本 ${node.total}</h3>` + rowTable(ds, node.rows, r => misNames.has(r.name)) + `</div>`;
+}
+function manStatus() {
+  const M = state.man, ds = DS[M.ds];
+  const st = manStats(M.root, ds);
+  const n = ds.rows.length;
+  if (!st.done) {
+    return `<div class="outcome info" id="manStatus"><div><strong>还有 ${st.pending} 个节点待划分</strong><p>已设 ${st.leaves} 个叶 · 点树上虚线框，选一刀划分或设为叶子。目标：用最少的叶，把 ${n} 个样本全部分对。</p></div></div>`;
+  }
+  const algo = manAlgo(), aSt = treeStats(algo), aMis = trainMis(algo, ds);
+  const acc = n - st.mis.length, aAcc = n - aMis.length;
+  let cls, msg;
+  if (acc > aAcc) { cls = 'success'; msg = `比算法还准（${acc}/${n} vs ${aAcc}/${n}）！但叶 ${st.leaves} 个 vs 算法 ${aSt.leaves} 个——想想是不是把个别样本硬背下来了（过拟合）。`; }
+  else if (acc === aAcc && st.leaves <= aSt.leaves) { cls = 'success'; msg = `和算法一样准（${acc}/${n}），叶还更少或相同（${st.leaves} ≤ ${aSt.leaves}）——漂亮，这就是棵好树！`; }
+  else if (acc === aAcc) { cls = 'info'; msg = `一样准（${acc}/${n}），但叶更多（${st.leaves} > ${aSt.leaves}）：试试撤销某些划分，树可以更简洁。`; }
+  else {
+    cls = 'warning';
+    const names = st.mis.map(r => esc(r.name)).join('、');
+    if (st.leaves < aSt.leaves) {
+      msg = `训练正确率 ${acc}/${n}，算法 ${aAcc}/${n}——但算法用了 ${aSt.leaves} 个叶，你只用了 ${st.leaves} 个：它把每个样本都背下来了（过拟合）。${M.ds === 'donate' ? '课件 p88 的黑板树也正是 10/11（错 Mary）。' : ''}错分：${names}。可以再分错分的叶追平算法，或保留更简洁的树——这正是简洁与准确的权衡。`;
+    } else {
+      msg = `还差一点：${acc}/${n} vs 算法 ${aAcc}/${n}（算法 ${aSt.leaves} 个叶，你 ${st.leaves} 个）。错分：${names}——点包含它们的叶再分一刀，或开「提示」看这一刀算法会怎么选。`;
+    }
+  }
+  return `<div class="outcome ${cls}" id="manStatus"><div><strong>画完了！训练正确率 ${acc}/${n} · 叶 ${st.leaves} 个 · 深度 ${st.maxD}</strong><p>${msg}</p></div></div>`;
+}
+function renderMan() {
+  const M = state.man, ds = DS[M.ds];
+  const st = manStats(M.root, ds);
+  const algo = M.compare ? manAlgo() : null;
+  const aSt = algo ? treeStats(algo) : null, aMis = algo ? trainMis(algo, ds) : null;
+  $('#dtRoot').innerHTML =
+    `<div class="man-wrap">` + manStatus() +
+    `<div class="panel man-ctl"><h2>画树工具</h2><div class="man-ctl-row">` +
+    `<div class="ctl-select"><span>数据</span><select id="manDs">${DATASETS.map(d => `<option value="${d.id}"${M.ds === d.id ? ' selected' : ''}>${esc(d.name)}（${esc(d.tag)}）</option>`).join('')}</select></div>` +
+    `<div class="ctl-select"><span>准则</span><select id="manCrit">${Object.keys(CRITS).map(k => `<option value="${k}"${M.crit === k ? ' selected' : ''}>${esc(CRITS[k].name)}（${esc(CRITS[k].ref)}）</option>`).join('')}</select></div>` +
+    `<div class="man-btns">` +
+    `<button data-act="manundo" ${M.hist.length ? '' : 'disabled'}>撤销一步</button>` +
+    `<button data-act="manreset">重新画</button>` +
+    `<button data-act="manhint" aria-pressed="${M.hint}">提示：算法之选</button>` +
+    `<button data-act="mancompare" aria-pressed="${M.compare}">对比算法树</button>` +
+    `</div></div>` +
+    `<p class="muted" style="font-size:18px;margin-top:10px">每一刀都由你选：点虚线节点 → 挑一个候选划分（或设叶）。撤销不限次；「提示」标出算法会选哪刀，但不替你选。</p></div>` +
+    `<div class="man-grid"><div style="min-width:0">` +
+    `<div class="panel"><h2>你的树（点节点继续画）</h2>` + manSvg(M.root, M.sel, M.crit, true) +
+    `<div class="dt-legend"><span><span class="dt-sw" style="border-color:#b45309;background:#fff9eb"></span>待划分</span>` +
+    `<span><span class="dt-sw" style="border-color:#1d4ed8;background:#fff"></span>已划分</span>` +
+    `<span><span class="dt-sw" style="border-color:#15803d;background:#d8f3e3"></span>叶 · ${esc(ds.className[ds.classes[0]])}</span>` +
+    `<span><span class="dt-sw" style="border-color:#b45309;background:#fff0cd"></span>叶 · ${esc(ds.className[ds.classes[1]])}</span>` +
+    `<span><span class="dt-sw" style="border-color:#2563eb;background:#fff;border-width:4px"></span>当前节点</span></div>` +
+    `<p class="dt-hint">树宽超出屏幕时左右滑动（字号不缩）。</p></div>` +
+    (algo ? `<div class="panel" style="margin-top:20px"><h2>算法的树（同一准则，自动选最优）</h2>` + manSvg(algo, -1, M.crit, false) +
+      `<div class="formula-card"><div class="formula">算法：正确率 <span class="hl">${ds.rows.length - aMis.length}/${ds.rows.length}</span> · 叶 ${aSt.leaves} 个 · 深度 ${aSt.maxD}</div><div class="formula-sub">你的树不必和它一样——分得对、叶少，就是好树。</div></div></div>` : '') +
+    `</div><div style="min-width:0">` + manEditor() + `</div></div>` +
+    `<div class="note blue"><strong>玩法与 stopping（p94）</strong><p>纯节点（全同类）自然该设叶；样本太少或属性取值全同时也只能设叶——这正是课件的三个停止条件。随时开「对比算法树」看贪心算法怎么画，再想想你的树为什么不同。</p></div>` +
+    `</div>`;
+}
+
 /* ---------------- 播放与事件 ---------------- */
 function stopPlay() {
   if (state.timer) { clearInterval(state.timer); state.timer = null; }
@@ -955,7 +1217,12 @@ function startPlay() {
     if (state.beat >= BEATS.length - 1) { stopPlay(); renderDemo(); }
   }, state.speed);
 }
-function render() { state.tab === 'demo' ? renderDemo() : renderLab(); }
+function render() { state.tab === 'demo' ? renderDemo() : state.tab === 'lab' ? renderLab() : renderMan(); }
+function manPushHist() {
+  const M = state.man;
+  M.hist.push(JSON.stringify({ root: M.root, sel: M.sel }));
+  if (M.hist.length > 60) M.hist.shift();
+}
 function labRebuild() {
   state.lab.sel = 0; state.lab.pred = null; state.lab.sample = null;
   renderLab();
@@ -973,6 +1240,22 @@ document.addEventListener('click', (e) => {
   if (dot) { stopPlay(); state.beat = +dot.getAttribute('data-dot'); renderDemo(); return; }
   const nd = e.target.closest('[data-node]');
   if (nd) { state.lab.sel = +nd.getAttribute('data-node'); renderLab(); return; }
+  const mn = e.target.closest('[data-mannode]');
+  if (mn) { state.man.sel = +mn.getAttribute('data-mannode'); renderMan(); return; }
+  const mc = e.target.closest('[data-mancand]');
+  if (mc) {
+    const M = state.man, ds = DS[M.ds];
+    const node = manNodeById(M.root, M.sel);
+    if (!node || node.leaf || node.children) return;
+    const cands = candidates(node.rows, ds, M.crit, ds.slideThr ? 'both' : 'auto');
+    const c = cands[+mc.getAttribute('data-mancand')];
+    if (!c) return;
+    manPushHist();
+    const kids = manualSplit(node, c, ds);
+    M.sel = kids[0].id;
+    renderMan();
+    return;
+  }
   const act = e.target.closest('[data-act]');
   if (!act) return;
   const a = act.getAttribute('data-act');
@@ -981,6 +1264,36 @@ document.addEventListener('click', (e) => {
   else if (a === 'reset') { stopPlay(); state.beat = 0; renderDemo(); }
   else if (a === 'play') { state.playing ? (stopPlay(), renderDemo()) : (startPlay(), renderDemo()); }
   else if (a === 'labreset') { Object.assign(state.lab, { crit: 'gini', depth: 6, min: 4, thrMode: state.lab.ds === 'donate' ? 'slide' : 'auto' }); labRebuild(); }
+  else if (a === 'manundo') {
+    const M = state.man;
+    if (!M.hist.length) return;
+    const snap = JSON.parse(M.hist.pop());
+    M.root = snap.root; M.sel = snap.sel;
+    renderMan();
+  }
+  else if (a === 'manreset') {
+    const M = state.man;
+    M.root = manualRoot(DS[M.ds]); M.sel = 0; M.hist = [];
+    renderMan();
+  }
+  else if (a === 'manhint') { state.man.hint = !state.man.hint; renderMan(); }
+  else if (a === 'mancompare') { state.man.compare = !state.man.compare; renderMan(); }
+  else if (a === 'manleaf') {
+    const M = state.man, node = manNodeById(M.root, M.sel);
+    if (!node || node.leaf || node.children) return;
+    manPushHist();
+    manualLeaf(node, DS[M.ds]);
+    const next = manualPending(M.root)[0];
+    if (next) M.sel = next.id;
+    renderMan();
+  }
+  else if (a === 'manreopen') {
+    const M = state.man, node = manNodeById(M.root, M.sel);
+    if (!node || (!node.leaf && !node.children)) return;
+    manPushHist();
+    manualReopen(node);
+    renderMan();
+  }
   else if (a === 'predict') {
     const ds = DS[state.lab.ds];
     ds.features.forEach(f => {
@@ -995,7 +1308,9 @@ document.addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   const nd = e.target.closest && e.target.closest('[data-node]');
-  if (nd && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.lab.sel = +nd.getAttribute('data-node'); renderLab(); }
+  if (nd && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.lab.sel = +nd.getAttribute('data-node'); renderLab(); return; }
+  const mn = e.target.closest && e.target.closest('[data-mannode]');
+  if (mn && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); state.man.sel = +mn.getAttribute('data-mannode'); renderMan(); }
 });
 document.addEventListener('input', (e) => {
   const id = e.target.id;
@@ -1013,6 +1328,12 @@ document.addEventListener('change', (e) => {
   if (id === 'dtDs') { state.lab.ds = e.target.value; state.lab.thrMode = e.target.value === 'donate' ? 'slide' : 'auto'; labRebuild(); return; }
   if (id === 'dtCrit') { state.lab.crit = e.target.value; labRebuild(); return; }
   if (id === 'dtThr') { state.lab.thrMode = e.target.value; labRebuild(); return; }
+  if (id === 'manDs') {
+    const M = state.man;
+    M.ds = e.target.value; M.root = manualRoot(DS[M.ds]); M.sel = 0; M.hist = [];
+    renderMan(); return;
+  }
+  if (id === 'manCrit') { state.man.crit = e.target.value; renderMan(); return; }
   if (id === 'trPick') {
     const ds = DS[state.lab.ds], v = e.target.value;
     const src = v === 'cindy' ? ds.cindy : ds.rows[+v];
