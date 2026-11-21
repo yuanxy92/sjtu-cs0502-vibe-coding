@@ -113,6 +113,13 @@ html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
 .slider-row{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:650;color:var(--muted);flex-wrap:wrap}
 .slider-row input[type=range]{width:180px;accent-color:var(--blue)}
 .slider-row output{font-family:var(--mono);font-size:23px;font-weight:750;color:var(--blue-dark);min-width:40px}
+/* 单节点阈值拖动 */
+.node-thr{margin-top:12px;border:1px solid #c7d7ef;border-radius:9px;background:#f4f8ff;padding:10px 14px}
+.nt-head{font-size:20px;font-weight:750;color:#17427a}
+.nt-head output{font-family:var(--mono);color:var(--blue-dark)}
+.node-thr input[type=range]{display:block;width:100%;height:30px;margin:6px 0 2px;accent-color:var(--blue)}
+.node-thr p{font-size:18px;color:var(--muted);line-height:1.45;margin:0 0 8px}
+.node-thr button{width:100%;font-size:19px;padding:6px 10px;min-height:38px}
 .playback{display:flex;gap:10px;width:100%;flex-wrap:wrap}
 .playback button{flex:1 1 auto;padding:8px 10px}
 .step-count{color:var(--muted);font-size:20px}
@@ -352,16 +359,20 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .lg-mid>#dtNotes{flex:0 0 auto}
   .lg-mid>#dtNotes .fold-body{max-height:240px}
   .dt-side{position:static;max-height:none;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-  .dt-side>.panel,.dt-side>#dtTracer{flex:0 0 auto}
-  .lg-right{gap:8px}
-  .lg-right .dt-ctl{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end;padding:10px 12px}
+  .dt-side>.panel{flex:0 0 auto}
+  .lg-right{gap:8px;overflow:hidden}
+  .lg-right>#dtTracer{flex:1 1 auto;min-height:0;overflow-y:auto}
+  /* 一行一个控件，标签在左、控件占满剩余宽度 */
+  .lg-right .dt-ctl{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;flex:0 0 auto}
   .lg-right .dt-ctl h2{display:none}
   .lg-right .dt-ctl>.muted{display:none}
-  .lg-right .dt-ctl .ctl-select{display:grid;gap:1px;width:100%;font-size:18px;line-height:1.2}
-  .lg-right .dt-ctl .ctl-select select{width:100%;min-width:0;min-height:36px;font-size:18px}
-  .lg-right .dt-ctl .slider-row{grid-column:1/-1;flex-wrap:nowrap;font-size:18px;gap:8px}
+  .lg-right .dt-ctl .ctl-select{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;width:100%;font-size:18px;line-height:1.2}
+  .lg-right .dt-ctl .ctl-select>span{flex:0 0 auto;min-width:108px}
+  .lg-right .dt-ctl .ctl-select select{flex:1 1 auto;width:auto;min-width:0;min-height:36px;font-size:18px}
+  .lg-right .dt-ctl .slider-row{flex-wrap:nowrap;align-items:center;font-size:18px;gap:8px;width:100%}
+  .lg-right .dt-ctl .slider-row>span{flex:0 0 auto;min-width:108px}
   .lg-right .dt-ctl .slider-row input[type=range]{width:auto;flex:1;min-width:60px}
-  .lg-right .dt-ctl>button{grid-column:2;grid-row:2;font-size:19px;padding:6px 10px;min-height:36px}
+  .lg-right .dt-ctl>button{width:100%;font-size:19px;padding:6px 10px;min-height:36px}
   .lg-right #dtTracer .muted{display:none}
   .lg-right #dtTracer .tracer{gap:4px}
   .lg-right #dtTracer .panel{padding:8px 12px}
@@ -417,6 +428,16 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   #manEditor h2{margin-bottom:4px}
 }
 @media (min-width:1101px) and (max-height:800px){
+  .lg-right .dt-ctl{gap:4px;padding:8px 10px}
+  .lg-right .dt-ctl .ctl-select{font-size:17px}
+  .lg-right .dt-ctl .ctl-select>span{min-width:100px}
+  .lg-right .dt-ctl .ctl-select select{min-height:34px;font-size:17px}
+  .lg-right .dt-ctl .slider-row{font-size:17px}
+  .lg-right .dt-ctl .slider-row>span{min-width:100px}
+  .lg-right .dt-ctl>button{min-height:34px;font-size:18px}
+  .lg-right #dtTracer h2{display:none}
+  .lg-right #dtTracer .tracer{gap:3px}
+  .lg-right #dtTracer .panel{padding:6px 12px}
   #manEditor h2{font-size:19px;margin:0 0 2px}
   .mp-field{gap:1px;font-size:16px}
   .mp-field select{min-height:36px;font-size:17px}
@@ -690,12 +711,13 @@ function candidates(rows, ds, crit, thrMode) {
   return out;
 }
 let NID = 0;
-function buildTree(rows, ds, opts, depth) {
+function buildTree(rows, ds, opts, depth, path) {
   depth = depth || 0;
+  path = path == null ? '' : path;
   if (depth === 0) NID = 0;
   const counts = countsOf(rows, ds), total = rows.length;
   const imp = impurity(counts, total, opts.crit);
-  const node = { id: NID++, depth, rows, counts, total, imp, leaf: false, children: null };
+  const node = { id: NID++, depth, path, rows, counts, total, imp, leaf: false, children: null };
   const majority = () => {
     let best = ds.classes[0];
     ds.classes.forEach(k => { if (counts[k] > counts[best]) best = k; });
@@ -709,10 +731,20 @@ function buildTree(rows, ds, opts, depth) {
   const cands = candidates(rows, ds, opts.crit, opts.thrMode);
   node.cands = cands;
   if (!cands.length) return stop(2);
-  const best = cands[0];
-  if (best.score >= imp - 1e-9) return stop(5);
+  let best = cands[0];
+  const F = opts.forces && opts.forces[path];
+  if (F) {
+    const f = ds.features.find(x => x.key === F.key);
+    const gs = f && f.type === 'num' ? groupsFor(rows, f, F.thr) : null;
+    if (gs && gs.length > 1) {
+      let sc = 0;
+      gs.forEach(g => { sc += (g.rows.length / total) * impurity(countsOf(g.rows, ds), g.rows.length, opts.crit); });
+      best = { fi: ds.features.indexOf(f), ti: -1, f, thr: F.thr, groups: gs, score: sc, forced: true };
+    }
+  }
+  if (!best.forced && best.score >= imp - 1e-9) return stop(5);
   node.feature = best.f; node.thr = best.thr; node.groups = best.groups; node.best = best;
-  node.children = best.groups.map(g => buildTree(g.rows, ds, opts, depth + 1));
+  node.children = best.groups.map((g, i) => buildTree(g.rows, ds, opts, depth + 1, path ? path + '.' + i : String(i)));
   return node;
 }
 function predict(root, sample) {
@@ -791,7 +823,7 @@ window.DecisionTreeCore = CORE;
 const state = {
   tab: 'demo', beat: 0, playing: false, speed: 800, timer: null,
   demoFolds: { ledger: false, inspector: false },
-  lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null, dataOpen: false, notesOpen: false },
+  lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null, forces: {}, dataOpen: false, notesOpen: false },
   man: { ds: 'donate', crit: 'gini', root: manualRoot(DS.donate), sel: 0, hist: [], hint: false, compare: false, feat: null, thr: null }
 };
 const $ = (s) => document.querySelector(s);
@@ -1076,7 +1108,7 @@ function renderDemo() {
 /* ---------------- 实验（tab ②） ---------------- */
 function labTree() {
   const L = state.lab;
-  return buildTree(DS[L.ds].rows, DS[L.ds], { crit: L.crit, maxDepth: L.depth, minSamples: L.min, thrMode: L.thrMode });
+  return buildTree(DS[L.ds].rows, DS[L.ds], { crit: L.crit, maxDepth: L.depth, minSamples: L.min, thrMode: L.thrMode, forces: L.forces });
 }
 function labLabels(n, ds) {
   if (n.leaf) return { title: ds.className[n.label], sub: ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ') };
@@ -1138,24 +1170,48 @@ function labSvg(root, lay, stale) {
 function candTable(ds, n) {
   if (!n.cands || !n.cands.length) return `<p class="muted">无可用候选（属性取值都相同）。</p>`;
   const crit = state.lab.crit;
+  const isChosen = c => n.best && c.f.key === n.best.f.key &&
+    (c.f.type === 'num' ? Math.abs(c.thr - n.best.thr) < 1e-9 : c.thr === n.best.thr);
+  const rowOf = (c, badge) => `<tr class="is-hit"><td>${esc(c.f.label)}</td><td>${c.f.type === 'num' ? '≤ ' + fmtNum(c.thr) : '= ' + esc(c.thr)}</td>` +
+    `<td>${c.groups.map(g => g.rows.length).join(' ／ ')}</td><td>${c.score.toFixed(3)}</td><td>${(n.imp - c.score).toFixed(3)}</td>` +
+    `<td>${badge}</td></tr>`;
+  const manual = n.best && n.best.forced && !n.cands.some(isChosen)
+    ? rowOf(n.best, '<span class="badge core">选用 · 手动</span>') : '';
   return `<div class="table-wrap scroll-420"><table class="trace"><thead><tr><th>特征</th><th>阈值／取值</th><th>分支样本</th><th>${crit === 'entropy' ? '加权熵' : crit === 'gini' ? '加权基尼' : '加权错误率'}</th><th>不纯度下降</th><th></th></tr></thead><tbody>` +
-    n.cands.map((c, i) => `<tr${i === 0 && !n.leaf ? ' class="is-hit"' : ''}><td>${esc(c.f.label)}</td><td>${c.f.type === 'num' ? '≤ ' + fmtNum(c.thr) : '= ' + esc(c.thr)}</td>` +
+    manual + n.cands.map(c => `<tr><td>${esc(c.f.label)}</td><td>${c.f.type === 'num' ? '≤ ' + fmtNum(c.thr) : '= ' + esc(c.thr)}</td>` +
       `<td>${c.groups.map(g => g.rows.length).join(' ／ ')}</td><td>${c.score.toFixed(3)}</td><td>${(n.imp - c.score).toFixed(3)}</td>` +
-      `<td>${i === 0 && !n.leaf ? '<span class="badge core">选用</span>' : ''}</td></tr>`).join('') +
+      `<td>${isChosen(c) ? '<span class="badge core">选用</span>' : ''}</td></tr>`).join('') +
     `</tbody></table></div>`;
+}
+function labThrRange(n) {
+  const vals = n.rows.map(r => r[n.feature.key]);
+  const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = hi - lo;
+  const step = span > 5000 ? 500 : span > 500 ? 10 : span >= 1 ? 1 : 0.1;
+  const max = hi - step > lo ? hi - step : (lo + hi) / 2;
+  const cur = Math.min(max, Math.max(lo, lo + Math.round((n.thr - lo) / step) * step));
+  return { lo, step, max, cur };
 }
 function labInspector(root) {
   const ds = DS[state.lab.ds], L = state.lab;
   const n = nodeById(root, L.sel) || root;
   const crit = L.crit;
   const tie = n.leaf && ds.classes.some(k => k !== n.label && n.counts[k] === n.counts[n.label]);
+  const forced = !n.leaf && n.feature && n.feature.type === 'num' ? L.forces[n.path] : null;
+  let thrUI = '';
+  if (!n.leaf && n.feature && n.feature.type === 'num') {
+    const R = labThrRange(n);
+    thrUI = `<div class="node-thr"><div class="nt-head">此节点阈值：${esc(n.feature.label)} ≤ <output id="nodeThrVal">${fmtNum(n.thr)}</output></div>` +
+      `<input type="range" id="nodeThr" min="${R.lo}" max="${R.max}" step="${R.step}" value="${R.cur}" aria-label="此节点阈值">` +
+      `<p>拖动只重算这一刀，子树仍按当前准则自动生长，其余节点不变。</p>` +
+      `<button data-act="nodeThrReset"${forced ? '' : ' disabled'}>恢复算法选择</button></div>`;
+  }
   return `<div class="panel"><h2>节点检查器 · #${n.id}</h2>` +
-    `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换</p>` +
+    `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换</p>` + thrUI +
     countChips(ds, n.counts) +
     `<div class="formula-card"><div class="formula">${crit === 'gini' ? 'Gini' : crit === 'error' ? 'Error' : 'Ent'} = ${impSub(n.counts, n.total, crit)}</div><div class="formula-sub">${esc(CRITS[crit].name)}（${esc(CRITS[crit].ref)}）</div></div>` +
     (n.leaf
       ? `<div class="note ${n.stop === 3 || n.stop === 4 ? '' : 'green'}"><strong>${esc(STOP_TXT[n.stop])}${n.stop === 3 ? `（${n.total} &lt; ${L.min}）` : n.stop === 4 ? `（${L.depth}）` : ''}</strong><p>叶类别＝${esc(ds.className[n.label])}（${n.counts[n.label]}/${n.total} 多数）${tie ? '；多数平局取类别序第一类 ' + ds.classes[0] : ''}。</p></div>`
-      : `<div class="note blue"><strong>选用划分：${esc(n.best.f.label)} ${n.best.f.type === 'num' ? '≤ ' + fmtNum(n.best.thr) : '= ' + esc(n.best.thr)}</strong><p>准则值 ${n.best.score.toFixed(3)}，不纯度下降 ${(n.imp - n.best.score).toFixed(3)}；共 ${n.cands.length} 个候选，全量见下表。</p></div>`) +
+      : `<div class="note blue"><strong>选用划分：${esc(n.best.f.label)} ${n.best.f.type === 'num' ? '≤ ' + fmtNum(n.best.thr) : '= ' + esc(n.best.thr)}${forced ? ' · 手动阈值' : ''}</strong><p>准则值 ${n.best.score.toFixed(3)}，不纯度下降 ${(n.imp - n.best.score).toFixed(3)}；共 ${n.cands.length} 个候选，全量见下表。</p></div>`) +
     `<h3>全量样本 ${n.total}</h3>` + rowTable(ds, n.rows) +
     `<h3>候选划分全量（${n.cands ? n.cands.length : 0}）</h3>` + candTable(ds, n) + `</div>`;
 }
@@ -1194,10 +1250,11 @@ function labNotes(root, mis) {
   const st = treeStats(root);
   let html = `<p>${esc(ds.desc)}</p>` +
     `<div class="formula-card"><div class="formula">${esc(CRITS[L.crit].def)}</div><div class="formula-sub">${esc(CRITS[L.crit].name)}（${esc(CRITS[L.crit].ref)}）：${esc(CRITS[L.crit].pick)}；数值特征扫中点阈值二分，类别特征按取值多路分。</div></div>`;
+  const anyForce = Object.keys(L.forces || {}).length > 0;
   if (L.ds === 'donate' && L.thrMode === 'slide') {
-    html += `<div class="note blue"><strong>阈值候选＝课件给定</strong><p>年龄 50 ／ 薪资 60,000，与分步演示完全同树。切到"自动扫描中点"看真实算法的搜索结果。</p></div>`;
+    html += `<div class="note blue"><strong>阈值候选＝课件给定</strong><p>年龄 50 ／ 薪资 60,000${anyForce ? '；当前有节点手动拖过阈值' : '，与分步演示完全同树'}。切到"自动扫描中点"看真实算法的搜索结果。</p></div>`;
   }
-  if (L.ds === 'donate' && L.thrMode === 'auto' && root.best) {
+  if (L.ds === 'donate' && L.thrMode === 'auto' && root.best && !root.best.forced) {
     const b = root.best;
     html += `<div class="note blue"><strong>自动扫描找到更纯的阈值</strong><p>根节点选 ${esc(b.f.label)} ≤ ${fmtNum(b.thr)}（准则值 ${b.score.toFixed(3)}），比课件手算阈值 60,000 的 0.260 更低——课件固定阈值只为手算，扫描中点才是完整算法。</p></div>`;
   }
@@ -1255,14 +1312,15 @@ function renderLab() {
     `<div class="slider-row"><span>最大深度</span><input type="range" id="dtDepth" min="1" max="6" step="1" value="${L.depth}"><output>${L.depth}</output></div>` +
     `<div class="slider-row"><span>停止样本阈值</span><input type="range" id="dtMin" min="2" max="8" step="1" value="${L.min}"><output>${L.min}</output></div>` +
     `<button data-act="labreset">恢复默认配置</button>` +
-    `<p class="muted" style="font-size:18px">改配置立即重建树；选中节点与预测路径重置。</p></div>` +
+    `<p class="muted" style="font-size:18px">改配置＝更新整棵树（手动阈值一并清除）；选中节点与预测路径重置。</p></div>` +
     p.tracer +
     `</aside></div></div>`;
 }
 /* 滑杆拖动时只补丁树／指标／检查器等区域，不重建控件面板，拖动不被打断 */
-function labLive() {
+function labLive(skipInspector) {
   const p = labParts();
   ['dtMetrics', 'dtTreePanel', 'dtDataPanel', 'dtInspector', 'dtTracer', 'dtNotes'].forEach(id => {
+    if (skipInspector && id === 'dtInspector') return;
     const el = document.getElementById(id);
     if (el) el.outerHTML = p[{ dtMetrics: 'metrics', dtTreePanel: 'tree', dtDataPanel: 'data', dtInspector: 'inspector', dtTracer: 'tracer', dtNotes: 'notes' }[id]];
   });
@@ -1533,6 +1591,7 @@ function manPushHist() {
 }
 function labRebuild() {
   state.lab.sel = 0; state.lab.pred = null; state.lab.sample = null;
+  state.lab.forces = {};
   renderLab();
 }
 document.addEventListener('click', (e) => {
@@ -1572,6 +1631,13 @@ document.addEventListener('click', (e) => {
   else if (a === 'reset') { stopPlay(); state.beat = 0; renderDemo(); }
   else if (a === 'play') { state.playing ? (stopPlay(), renderDemo()) : (startPlay(), renderDemo()); }
   else if (a === 'labreset') { Object.assign(state.lab, { crit: 'gini', depth: 6, min: 4, thrMode: state.lab.ds === 'donate' ? 'slide' : 'auto' }); labRebuild(); }
+  else if (a === 'nodeThrReset') {
+    const n = nodeById(labTree(), state.lab.sel);
+    if (!n || !state.lab.forces[n.path]) return;
+    delete state.lab.forces[n.path];
+    state.lab.pred = null;
+    labLive();
+  }
   else if (a === 'manundo') {
     const M = state.man;
     if (!M.hist.length) return;
@@ -1621,10 +1687,12 @@ document.addEventListener('click', (e) => {
       const el = document.getElementById('tr-' + f.key);
       state.lab.sample[f.key] = f.type === 'num' ? Number(el.value) : el.value;
     });
-    const root = buildTree(ds.rows, ds, { crit: state.lab.crit, maxDepth: state.lab.depth, minSamples: state.lab.min, thrMode: state.lab.thrMode });
+    const root = labTree();
     state.lab.pred = predict(root, state.lab.sample);
     state.lab.pred.sample = Object.assign({}, state.lab.sample);
     renderLab();
+    const tr = document.getElementById('dtTracer');
+    if (tr) tr.scrollTop = tr.scrollHeight;
   }
 });
 document.addEventListener('toggle', (e) => {
@@ -1647,10 +1715,23 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('input', (e) => {
   const id = e.target.id;
   if (id === 'manThr') { state.man.thr = +e.target.value; manPatchPicker(); return; }
+  if (id === 'nodeThr') {
+    const n = nodeById(labTree(), state.lab.sel);
+    if (!n || !n.feature || n.feature.type !== 'num') return;
+    state.lab.forces[n.path] = { key: n.feature.key, thr: +e.target.value };
+    state.lab.pred = null;
+    const out = document.getElementById('nodeThrVal');
+    if (out) out.textContent = fmtNum(+e.target.value);
+    labLive(true);
+    const btn = document.querySelector('[data-act="nodeThrReset"]');
+    if (btn) btn.disabled = false;
+    return;
+  }
   if (id === 'dtDepth' || id === 'dtMin') {
     state.lab[id === 'dtDepth' ? 'depth' : 'min'] = +e.target.value;
     const out = e.target.parentElement.querySelector('output');
     if (out) out.textContent = e.target.value;
+    state.lab.forces = {};
     state.lab.sel = 0; state.lab.pred = null;
     labLive();
   }
@@ -1658,6 +1739,7 @@ document.addEventListener('input', (e) => {
 document.addEventListener('change', (e) => {
   const id = e.target.id;
   if (id === 'dtSpeed') { state.speed = +e.target.value; if (state.playing) startPlay(); return; }
+  if (id === 'nodeThr') { labLive(); return; }
   if (id === 'dtDs') { state.lab.ds = e.target.value; state.lab.thrMode = e.target.value === 'donate' ? 'slide' : 'auto'; labRebuild(); return; }
   if (id === 'dtCrit') { state.lab.crit = e.target.value; labRebuild(); return; }
   if (id === 'dtThr') { state.lab.thrMode = e.target.value; labRebuild(); return; }
