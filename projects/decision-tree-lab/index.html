@@ -128,6 +128,8 @@ html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
 .tree-wrap::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
 .tree-wrap::-webkit-scrollbar-thumb:hover{background:#6c96e8}
 .tree-wrap svg{display:block;width:100%;height:auto;margin:0 auto}
+.demo-tree svg{width:100%;max-width:820px;height:auto}
+@media (max-width:700px){.demo-tree svg{width:820px;max-width:none}}
 .dt-node{cursor:pointer}
 .tree-wrap svg [data-role]{cursor:default}
 .dt-node .dt-box{transition:stroke .2s,fill .3s,opacity .4s}
@@ -357,7 +359,7 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .lg-right #dtTracer input[type=number],.lg-right #dtTracer select{min-height:36px}
   .lg-right #dtTracer button{min-height:40px}
   .tree-wrap{flex:1 1 0px;min-height:0;overflow:auto}
-  .demo-tree svg{width:100%;height:100%;min-width:0}
+  .demo-tree svg{width:auto;height:auto;max-width:100%;max-height:100%;min-width:0}
   .dt-legend{flex:0 0 auto;font-size:18px;margin-top:6px}
   .dt-hint{flex:0 0 auto;font-size:18px;margin-top:4px}
   .proj .scroll-420,.proj .scroll-560,.proj .scroll-260{max-height:220px}
@@ -823,7 +825,22 @@ function branchTag(n, i) {
   const s = String(g.label), ix = s.lastIndexOf('=');
   return ix >= 0 ? s.slice(ix + 1).trim() : s;
 }
-function treeZoom(W) { return W <= 380 ? 1.5 : W <= 640 ? 1.2 : 1; }
+const CJK_RE = /[\u2e80-\u9fff\uff00-\uffef]/;
+function textW(str, fs) {
+  let w = 0;
+  for (const ch of String(str)) {
+    if (CJK_RE.test(ch)) w += fs;
+    else if (ch === ' ') w += fs * 0.26;
+    else if (ch === '·') w += fs * 0.35;
+    else w += fs * 0.55;
+  }
+  return w;
+}
+function fitCardW(items, fs, fs2) {
+  let m = 0;
+  items.forEach(it => { m = Math.max(m, textW(it[0], fs || 19.5), textW(it[1], fs2 || 17)); });
+  return Math.max(160, Math.ceil(m) + 24);
+}
 function nodeCard(x, y, w, h, o) {
   let s = '';
   if (o.halo) s += `<rect x="${x - w / 2 - 6}" y="${y - h / 2 - 6}" width="${w + 12}" height="${h + 12}" rx="19" fill="none" stroke="${o.halo}" stroke-width="3.2"/>`;
@@ -973,7 +990,7 @@ function demoSvg(beat) {
       (off ? '' : edgeTag(e.label, (x1 + x2) / 2, (y1 + y2) / 2, 21));
   }).join('');
   const nodes = Object.keys(DPOS).map(r => demoNodeBox(r, beat.show[r] || 'off', beat)).join('');
-  return `<div class="tree-wrap demo-tree"><svg viewBox="20 0 820 392" role="img" aria-label="决策树生长图">${edges}${nodes}</svg></div>`;
+  return `<div class="tree-wrap demo-tree"><svg viewBox="20 0 820 392" width="820" height="392" role="img" aria-label="决策树生长图">${edges}${nodes}</svg></div>`;
 }
 const DEMO_LEGEND = `<div class="legend-strip"><span><span class="dt-sw" style="border-color:#1d4ed8;background:#fff"></span>内部节点</span>` +
   `<span><span class="dt-sw" style="border-color:#15803d;background:#d8f3e3"></span>叶 · 捐赠</span>` +
@@ -1031,19 +1048,31 @@ function labTree() {
   const L = state.lab;
   return buildTree(DS[L.ds].rows, DS[L.ds], { crit: L.crit, maxDepth: L.depth, minSamples: L.min, thrMode: L.thrMode });
 }
-function layout(root) {
-  const SLOT = 176, ROW = 116, PAD = 46;
+function labLabels(n, ds) {
+  if (n.leaf) return { title: ds.className[n.label], sub: ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ') };
+  return {
+    title: n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}?` : `${n.feature.label}?`,
+    sub: ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ')
+  };
+}
+function labCardW(root, ds) {
+  const items = [];
+  (function walk(n) { const L = labLabels(n, ds); items.push([L.title, L.sub]); if (n.children) n.children.forEach(walk); })(root);
+  return fitCardW(items);
+}
+function layout(root, NW) {
+  const SLOT = (NW || 164) + 20, ROW = 116, PAD = 46, M = 16;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
-    if (n.leaf) { pos.set(n.id, { x: (slot + 0.5) * SLOT + 16, y: n.depth * ROW + PAD }); slot++; }
+    if (n.leaf) { pos.set(n.id, { x: (slot + 0.5) * SLOT + M, y: n.depth * ROW + PAD }); slot++; }
     else {
       n.children.forEach(walk);
       const xs = n.children.map(c => pos.get(c.id).x);
       pos.set(n.id, { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: n.depth * ROW + PAD });
     }
   })(root);
-  return { pos, W: slot * SLOT + 32, H: maxD * ROW + PAD + 64, maxD, leaves: slot };
+  return { pos, W: slot * SLOT + 2 * M, H: maxD * ROW + PAD + 64, maxD, leaves: slot, NW: NW || 164 };
 }
 function nodeById(root, id) {
   let hit = null;
@@ -1068,21 +1097,13 @@ function labSvg(root, lay, stale) {
       walk(c);
     });
     const on = pathIds.has(n.id), sel = state.lab.sel === n.id;
-    let o, line1;
-    if (n.leaf) {
-      const pal = n.label === ds.classes[0] ? TP.yes : TP.no;
-      line1 = ds.className[n.label];
-      o = { ...pal, title: line1, sub: ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ') };
-    } else {
-      line1 = n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}?` : `${n.feature.label}?`;
-      o = { ...TP.inner, title: line1, sub: ds.classes.map(k => `${k}${n.counts[k]}`).join(' · ') };
-    }
+    const L = labLabels(n, ds);
+    let o = n.leaf ? { ...(n.label === ds.classes[0] ? TP.yes : TP.no), ...L } : { ...TP.inner, ...L };
     if (on) o.halo = EDGE_ON; else if (sel) o.halo = '#2563eb';
-    nodes += `<g class="dt-node${sel ? ' active' : ''}${on ? ' onpath' : ''}" data-node="${n.id}" tabindex="0" role="button" aria-label="节点 ${n.id}，${esc(line1)}，${n.total} 样本">` +
-      nodeCard(p.x, p.y, 164, 82, o) + `</g>`;
+    nodes += `<g class="dt-node${sel ? ' active' : ''}${on ? ' onpath' : ''}" data-node="${n.id}" tabindex="0" role="button" aria-label="节点 ${n.id}，${esc(L.title)}，${n.total} 样本">` +
+      nodeCard(p.x, p.y, lay.NW, 82, o) + `</g>`;
   })(root);
-  const zoom = treeZoom(lay.W);
-  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${Math.round(lay.W * zoom)}px" role="img" aria-label="决策树结构图">${edges}${nodes}</svg></div>`;
+  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${lay.W}px" role="img" aria-label="决策树结构图">${edges}${nodes}</svg></div>`;
 }
 function candTable(ds, n) {
   if (!n.cands || !n.cands.length) return `<p class="muted">无可用候选（属性取值都相同）。</p>`;
@@ -1164,7 +1185,7 @@ function labNotes(root, mis) {
 function labParts() {
   const L = state.lab, ds = DS[L.ds];
   const root = labTree();
-  const lay = layout(root);
+  const lay = layout(root, labCardW(root, ds));
   const st = treeStats(root);
   const mis = trainMis(root, ds);
   if (!nodeById(root, L.sel)) L.sel = root.id;
@@ -1227,24 +1248,45 @@ function manAlgo() {
   const M = state.man;
   return buildTree(DS[M.ds].rows, DS[M.ds], { crit: M.crit, maxDepth: 6, minSamples: 2, thrMode: 'auto' });
 }
-function manLayout(root) {
-  const SLOT = 176, ROW = 110, PAD = 44;
+const CRIT_TAG = { gini: '基尼', error: '错误率', entropy: '熵' };
+function manLabels(n, ds, crit) {
+  if (!n.leaf && !n.children) {
+    return { wait: true, title: '待划分', sub: `${n.total} 人 · ${CRIT_TAG[crit]} ${impurity(n.counts, n.total, crit).toFixed(3)}` };
+  }
+  if (n.leaf) {
+    const pure = n.counts[n.label] === n.total;
+    return { title: ds.className[n.label], sub: `${n.counts[n.label]}/${n.total} ${pure ? '全同类' : '多数表决'}` };
+  }
+  return {
+    title: n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}` : `${n.feature.label} 分支`,
+    sub: `${n.total} 人 · ${n.groups.length} 分支`
+  };
+}
+function manCardW(root, ds, crit) {
+  const items = [];
+  (function walk(n) { const L = manLabels(n, ds, crit); items.push([L.title, L.sub]); if (n.children) n.children.forEach(walk); })(root);
+  return fitCardW(items);
+}
+function manLayout(root, NW) {
+  const SLOT = (NW || 160) + 20, ROW = 110, PAD = 44, M = 12;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
-    if (n.leaf || !n.children) { pos.set(n.id, { x: (slot + 0.5) * SLOT + 12, y: n.depth * ROW + PAD }); slot++; }
+    if (n.leaf || !n.children) { pos.set(n.id, { x: (slot + 0.5) * SLOT + M, y: n.depth * ROW + PAD }); slot++; }
     else {
       n.children.forEach(walk);
       const xs = n.children.map(c => pos.get(c.id).x);
       pos.set(n.id, { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: n.depth * ROW + PAD });
     }
   })(root);
-  return { pos, W: Math.max(slot * SLOT + 24, 340), H: maxD * ROW + PAD + 56 };
+  const span = slot * SLOT, W = Math.max(span + 2 * M, 340);
+  const dx = (W - span) / 2 - M;
+  pos.forEach(p => { p.x += dx; });
+  return { pos, W, H: maxD * ROW + PAD + 56, NW: NW || 160 };
 }
 function manSvg(root, selId, crit, interactive) {
   const ds = DS[state.man.ds];
-  const lay = manLayout(root);
-  const critName = CRITS[crit].name;
+  const lay = manLayout(root, manCardW(root, ds, crit));
   let edges = '', nodes = '';
   (function walk(n) {
     const p = lay.pos.get(n.id);
@@ -1254,23 +1296,17 @@ function manSvg(root, selId, crit, interactive) {
         edgeTag(branchTag(n, i), (p.x + q.x) / 2, (p.y + q.y) / 2);
       walk(c);
     });
-    const pending = !n.leaf && !n.children;
     const sel = interactive && n.id === selId;
+    const L = manLabels(n, ds, crit);
     let o;
-    if (pending) {
-      o = { ...TP.wait, dash: true, title: '待划分', sub: `${n.total} 人 · ${critName} ${impurity(n.counts, n.total, crit).toFixed(3)}` };
-    } else if (n.leaf) {
-      const pure = n.counts[n.label] === n.total;
-      o = { ...(n.label === ds.classes[0] ? TP.yes : TP.no), title: ds.className[n.label], sub: `${n.counts[n.label]}/${n.total} ${pure ? '全同类' : '多数表决'}` };
-    } else {
-      o = { ...TP.inner, title: n.feature.type === 'num' ? `${n.feature.label} ≤ ${fmtNum(n.thr)}` : `${n.feature.label} 分支`, sub: `${n.total} 人 · ${n.groups.length} 分支` };
-    }
+    if (L.wait) o = { ...TP.wait, ...L, dash: true };
+    else if (n.leaf) o = { ...(n.label === ds.classes[0] ? TP.yes : TP.no), ...L };
+    else o = { ...TP.inner, ...L };
     if (sel) o.halo = '#2563eb';
     nodes += `<g class="man-node" ${interactive ? `data-mannode="${n.id}" tabindex="0" role="button" aria-label="节点${n.id}：${esc(o.title)}，${esc(o.sub)}"` : ''}>` +
-      nodeCard(p.x, p.y, 160, 80, o) + `</g>`;
+      nodeCard(p.x, p.y, lay.NW, 80, o) + `</g>`;
   })(root);
-  const zoom = treeZoom(lay.W);
-  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${Math.round(lay.W * zoom)}px" role="img" aria-label="${interactive ? '你画的决策树' : '算法自动建的决策树'}">${edges}${nodes}</svg></div>`;
+  return `<div class="tree-wrap"><svg viewBox="0 0 ${lay.W} ${lay.H}" style="width:${lay.W}px" role="img" aria-label="${interactive ? '你画的决策树' : '算法自动建的决策树'}">${edges}${nodes}</svg></div>`;
 }
 /* 下拉框选划分：属性 → 阈值（数值特征），实时预览准则值与分支构成 */
 function manCandSet(node, ds) {
