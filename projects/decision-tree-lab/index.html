@@ -314,6 +314,49 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .tabs button{padding:12px 16px;font-size:20px}
   .phone-body svg{width:140px;height:140px}
   .mg-left .tree-wrap{max-height:min(62vh,560px);overflow:auto;scrollbar-gutter:stable}
+  .lab-grid>.lg-right{order:2}
+  .lab-grid>.lg-mid{order:3}
+}
+/* Phones: compact chrome, tree and controls reachable without long scrolling */
+@media (max-width:700px){
+  .app{padding:14px 12px 28px}
+  .app-header{padding:14px 14px;gap:4px}
+  .eyebrow{font-size:16px}
+  h1{font-size:31px}
+  .subtitle{font-size:17px}
+  .header-actions{margin-top:8px;gap:8px}
+  .header-actions button{font-size:16px;min-height:38px;padding:5px 10px}
+  .tabs{margin-top:14px}
+  .tabs button{padding:9px 12px;font-size:17px}
+  .tabs .sib-link{font-size:16px;padding:6px 10px;min-height:38px}
+  .panel{padding:14px 13px}
+  .panel h2{font-size:20px;margin-bottom:8px}
+  .outcome{padding:10px 12px}
+  .outcome strong{font-size:20px}
+  .outcome p{font-size:17px;margin-top:2px}
+  .legend-strip{font-size:16px;gap:4px 10px}
+  .legend-strip .dt-sw{width:20px;height:13px;vertical-align:-2px;margin-right:4px}
+  .legend-strip .muted{display:none}
+  .ctl-strip{padding:10px 12px;gap:8px}
+  .ctl-strip .ctl-note{display:none}
+  .ctl-strip .playback button{font-size:17px;min-height:40px;padding:6px 8px}
+  .ctl-strip .ctl-select{font-size:16px}
+  .ctl-strip .ctl-select select{min-height:36px;font-size:16px}
+  .step-dots{flex-wrap:nowrap;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+  .step-dot{height:30px;min-width:30px;padding:0 7px;font-size:15px;flex:0 0 auto}
+  .ins-head .muted{display:none}
+  .man-ctl-hint{display:none}
+  .man-ctl h2{margin-bottom:6px}
+  .man-btns{gap:6px}
+  .man-btns button{min-height:40px;font-size:16px;padding:5px 10px}
+  .proj{gap:12px}
+  .lab-grid{gap:12px}
+  .lg-right .dt-ctl{gap:8px}
+  .man-grid{gap:12px}
+  .mg-left .tree-wrap{max-height:min(58vh,460px)}
+  .mp-field{font-size:17px}
+  .mp-preview{font-size:17px}
+  .leaf-btn{min-height:48px;font-size:18px;margin-top:10px}
 }
 /* Projection mode: 16:9 classroom screen — page fits viewport, panels scroll inside */
 @media (min-width:1101px){
