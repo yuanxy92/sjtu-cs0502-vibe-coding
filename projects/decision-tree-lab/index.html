@@ -237,6 +237,10 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
 .proj>.outcome{margin-top:0}
 .demo-grid,.lab-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .dg-left,.lg-left,.mg-left{display:grid;gap:16px;min-width:0}
+.lg-folds{display:grid;gap:12px;min-width:0}
+.ins-panel{display:block}
+.ins-head,.ins-cands{min-width:0}
+.ins-cands{margin-top:12px}
 .mg-right{min-width:0}
 .dg-tree,.dg-step{display:flex;flex-direction:column;min-width:0}
 .legend-strip{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:18px;color:var(--muted)}
@@ -338,25 +342,33 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .ctl-strip .step-dots{flex:1 1 auto}
   .legend-strip{flex:0 0 auto}
   .demo-grid{flex:1 1 auto;min-height:0;display:grid;gap:14px;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
-  .lab-grid{flex:1 1 auto;min-height:0;display:grid;gap:14px;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr) 350px}
+  .lab-grid{flex:1 1 auto;min-height:0;display:grid;gap:14px;grid-template-columns:minmax(0,1fr) 350px;grid-template-rows:minmax(0,1.8fr) minmax(0,1fr);grid-template-areas:"tree side" "mid side"}
   .dg-tree{min-height:0;overflow:hidden}
   .dg-tree .tree-wrap{flex:1 1 0px;min-height:0}
   .dg-step{min-height:0;overflow:hidden}
   .dg-step .step-view{flex:1 1 auto;min-height:100px;max-height:none}
   .dg-folds{flex:0 0 auto;margin-top:10px}
   .dg-folds .fold-body{max-height:180px}
-  .lg-left{display:flex;min-width:0;min-height:0}
-  .lg-left>.panel{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .lg-mid{min-width:0;min-height:0;display:flex;flex-direction:column;gap:12px}
-  .lg-mid>#dtInspector{flex:1 1 auto;min-height:0;display:flex}
-  .lg-mid .panel{flex:1 1 auto;min-height:0;overflow-y:auto}
-  .lg-mid>#dtDataPanel{flex:0 0 auto}
-  .lg-mid>#dtDataPanel .fold-body{max-height:200px}
-  .lg-mid>#dtNotes{flex:0 0 auto}
-  .lg-mid>#dtNotes .fold-body{max-height:240px}
+  .lg-left{grid-area:tree;display:flex;min-width:0;min-height:0}
+  .lg-left>.panel{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:10px 14px}
+  .lg-left>.panel h2{font-size:20px;margin-bottom:5px}
+  .lg-mid{grid-area:mid;min-width:0;min-height:0;display:flex;gap:12px}
+  .lg-mid>#dtInspector{flex:1 1 auto;min-width:0;min-height:0;display:flex}
+  .lg-mid>#dtInspector>.ins-panel{flex:1;min-width:0;min-height:0;height:auto;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:12px;padding:10px 12px;overflow:hidden}
+  .ins-head{min-height:0;overflow-y:auto;padding-right:2px}
+  .ins-head h2{font-size:19px;margin-bottom:5px}
+  .ins-head .muted{display:none}
+  .ins-head .formula-card{margin-top:6px}
+  .ins-cands{min-height:0;overflow-y:auto;margin-top:0}
+  .ins-cands h3{font-size:17px;margin:0 0 4px}
+  .ins-cands h3+h3{margin-top:8px}
+  .ins-cands .table-wrap{max-height:none;overflow:visible}
+  .lg-folds{flex:0 0 272px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+  .lg-folds .fold{flex:0 0 auto;margin:0}
+  .lg-folds .fold-body{max-height:150px}
   .dt-side{position:static;max-height:none;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
   .dt-side>.panel{flex:0 0 auto}
-  .lg-right{gap:8px;overflow:hidden}
+  .lg-right{grid-area:side;gap:8px;overflow:hidden}
   .lg-right>#dtTracer{flex:1 1 auto;min-height:0;overflow-y:auto}
   /* 一行一个控件，标签在左、控件占满剩余宽度 */
   .lg-right .dt-ctl{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;flex:0 0 auto}
@@ -1300,15 +1312,16 @@ function labInspector(root) {
   const tie = n.leaf && ds.classes.some(k => k !== n.label && n.counts[k] === n.counts[n.label]);
   const forced = !n.leaf && n.feature && n.feature.type === 'num' ? L.forces[n.path] : null;
   const resetUI = forced ? `<button class="node-reset" data-act="nodeThrReset">恢复算法选择</button>` : '';
-  return `<div class="panel"><h2>节点检查器 · #${n.id}</h2>` +
+  return `<div class="panel ins-panel"><div class="ins-head"><h2>节点检查器 · #${n.id}</h2>` +
     `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换；在实验配置里拖动「阈值」只改这一刀</p>` + resetUI +
     countChips(ds, n.counts) +
     `<div class="formula-card"><div class="formula">${crit === 'gini' ? 'Gini' : crit === 'error' ? 'Error' : 'Ent'} = ${impSub(n.counts, n.total, crit)}</div><div class="formula-sub">${esc(CRITS[crit].name)}（${esc(CRITS[crit].ref)}）</div></div>` +
     (n.leaf
       ? `<div class="note ${n.stop === 3 || n.stop === 4 ? '' : 'green'}"><strong>${esc(STOP_TXT[n.stop])}${n.stop === 3 ? `（${n.total} &lt; ${L.min}）` : n.stop === 4 ? `（${L.depth}）` : ''}</strong><p>叶类别＝${esc(ds.className[n.label])}（${n.counts[n.label]}/${n.total} 多数）${tie ? '；多数平局取类别序第一类 ' + ds.classes[0] : ''}。</p></div>`
       : `<div class="note blue"><strong>选用划分：${esc(n.best.f.label)} ${n.best.f.type === 'num' ? '≤ ' + fmtNum(n.best.thr) : '= ' + esc(n.best.thr)}${forced ? ' · 手动阈值' : ''}</strong><p>准则值 ${n.best.score.toFixed(3)}，不纯度下降 ${(n.imp - n.best.score).toFixed(3)}；共 ${n.cands.length} 个候选，全量见下表。</p></div>`) +
-    `<h3>全量样本 ${n.total}</h3>` + rowTable(ds, n.rows) +
-    `<h3>候选划分全量（${n.cands ? n.cands.length : 0}）</h3>` + candTable(ds, n) + `</div>`;
+    `</div><div class="ins-cands">` +
+    `<h3>候选划分全量（${n.cands ? n.cands.length : 0}）</h3>` + candTable(ds, n) +
+    `<h3>全量样本 ${n.total}</h3>` + rowTable(ds, n.rows) + `</div></div>`;
 }
 function tracerPanel(ds, stale) {
   const L = state.lab;
@@ -1397,7 +1410,7 @@ function renderLab() {
     `<div class="proj proj-lab">` + p.metrics + p.legend +
     `<div class="lab-grid">` +
     `<div class="lg-left">` + p.tree + `</div>` +
-    `<div class="lg-mid">` + p.inspector + p.data + p.notes + `</div>` +
+    `<div class="lg-mid">` + p.inspector + `<div class="lg-folds">` + p.data + p.notes + `</div>` + `</div>` +
     `<aside class="dt-side lg-right">` +
     `<div class="panel dt-ctl"><h2>实验配置</h2>` +
     `<div class="ctl-select"><span>数据</span><select id="dtDs">${DATASETS.map(d => `<option value="${d.id}"${L.ds === d.id ? ' selected' : ''}>${esc(d.name)}（${esc(d.tag)}）</option>`).join('')}</select></div>` +
