@@ -751,7 +751,9 @@ function majorityOf(counts, ds) {
 }
 function manualNode(rows, ds, depth) {
   const counts = countsOf(rows, ds);
-  return { id: MID++, depth, rows, counts, total: rows.length, leaf: false, children: null };
+  const n = { id: MID++, depth, rows, counts, total: rows.length, leaf: false, children: null };
+  if (impurity(counts, rows.length, 'gini') === 0) { n.leaf = true; n.label = majorityOf(counts, ds); n.stop = 'man'; }
+  return n;
 }
 function manualRoot(ds) { MID = 0; return manualNode(ds.rows, ds, 0); }
 function manualSplit(node, cand, ds) {
@@ -1121,7 +1123,7 @@ function labSvg(root, lay, stale) {
       const q = lay.pos.get(c.id);
       const on = pathEdges.has(n.id + '>' + n.groups[i].key);
       edges += `<path class="dt-edge${on ? ' onpath' : ''}" d="${edgePath(p.x, p.y, q.x, q.y)}" fill="none" stroke="${on ? EDGE_ON : EDGE_DEF}" stroke-width="${on ? 3.4 : 2.2}" stroke-linecap="round"/>` +
-        edgeTag(branchTag(n, i), (p.x + q.x) / 2, (p.y + q.y) / 2);
+        edgeTag(branchTag(n, i), q.x, q.y - 66);
       walk(c);
     });
     const on = pathIds.has(n.id), sel = state.lab.sel === n.id;
@@ -1321,7 +1323,7 @@ function manSvg(root, selId, crit, interactive) {
     if (n.children) n.children.forEach((c, i) => {
       const q = lay.pos.get(c.id);
       edges += `<path d="${edgePath(p.x, p.y, q.x, q.y, 40, 40)}" fill="none" stroke="${EDGE_DEF}" stroke-width="2.2" stroke-linecap="round"/>` +
-        edgeTag(branchTag(n, i), (p.x + q.x) / 2, (p.y + q.y) / 2);
+        edgeTag(branchTag(n, i), q.x, q.y - 66);
       walk(c);
     });
     const sel = interactive && n.id === selId;
@@ -1430,13 +1432,13 @@ function manEditor() {
     body = `<div class="note blue"><strong>此节点已划分：${esc(node.feature.type === 'num' ? `${node.feature.label} ≤ ${fmtNum(node.thr)}` : node.feature.label)}</strong><p>${node.groups.map(g => `${esc(g.label)} → ${g.rows.length}人`).join('；')}。点孩子节点继续画，或撤销这一刀重选。</p></div>`;
     action = `<button class="leaf-btn reopen" data-act="manreopen">撤销此划分，重新选</button>`;
   } else {
-    body = `<div class="note ${pure ? 'green' : ''}"><strong>叶子：${esc(ds.className[node.label])}</strong><p>${node.counts[node.label]}/${node.total} ${pure ? '全同类（停止条件 1）' : '多数表决'}${misNames.size && node.rows.some(r => misNames.has(r.name)) ? '；此叶有错分样本（下表红底）' : ''}。</p></div>`;
-    action = `<button class="leaf-btn reopen" data-act="manreopen">改主意：重新划分此节点</button>`;
+    body = `<div class="note ${pure ? 'green' : ''}"><strong>叶子：${esc(ds.className[node.label])}</strong><p>${node.counts[node.label]}/${node.total} ${pure ? '全同类（停止条件 1，自动成叶）' : '多数表决'}${misNames.size && node.rows.some(r => misNames.has(r.name)) ? '；此叶有错分样本（下表红底）' : ''}。</p></div>`;
+    action = pure ? '' : `<button class="leaf-btn reopen" data-act="manreopen">改主意：重新划分此节点</button>`;
   }
   return `<div class="panel" id="manEditor"><h2>节点 #${node.id} · 深度 ${node.depth} · ${node.total} 人</h2>` +
     `<div class="man-ed-grid"><div class="man-ed-main">` +
     body +
-    `<div class="man-bottom">${action}</div></div>` +
+    (action ? `<div class="man-bottom">${action}</div>` : '') + `</div>` +
     `<div class="man-ed-data"><h3>此节点数据 · ${node.total} 人</h3>` +
     countChips(ds, node.counts) +
     `<div class="formula-card"><div class="formula">${CRITS[M.crit].name} = ${impSub(node.counts, node.total, M.crit)}</div><div class="formula-sub">${esc(CRITS[M.crit].def)} · ${esc(CRITS[M.crit].pick)}</div></div>` +
@@ -1496,6 +1498,15 @@ function renderMan() {
       `<div class="formula-card"><div class="formula">算法：正确率 <span class="hl">${ds.rows.length - aMis.length}/${ds.rows.length}</span> · 叶 ${aSt.leaves} 个 · 深度 ${aSt.maxD}</div><div class="formula-sub">你的树不必和它一样——分得对、叶少，就是好树。</div></div></div>` : '') +
     `</div><div class="mg-right">` + manEditor() + `</div></div>` +
     `</div>`;
+  const selEl = document.querySelector(`.mg-left svg .man-node[data-mannode="${M.sel}"]`);
+  const wrap = selEl && selEl.closest('.tree-wrap');
+  if (wrap) {
+    const nb = selEl.getBoundingClientRect(), wb = wrap.getBoundingClientRect(), pad = 18;
+    if (nb.top < wb.top + pad) wrap.scrollTop -= (wb.top + pad - nb.top);
+    else if (nb.bottom > wb.bottom - pad) wrap.scrollTop += (nb.bottom - (wb.bottom - pad));
+    if (nb.left < wb.left + pad) wrap.scrollLeft -= (wb.left + pad - nb.left);
+    else if (nb.right > wb.right - pad) wrap.scrollLeft += (nb.right - (wb.right - pad));
+  }
 }
 
 /* ---------------- 播放与事件 ---------------- */
@@ -1581,9 +1592,10 @@ document.addEventListener('click', (e) => {
     const P = manPick(node, ds);
     if (!P) return;
     manPushHist();
-    const kids = manualSplit(node, P.opt, ds);
+    manualSplit(node, P.opt, ds);
     M.feat = null; M.thr = null;
-    M.sel = kids[0].id;
+    const next = manualPending(M.root)[0];
+    M.sel = next ? next.id : node.id;
     renderMan();
   }
   else if (a === 'mancompare') { state.man.compare = !state.man.compare; renderMan(); }
