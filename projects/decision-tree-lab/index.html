@@ -107,19 +107,15 @@ html::-webkit-scrollbar-thumb{background:#b9c8de;border-radius:5px}
 /* Controls */
 .dt-ctl{display:grid;gap:12px;justify-items:start}
 .dt-ctl .ctl-select{width:100%}
+.dt-ctl .slider-row{width:100%}
+.dt-ctl .slider-row input[type=range]{flex:1 1 auto;min-width:120px}
 .ctl-select{display:flex;gap:8px;align-items:center;font-size:19px;color:var(--muted);font-weight:650;flex-wrap:wrap}
 .ctl-select select{min-height:42px;padding:2px 10px;border:1px solid #bac8da;border-radius:7px;background:#fff;font-size:19px;max-width:100%}
 .ctl-select select:disabled{background:#f0f3f7;color:#8c99ab}
 .slider-row{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:650;color:var(--muted);flex-wrap:wrap}
 .slider-row input[type=range]{width:180px;accent-color:var(--blue)}
 .slider-row output{font-family:var(--mono);font-size:23px;font-weight:750;color:var(--blue-dark);min-width:40px}
-/* 单节点阈值拖动 */
-.node-thr{margin-top:12px;border:1px solid #c7d7ef;border-radius:9px;background:#f4f8ff;padding:10px 14px}
-.nt-head{font-size:20px;font-weight:750;color:#17427a}
-.nt-head output{font-family:var(--mono);color:var(--blue-dark)}
-.node-thr input[type=range]{display:block;width:100%;height:30px;margin:6px 0 2px;accent-color:var(--blue)}
-.node-thr p{font-size:18px;color:var(--muted);line-height:1.45;margin:0 0 8px}
-.node-thr button{width:100%;font-size:19px;padding:6px 10px;min-height:38px}
+.node-reset{width:100%;margin-top:8px;font-size:19px;padding:6px 10px;min-height:38px}
 .playback{display:flex;gap:10px;width:100%;flex-wrap:wrap}
 .playback button{flex:1 1 auto;padding:8px 10px}
 .step-count{color:var(--muted);font-size:20px}
@@ -1191,22 +1187,28 @@ function labThrRange(n) {
   const cur = Math.min(max, Math.max(lo, lo + Math.round((n.thr - lo) / step) * step));
   return { lo, step, max, cur };
 }
+function labThrRow(root) {
+  const n = nodeById(root, state.lab.sel) || root;
+  if (!n.leaf && n.feature && n.feature.type === 'num') {
+    const R = labThrRange(n);
+    return `<div class="slider-row" id="dtThrRow" title="拖动只重算选中节点这一刀，子树照常生长">` +
+      `<span>阈值·${esc(n.feature.label)}</span>` +
+      `<input type="range" id="nodeThr" min="${R.lo}" max="${R.max}" step="${R.step}" value="${R.cur}" aria-label="选中节点阈值">` +
+      `<output id="nodeThrVal">${fmtNum(n.thr)}</output></div>`;
+  }
+  const why = n.leaf ? '叶节点' : '类别特征按取值多路分';
+  return `<div class="slider-row" id="dtThrRow" title="选中节点是${why}，没有数值阈值"><span>阈值</span>` +
+    `<input type="range" disabled aria-label="选中节点没有数值阈值"><output>${n.leaf ? '叶' : '多路'}</output></div>`;
+}
 function labInspector(root) {
   const ds = DS[state.lab.ds], L = state.lab;
   const n = nodeById(root, L.sel) || root;
   const crit = L.crit;
   const tie = n.leaf && ds.classes.some(k => k !== n.label && n.counts[k] === n.counts[n.label]);
   const forced = !n.leaf && n.feature && n.feature.type === 'num' ? L.forces[n.path] : null;
-  let thrUI = '';
-  if (!n.leaf && n.feature && n.feature.type === 'num') {
-    const R = labThrRange(n);
-    thrUI = `<div class="node-thr"><div class="nt-head">此节点阈值：${esc(n.feature.label)} ≤ <output id="nodeThrVal">${fmtNum(n.thr)}</output></div>` +
-      `<input type="range" id="nodeThr" min="${R.lo}" max="${R.max}" step="${R.step}" value="${R.cur}" aria-label="此节点阈值">` +
-      `<p>拖动只重算这一刀，子树仍按当前准则自动生长，其余节点不变。</p>` +
-      `<button data-act="nodeThrReset"${forced ? '' : ' disabled'}>恢复算法选择</button></div>`;
-  }
+  const resetUI = forced ? `<button class="node-reset" data-act="nodeThrReset">恢复算法选择</button>` : '';
   return `<div class="panel"><h2>节点检查器 · #${n.id}</h2>` +
-    `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换</p>` + thrUI +
+    `<p class="muted">深度 ${n.depth} · 样本 ${n.total} · 点树中任意节点切换；在实验配置里拖动「阈值」只改这一刀</p>` + resetUI +
     countChips(ds, n.counts) +
     `<div class="formula-card"><div class="formula">${crit === 'gini' ? 'Gini' : crit === 'error' ? 'Error' : 'Ent'} = ${impSub(n.counts, n.total, crit)}</div><div class="formula-sub">${esc(CRITS[crit].name)}（${esc(CRITS[crit].ref)}）</div></div>` +
     (n.leaf
@@ -1250,13 +1252,8 @@ function labNotes(root, mis) {
   const st = treeStats(root);
   let html = `<p>${esc(ds.desc)}</p>` +
     `<div class="formula-card"><div class="formula">${esc(CRITS[L.crit].def)}</div><div class="formula-sub">${esc(CRITS[L.crit].name)}（${esc(CRITS[L.crit].ref)}）：${esc(CRITS[L.crit].pick)}；数值特征扫中点阈值二分，类别特征按取值多路分。</div></div>`;
-  const anyForce = Object.keys(L.forces || {}).length > 0;
-  if (L.ds === 'donate' && L.thrMode === 'slide') {
-    html += `<div class="note blue"><strong>阈值候选＝课件给定</strong><p>年龄 50 ／ 薪资 60,000${anyForce ? '；当前有节点手动拖过阈值' : '，与分步演示完全同树'}。切到"自动扫描中点"看真实算法的搜索结果。</p></div>`;
-  }
-  if (L.ds === 'donate' && L.thrMode === 'auto' && root.best && !root.best.forced) {
-    const b = root.best;
-    html += `<div class="note blue"><strong>自动扫描找到更纯的阈值</strong><p>根节点选 ${esc(b.f.label)} ≤ ${fmtNum(b.thr)}（准则值 ${b.score.toFixed(3)}），比课件手算阈值 60,000 的 0.260 更低——课件固定阈值只为手算，扫描中点才是完整算法。</p></div>`;
+  if (L.ds === 'donate') {
+    html += `<div class="note blue"><strong>阈值由你决定</strong><p>未手动拖动时按课件给定阈值生长（年龄 50 ／ 薪资 60,000），与分步演示同树。教材取整是为手算方便：扫描全部中点，根节点最优是薪资 ≤ 55,500，准则值 0.152 比 60,000 的 0.260 更低——把实验配置里的阈值滑杆拖到 55,500 就能复现。</p></div>`;
   }
   if (L.crit === 'error') html += `<div class="note"><strong>错误率粒度粗</strong><p>只看多数类，容易平局（课件 p91 两个 2/11 选不出）；对照基尼看同一数据的不同选择。</p></div>`;
   if (L.crit === 'entropy') html += `<div class="note blue"><strong>信息增益＝拓展准则</strong><p>Gain = Ent(父) − 加权 Ent(子)；表中"准则值"为加权熵（越小越好），"不纯度下降"即增益。课件主讲基尼。</p></div>`;
@@ -1289,6 +1286,7 @@ function labParts() {
       `<span><span class="dt-sw" style="border-color:#2563eb;background:#fff;border-width:4px"></span>选中</span>` +
       `<span><span class="dt-sw" style="border-color:#15803d;background:#fff;border-width:4px"></span>预测路径</span>` +
       `<span class="muted">树宽超出面板时横向滚动（字号不缩）；叶框色＝多数类别。</span></div>`,
+    thr: labThrRow(root),
     data: `<details class="fold" id="dtDataPanel"${L.dataOpen ? ' open' : ''}><summary>训练数据全量 ${ds.rows.length} 行（红底＝当前树错分）</summary><div class="fold-body">` +
       rowTable(ds, ds.rows, r => misNames.has(r.name)) + `</div></details>`,
     inspector: `<div id="dtInspector">${labInspector(root)}</div>`,
@@ -1308,21 +1306,21 @@ function renderLab() {
     `<div class="panel dt-ctl"><h2>实验配置</h2>` +
     `<div class="ctl-select"><span>数据</span><select id="dtDs">${DATASETS.map(d => `<option value="${d.id}"${L.ds === d.id ? ' selected' : ''}>${esc(d.name)}（${esc(d.tag)}）</option>`).join('')}</select></div>` +
     `<div class="ctl-select"><span>准则</span><select id="dtCrit">${Object.keys(CRITS).map(k => `<option value="${k}"${L.crit === k ? ' selected' : ''}>${esc(CRITS[k].name)}（${esc(CRITS[k].ref)}）</option>`).join('')}</select></div>` +
-    `<div class="ctl-select"><span>阈值候选</span><select id="dtThr"${L.ds === 'donate' ? '' : ' disabled'}><option value="slide"${L.thrMode === 'slide' ? ' selected' : ''}>课件给定（50／60,000）</option><option value="auto"${L.thrMode === 'auto' ? ' selected' : ''}>自动扫描中点</option></select></div>` +
+    p.thr +
     `<div class="slider-row"><span>最大深度</span><input type="range" id="dtDepth" min="1" max="6" step="1" value="${L.depth}"><output>${L.depth}</output></div>` +
     `<div class="slider-row"><span>停止样本阈值</span><input type="range" id="dtMin" min="2" max="8" step="1" value="${L.min}"><output>${L.min}</output></div>` +
     `<button data-act="labreset">恢复默认配置</button>` +
-    `<p class="muted" style="font-size:18px">改配置＝更新整棵树（手动阈值一并清除）；选中节点与预测路径重置。</p></div>` +
+    `<p class="muted" style="font-size:18px">「阈值」只重算选中节点这一刀；改其他配置＝更新整棵树（手动阈值一并清除）。</p></div>` +
     p.tracer +
     `</aside></div></div>`;
 }
 /* 滑杆拖动时只补丁树／指标／检查器等区域，不重建控件面板，拖动不被打断 */
 function labLive(skipInspector) {
   const p = labParts();
-  ['dtMetrics', 'dtTreePanel', 'dtDataPanel', 'dtInspector', 'dtTracer', 'dtNotes'].forEach(id => {
-    if (skipInspector && id === 'dtInspector') return;
+  ['dtMetrics', 'dtTreePanel', 'dtDataPanel', 'dtInspector', 'dtTracer', 'dtNotes', 'dtThrRow'].forEach(id => {
+    if (skipInspector && (id === 'dtInspector' || id === 'dtThrRow')) return;
     const el = document.getElementById(id);
-    if (el) el.outerHTML = p[{ dtMetrics: 'metrics', dtTreePanel: 'tree', dtDataPanel: 'data', dtInspector: 'inspector', dtTracer: 'tracer', dtNotes: 'notes' }[id]];
+    if (el) el.outerHTML = p[{ dtMetrics: 'metrics', dtTreePanel: 'tree', dtDataPanel: 'data', dtInspector: 'inspector', dtTracer: 'tracer', dtNotes: 'notes', dtThrRow: 'thr' }[id]];
   });
 }
 
@@ -1723,8 +1721,6 @@ document.addEventListener('input', (e) => {
     const out = document.getElementById('nodeThrVal');
     if (out) out.textContent = fmtNum(+e.target.value);
     labLive(true);
-    const btn = document.querySelector('[data-act="nodeThrReset"]');
-    if (btn) btn.disabled = false;
     return;
   }
   if (id === 'dtDepth' || id === 'dtMin') {
@@ -1742,7 +1738,6 @@ document.addEventListener('change', (e) => {
   if (id === 'nodeThr') { labLive(); return; }
   if (id === 'dtDs') { state.lab.ds = e.target.value; state.lab.thrMode = e.target.value === 'donate' ? 'slide' : 'auto'; labRebuild(); return; }
   if (id === 'dtCrit') { state.lab.crit = e.target.value; labRebuild(); return; }
-  if (id === 'dtThr') { state.lab.thrMode = e.target.value; labRebuild(); return; }
   if (id === 'manDs') {
     const M = state.man;
     M.ds = e.target.value; M.root = manualRoot(DS[M.ds]); M.sel = 0; M.hist = [];
