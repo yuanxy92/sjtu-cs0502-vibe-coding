@@ -490,7 +490,7 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
       </div>
     </div>
     <div class="head-pop" id="infoPop" hidden>
-      <p class="subtitle">Slide13 分类·决策树（p78–94）：①分步演示——课件 p79 捐赠例 11 人，错误率平局（2/11）→ 基尼系数破局（0.297 对 0.260）→ p88 黑板树逐节点生长 → Cindy 预测路径；②数据与算法实验——4 份内嵌数据，划分准则（错误率／基尼／信息增益）、最大深度、停止样本阈值、阈值候选可调，节点检查器全量代入，样本预测沿树高亮；③自己画树——每个节点选哪一刀由学生自己决定，手机扫码即玩，画完与算法树比正确率与叶数。全部数据内嵌，可离线打开。</p>
+      <p class="subtitle">Slide13 分类·决策树（p78–94）：①分步演示——课件 p79 捐赠例 11 人，错误率平局（2/11）→ 基尼系数破局（0.297 对 0.260）→ p88 黑板树逐节点生长 → Cindy 预测路径；②数据与算法实验——7 份内嵌数据（含西瓜、泰坦尼克、鸢尾花），划分准则（错误率／基尼／信息增益）、最大深度、停止样本阈值可调，节点阈值滑杆拖动即改，节点检查器全量代入，样本预测沿树高亮；③自己画树——每个节点选哪一刀由学生自己决定，手机扫码即玩，画完与算法树比正确率与叶数。全部数据内嵌，可离线打开。</p>
       <p class="muted">对应 Slide13 第 78–94 页：决策树概念 p78、捐赠例与四步算法 p79–85、新样本预测 p86–87、黑板树 p88、核心问题 p89、错误率 p90–91、基尼系数 p92–93、停止条件 p94。叶节点颜色＝类别：绿＝捐赠／是，琥珀＝不捐赠／否；内部节点＝白底蓝框，当前节点＝蓝色粗框，预测路径＝绿色粗框。「③ 自己画树」中学生手选每一刀划分，琥珀虚线框＝待划分节点，画完自动与算法树对比正确率与叶数。</p>
       <p class="muted">同卡片姊妹页面：<a href="../association-lab/">频繁项集与关联规则实验室 ↗</a> · <a href="../clustering-lab/">聚类实验室（K-Means＋DBSCAN）↗</a> · <a href="../clustering-quiz/">聚类课堂小测 ↗</a></p>
     </div>
@@ -596,6 +596,99 @@ const DATASETS = [
       { name: '申请人12', income: '低', credit: 'Fair', debt: '低', label: 'N' },
       { name: '申请人13', income: '低', credit: 'Fair', debt: '高', label: 'N' },
       { name: '申请人14', income: '低', credit: 'Fair', debt: '高', label: 'N' }
+    ]
+  },
+  {
+    id: 'melon', name: '西瓜例', tag: '17 个 · 类别',
+    desc: '17 个西瓜，六个类别特征，标签为是否好瓜（8 好／9 坏）。全部是类别多路划分，树比天气例更深：纹理把样本分成清晰／稍糊／模糊三路，模糊一路 3 个全坏、一步成叶，清晰一路还要再看触感。',
+    features: [
+      { key: 'color', label: '色泽', type: 'cat', values: ['青绿', '乌黑', '浅白'] },
+      { key: 'root', label: '根蒂', type: 'cat', values: ['蜷缩', '稍蜷', '硬挺'] },
+      { key: 'sound', label: '敲声', type: 'cat', values: ['浊响', '沉闷', '清脆'] },
+      { key: 'texture', label: '纹理', type: 'cat', values: ['清晰', '稍糊', '模糊'] },
+      { key: 'umbilicus', label: '脐部', type: 'cat', values: ['凹陷', '稍凹', '平坦'] },
+      { key: 'touch', label: '触感', type: 'cat', values: ['硬滑', '软粘'] }
+    ],
+    classes: ['Y', 'N'], className: { Y: '好瓜', N: '坏瓜' }, labelKey: 'label',
+    rows: [
+      { name: '瓜01', color: '青绿', root: '蜷缩', sound: '浊响', texture: '清晰', umbilicus: '凹陷', touch: '硬滑', label: 'Y' },
+      { name: '瓜02', color: '乌黑', root: '蜷缩', sound: '沉闷', texture: '清晰', umbilicus: '凹陷', touch: '硬滑', label: 'Y' },
+      { name: '瓜03', color: '乌黑', root: '蜷缩', sound: '浊响', texture: '清晰', umbilicus: '凹陷', touch: '硬滑', label: 'Y' },
+      { name: '瓜04', color: '青绿', root: '蜷缩', sound: '沉闷', texture: '清晰', umbilicus: '凹陷', touch: '硬滑', label: 'Y' },
+      { name: '瓜05', color: '浅白', root: '蜷缩', sound: '浊响', texture: '清晰', umbilicus: '凹陷', touch: '硬滑', label: 'Y' },
+      { name: '瓜06', color: '青绿', root: '稍蜷', sound: '浊响', texture: '清晰', umbilicus: '稍凹', touch: '软粘', label: 'Y' },
+      { name: '瓜07', color: '乌黑', root: '稍蜷', sound: '浊响', texture: '稍糊', umbilicus: '稍凹', touch: '软粘', label: 'Y' },
+      { name: '瓜08', color: '乌黑', root: '稍蜷', sound: '浊响', texture: '清晰', umbilicus: '稍凹', touch: '硬滑', label: 'Y' },
+      { name: '瓜09', color: '乌黑', root: '稍蜷', sound: '沉闷', texture: '稍糊', umbilicus: '稍凹', touch: '硬滑', label: 'N' },
+      { name: '瓜10', color: '青绿', root: '硬挺', sound: '清脆', texture: '清晰', umbilicus: '平坦', touch: '软粘', label: 'N' },
+      { name: '瓜11', color: '浅白', root: '硬挺', sound: '清脆', texture: '模糊', umbilicus: '平坦', touch: '硬滑', label: 'N' },
+      { name: '瓜12', color: '浅白', root: '蜷缩', sound: '浊响', texture: '模糊', umbilicus: '平坦', touch: '软粘', label: 'N' },
+      { name: '瓜13', color: '青绿', root: '稍蜷', sound: '浊响', texture: '稍糊', umbilicus: '凹陷', touch: '硬滑', label: 'N' },
+      { name: '瓜14', color: '浅白', root: '稍蜷', sound: '沉闷', texture: '稍糊', umbilicus: '凹陷', touch: '硬滑', label: 'N' },
+      { name: '瓜15', color: '乌黑', root: '稍蜷', sound: '浊响', texture: '清晰', umbilicus: '稍凹', touch: '软粘', label: 'N' },
+      { name: '瓜16', color: '浅白', root: '蜷缩', sound: '浊响', texture: '模糊', umbilicus: '平坦', touch: '硬滑', label: 'N' },
+      { name: '瓜17', color: '青绿', root: '蜷缩', sound: '沉闷', texture: '稍糊', umbilicus: '稍凹', touch: '硬滑', label: 'N' }
+    ]
+  },
+  {
+    id: 'titanic', name: '泰坦尼克例', tag: '16 人 · 数值+类别',
+    desc: '16 位乘客：性别与舱位是类别特征，年龄是数值特征，标签为是否生还。年龄先把 20 岁以下的小孩整组分出（4 人全生还），剩下的乘客再按性别分；女性一侧再按舱位分——同一棵树里数值二分与类别多路交替出现，年龄节点的滑杆可以直接拖动。',
+    features: [
+      { key: 'sex', label: '性别', type: 'cat', values: ['女', '男'] },
+      { key: 'pclass', label: '舱位', type: 'cat', values: ['头等', '二等', '三等'] },
+      { key: 'age', label: '年龄', type: 'num' }
+    ],
+    classes: ['Y', 'N'], className: { Y: '生还', N: '未生还' }, labelKey: 'label',
+    rows: [
+      { name: '乘客01', sex: '女', pclass: '头等', age: 29, label: 'Y' },
+      { name: '乘客02', sex: '男', pclass: '头等', age: 40, label: 'N' },
+      { name: '乘客03', sex: '女', pclass: '头等', age: 2, label: 'Y' },
+      { name: '乘客04', sex: '男', pclass: '头等', age: 30, label: 'N' },
+      { name: '乘客05', sex: '女', pclass: '二等', age: 25, label: 'Y' },
+      { name: '乘客06', sex: '男', pclass: '二等', age: 35, label: 'N' },
+      { name: '乘客07', sex: '女', pclass: '二等', age: 30, label: 'Y' },
+      { name: '乘客08', sex: '男', pclass: '二等', age: 45, label: 'N' },
+      { name: '乘客09', sex: '女', pclass: '三等', age: 22, label: 'N' },
+      { name: '乘客10', sex: '男', pclass: '三等', age: 28, label: 'N' },
+      { name: '乘客11', sex: '女', pclass: '三等', age: 19, label: 'Y' },
+      { name: '乘客12', sex: '男', pclass: '三等', age: 32, label: 'N' },
+      { name: '乘客13', sex: '女', pclass: '三等', age: 40, label: 'N' },
+      { name: '乘客14', sex: '男', pclass: '三等', age: 24, label: 'N' },
+      { name: '乘客15', sex: '男', pclass: '三等', age: 6, label: 'Y' },
+      { name: '乘客16', sex: '女', pclass: '三等', age: 8, label: 'Y' }
+    ]
+  },
+  {
+    id: 'iris', name: '鸢尾花例', tag: '20 朵 · 数值',
+    desc: '20 朵鸢尾花，四项数值特征（花萼长宽、花瓣长宽，单位 cm），两个品种。花瓣长一个阈值就能把两品种完全分开——根节点一步成 2 个纯叶、训练误差 0，用来说明"树不一定越深越好"。',
+    features: [
+      { key: 'sl', label: '花萼长', type: 'num' },
+      { key: 'sw', label: '花萼宽', type: 'num' },
+      { key: 'pl', label: '花瓣长', type: 'num' },
+      { key: 'pw', label: '花瓣宽', type: 'num' }
+    ],
+    classes: ['Y', 'N'], className: { Y: '山鸢尾', N: '变色鸢尾' }, labelKey: 'label',
+    rows: [
+      { name: '花01', sl: 5.1, sw: 3.5, pl: 1.4, pw: 0.2, label: 'Y' },
+      { name: '花02', sl: 4.9, sw: 3.0, pl: 1.4, pw: 0.2, label: 'Y' },
+      { name: '花03', sl: 4.7, sw: 3.2, pl: 1.3, pw: 0.2, label: 'Y' },
+      { name: '花04', sl: 4.6, sw: 3.1, pl: 1.5, pw: 0.2, label: 'Y' },
+      { name: '花05', sl: 5.0, sw: 3.6, pl: 1.4, pw: 0.2, label: 'Y' },
+      { name: '花06', sl: 5.4, sw: 3.9, pl: 1.7, pw: 0.4, label: 'Y' },
+      { name: '花07', sl: 4.6, sw: 3.4, pl: 1.4, pw: 0.3, label: 'Y' },
+      { name: '花08', sl: 5.0, sw: 3.4, pl: 1.5, pw: 0.2, label: 'Y' },
+      { name: '花09', sl: 4.4, sw: 2.9, pl: 1.4, pw: 0.2, label: 'Y' },
+      { name: '花10', sl: 4.9, sw: 3.1, pl: 1.5, pw: 0.1, label: 'Y' },
+      { name: '花11', sl: 7.0, sw: 3.2, pl: 4.7, pw: 1.4, label: 'N' },
+      { name: '花12', sl: 6.4, sw: 3.2, pl: 4.5, pw: 1.5, label: 'N' },
+      { name: '花13', sl: 6.9, sw: 3.1, pl: 4.9, pw: 1.5, label: 'N' },
+      { name: '花14', sl: 5.5, sw: 2.3, pl: 4.0, pw: 1.3, label: 'N' },
+      { name: '花15', sl: 6.5, sw: 2.8, pl: 4.6, pw: 1.5, label: 'N' },
+      { name: '花16', sl: 5.7, sw: 2.8, pl: 4.5, pw: 1.3, label: 'N' },
+      { name: '花17', sl: 6.3, sw: 3.3, pl: 4.7, pw: 1.6, label: 'N' },
+      { name: '花18', sl: 4.9, sw: 2.4, pl: 3.3, pw: 1.0, label: 'N' },
+      { name: '花19', sl: 6.6, sw: 2.9, pl: 4.6, pw: 1.3, label: 'N' },
+      { name: '花20', sl: 5.2, sw: 2.7, pl: 3.9, pw: 1.4, label: 'N' }
     ]
   },
   {
@@ -1263,6 +1356,9 @@ function labNotes(root, mis) {
       : `<div class="note green"><strong>当前树放过了噪声</strong><p>训练错 ${mis.length}/${ds.rows.length}（${mis.map(r => esc(r.name)).join('、') || '无'}）：噪声留在多数叶里，比逐点 memorize 更泛化。调小停止阈值可复现过拟合。</p></div>`;
   }
   if (L.ds === 'weather') html += `<div class="note blue"><strong>类别特征多路划分</strong><p>outlook 一个取值一条分支（晴／阴／雨），与数值二分对照；阴分支 4 天全 Y，一步成叶。</p></div>`;
+  if (L.ds === 'melon') html += `<div class="note blue"><strong>类别特征多路划分</strong><p>根节点「纹理」分三路：模糊 3 个全坏，一步成叶；稍糊 5 个再由「触感」分开；清晰 9 个看「根蒂」。瓜15 落进 {Y2,N1} 小叶，样本不足阈值，成为训练误差。</p></div>`;
+  if (L.ds === 'titanic') html += `<div class="note blue"><strong>数值与类别混合</strong><p>基尼下根节点是年龄（数值二分）：20 岁以下 4 人全生还；剩下的人再按性别、舱位多路分。换成错误率准则会先按性别分（4 叶、错 1）——同一数据、不同准则长出不同的树。选中年龄节点，可用实验配置里的滑杆直接拖阈值。</p></div>`;
+  if (L.ds === 'iris') html += `<div class="note green"><strong>一刀就够</strong><p>花瓣长 2.5 cm 把 20 朵完全分开，根节点直接长出两个纯叶，深度 1、误差 0。把滑杆拖离 2.5，纯叶立刻变混——最优阈值不是随便取的。</p></div>`;
   html += `<details class="note-fold"><summary>停止条件（p94 三条＋实验室两条）</summary><p>① 全同类；② 属性取值都相同或无可用划分；③ 样本量少于阈值（当前 ${L.min}）；④ 深度上限（当前 ${L.depth}）；⑤ 无划分能降低不纯度。</p></details>`;
   return html;
 }
@@ -1313,15 +1409,27 @@ function renderLab() {
     `<p class="muted" style="font-size:18px">「阈值」只重算选中节点这一刀；改其他配置＝更新整棵树（手动阈值一并清除）。</p></div>` +
     p.tracer +
     `</aside></div></div>`;
+  centerLabTree();
+}
+/* 重绘整树后把横向滚动放到中间，保证根节点在视野内（宽树不再停在最左边） */
+function centerLabTree() {
+  const w = document.querySelector('#dtTreePanel .tree-wrap');
+  if (!w) return;
+  w.scrollLeft = Math.max(0, (w.scrollWidth - w.clientWidth) / 2);
+  w.scrollTop = 0;
 }
 /* 滑杆拖动时只补丁树／指标／检查器等区域，不重建控件面板，拖动不被打断 */
 function labLive(skipInspector) {
+  const w0 = document.querySelector('#dtTreePanel .tree-wrap');
+  const sx = w0 ? w0.scrollLeft : 0, sy = w0 ? w0.scrollTop : 0;
   const p = labParts();
   ['dtMetrics', 'dtTreePanel', 'dtDataPanel', 'dtInspector', 'dtTracer', 'dtNotes', 'dtThrRow'].forEach(id => {
     if (skipInspector && (id === 'dtInspector' || id === 'dtThrRow')) return;
     const el = document.getElementById(id);
     if (el) el.outerHTML = p[{ dtMetrics: 'metrics', dtTreePanel: 'tree', dtDataPanel: 'data', dtInspector: 'inspector', dtTracer: 'tracer', dtNotes: 'notes', dtThrRow: 'thr' }[id]];
   });
+  const w1 = document.querySelector('#dtTreePanel .tree-wrap');
+  if (w1) { w1.scrollLeft = sx; w1.scrollTop = sy; }
 }
 
 /* ---------------- 自己画树（tab ③，手机优先） ---------------- */
