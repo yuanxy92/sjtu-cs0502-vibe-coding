@@ -1061,7 +1061,7 @@ function labCardW(root, ds) {
   return fitCardW(items);
 }
 function layout(root, NW) {
-  const SLOT = (NW || 164) + 20, ROW = 116, PAD = 46, M = 16;
+  const SLOT = (NW || 164) + 20, ROW = 150, PAD = 46, M = 16;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
@@ -1268,7 +1268,7 @@ function manCardW(root, ds, crit) {
   return fitCardW(items);
 }
 function manLayout(root, NW) {
-  const SLOT = (NW || 160) + 20, ROW = 110, PAD = 44, M = 12;
+  const SLOT = (NW || 160) + 20, ROW = 150, PAD = 44, M = 12;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
