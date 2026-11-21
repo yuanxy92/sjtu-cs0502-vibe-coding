@@ -267,6 +267,8 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
 .man-pick{display:grid;gap:8px;margin:2px 0}
 .mp-field{display:grid;gap:3px;font-size:19px;font-weight:650;color:var(--muted)}
 .mp-field select{width:100%;min-height:46px;padding:4px 12px;border:1px solid #bac8da;border-radius:8px;background:#fff;font-size:19px;color:#1e3a63}
+.mp-field output{font-family:var(--mono);font-weight:750;color:#17427a}
+.mp-field input[type=range]{width:100%;height:30px;accent-color:#2563eb;cursor:pointer}
 .mp-apply{width:100%;min-height:48px;font-size:20px}
 .mp-preview{border:1px solid #d5e2f5;background:#f5f9ff;border-radius:9px;padding:8px 12px;margin-top:8px;font-size:18px;color:#41536b}
 .mp-score{font-weight:750;color:#17427a}
@@ -274,6 +276,13 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
 .mp-groups{display:grid;gap:2px;margin-top:5px}
 .mpg b{color:#17427a}
 .mp-hint{margin-top:6px;color:#854d0e;font-weight:650}
+.man-ed-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:4px}
+.man-ed-data h3{margin:0;font-size:19px;color:#17427a}
+.man-ed-data .chips{margin-top:6px}
+.man-ed-data .formula-card{margin-top:8px}
+.man-data-hint{margin:2px 0 6px;font-size:16px;color:var(--muted)}
+.man-ed-data .table-wrap{max-height:min(46vh,420px);overflow:auto;scrollbar-gutter:stable}
+@media (min-width:701px){.man-ed-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
 .man-node{cursor:pointer}
 .man-node rect{transition:stroke .15s,fill .2s}
 .man-node:hover rect{stroke-width:3.2}
@@ -297,6 +306,7 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .outcome p{font-size:20px}
   .tabs button{padding:12px 16px;font-size:20px}
   .phone-body svg{width:140px;height:140px}
+  .mg-left .tree-wrap{max-height:min(62vh,560px);overflow:auto;scrollbar-gutter:stable}
 }
 /* Projection mode: 16:9 classroom screen — page fits viewport, panels scroll inside */
 @media (min-width:1101px){
@@ -383,23 +393,41 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   #manEditor::-webkit-scrollbar-track{background:#eef2f8}
   #manEditor::-webkit-scrollbar-thumb{background:#9db4d6;border-radius:5px}
   #manEditor>*{flex:0 0 auto}
-  .man-pick{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) auto;align-items:end;gap:10px;margin:2px 0 0}
+  .man-pick{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"feat apply" "thr thr";align-items:end;gap:6px 10px;margin:2px 0 0}
+  .man-pick .mp-feat{grid-area:feat}
+  .man-pick .mp-thr{grid-area:thr}
+  .man-pick .mp-apply{grid-area:apply}
   .mp-field{gap:2px;font-size:17px}
   .mp-field select{min-height:40px;font-size:18px;padding:2px 10px}
+  .mp-field input[type=range]{height:26px}
   .mp-apply{min-height:40px;width:auto;font-size:19px;padding:6px 16px;white-space:nowrap}
   .mp-preview{padding:6px 12px;margin-top:6px;font-size:18px;max-height:150px;overflow-y:auto}
   .mp-score b{font-size:18px}
   .mp-groups{font-size:18px;margin-top:4px}
+  .man-ed-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start;gap:12px;margin-top:2px}
+  .man-ed-data h3{font-size:18px}
+  .man-data-hint{display:none}
+  #manEditor .man-ed-data .table-wrap{max-height:min(32vh,400px)}
+  #manEditor .man-ed-data .formula{font-size:18px}
   #manEditor .man-bottom{display:flex;gap:10px;align-items:center;margin-top:8px}
   #manEditor .man-bottom .leaf-btn{width:auto;flex:0 0 auto;margin-top:0;min-height:42px;font-size:19px;padding:6px 14px}
-  #manEditor .man-bottom .sample-fold{flex:1 1 auto;min-width:0;margin-top:0;max-height:110px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#9db4d6 #eef2f8}
-  #manEditor .sample-fold .table-wrap{max-height:none;overflow:visible}
   #manEditor .formula-card{padding:6px 12px;gap:2px;margin-top:6px}
   #manEditor .formula{font-size:21px}
   #manEditor .formula-sub{display:none}
-  #manEditor h3{display:none}
   #manEditor h2{margin-bottom:4px}
-  #manEditor .sample-fold summary{font-size:18px;padding:4px 0}
+}
+@media (min-width:1101px) and (max-height:800px){
+  #manEditor h2{font-size:19px;margin:0 0 2px}
+  .mp-field{gap:1px;font-size:16px}
+  .mp-field select{min-height:36px;font-size:17px}
+  .mp-field input[type=range]{height:22px}
+  .mp-preview{max-height:96px;font-size:17px;padding:5px 10px;margin-top:5px}
+  .mp-score b{font-size:17px}
+  .mp-groups{font-size:17px;margin-top:3px}
+  #manEditor .man-bottom{margin-top:6px}
+  #manEditor .man-ed-data .chips{gap:6px}
+  #manEditor .man-ed-data .chip{font-size:16px;padding:1px 8px}
+  #manEditor .man-ed-data .table-wrap{max-height:156px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -762,7 +790,7 @@ const state = {
   tab: 'demo', beat: 0, playing: false, speed: 800, timer: null,
   demoFolds: { ledger: false, inspector: false },
   lab: { ds: 'donate', crit: 'gini', depth: 6, min: 4, thrMode: 'slide', sel: 0, pred: null, sample: null, dataOpen: false, notesOpen: false },
-  man: { ds: 'donate', crit: 'gini', root: manualRoot(DS.donate), sel: 0, hist: [], hint: false, compare: false, feat: null, thr: null, sampleOpen: !(typeof matchMedia === 'function' && matchMedia('(min-width:1101px)').matches) }
+  man: { ds: 'donate', crit: 'gini', root: manualRoot(DS.donate), sel: 0, hist: [], hint: false, compare: false, feat: null, thr: null }
 };
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -1061,7 +1089,7 @@ function labCardW(root, ds) {
   return fitCardW(items);
 }
 function layout(root, NW) {
-  const SLOT = (NW || 164) + 20, ROW = 150, PAD = 46, M = 16;
+  const SLOT = (NW || 164) + 20, ROW = 150, PAD = 62, M = 16;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
@@ -1072,7 +1100,7 @@ function layout(root, NW) {
       pos.set(n.id, { x: (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2, y: n.depth * ROW + PAD });
     }
   })(root);
-  return { pos, W: slot * SLOT + 2 * M, H: maxD * ROW + PAD + 64, maxD, leaves: slot, NW: NW || 164 };
+  return { pos, W: slot * SLOT + 2 * M, H: maxD * ROW + PAD + 76, maxD, leaves: slot, NW: NW || 164 };
 }
 function nodeById(root, id) {
   let hit = null;
@@ -1268,7 +1296,7 @@ function manCardW(root, ds, crit) {
   return fitCardW(items);
 }
 function manLayout(root, NW) {
-  const SLOT = (NW || 160) + 20, ROW = 150, PAD = 44, M = 12;
+  const SLOT = (NW || 160) + 20, ROW = 150, PAD = 62, M = 20;
   let slot = 0, maxD = 0; const pos = new Map();
   (function walk(n) {
     maxD = Math.max(maxD, n.depth);
@@ -1282,7 +1310,7 @@ function manLayout(root, NW) {
   const span = slot * SLOT, W = Math.max(span + 2 * M, 340);
   const dx = (W - span) / 2 - M;
   pos.forEach(p => { p.x += dx; });
-  return { pos, W, H: maxD * ROW + PAD + 56, NW: NW || 160 };
+  return { pos, W, H: maxD * ROW + PAD + 76, NW: NW || 160 };
 }
 function manSvg(root, selId, crit, interactive) {
   const ds = DS[state.man.ds];
@@ -1319,25 +1347,45 @@ function manCandSet(node, ds) {
   });
   return { cands, groups };
 }
+function manThrRange(node, f) {
+  const vals = node.rows.map(r => r[f.key]);
+  const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = hi - lo;
+  const step = span > 5000 ? 500 : span > 500 ? 10 : (span >= 1 ? 1 : 0.1);
+  const max = hi - step > lo ? hi - step : (lo + hi) / 2;
+  const mid = lo + Math.round(((lo + hi) / 2 - lo) / step) * step;
+  return { lo, hi, step, max, def: Math.min(Math.max(mid, lo), max) };
+}
+function manCandAt(node, ds, f, thr, crit) {
+  const groups = groupsFor(node.rows, f, thr);
+  if (groups.length < 2) return null;
+  let score = 0;
+  groups.forEach(g => { score += (g.rows.length / node.total) * impurity(countsOf(g.rows, ds), g.rows.length, crit); });
+  return { f, thr, groups, score };
+}
 function manPick(node, ds) {
   const set = manCandSet(node, ds);
   if (!set.groups.length) return null;
   const M = state.man;
   const g = set.groups.find(x => x.f.key === M.feat) || set.groups[0];
-  const opt = g.opts.find(o => String(o.thr) === String(M.thr)) || g.opts[0];
-  return { cands: set.cands, groups: set.groups, g, opt };
+  if (g.f.type !== 'num') return { cands: set.cands, groups: set.groups, g, opt: g.opts[0] };
+  const R = manThrRange(node, g.f);
+  const raw = M.thr == null || isNaN(+M.thr) ? R.def : Math.min(R.max, Math.max(R.lo, +M.thr));
+  const thr = Math.min(R.max, R.lo + Math.round((raw - R.lo) / R.step) * R.step);
+  const opt = manCandAt(node, ds, g.f, thr, M.crit) || g.opts[0];
+  return { cands: set.cands, groups: set.groups, g, opt, R };
 }
 function manPreview(node, ds, P) {
   const M = state.man, crit = CRITS[M.crit].name;
   const o = P.opt, drop = impurity(node.counts, node.total, M.crit) - o.score, pure = o.score <= 1e-9;
   const best = P.cands[0];
+  const isBest = best.f.key === o.f.key && Math.abs(best.score - o.score) < 1e-9;
   const groups = o.groups.map(g => {
     const cc = countsOf(g.rows, ds);
     return `<span class="mpg">${esc(g.label)} → <b>${g.rows.length}</b> 人（${ds.classes.map(k => `${k}${cc[k]}`).join('·')}）</span>`;
   }).join('');
   return `<div class="mp-score">${crit} <b>${o.score.toFixed(3)}</b> · 不纯度下降 <b>${drop.toFixed(3)}</b>` +
     (pure ? ' <span class="badge hi">一刀全纯</span>' : '') +
-    (o === best && M.hint ? ' <span class="badge core">算法之选</span>' : '') + `</div>` +
+    (isBest && M.hint ? ' <span class="badge core">算法之选</span>' : '') + `</div>` +
     `<div class="mp-groups">${groups}</div>` +
     (M.hint ? `<div class="mp-hint">算法会选：${esc(best.f.label)}${best.f.type === 'num' ? ' ≤ ' + fmtNum(best.thr) : '（按全部取值）'}（${crit} ${best.score.toFixed(3)}）</div>` : '');
 }
@@ -1347,31 +1395,23 @@ function manPicker(node, ds) {
   const featOpts = P.groups.map(g =>
     `<option value="${g.f.key}"${g.f.key === P.g.f.key ? ' selected' : ''}>${esc(g.f.label)}（${g.f.type === 'num' ? '数值 · 二分' : '类别 · 多路'}）</option>`).join('');
   const thrField = P.g.f.type === 'num'
-    ? `<label class="mp-field"><span>阈值</span><select id="manThr">` +
-      P.g.opts.map(o => `<option value="${o.thr}"${String(o.thr) === String(P.opt.thr) ? ' selected' : ''}>≤ ${fmtNum(o.thr)}</option>`).join('') + `</select></label>`
-    : `<label class="mp-field"><span>分支</span><select id="manThr" disabled><option>按 ${P.g.f.values.length} 个取值多路分</option></select></label>`;
+    ? `<label class="mp-field mp-thr"><span>阈值：≤ <output id="manThrVal">${fmtNum(P.opt.thr)}</output></span>` +
+      `<input type="range" id="manThr" min="${P.R.lo}" max="${P.R.max}" step="${P.R.step}" value="${P.opt.thr}" aria-label="阈值"></label>`
+    : `<label class="mp-field mp-thr"><span>分支</span><select id="manThr" disabled><option>按 ${P.g.f.values.length} 个取值多路分</option></select></label>`;
   return `<div class="man-pick">` +
-    `<label class="mp-field"><span>划分属性</span><select id="manFeat">${featOpts}</select></label>` + thrField +
+    `<label class="mp-field mp-feat"><span>划分属性</span><select id="manFeat">${featOpts}</select></label>` + thrField +
     `<button class="primary mp-apply" data-act="mansplit">应用这一刀</button></div>` +
     `<div class="mp-preview" id="manPreview">${manPreview(node, ds, P)}</div>`;
 }
-/* 只补丁阈值下拉与预览，保留当前下拉焦点 */
+/* 拖动滑块只补丁数值与预览，保留滑块焦点 */
 function manPatchPicker() {
   const M = state.man, ds = DS[M.ds];
   const node = manNodeById(M.root, M.sel);
   if (!node || node.leaf || node.children) return;
   const P = manPick(node, ds);
   if (!P) return;
-  const selThr = document.getElementById('manThr');
-  if (selThr) {
-    if (P.g.f.type === 'num') {
-      selThr.disabled = false;
-      selThr.innerHTML = P.g.opts.map(o => `<option value="${o.thr}"${String(o.thr) === String(P.opt.thr) ? ' selected' : ''}>≤ ${fmtNum(o.thr)}</option>`).join('');
-    } else {
-      selThr.disabled = true;
-      selThr.innerHTML = `<option>按 ${P.g.f.values.length} 个取值多路分</option>`;
-    }
-  }
+  const out = document.getElementById('manThrVal');
+  if (out && P.g.f.type === 'num') out.textContent = fmtNum(P.opt.thr);
   const pv = document.getElementById('manPreview');
   if (pv) pv.innerHTML = manPreview(node, ds, P);
 }
@@ -1394,17 +1434,21 @@ function manEditor() {
     action = `<button class="leaf-btn reopen" data-act="manreopen">改主意：重新划分此节点</button>`;
   }
   return `<div class="panel" id="manEditor"><h2>节点 #${node.id} · 深度 ${node.depth} · ${node.total} 人</h2>` +
+    `<div class="man-ed-grid"><div class="man-ed-main">` +
+    body +
+    `<div class="man-bottom">${action}</div></div>` +
+    `<div class="man-ed-data"><h3>此节点数据 · ${node.total} 人</h3>` +
     countChips(ds, node.counts) +
     `<div class="formula-card"><div class="formula">${CRITS[M.crit].name} = ${impSub(node.counts, node.total, M.crit)}</div><div class="formula-sub">${esc(CRITS[M.crit].def)} · ${esc(CRITS[M.crit].pick)}</div></div>` +
-    body +
-    `<div class="man-bottom">${action}<details class="sample-fold" id="manSampleFold"${M.sampleOpen ? ' open' : ''}><summary>此节点样本 ${node.total} 人（红底＝整树错分）</summary>${rowTable(ds, node.rows, r => misNames.has(r.name))}</details></div></div>`;
+    `<p class="man-data-hint">红底＝整树中被错分的样本</p>` +
+    rowTable(ds, node.rows, r => misNames.has(r.name)) + `</div></div></div>`;
 }
 function manStatus() {
   const M = state.man, ds = DS[M.ds];
   const st = manStats(M.root, ds);
   const n = ds.rows.length;
   if (!st.done) {
-    return `<div class="outcome info" id="manStatus"><div><strong>还有 ${st.pending} 个节点待划分</strong><p>已设 ${st.leaves} 个叶 · 点树上虚线框，用下拉框选属性与阈值后「应用这一刀」，或设为叶子。选错点撤销一步。目标：用最少的叶，把 ${n} 个样本全部分对。</p></div></div>`;
+    return `<div class="outcome info" id="manStatus"><div><strong>还有 ${st.pending} 个节点待划分</strong><p>已设 ${st.leaves} 个叶 · 点树上虚线框，下拉选属性、拖动阈值滑杆（右侧即此节点全部样本），再「应用这一刀」或设为叶子。选错点撤销一步。目标：用最少的叶，把 ${n} 个样本全部分对。</p></div></div>`;
   }
   const algo = manAlgo(), aSt = treeStats(algo), aMis = trainMis(algo, ds);
   const acc = n - st.mis.length, aAcc = n - aMis.length;
@@ -1439,13 +1483,13 @@ function renderMan() {
     `<button data-act="manhint" aria-pressed="${M.hint}">提示：算法之选</button>` +
     `<button data-act="mancompare" aria-pressed="${M.compare}">对比算法树</button>` +
     `</div></div>` +
-    `<p class="muted man-ctl-hint" style="font-size:18px;margin-top:10px">每一刀都由你选：点虚线节点 → 在下拉框挑属性和阈值（改动即预览准则值与分支构成）→ 应用这一刀；选错了点撤销一步回退。「提示」显示算法会选哪一刀，但不替你选。纯节点该设叶，样本太少或属性全同也只能设叶（p94 停止条件）。</p></div>` +
+    `<p class="muted man-ctl-hint" style="font-size:18px;margin-top:10px">每一刀都由你选：点虚线节点 → 下拉选属性、拖动阈值滑杆（改动即预览准则值与分支构成，右侧显示此节点全部样本）→ 应用这一刀；选错了点撤销一步回退。「提示」显示算法会选哪一刀，但不替你选。纯节点该设叶，样本太少或属性全同也只能设叶（p94 停止条件）。</p></div>` +
     `<div class="legend-strip"><span><span class="dt-sw" style="border-color:#b45309;background:#fff9eb"></span>待划分</span>` +
     `<span><span class="dt-sw" style="border-color:#1d4ed8;background:#fff"></span>已划分</span>` +
     `<span><span class="dt-sw" style="border-color:#15803d;background:#d8f3e3"></span>叶 · ${esc(ds.className[ds.classes[0]])}</span>` +
     `<span><span class="dt-sw" style="border-color:#b45309;background:#fff0cd"></span>叶 · ${esc(ds.className[ds.classes[1]])}</span>` +
     `<span><span class="dt-sw" style="border-color:#2563eb;background:#fff;border-width:4px"></span>当前节点</span>` +
-    `<span class="muted">树宽超出屏幕时左右滑动（字号不缩）。</span></div>` +
+    `<span class="muted">树超出区域时在框内拖动滚动条查看（字号不缩）。</span></div>` +
     `<div class="man-grid"><div class="mg-left${algo ? ' two' : ''}">` +
     `<div class="panel"><h2>你的树（点节点继续画）</h2>` + manSvg(M.root, M.sel, M.crit, true) + `</div>` +
     (algo ? `<div class="panel"><h2>算法的树（同一准则，自动选最优）</h2>` + manSvg(algo, -1, M.crit, false) +
@@ -1577,7 +1621,6 @@ document.addEventListener('toggle', (e) => {
   else if (id === 'dtInsFold') state.demoFolds.inspector = e.target.open;
   else if (id === 'dtDataPanel') state.lab.dataOpen = e.target.open;
   else if (id === 'dtNotes') state.lab.notesOpen = e.target.open;
-  else if (id === 'manSampleFold') state.man.sampleOpen = e.target.open;
 }, true);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
@@ -1591,6 +1634,7 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('input', (e) => {
   const id = e.target.id;
+  if (id === 'manThr') { state.man.thr = +e.target.value; manPatchPicker(); return; }
   if (id === 'dtDepth' || id === 'dtMin') {
     state.lab[id === 'dtDepth' ? 'depth' : 'min'] = +e.target.value;
     const out = e.target.parentElement.querySelector('output');
@@ -1612,8 +1656,7 @@ document.addEventListener('change', (e) => {
     renderMan(); return;
   }
   if (id === 'manCrit') { state.man.crit = e.target.value; renderMan(); return; }
-  if (id === 'manFeat') { state.man.feat = e.target.value; state.man.thr = null; manPatchPicker(); return; }
-  if (id === 'manThr') { state.man.thr = e.target.value; manPatchPicker(); return; }
+  if (id === 'manFeat') { state.man.feat = e.target.value; state.man.thr = null; renderMan(); return; }
   if (id === 'trPick') {
     const ds = DS[state.lab.ds], v = e.target.value;
     const src = v === 'cindy' ? ds.cindy : ds.rows[+v];
