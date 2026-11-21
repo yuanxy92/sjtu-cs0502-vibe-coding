@@ -402,7 +402,7 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .man-ctl .ctl-select select{min-height:38px;font-size:18px;min-width:0}
   .man-ctl .man-btns{flex-wrap:nowrap;flex:0 0 auto;margin-left:auto}
   .man-ctl .man-btns button{min-height:40px;padding:6px 12px;font-size:19px}
-  .man-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:stretch;gap:14px}
+  .man-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:stretch;gap:14px}
   .mg-left{display:grid;gap:12px;min-width:0;min-height:0;grid-template-rows:minmax(0,1fr)}
   .mg-left.two{grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
   .mg-left>.panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -454,9 +454,13 @@ table.trace tbody tr:hover td{filter:brightness(.985)}
   .mp-score b{font-size:17px}
   .mp-groups{font-size:17px;margin-top:3px}
   #manEditor .man-bottom{margin-top:6px}
-  #manEditor .man-ed-data .chips{gap:6px}
-  #manEditor .man-ed-data .chip{font-size:16px;padding:1px 8px}
-  #manEditor .man-ed-data .table-wrap{max-height:156px}
+  #manEditor .man-ed-data .chips{gap:4px}
+  #manEditor .man-ed-data .chip{font-size:16px;padding:1px 6px}
+  #manEditor .man-ed-data .formula{font-size:17px}
+  #manEditor .man-ed-data .table-wrap{max-height:148px}
+}
+@media (min-width:1101px) and (max-width:1400px) and (max-height:800px){
+  #manEditor .man-ed-data .formula{font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
