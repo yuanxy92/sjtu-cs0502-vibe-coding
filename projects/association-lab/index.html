@@ -1020,11 +1020,11 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       <div class="formula-sub">${nd.level ? `阈值 ${pct(state.minsup, 0)} ＝ ≥${groups(n)} 单；${counted ? (verdict ? (info.cand.frequent ? '达标' : '不达标') : '已数出，等第 4 步宣判') : '没有数过，所以没有支持度可言'}` : '空集是每条事务的子集'}</div></div>
       <h3>包含它的事务（${inT.length}／${n}）</h3>
       <div class="chips">${inT.length ? inT.map(x => `<span class="chip">Tid ${x}</span>`).join('') : '<span class="muted">一条都没有</span>'}</div>
-      ${subs.length ? `<h3>直接子集（格图上往下一层的边）</h3>
+      ${subs.length ? `<h3>直接子集（${isPhone() ? '清单里的下一层' : '格图上往下一层的边'}）</h3>
       <div class="chips">${subs.map(s => { const si = states.map[s.join(',')]; const known = si.st === 'counted' || si.st === 'freq' || si.st === 'infreq'; return itemsetChip(s, chipCls(si.st), known && si.cand ? si.cand.support : undefined); }).join('')}</div>` : ''}
       ${killers.length ? `<div class="note red"><strong>排除依据</strong>
         <div class="chips" style="margin:6px 0">${killers.map(k => itemsetChip(k, 'pruned')).join('')}</div>
-        <p>这些子集不频繁 ⇒ 按向下闭包性，${nd.label} 和它的全部 ${Math.pow(2, LAT.N - nd.level) - 1} 个超集都不必计数。格图上从它出发的红虚线边就是这个超集锥。</p></div>` : ''}
+        <p>这些子集不频繁 ⇒ 按向下闭包性，${nd.label} 和它的全部 ${Math.pow(2, LAT.N - nd.level) - 1} 个超集都不必计数。${isPhone() ? '清单里那些红色虚线框的超集就是它。' : '格图上从它出发的红虚线边就是这个超集锥。'}</p></div>` : ''}
       ${info.st === 'freq' ? `<div class="note green"><strong>它还会继续长大</strong><p>作为 L(${nd.level}) 的成员，下一轮它会和同前缀的兄弟连接，生成 ${nd.level + 1} 项候选。</p></div>` : ''}`;
   }
 
@@ -1079,11 +1079,17 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
 
     if (SOURCES[state.source].lattice) {
       const states = latticeStates(t);
-      const extra = ['格图上琥珀色节点就是刚拼出来的候选，琥珀色粗边是它的两个连接父集。',
-        '被剪的候选这一步先保持琥珀色、用红粗边连向连累它的不频繁子集——看清"谁连累谁"；下一步它和它的边才一起变灰。' + (state.source === 'course' ? '课件 p36 把 D 的整片超集锥画红，这里把"数过才红、没数就蓝灰"分得更细。' : '第 3 轮点一下格图上的 ABC（milk+beer+bread），看它是被哪个不频繁子集（BC＝beer+bread）连累的。'),
-        '节点里琥珀色分数＝刚数出的支持度。' + (Object.values(states.map).some(i => i.st === 'pruned' || i.st === 'closed') ? '灰节点灰边＝省掉的计数。' : ''),
-        (state.source === 'course' ? '绿节点进入 L(k)；新红节点的不频繁超集锥先用红虚线整片连起来展示，下一步才整体变灰——对照课件 p38 的最后一张格图。'
-          : '绿节点进入 L(k)；新红节点的超集锥先用红虚线连成整片，下一步才变灰。把阈值拖到 20%，D 和 ACE 会翻身变绿。')][phase];
+      const extra = (isPhone()
+        ? ['琥珀色项集就是刚拼出来的候选，它的两个连接父集就在上一层清单里。',
+          '被剪的候选这一步先保持琥珀色、用红框标出连累它的不频繁子集；下一步它才变灰。' + (state.source === 'course' ? '课件 p36 把 D 的整片超集锥画红，这里把"数过才红、没数就蓝灰"分得更细。' : '第 3 轮点一下 ABC，看它是被哪个不频繁子集（BC）连累的。'),
+          '项集里的琥珀色分数＝刚数出的支持度。' + (Object.values(states.map).some(i => i.st === 'pruned' || i.st === 'closed') ? '灰色虚线框＝省掉的计数。' : ''),
+          (state.source === 'course' ? '绿项集进入 L(k)；新红项集的超集锥先用红色虚线框标出，下一步才整体变灰——对照课件 p38 的最后一张格图。'
+            : '绿项集进入 L(k)；新红项集的超集锥先用红色虚线框标出，下一步才变灰。把阈值拖到 20%，D 和 ACE 会翻身变绿。')]
+        : ['格图上琥珀色节点就是刚拼出来的候选，琥珀色粗边是它的两个连接父集。',
+          '被剪的候选这一步先保持琥珀色、用红粗边连向连累它的不频繁子集——看清"谁连累谁"；下一步它和它的边才一起变灰。' + (state.source === 'course' ? '课件 p36 把 D 的整片超集锥画红，这里把"数过才红、没数就蓝灰"分得更细。' : '第 3 轮点一下格图上的 ABC（milk+beer+bread），看它是被哪个不频繁子集（BC＝beer+bread）连累的。'),
+          '节点里琥珀色分数＝刚数出的支持度。' + (Object.values(states.map).some(i => i.st === 'pruned' || i.st === 'closed') ? '灰节点灰边＝省掉的计数。' : ''),
+          (state.source === 'course' ? '绿节点进入 L(k)；新红节点的不频繁超集锥先用红虚线整片连起来展示，下一步才整体变灰——对照课件 p38 的最后一张格图。'
+            : '绿节点进入 L(k)；新红节点的超集锥先用红虚线连成整片，下一步才变灰。把阈值拖到 20%，D 和 ACE 会翻身变绿。')])[phase];
       $('outcomeText').innerHTML += ' ' + extra;
       const candChips = r.cands.map(c => {
         const info = states.map[c.items.join(',')];
@@ -1360,8 +1366,10 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     ({ data: renderData, apriori: renderApriori, rules: renderRules })[state.tab]();
   }
 
+  function isPhone() { return window.matchMedia('(max-width:700px)').matches; }
+
   function revealInspector() {
-    if (!window.matchMedia('(max-width:700px)').matches) return;
+    if (!isPhone()) return;
     const el = document.querySelector('.insp-panel');
     if (!el) return;
     window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 76, behavior: 'smooth' });
