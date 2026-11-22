@@ -239,6 +239,76 @@ tr.selected td{background:#e7f0ff!important}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 
+/* Phone portrait (≤700px): compact chart, wrapped tabs, single column */
+@media (max-width:700px){
+  :root{font-size:17px}
+  .app{padding:12px 12px 28px}
+  .app-header{padding:14px 16px;gap:4px}
+  .eyebrow{font-size:14px}
+  h1{font-size:29px}
+  .subtitle,.header-motif{display:none}
+  .presets{gap:8px;margin-top:10px}
+  .preset-label{font-size:15px}
+  .preset-btn{font-size:15px;padding:4px 11px;min-height:36px;border-radius:14px}
+  .preset-note{font-size:14px;line-height:1.4}
+  .tabs,.kmtabs{gap:4px;margin-top:10px;padding-top:4px;flex-wrap:wrap}
+  .tabs button,.kmtabs button{font-size:15px;padding:8px 10px;flex:1 1 auto}
+  .kmtabs .quiz-link{font-size:15px;min-height:36px;padding:5px 10px;justify-content:center}
+  .km-wrap svg{min-width:0;max-height:none}
+  .km-side{min-width:0}
+  .grid2,.grid2.wide-left,.grid2.km-grid{gap:12px;margin-top:12px}
+  .panel{padding:14px;border-radius:8px}
+  .panel h2{font-size:19px;margin-bottom:8px}
+  .panel h3{font-size:17px;margin:12px 0 6px}
+  .panel .muted,.km-hint{font-size:15px}
+  .outcome{min-height:0;padding:10px 12px}
+  .outcome strong{font-size:19px}
+  .outcome p{font-size:15px;margin-top:2px}
+  .metrics{gap:6px;margin-top:10px}
+  .metric{padding:7px 9px;border-radius:7px}
+  .metric small{font-size:13px}
+  .metric b{font-size:21px}
+  .note{font-size:15px;padding:10px 12px;margin-top:12px;line-height:1.5}
+  .note strong{font-size:16px;margin-bottom:4px}
+  .toolbar{gap:8px;padding:10px 0 6px}
+  .toolbar .preset-label{width:100%}
+  .toolbar .preset-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%}
+  .toolbar .preset-btn{font-size:14px;padding:2px 6px;min-height:34px;border-radius:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .playback{gap:6px;flex-wrap:wrap}
+  .playback button{font-size:16px;padding:7px 8px;min-height:40px}
+  .km-ctl .playback button{flex:1 1 calc(50% - 4px)}
+  .km-ctl .step-dots{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .km-ctl .step-dots::-webkit-scrollbar{display:none}
+  .km-ctl .step-dot{height:30px;min-width:30px;font-size:15px;padding:0 7px;flex:0 0 auto}
+  .km-ctl .slider-row{gap:6px;font-size:16px}
+  .km-ctl .slider-row input[type=range]{width:auto;flex:1 1 80px;min-width:0}
+  .ctl-select{font-size:16px}
+  .ctl-select select{min-height:36px;font-size:16px;max-width:100%}
+  .lat-legend{font-size:14px;gap:6px 12px;margin-top:8px}
+  .lat-sw{width:18px;height:13px;vertical-align:-2px;margin-right:4px}
+  .formula-card{padding:10px 12px;gap:4px;margin-top:10px}
+  .formula{font-size:17px}
+  .formula-sub{font-size:14px}
+  table.trace{font-size:14.5px}
+  table.trace th{font-size:13px;padding:6px 8px}
+  table.trace td{padding:6px 8px}
+  table.trace td.soft{min-width:120px;max-width:200px}
+  .scroll-420{max-height:300px}
+  .chip{font-size:15px;padding:1px 9px}
+  .footer{font-size:14px;line-height:1.5;margin-top:20px}
+}
+
+@media (max-width:700px){
+  .km-ctl .ctl-select{width:100%}
+  .km-ctl .ctl-select label{white-space:nowrap}
+  .km-ctl .ctl-select select{flex:1 1 auto;min-width:0}
+}
+
+@media (max-width:380px){
+  .tabs button,.kmtabs button{font-size:14px;padding:8px 7px}
+  .kmtabs .quiz-link{font-size:14px;padding:5px 8px}
+}
+
 </style>
 </head>
 <body>
@@ -705,17 +775,42 @@ tr.selected td{background:#e7f0ff!important}
     }
     return p + 'Z';
   }
+  function isPhone() { return window.matchMedia('(max-width:700px)').matches; }
+  function revealInspector() {
+    if (!isPhone()) return;
+    const el = document.querySelector('.km-insp');
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' });
+  }
+  function phoneDots() {
+    if (!isPhone()) return;
+    const cur = document.querySelector('.step-dot[aria-current="true"]');
+    const row = cur && cur.parentElement;
+    if (!cur || !row) return;
+    const cr = cur.getBoundingClientRect(), rr = row.getBoundingClientRect();
+    row.scrollLeft += (cr.left - rr.left) - (rr.width - cr.width) / 2;
+  }
+  function plotDims() {
+    return isPhone()
+      ? { W: 460, H: 430, L: 46, R: 20, T: 18, B: 46, tick: 17, lab: 18, r: 10, star: 13, starR: 5.8 }
+      : { W: 1180, H: 960, L: 76, R: 24, T: 24, B: 64, tick: 18, lab: 19, r: 8, star: 17, starR: 7.5 };
+  }
   function scatter(o) {
     const pts = o.pts, dom = o.dom || domainOf(pts);
-    const W = 1180, H = 960, L = 76, R = 24, T = 24, B = 64;
+    const phone = isPhone();
+    const d = plotDims();
+    const W = d.W, H = d.H, L = d.L, R = d.R, T = d.T, B = d.B;
     const sx = x => L + (x / dom.X) * (W - L - R), sy = y => H - B - (y / dom.Y) * (H - T - B);
     const xt = dom.X <= 60 ? 10 : 200, yt = dom.Y <= 60 ? 10 : 100;
     let g = '';
     if (o.placeable) g += `<rect data-kmplace="1" x="${L}" y="${T}" width="${W - L - R}" height="${sy(0) - T}" fill="transparent"/>`;
-    for (let x = 0; x <= dom.X; x += xt) g += `<line x1="${sx(x)}" y1="${sy(0)}" x2="${sx(x)}" y2="${sy(0) + 8}" stroke="#8fa2bd" stroke-width="1.5"/><text x="${sx(x)}" y="${sy(0) + 30}" font-size="18" fill="#53647c" text-anchor="middle">${x}</text>`;
-    for (let y = 0; y <= dom.Y; y += yt) g += `<line x1="${L - 8}" y1="${sy(y)}" x2="${L}" y2="${sy(y)}" stroke="#8fa2bd" stroke-width="1.5"/><text x="${L - 14}" y="${sy(y) + 6}" font-size="18" fill="#53647c" text-anchor="end">${y}</text>`;
+    for (let x = 0; x <= dom.X; x += xt) g += `<line x1="${sx(x)}" y1="${sy(0)}" x2="${sx(x)}" y2="${sy(0) + 8}" stroke="#8fa2bd" stroke-width="1.5"/><text x="${sx(x)}" y="${sy(0) + (phone ? 24 : 30)}" font-size="${d.tick}" fill="#53647c" text-anchor="middle">${x}</text>`;
+    for (let y = 0; y <= dom.Y; y += yt) g += `<line x1="${L - 8}" y1="${sy(y)}" x2="${L}" y2="${sy(y)}" stroke="#8fa2bd" stroke-width="1.5"/><text x="${L - (phone ? 6 : 14)}" y="${sy(y) + 6}" font-size="${d.tick}" fill="#53647c" text-anchor="end">${y}</text>`;
     g += `<line x1="${L}" y1="${sy(0)}" x2="${W - R}" y2="${sy(0)}" stroke="#8fa2bd" stroke-width="2"/><line x1="${L}" y1="${T}" x2="${L}" y2="${sy(0)}" stroke="#8fa2bd" stroke-width="2"/>`;
-    g += `<text x="${W - R}" y="${H - 14}" font-size="19" fill="#53647c" text-anchor="end">${o.xlab || 'x（米）'}</text><text x="${L - 40}" y="${T + 4}" font-size="19" fill="#53647c">${o.ylab || 'y（米）'}</text>`;
+    g += `<text x="${W - R}" y="${phone ? H - 4 : H - 14}" font-size="${d.lab}" fill="#53647c" text-anchor="end">${o.xlab || 'x（米）'}</text>`;
+    g += phone
+      ? `<text transform="translate(12 ${H / 2}) rotate(-90)" font-size="${d.lab}" fill="#53647c" text-anchor="middle">${o.ylab || 'y（米）'}</text>`
+      : `<text x="${L - 40}" y="${T + 4}" font-size="${d.lab}" fill="#53647c">${o.ylab || 'y（米）'}</text>`;
     if (o.epsCircle) {
       const e = o.epsCircle;
       g += `<ellipse cx="${sx(e.x)}" cy="${sy(e.y)}" rx="${(e.eps * (W - L - R) / dom.X).toFixed(1)}" ry="${(e.eps * (H - T - B) / dom.Y).toFixed(1)}" fill="rgba(34,177,232,.07)" stroke="#22b1e8" stroke-width="2" stroke-dasharray="6 4"/>`;
@@ -733,15 +828,15 @@ tr.selected td{background:#e7f0ff!important}
       const ring = o.pick === i ? ' stroke="#102344" stroke-width="3.5"'
         : stt ? ` stroke="${stt.stroke}" stroke-width="${stt.sw || 2}"${stt.dash ? ` stroke-dasharray="${stt.dash}"` : ''}`
         : (o.noise && p.g === 6 ? ' stroke="#1f2937" stroke-width="3" stroke-dasharray="4 3"' : ' stroke="#ffffff" stroke-width="1.5"');
-      g += `<circle class="km-pt" data-kmpt="${i}" cx="${sx(p.x)}" cy="${sy(p.y)}" r="8" fill="${col}"${ring}><title>${o.name ? o.name(i) : i} (${p.x}, ${p.y})</title></circle>`;
+      g += `<circle class="km-pt" data-kmpt="${i}" cx="${sx(p.x)}" cy="${sy(p.y)}" r="${d.r}" fill="${col}"${ring}><title>${o.name ? o.name(i) : i} (${p.x}, ${p.y})</title></circle>`;
     });
     (o.centers || []).forEach((c, j) => {
-      g += `<path class="km-c" data-kmc="${j}" d="${starPath(sx(c.x), sy(c.y), 17, 7.5)}" fill="${COLORS[j % COLORS.length]}" stroke="rgba(20,20,20,.6)" stroke-width="1.6"><title>中心 ${j + 1} (${f1(c.x)}, ${f1(c.y)})</title></path>`;
+      g += `<path class="km-c" data-kmc="${j}" d="${starPath(sx(c.x), sy(c.y), d.star, d.starR)}" fill="${COLORS[j % COLORS.length]}" stroke="rgba(20,20,20,.6)" stroke-width="1.6"><title>中心 ${j + 1} (${f1(c.x)}, ${f1(c.y)})</title></path>`;
     });
     (o.circles || []).forEach(c => {
       g += `<circle cx="${sx(c.x)}" cy="${sy(c.y)}" r="${c.r}" fill="none" stroke="#53647c" stroke-width="2" stroke-dasharray="3 5"/>`;
     });
-    return `<div class="km-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="散点图">${g}</svg></div>`;
+    return `<div class="km-wrap${phone ? ' compact' : ''}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="散点图">${g}</svg></div>`;
   }
   function legend(counts) {
     return `<div class="lat-legend">${counts.map((n, j) => `<span><span class="lat-sw" style="border-color:${COLORS[j % COLORS.length]};background:${COLORS[j % COLORS.length]}33"></span>中心 ${j + 1}：${n} 点</span>`).join('')}</div>`;
@@ -808,7 +903,7 @@ tr.selected td{background:#e7f0ff!important}
         return `<tr class="${best ? 'is-hit' : ''}"><td><span class="chip" style="border-color:${COLORS[j % COLORS.length]};background:${COLORS[j % COLORS.length]}22">中心 ${j + 1}</span></td>
           <td class="soft">${sub}</td><td>${dText}</td></tr>`;
       }).join('');
-      inspector = `<div class="panel"><h2>检查器 · ${nameOf(state.src, state.pickPt)} (${p.x}, ${p.y})</h2>
+      inspector = `<div class="panel km-insp"><h2>检查器 · ${nameOf(state.src, state.pickPt)} (${p.x}, ${p.y})</h2>
         <p class="km-hint">到各中心的${M_SHORT[state.metric]}（课件 ${M_PAGE[state.metric]}）；${a ? '蓝底＝本轮归属的最近中心。' : '下一拍 ② 才分配，先比大小。'}</p>
         <div class="table-wrap" style="margin-top:10px"><table class="trace"><thead><tr><th>中心</th><th>代入式</th><th>d</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     } else if (state.pickC !== null) {
@@ -821,11 +916,11 @@ tr.selected td{background:#e7f0ff!important}
           <div class="formula">c_y = Σy/n = ${f0(sysum)}/${mem.length} = <span class="hl">${f1(sysum / mem.length)}</span></div>
           ${old ? `<div class="formula-sub">旧中心 (${f1(old.x)}, ${f1(old.y)}) → 新中心 (${f1(c.x)}, ${f1(c.y)})，移动 ${f1(Math.hypot(old.x - c.x, old.y - c.y))} 米</div>` : '<div class="formula-sub">当前拍是 ② 分配：下一拍 ③ 中心将移到这个均值。</div>'}
         </div>` : '<p class="km-hint">这一簇本轮没有成员：空簇保留原中心（不硬凑均值）。</p>';
-      inspector = `<div class="panel"><h2>检查器 · 中心 ${j + 1} (${f1(c.x)}, ${f1(c.y)})</h2>
+      inspector = `<div class="panel km-insp"><h2>检查器 · 中心 ${j + 1} (${f1(c.x)}, ${f1(c.y)})</h2>
         <p class="km-hint">成员 ${mem.length} 个；均值＝Σ/n（课件 p48 红字）。</p>${meanCard}
         ${mem.length ? `<div class="table-wrap scroll-420" style="margin-top:12px"><table class="trace"><thead><tr><th>成员</th><th>x</th><th>y</th></tr></thead><tbody>${mem.map(x => `<tr><td>${nameOf(state.src, x.i)}</td><td>${x.p.x}</td><td>${x.p.y}</td></tr>`).join('')}</tbody></table></div>` : ''}</div>`;
     } else {
-      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点图里的圆点：看到 K 个中心的距离逐行代入，最小行＝归属。<br>点星（中心）：看成员全列表与均值代入式 Σx/n、Σy/n。<br>距离定义在右侧控制区切换：欧氏／曼哈顿／余弦，代入式跟着换。</p></div>`;
+      inspector = `<div class="panel km-insp"><h2>检查器</h2><p class="km-hint">点图里的圆点：看到 K 个中心的距离逐行代入，最小行＝归属。<br>点星（中心）：看成员全列表与均值代入式 Σx/n、Σy/n。<br>距离定义在右侧控制区切换：欧氏／曼哈顿／余弦，代入式跟着换。</p></div>`;
     }
 
     const hist = [];
@@ -1038,11 +1133,11 @@ tr.selected td{background:#e7f0ff!important}
         const inEps = dist <= L.eps + 1e-9;
         return `<tr class="${inEps ? 'is-hit' : ''}"><td>${labName(L.shape, j)}</td><td>(${q.x}, ${q.y})</td><td>${f1(dist)}</td><td>${inEps ? '≤ Eps ✓' : '—'}</td></tr>`;
       }).join('');
-      inspector = `<div class="panel"><h2>检查器 · ${labName(L.shape, i)} (${p.x}, ${p.y})</h2>
+      inspector = `<div class="panel km-insp"><h2>检查器 · ${labName(L.shape, i)} (${p.x}, ${p.y})</h2>
         <p class="km-hint">${verdict}。蓝底行＝Eps=${L.eps} 邻域内的点（含自己），共 ${N.length} 个，与 MinPts=${L.minPts} 比大小即定核心／边界。</p>
         <div class="table-wrap scroll-420" style="margin-top:10px"><table class="trace"><thead><tr><th>点</th><th>坐标</th><th>距离</th><th>邻域</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
     } else {
-      inspector = `<div class="panel"><h2>检查器</h2><p class="km-hint">点任意圆点：全量距离表＋Eps 邻域判定（邻域点数 vs MinPts → 核心／边界／噪声）。<br>实心＝核心点，半透明＝边界点，黑虚线＝噪声，灰＝未访问；蓝虚线圈＝当前点的 Eps 邻域。</p></div>`;
+      inspector = `<div class="panel km-insp"><h2>检查器</h2><p class="km-hint">点任意圆点：全量距离表＋Eps 邻域判定（邻域点数 vs MinPts → 核心／边界／噪声）。<br>实心＝核心点，半透明＝边界点，黑虚线＝噪声，灰＝未访问；蓝虚线圈＝当前点的 Eps 邻域。</p></div>`;
     }
 
     let cmpNote = '';
@@ -1088,6 +1183,7 @@ tr.selected td{background:#e7f0ff!important}
     document.querySelector('nav[aria-label="数据集"]').style.display = state.tab === 'kmrun' ? '' : 'none';
     document.querySelectorAll('#kmTabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.kmtab === state.tab));
     if (state.tab === 'kmrun') renderRun(); else renderLab();
+    phoneDots();
   }
   function resetRun1() { state.step = 0; state.pickPt = null; state.pickC = null; }
 
@@ -1095,11 +1191,11 @@ tr.selected td{background:#e7f0ff!important}
     const t = e.target.closest('button');
     const place = e.target.closest && e.target.closest('[data-kmplace]');
     if (place && state.tab === 'kmlab' && state.lab.initMode === 'manual') {
-      const svg = place.ownerSVGElement, rect = svg.getBoundingClientRect();
-      const vx = (e.clientX - rect.left) / rect.width * 1180, vy = (e.clientY - rect.top) / rect.height * 960;
+      const svg = place.ownerSVGElement, rect = svg.getBoundingClientRect(), d = plotDims();
+      const vx = (e.clientX - rect.left) / rect.width * d.W, vy = (e.clientY - rect.top) / rect.height * d.H;
       const pts = labPts(), dom = domainOf(pts);
-      const x = Math.max(0, Math.min(dom.X, (vx - 76) / (1180 - 76 - 24) * dom.X));
-      const y = Math.max(0, Math.min(dom.Y, (960 - 64 - vy) / (960 - 24 - 64) * dom.Y));
+      const x = Math.max(0, Math.min(dom.X, (vx - d.L) / (d.W - d.L - d.R) * dom.X));
+      const y = Math.max(0, Math.min(dom.Y, (d.H - d.B - vy) / (d.H - d.T - d.B) * dom.Y));
       const L = state.lab, c = { x: Math.round(x), y: Math.round(y) };
       if (L.manual.length < L.k) L.manual.push(c);
       else {
@@ -1113,8 +1209,8 @@ tr.selected td{background:#e7f0ff!important}
     const ct = e.target.closest && e.target.closest('[data-kmc]');
     if (pt && !t) {
       const i = +pt.dataset.kmpt;
-      if (state.tab === 'kmrun') { run1Stop(); state.pickPt = i; state.pickC = null; kmRender(); }
-      else if (state.lab.algo === 'dbscan') { labStop(); state.lab.dpick = i; kmRender(); }
+      if (state.tab === 'kmrun') { run1Stop(); state.pickPt = i; state.pickC = null; kmRender(); revealInspector(); }
+      else if (state.lab.algo === 'dbscan') { labStop(); state.lab.dpick = i; kmRender(); revealInspector(); }
       else if (state.lab.initMode === 'manual') {
         const L = state.lab, p = labPts()[i];
         if (L.manual.length < L.k) L.manual.push({ x: p.x, y: p.y });
@@ -1128,11 +1224,15 @@ tr.selected td{background:#e7f0ff!important}
       return;
     }
     if (ct && !t) {
-      if (state.tab === 'kmrun') { run1Stop(); state.pickC = +ct.dataset.kmc; state.pickPt = null; kmRender(); }
+      if (state.tab === 'kmrun') { run1Stop(); state.pickC = +ct.dataset.kmc; state.pickPt = null; kmRender(); revealInspector(); }
       return;
     }
     if (!t) return;
-    if (t.dataset.kmtab) { labStop(); run1Stop(); state.tab = t.dataset.kmtab; kmRender(); return; }
+    if (t.dataset.kmtab) {
+      labStop(); run1Stop(); state.tab = t.dataset.kmtab; kmRender();
+      if (isPhone()) window.scrollTo({ top: 0 });
+      return;
+    }
     if (t.dataset.kmsrc) { run1Stop(); state.src = t.dataset.kmsrc; state.k = SHAPES[state.src].kDef; resetRun1(); kmRender(); return; }
     if (t.dataset.kmstep !== undefined) { run1Stop(); state.step = +t.dataset.kmstep; kmRender(); return; }
     if (t.dataset.kmshape) {
@@ -1183,6 +1283,13 @@ tr.selected td{background:#e7f0ff!important}
 
   labAutoRun();
   kmRender();
+  let lastPhone = isPhone();
+  window.addEventListener('resize', () => {
+    const now = isPhone();
+    if (now === lastPhone) return;
+    lastPhone = now;
+    kmRender();
+  });
 })();
 </script>
 </body>
