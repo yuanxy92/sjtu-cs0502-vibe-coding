@@ -233,6 +233,70 @@ tr.selected td{background:#e7f0ff!important}
 .ins-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .ins-label{font-family:var(--mono);font-size:34px;font-weight:800;color:#17427a;letter-spacing:.02em}
 .ins-state{font-size:19px;color:var(--muted);margin:6px 0 10px}
+.lat-mobile{display:none}
+
+/* Phones: the 980px-wide lattice is replaced by a vertical list, one section per k */
+@media (max-width:700px){
+  .app{padding:14px 12px 28px}
+  .app-header{padding:16px;gap:6px}
+  .eyebrow{font-size:15px}
+  h1{font-size:30px}
+  .subtitle,.preset-note{display:none}
+  .presets{margin-top:14px;gap:8px}
+  .preset-label,.preset-note{font-size:16px}
+  .preset-btn{min-height:38px;padding:4px 12px;font-size:17px}
+  .tabs{margin-top:14px;flex-wrap:wrap;overflow:visible}
+  .tabs button{flex:1 1 0;min-width:0;white-space:normal;text-align:center;padding:9px 6px;font-size:15px;line-height:1.25}
+  .toolbar{gap:10px;padding:12px 0 10px}
+  .playback button{min-height:40px;padding:6px 12px;font-size:17px}
+  .slider-row{font-size:17px;gap:8px}
+  .slider-row input[type=range]{width:140px}
+  .slider-row output{font-size:19px;min-width:52px}
+  .outcome{min-height:0;padding:12px 14px}
+  .outcome strong{font-size:21px}
+  .outcome p{font-size:16px}
+  #sceneRoot .panel,.lat-panel{padding:16px 14px}
+  .panel h2{font-size:21px}
+  .panel .muted{font-size:16px}
+  .lat-controls{gap:8px 10px;padding:8px 10px}
+  .lat-controls button{min-height:36px;padding:3px 11px;font-size:16px}
+  .ctl-select{font-size:16px}
+  .ctl-select select{min-height:34px;font-size:16px}
+  .switch{font-size:16px}
+  .lat-controls .edge-switch{display:none}
+  .lattice-wrap{display:none}
+  .lat-panel .round-head .muted{display:none}
+  .lat-mobile{display:grid;gap:14px;margin-top:2px}
+  .lat-mnote{font-size:15px;line-height:1.5}
+  .lat-mlevel{border-top:1px dashed #dbe3ef;padding-top:10px}
+  .lat-mlevel:first-of-type{border-top:0;padding-top:0}
+  .lat-mlevel h3{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;font-size:17px}
+  .lat-mk{font-family:var(--mono);font-size:19px;font-weight:800}
+  .lat-mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:7px}
+  .lat-card{display:grid;justify-items:center;gap:1px;min-height:48px;padding:5px 3px;border:2px solid #c3cede;border-radius:9px;background:#fff;font-family:var(--mono);line-height:1.15}
+  .lat-card b{font-size:16px;font-weight:800}
+  .lat-card-sup{font-size:12px;opacity:.9}
+  .lat-legend{font-size:15px;line-height:1.4;gap:6px 12px}
+  .lat-sw{width:20px;height:13px}
+  .ins-label{font-size:27px}
+  .ins-head{gap:8px}
+  .ins-state{font-size:16px}
+  .formula{font-size:20px}
+  .formula-sub{font-size:16px}
+  .metric b{font-size:24px}
+  .metric small{font-size:16px}
+  table.trace{font-size:16px}
+  table.trace th,table.trace td{padding:7px 9px}
+  table.trace td.wrap{min-width:170px;width:auto}
+  .grid3{display:flex;flex-direction:column;gap:14px;margin-top:14px;align-items:stretch}
+  .grid3>*{min-width:0}
+  .grid3 .insp-panel{order:1}
+  .grid3 .round-panel{order:2}
+  .grid3 .tdb-panel{order:3}
+  .bar-row{grid-template-columns:minmax(0,28vw) minmax(0,1fr) 88px;gap:8px;font-size:16px}
+  .bar-val{font-size:14px;white-space:nowrap}
+  .footer{font-size:15px}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -875,6 +939,36 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     return `<svg id="latticeSvg" viewBox="0 0 ${LAT.W} ${LAT.H}" role="group" aria-label="项集格图">${parts.join('')}</svg>`;
   }
 
+  function latticeMobile(t, states) {
+    const { map } = states;
+    const sel = state.pick, n = t.db.n;
+    const names = ['空集', '单项集', '二项集', '三项集', '四项集', '五项集'];
+    const rows = LAT.byLevel.map((row, L) => {
+      const cards = row.map(nd => {
+        const info = map[nd.key];
+        let [fill, stroke, text, dash] = LAT_FILL[info.st];
+        if (info.flash) { stroke = '#b91c1c'; dash = '5 4'; }
+        const showC = state.showCount && info.cand && info.cand.count !== null &&
+          (info.st === 'counted' || info.st === 'freq' || info.st === 'infreq');
+        const sup = info.cand && info.cand.count !== null ? `${info.cand.count}/${n}` : '';
+        const style = `background:${fill};border-color:${stroke};color:${text};` +
+          (dash ? 'border-style:dashed;' : '') +
+          (sel === nd.key ? 'box-shadow:0 0 0 3px #2563eb;' : '');
+        return `<button type="button" class="lat-card" data-node="${nd.key}" aria-pressed="${sel === nd.key}" aria-label="${nd.label}：${STATE_TEXT[info.st]}${sup ? '，支持度 ' + sup : ''}" style="${style}">
+          <b>${nd.label}</b>${showC ? `<span class="lat-card-sup">${sup}</span>` : ''}
+        </button>`;
+      }).join('');
+      return `<section class="lat-mlevel" aria-label="k=${L} ${names[L]}">
+        <h3><span class="lat-mk" style="color:${LEVEL_HUE[L]}">k=${L}</span>${names[L]}<span class="muted">${row.length} 个</span></h3>
+        <div class="lat-mgrid">${cards}</div>
+      </section>`;
+    }).join('');
+    return `<div class="lat-mobile">
+      <p class="lat-mnote muted">竖屏把整张格图换成按 k 分层的清单，配色与宽屏格图一致：点任意项集，下方检查器给出子集、包含它的事务与排除依据。</p>
+      ${rows}
+    </div>`;
+  }
+
   function latticeControls() {
     return `<div class="lat-controls">
       <button id="playBtn" class="primary">${state.playing ? '暂停' : '自动播放'}</button>
@@ -883,7 +977,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
         <option value="1000" ${state.speed === 1000 ? 'selected' : ''}>中</option>
         <option value="500" ${state.speed === 500 ? 'selected' : ''}>快</option></select></label>
       <label class="switch"><input type="checkbox" id="tgCount" ${state.showCount ? 'checked' : ''}>显示计数</label>
-      <label class="switch"><input type="checkbox" id="tgEdges" ${state.showEdges ? 'checked' : ''}>显示全部边</label>
+      <label class="switch edge-switch"><input type="checkbox" id="tgEdges" ${state.showEdges ? 'checked' : ''}>显示全部边</label>
       <label class="switch"><input type="checkbox" id="tgClosure" ${state.closure ? 'checked' : ''}>闭包锥</label>
       <button id="exportSvg">导出 SVG</button>
       <button id="latReset">重置</button>
@@ -900,7 +994,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
   }
 
   function inspectorHTML(t, states) {
-    if (!state.pick) return `<div class="note blue"><strong>点格图上任意一个节点</strong>
+    if (!state.pick) return `<div class="note blue"><strong>点任意一个项集节点</strong>
       <p>这里会给出它的支持度手算、包含它的事务、以及它被剪／被排除的依据。点红节点再看它的超集锥，就是课件 p33 那张"Pruned supersets"图。</p></div>`;
     const nd = LAT.byKey.get(state.pick);
     const info = states.map[nd.key];
@@ -1010,19 +1104,20 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
             <span class="muted">32 节点 = 2^5 · 80 条子集边 · ${SOURCES[state.source].label}</span></div>
           ${latticeControls()}
           <div class="lattice-wrap">${latticeSVG(t)}</div>
+          ${latticeMobile(t, states)}
           ${latticeLegend()}
         </section>
         <div class="grid3">
-          <section class="panel"><h2>初始数据 · Database TDB</h2>
+          <section class="panel tdb-panel"><h2>初始数据 · Database TDB</h2>
             <div class="table-wrap ${src().baskets.length > 8 ? 'scroll-420' : ''}"><table class="trace"><thead><tr><th>Tid</th><th>Items</th><th>Binary</th></tr></thead>
             <tbody>${tdbRows}</tbody></table></div>
-            <div class="note blue" style="margin-top:12px"><strong>${pickItems ? '蓝底行＝包含选中节点 ' + LAT.byKey.get(state.pick).label + ' 的事务' : '点格图节点，这里高亮包含它的事务'}</strong>
+            <div class="note blue" style="margin-top:12px"><strong>${pickItems ? '蓝底行＝包含选中节点 ' + LAT.byKey.get(state.pick).label + ' 的事务' : '点任意项集节点，这里高亮包含它的事务'}</strong>
               <p>${pickItems ? (pickInfo.cand && pickInfo.cand.count !== null
                 ? `支持度的分子就是蓝底行的行数：${pickInfo.cand.count} ／ ${n}。`
                 : `蓝底行共 ${hitN} 行，手算 ${hitN}/${n} = ${pct(hitN / n, 0)}；但它在格图上${pickInfo.st === 'pruned' || pickInfo.st === 'doomed' ? '被剪枝' : pickInfo.st === 'closed' ? '被向下闭包性整片排除' : pickInfo.flash ? '即将被闭包整片排除（红虚线锥）' : '还没轮到计数'}，算法从未数过它。`)
                 : '选中一个节点后，数蓝底行就能手算它的支持度。'}Binary 列按 A B C D E 顺序写 0/1。</p></div>
           </section>
-          <section class="panel"><h2>本轮在干什么</h2>
+          <section class="panel round-panel"><h2>本轮在干什么</h2>
             ${NOTATION}
             ${metrics}
             <div class="note blue"><strong>${PHASES[phase]}步</strong><p>${phaseNote(phase, st, r.cands.find(c => c.pruned))}</p></div>
@@ -1030,7 +1125,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
             <div class="chips">${candChips}</div>
             ${phase === 3 && r.frequent.length ? `<h3>L(${st.k}) 全家福</h3><div class="chips">${r.frequent.map(f => itemsetChip(f.items, 'frequent', f.support)).join('')}</div>` : ''}
           </section>
-          <section class="panel"><h2>节点检查器</h2>${inspectorHTML(t, states)}</section>
+          <section class="panel insp-panel"><h2>节点检查器</h2>${inspectorHTML(t, states)}</section>
         </div>`;
       return;
     }
@@ -1265,6 +1360,13 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
     ({ data: renderData, apriori: renderApriori, rules: renderRules })[state.tab]();
   }
 
+  function revealInspector() {
+    if (!window.matchMedia('(max-width:700px)').matches) return;
+    const el = document.querySelector('.insp-panel');
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 76, behavior: 'smooth' });
+  }
+
   function resetRun() {
     state.trace = null;
     state.round = 0;
@@ -1274,7 +1376,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
 
   document.addEventListener('click', e => {
     const node = e.target.closest && e.target.closest('[data-node]');
-    if (node) { state.pick = node.dataset.node; rerender(); return; }
+    if (node) { state.pick = node.dataset.node; rerender(); revealInspector(); return; }
     const t = e.target.closest('button');
     if (!t) return;
     if (t.dataset.source) {
@@ -1345,7 +1447,7 @@ window.ITEMSET_DATA = {"course":{"items":[{"name":"milk","label":"milk","count":
       const row = e.target.closest('tr[data-rule]');
       if (row) { state.rulePick = +row.dataset.rule; rerender(); return; }
       const node = e.target.closest('[data-node]');
-      if (node) { state.pick = node.dataset.node; rerender(); return; }
+      if (node) { state.pick = node.dataset.node; rerender(); revealInspector(); return; }
     }
     if (e.key === 'ArrowRight' && state.tab === 'apriori') { stopPlay(); stepFwd(); rerender(); }
     if (e.key === 'ArrowLeft' && state.tab === 'apriori') { stopPlay(); stepBack(); rerender(); }
