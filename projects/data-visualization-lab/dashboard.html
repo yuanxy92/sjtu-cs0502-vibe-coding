@@ -1,0 +1,2317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 2 页｜同一份数据，变成一个能钻取的界面</title>
+<style>
+/* 数据可视化（Slide 14 · AI 时代篇）· 两个页面共用样式
+   第 1 页：提示词 → 生成结果
+   第 2 页：同一份数据 → 可交互界面
+   目标：投影可读（大字号）、离线单文件可用、桌面与平板都合适。 */
+
+:root {
+  --ink: #1f2937;
+  --ink-2: #374151;
+  --muted: #5b6675;
+  --line: #e5e7eb;
+  --line-2: #d7dce4;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --green: #15803d;
+  --green-soft: #f0fdf4;
+  --orange: #b45309;
+  --orange-soft: #fff7ed;
+  --blue: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --red: #b91c1c;
+  --purple: #7e22ce;
+  --teal: #0e7490;
+  --radius: 12px;
+  --mono: "SF Mono", Menlo, Consolas, "PingFang SC", "Microsoft YaHei", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg); color: var(--ink);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", system-ui, sans-serif;
+  font-size: 17px; line-height: 1.72;
+}
+
+.app { max-width: 1760px; margin: 0 auto; padding: 24px 28px 70px; }
+.narrow { max-width: 1240px; }
+
+/* ---------- 页头 ---------- */
+.eyebrow { margin: 0; color: var(--green); font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+.app-header h1 { margin: 6px 0 10px; font-size: 40px; line-height: 1.22; }
+.app-header h1 small { display: block; font-size: 21px; font-weight: 500; color: var(--muted); margin-top: 6px; }
+.subtitle { margin: 0 0 14px; max-width: 1240px; color: var(--ink-2); font-size: 19px; }
+.subtitle b { color: var(--green); }
+.notice {
+  margin: 0; padding: 9px 14px; max-width: 1240px;
+  background: var(--orange-soft); border-left: 4px solid var(--orange); border-radius: 6px;
+  color: #7c2d12; font-size: 16px;
+}
+
+/* ---------- 页间导航 ---------- */
+.pagenav { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 6px; }
+.pagenav a {
+  display: inline-block; text-decoration: none; font-size: 16.5px;
+  padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+}
+.pagenav a:hover { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+.pagenav a.active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+
+/* ---------- 通用块 ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; margin-bottom: 18px;
+}
+.card > h2 { margin: 0 0 6px; font-size: 27px; }
+.card > h2 .step {
+  display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center;
+  border-radius: 50%; background: var(--green); color: #fff; font-size: 17px; margin-right: 10px; vertical-align: 2px;
+}
+.card > .lead { margin: 0 0 14px; color: var(--ink-2); font-size: 17.5px; max-width: 1080px; }
+h3.sec { margin: 26px 0 10px; font-size: 25px; }
+.muted { color: var(--muted); font-size: 15.5px; }
+.small { font-size: 15px; }
+
+button.primary {
+  font: inherit; font-size: 16px; cursor: pointer; padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--green); background: var(--green); color: #fff;
+}
+button.primary:hover { background: #12682f; }
+button.ghost {
+  font: inherit; font-size: 15.5px; cursor: pointer; padding: 7px 14px; border-radius: 8px;
+  border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+}
+button.ghost:hover { border-color: var(--blue); color: var(--blue); }
+button.ghost:active { background: var(--blue-soft); }
+
+textarea, input[type="text"], select {
+  font: inherit; font-size: 16.5px; color: var(--ink);
+  padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 9px; background: #fff;
+}
+textarea { width: 100%; line-height: 1.6; resize: vertical; }
+textarea:focus, input:focus, select:focus { outline: 2px solid #bbf7d0; border-color: var(--green); }
+
+/* ---------- ① 数据集面板 ---------- */
+.ds-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ds-grid .wide { grid-column: 1 / -1; }
+.ds-block { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; background: #fcfdfe; min-width: 0; }
+.ds-block h4 { margin: 0 0 4px; font-size: 18px; }
+.ds-block p { margin: 2px 0 8px; font-size: 15.5px; color: var(--muted); }
+.tablewrap { max-height: 300px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.minitable { border-collapse: collapse; font-size: 15px; width: 100%; }
+table.minitable th, table.minitable td { border-bottom: 1px solid var(--line); padding: 5px 9px; text-align: left; white-space: nowrap; }
+table.minitable th { background: #f1f5f9; font-weight: 600; position: sticky; top: 0; z-index: 1; }
+table.minitable td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.minitable tr.sel td { background: var(--green-soft); }
+.ds-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+/* ---------- ② 运行日志 ---------- */
+.logtable { width: 100%; border-collapse: collapse; font-size: 15.5px; }
+.logtable th, .logtable td { border-bottom: 1px solid var(--line); padding: 7px 9px; text-align: left; }
+.logtable th { background: #f8fafc; font-weight: 600; color: var(--muted); }
+.logtable td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.logtable .ok { color: var(--green); font-weight: 600; }
+.logtable .bad { color: var(--red); font-weight: 600; }
+.logtable .pr { font-family: var(--mono); font-size: 14.5px; color: var(--ink-2); }
+
+/* ---------- ③ 提示词卡片 ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(720px, 1fr)); gap: 18px; }
+.pcard { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px 16px; }
+.pcard-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pcard-no {
+  width: 27px; height: 27px; line-height: 27px; text-align: center; border-radius: 50%;
+  background: var(--ink); color: #fff; font-size: 15px; flex: 0 0 auto;
+}
+.pcard-head .ttl { font-size: 18px; font-weight: 700; }
+.pcard-head .spacer { flex: 1; }
+.pcard-head .copy {
+  font: inherit; font-size: 14px; cursor: pointer; padding: 4px 11px; border-radius: 7px;
+  border: 1px solid var(--line-2); background: #fff; color: var(--muted);
+}
+.pcard-head .copy:hover { border-color: var(--green); color: var(--green); }
+
+.prompt-text {
+  position: relative; margin: 0 0 10px; padding: 11px 14px 11px 38px;
+  background: var(--green-soft); border-left: 4px solid var(--green); border-radius: 8px;
+  font-family: var(--mono); font-size: 17px; color: #14532d; line-height: 1.6;
+}
+.prompt-text::before { content: "»"; position: absolute; left: 14px; top: 0; font-size: 22px; color: var(--green); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.chip {
+  display: inline-flex; gap: 6px; align-items: baseline;
+  font-size: 14px; padding: 3px 10px; border-radius: 999px;
+  background: #f1f5f9; border: 1px solid var(--line); color: var(--ink-2);
+}
+.chip b { font-weight: 600; color: var(--muted); font-size: 13px; }
+.chip.hi { background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue); }
+
+.chartbox { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px 4px; }
+.chartbox .dv-svg { max-height: 430px; }
+.chart-err { padding: 14px; background: #fef2f2; border-left: 4px solid var(--red); border-radius: 8px; color: #7f1d1d; font-size: 16px; }
+
+.answer {
+  margin: 12px 0 0; padding: 9px 12px; background: #f8fafc; border-left: 3px solid var(--blue);
+  border-radius: 6px; font-size: 16.5px; color: var(--ink-2);
+}
+.answer b { color: var(--blue); }
+
+.codewrap { margin-top: 12px; }
+.codewrap > summary { cursor: pointer; font-size: 15.5px; color: var(--blue); }
+.codebox { margin: 8px 0 0; padding: 12px 14px; background: #0f172a; border-radius: 9px; overflow-x: auto; }
+.codebox pre { margin: 0; color: #e2e8f0; font-family: var(--mono); font-size: 14px; line-height: 1.65; white-space: pre; }
+.regen { margin-top: 10px; display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.regen textarea { flex: 1; min-width: 280px; font-size: 16px; }
+.runmeta { margin-top: 8px; font-size: 14.5px; color: var(--muted); font-family: var(--mono); }
+
+/* ---------- ④ 更多图型 ---------- */
+.more-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; }
+.minicard { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 14px 16px; }
+.minicard .prompt-text { font-size: 15.5px; padding: 8px 12px 8px 32px; }
+.minicard .prompt-text::before { left: 11px; font-size: 18px; }
+.minicard .chartbox { margin-top: 10px; }
+.minicard .chartbox .dv-svg { max-height: 280px; }
+
+/* ---------- 通用小图 ---------- */
+.mini-hint { font-size: 15px; color: var(--muted); }
+
+/* ---------- 第 2 页：交互式界面 ---------- */
+.dash { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; align-items: start; }
+.rail { position: sticky; top: 16px; }
+.rail-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px 16px; margin-bottom: 14px; }
+.rail-card h3 { margin: 0 0 9px; font-size: 19px; display: flex; align-items: center; gap: 8px; }
+.rail-card h3 .n { font-size: 13px; color: var(--muted); font-weight: 500; }
+.rail-card .hint { margin: 6px 0 0; font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+
+.optlist { display: grid; gap: 6px; }
+.opt {
+  display: flex; align-items: center; gap: 9px; cursor: pointer;
+  padding: 7px 11px; border-radius: 9px; border: 1px solid var(--line); background: #fff;
+  font-size: 16px; color: var(--ink-2);
+}
+.opt:hover { border-color: var(--green); }
+.opt.on { background: var(--green-soft); border-color: var(--green); color: #14532d; font-weight: 600; }
+.opt .unit { margin-left: auto; font-size: 13.5px; color: var(--muted); font-weight: 400; }
+
+.rangebox { display: grid; gap: 8px; }
+.rangebox label { font-size: 14.5px; color: var(--muted); display: flex; justify-content: space-between; }
+.rangebox label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--green); }
+.presets { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
+.presets button {
+  font: inherit; font-size: 14.5px; cursor: pointer; padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+}
+.presets button:hover { border-color: var(--green); color: var(--green); }
+
+.regiongrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.rchip {
+  font: inherit; font-size: 14.5px; cursor: pointer; text-align: center;
+  padding: 5px 4px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+}
+.rchip:hover { border-color: var(--green); }
+.rchip.on { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+.rchip.focus { outline: 3px solid rgba(180, 83, 9, .45); outline-offset: 1px; }
+
+.querybox { display: grid; gap: 8px; }
+.queryrow { display: flex; gap: 8px; }
+.queryrow input { flex: 1; min-width: 0; font-size: 15.5px; }
+.queryhit {
+  font-size: 14.5px; padding: 7px 10px; border-radius: 8px; background: var(--blue-soft);
+  border: 1px solid #bfdbfe; color: var(--blue); display: flex; gap: 8px; align-items: center;
+}
+.queryhit button { font: inherit; font-size: 13px; cursor: pointer; border: 0; background: transparent; color: var(--blue); text-decoration: underline; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 15px; min-height: 96px; display: flex; flex-direction: column; }
+.kpi .k { font-size: 14px; color: var(--muted); }
+.kpi .v { font-size: 27px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.kpi .u { font-size: 14.5px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+.kpi .sub { font-size: 13.5px; color: var(--muted); margin-top: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 16px; }
+.panels .span2 { grid-column: 1 / -1; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 15px 17px 13px; }
+.panel h4 { margin: 0 0 2px; font-size: 19px; display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.panel h4 .tag {
+  font-size: 12.5px; font-weight: 500; padding: 1px 9px; border-radius: 999px;
+  background: var(--blue-soft); color: var(--blue); border: 1px solid #bfdbfe;
+}
+.panel .ph { margin: 0 0 8px; font-size: 14.5px; color: var(--muted); }
+.panel .chartbox { padding: 6px 6px 2px; }
+.panel .chartbox .dv-svg { max-height: 330px; }
+.panel .chartbox.tall .dv-svg { max-height: 380px; }
+
+.drill { border-left: 4px solid #eab308; background: #fffdf5; padding: 12px 14px; border-radius: 8px; margin-top: 10px; }
+.drill h5 { margin: 0 0 6px; font-size: 17.5px; }
+.drill .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.drill .cell { background: #fff; border: 1px solid #fed7aa; border-radius: 8px; padding: 7px 10px; }
+.drill .cell .k { font-size: 13.5px; color: var(--muted); }
+.drill .cell .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.brush-note { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.brush-hint { fill: rgba(29, 78, 216, .12); }
+
+.tablewrap.tall { max-height: 420px; }
+
+/* 可点击的图元（条 / 气泡 / 点） */
+.dv-click { cursor: pointer; }
+.dv-click:hover { filter: brightness(.88) saturate(1.15); }
+
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.compare .side { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #fff; }
+.compare .side h4 { margin: 0 0 6px; font-size: 18px; }
+.compare .side p { margin: 0 0 8px; font-size: 15.5px; color: var(--ink-2); }
+.compare .side .tagline { font-size: 14px; color: var(--muted); }
+
+.footer { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 15.5px; color: var(--muted); }
+.footer code { background: #eef2ff; padding: 1px 6px; border-radius: 5px; font-size: 14.5px; }
+
+/* ---------- SVG ---------- */
+.dv-svg { display: block; width: 100%; height: auto; }
+.dv-svg text { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+.dv-tick { font-size: 13px; fill: #4b5563; }
+.dv-cell { font-size: 12px; }
+.dv-axistitle { font-size: 13.5px; fill: #374151; }
+.dv-note { font-size: 13px; fill: #4b5563; }
+.dv-cloud { font-weight: 600; }
+
+/* ---------- 点击放大看图（第 1 页） ---------- */
+.chartbox { position: relative; cursor: zoom-in; }
+.chartbox:hover, .chartbox:focus-visible { border-color: var(--green); }
+.chartbox:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.zoombadge {
+  position: absolute; right: 9px; top: 8px; z-index: 3;
+  font-size: 13px; line-height: 1.1; color: var(--muted);
+  background: rgba(255, 255, 255, .95); border: 1px solid var(--line-2);
+  padding: 4px 9px; border-radius: 999px; pointer-events: none; user-select: none;
+}
+.chartbox:hover .zoombadge { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+
+body.zoomed { overflow: hidden; }
+.zoomlayer {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(15, 23, 42, .85);
+  display: none; overflow: auto; padding: 20px;
+}
+.zoomlayer.open { display: block; }
+.zoompanel {
+  background: #fff; border-radius: 14px; margin: 0 auto;
+  width: min(1500px, 96vw); padding: 14px 16px 16px;
+}
+.zoombar { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; }
+.zoomtitle { flex: 1; min-width: 0; font-size: 18px; font-weight: 600; color: var(--ink); line-height: 1.45; }
+.zoomtitle .src { display: block; font-size: 13.5px; font-weight: 400; color: var(--muted); }
+.zoomclose {
+  font: inherit; font-size: 15px; cursor: pointer; flex: 0 0 auto;
+  padding: 7px 15px; border-radius: 9px; border: 1px solid var(--line-2); background: #fff; color: var(--ink-2);
+}
+.zoomclose:hover { border-color: var(--red); color: var(--red); }
+.zoomfig { width: 100%; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.zoomfig .dv-svg { width: 100%; height: 100%; max-height: none; }
+.zoomchips { margin: 12px 0 0; }
+.zoombody .codewrap { margin-top: 10px; }
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 1280px) {
+  .dash { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; }
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-header h1 { font-size: 32px; }
+  .app { padding: 18px 16px 50px; }
+}
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .regiongrid { grid-template-columns: repeat(2, 1fr); }
+  .panels { grid-template-columns: minmax(0, 1fr); }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <p class="eyebrow">计算机科学导论 · Slide 14 数据可视化 · AI 时代篇</p>
+    <h1>同一份数据，变成一个能钻取的界面<small>第 2 页：数据不变，交付物从「一张图」变成「一个界面」</small></h1>
+    <p class="subtitle">
+      这一页用的是<b>和第 1 页完全相同的数据</b>，一个数字都没改。
+      区别是：第 1 页交付 8 张静态图，第 2 页交付<b>一个界面</b>——
+      能筛、能刷、能钻、能联动、能导。<b>这才是 AI 时代"做可视化"真正的交付形态。</b>
+    </p>
+    <nav class="pagenav">
+      <a href="index.html">① 提示词 → 生成结果</a>
+      <a class="active" href="dashboard.html">② 同一份数据 → 可交互界面（本页）</a>
+    </nav>
+    <p class="notice">
+      数据说明：与第 1 页同一份<b>教学模拟数据（虚构）</b>，无随机源，可手工核对。
+      下方每一个数字、每一条曲线，都是从这份数据实时算出来的。
+    </p>
+  </header>
+
+  <div class="dash">
+
+    <!-- ============ 左侧控制台 ============ -->
+    <aside class="rail">
+
+      <div class="rail-card">
+        <h3><span class="n">①</span>看哪个指标</h3>
+        <div class="optlist" id="metricList"></div>
+        <p class="hint">切换指标：下面所有图、所有数字、整张表一起换口径——这就是"一个界面"和"八张图"的区别。</p>
+      </div>
+
+      <div class="rail-card">
+        <h3><span class="n">②</span>看哪一段时间</h3>
+        <div class="rangebox">
+          <label>起 <b id="lblFrom">04-01</b></label>
+          <input type="range" id="rngFrom" min="0" max="29" value="0">
+          <label>止 <b id="lblTo">04-30</b></label>
+          <input type="range" id="rngTo" min="0" max="29" value="29">
+        </div>
+        <div class="presets" id="timePresets"></div>
+        <p class="hint">也可以直接在「每日趋势」图上按住拖一段来选区间。</p>
+      </div>
+
+      <div class="rail-card">
+        <h3><span class="n">③</span>看哪些区</h3>
+        <div class="regiongrid" id="regionGrid"></div>
+        <div class="presets" style="margin-top:8px">
+          <button data-act="all">全选</button>
+          <button data-act="none">清空</button>
+          <button data-act="invert">反选</button>
+        </div>
+        <p class="hint">勾选哪些区，"全市"的数字就按哪些区重算。</p>
+      </div>
+
+      <div class="rail-card">
+        <h3><span class="n">④</span>用一句话问</h3>
+        <div class="querybox">
+          <div class="queryrow">
+            <input type="text" id="qInput" placeholder="例：浦东 阳性率 大于 1">
+            <button class="primary" id="qGo">问</button>
+          </div>
+          <div id="qOut"></div>
+          <div class="presets">
+            <button data-q="浦东 阳性率 大于 1">浦东 阳性率 大于 1</button>
+            <button data-q="阳性率 大于 1.4 的区">阳性率 大于 1.4 的区</button>
+            <button data-q="住院人数 最多的区">住院人数 最多的区</button>
+          </div>
+        </div>
+        <p class="hint">一句话进来，界面自己改：地区筛选、指标条件一起生效。</p>
+      </div>
+
+      <div class="rail-card">
+        <h3><span class="n">⑤</span>当前状态</h3>
+        <div class="chips" id="stateChips"></div>
+        <div class="ds-actions"><button class="ghost" id="btnReset">全部重置</button></div>
+      </div>
+
+    </aside>
+
+    <!-- ============ 右侧界面 ============ -->
+    <main>
+      <div class="kpis" id="kpis"></div>
+
+      <div class="panels">
+
+        <section class="panel span2">
+          <h4>每日趋势 <span class="tag">拖图上任意一段可刷选时间区间</span></h4>
+          <p class="ph" id="trendPh"></p>
+          <div class="chartbox tall" id="trendBox"></div>
+          <p class="brush-note" id="trendNote"></p>
+        </section>
+
+        <section class="panel">
+          <h4>12 个区 <span class="tag">点一根条 = 钻取这个区</span></h4>
+          <p class="ph" id="rankPh"></p>
+          <div class="chartbox" id="rankBox"></div>
+        </section>
+
+        <section class="panel">
+          <h4>率 vs 人口 <span class="tag">点一个气泡 = 钻取这个区</span></h4>
+          <p class="ph" id="scatterPh"></p>
+          <div class="chartbox" id="scatterBox"></div>
+        </section>
+
+        <section class="panel span2">
+          <h4>钻取：<span id="drillTitle">（先在左边或右边点一个区）</span></h4>
+          <p class="ph">钻取不是换一页，是把同一个界面的其他部分收窄到这个区。</p>
+          <div class="drill" id="drillBox"></div>
+        </section>
+
+        <section class="panel">
+          <h4>明细表 <span class="tag">随筛选实时重算</span></h4>
+          <p class="ph">点一行同样可以钻取。导出的就是你现在看到的这张表。</p>
+          <div class="tablewrap tall" id="tableBox"></div>
+          <div class="ds-actions"><button class="ghost" id="btnExport">导出当前视图（CSV）</button></div>
+        </section>
+
+        <section class="panel">
+          <h4>病例构成 <span class="tag">全市病例，不随筛选变化</span></h4>
+          <p class="ph">年龄构成与住院天数是全市全部病例的统计，和上面的筛选无关——界面里该注明的地方要注明。</p>
+          <div class="optlist" style="grid-auto-flow:column;grid-auto-columns:max-content;gap:10px;margin-bottom:8px">
+            <button class="ghost" data-v="age">年龄构成</button>
+            <button class="ghost" data-v="stay">住院天数</button>
+          </div>
+          <div class="chartbox" id="distBox"></div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <footer class="footer">
+    <p>
+      两页合起来才是这一节课：<b>第 1 页说明"一句话就能出图"，第 2 页说明"出图不再是终点，界面才是"。</b><br>
+      过去交作业交的是一张 PNG；现在交的是一个能被别人继续用的界面。
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* 数据层：全部为教学模拟数据（虚构），无随机源，数值可手工核对。
+ *
+ * 自洽约束（第二页的联动全靠这几条）：
+ *   ① 每个区 30 天的检测人次之和 = 该区汇总检测人次；阳性人数、住院人数同理；
+ *   ② 全市日度 = 12 个区当日之和 → 全市 30 天合计 = 12 个区汇总之和；
+ *   ③ 热力图用的「12 区 × 7 天阳性率」直接取自区×日明细，不另编一套；
+ *   ④ 口径公式集中在 D.metrics，页面、提示词、讲稿共用同一套说法。
+ */
+(function (global) {
+  'use strict';
+
+  // 地区：名称, 常住人口(万), 检测(万人次), 阳性(人), 住院(人), 重症(人)
+  var REGIONS = [
+    ['浦东新', 560, 62.0, 6200, 900, 40],
+    ['黄浦', 125, 18.5, 2900, 520, 25],
+    ['徐汇', 215, 26.0, 3600, 610, 28],
+    ['长宁', 62, 9.0, 1450, 260, 12],
+    ['静安', 115, 16.0, 2350, 470, 22],
+    ['普陀', 124, 12.5, 1700, 300, 14],
+    ['虹口', 85, 10.5, 2050, 520, 30],
+    ['杨浦', 134, 15.0, 2050, 380, 18],
+    ['闵行', 250, 28.0, 3300, 520, 21],
+    ['宝山', 220, 21.0, 2300, 360, 16],
+    ['嘉定', 78, 7.5, 800, 120, 5],
+    ['松江', 210, 19.0, 2100, 300, 12]
+  ];
+
+  var AGES = [
+    ['0-6 岁', 420], ['7-12 岁', 980], ['13-17 岁', 1650], ['18-24 岁', 3100],
+    ['25-29 岁', 4200], ['30-39 岁', 5300], ['40-49 岁', 6100], ['50-59 岁', 4800],
+    ['60 岁以上', 5600]
+  ];
+
+  // 住院天数分布（天, 例数）
+  var STAY_COUNTS = [
+    [1, 92], [2, 74], [3, 54], [4, 45], [5, 37], [6, 30], [7, 24], [8, 18],
+    [9, 12], [10, 8], [11, 6], [12, 4], [13, 3], [14, 2], [28, 1]
+  ];
+
+  // 省份 × 指标（数据透视表）
+  var PIVOT = {
+    provinces: ['本市', '江苏', '浙江', '安徽', '湖北', '山东'],
+    metrics: ['新增检测(万人次)', '阳性率(%)', '住院(人)', '治愈率(%)', '重症率(‰)'],
+    rows: {
+      本市: [126.0, 1.72, 6180, 96.4, 1.7],
+      江苏: [88.4, 1.31, 2140, 97.1, 0.9],
+      浙江: [64.2, 1.18, 1580, 97.6, 0.7],
+      安徽: [41.9, 1.09, 980, 97.8, 0.6],
+      湖北: [37.5, 2.24, 2260, 95.2, 2.6],
+      山东: [29.8, 0.96, 640, 98.1, 0.5]
+    }
+  };
+
+  // 词频（词云 + 共现网络共用）
+  var WORDS = [
+    ['咳嗽', 4820], ['发热', 4310], ['乏力', 3960], ['咽痛', 3320], ['鼻塞', 2870],
+    ['嗅觉减退', 2140], ['肌肉酸痛', 2080], ['头痛', 1960], ['失眠', 1520], ['腹泻', 1180],
+    ['焦虑', 960], ['疫苗', 2740], ['加强针', 2310], ['抗原', 1980], ['检测', 3260],
+    ['隔离', 2420], ['方舱', 1690], ['转运', 880], ['复诊', 1240], ['转阴', 1520]
+  ];
+
+  var NET_GROUPS = [
+    { name: '症状群', members: ['咳嗽', '发热', '乏力', '咽痛', '鼻塞', '嗅觉减退', '肌肉酸痛', '头痛'] },
+    { name: '诊疗群', members: ['抗原', '检测', '复诊', '转阴', '隔离', '方舱', '转运'] },
+    { name: '防控群', members: ['疫苗', '加强针', '失眠', '焦虑', '腹泻'] }
+  ];
+
+  // 流入矩阵：来源省 → 目的地区（行=来源，列=目的地，人数）
+  var FLOW_SOURCES = ['江苏', '浙江', '安徽', '湖北', '河南', '四川', '山东', '本市'];
+  var FLOW_TARGETS = ['浦东新', '闵行', '徐汇', '杨浦', '宝山', '外区'];
+  var FLOW_MATRIX = [
+    [980, 820, 640, 560, 700, 420],
+    [760, 900, 520, 480, 610, 360],
+    [520, 430, 610, 350, 390, 520],
+    [340, 280, 380, 410, 250, 610],
+    [300, 260, 240, 220, 280, 380],
+    [210, 190, 150, 130, 170, 240],
+    [150, 130, 110, 100, 120, 190],
+    [60, 90, 80, 70, 90, 160]
+  ];
+
+  var DAYS = 30;
+
+  function dateOf(i) {
+    var day = i + 1;
+    return '04-' + (day < 10 ? '0' + day : '' + day);
+  }
+
+  // 把 total 按 shape 的比例拆成整数，且合计严格等于 total（余数按小数部分从大到小补）
+  function allocate(total, shape) {
+    var sum = 0, i;
+    for (i = 0; i < shape.length; i++) sum += shape[i];
+    var raw = shape.map(function (s) { return total * s / sum; });
+    var base = raw.map(function (v) { return Math.floor(v); });
+    var used = 0;
+    for (i = 0; i < base.length; i++) used += base[i];
+    var order = raw.map(function (v, idx) {
+      return { i: idx, frac: v - Math.floor(v) };
+    }).sort(function (a, b) { return b.frac - a.frac || a.i - b.i; });
+    var rest = total - used, k;
+    for (k = 0; k < rest; k++) base[order[k % order.length].i] += 1;
+    return base;
+  }
+
+  // 全市流行曲线：第 1 天起量，第 15 天前后见顶，第 30 天回落（固定公式，无随机）
+  function wave(i) {
+    return 0.45 + 0.55 * Math.sin(Math.PI * (i + 1) / DAYS);
+  }
+
+  // 检测能力随时间小幅上升（筛查点逐步铺开），因此阳性率会跟着流行曲线走
+  function ramp(i) {
+    return 0.85 + 0.30 * (i / (DAYS - 1));
+  }
+
+  function buildRegionDaily() {
+    var out = [];
+    for (var r = 0; r < REGIONS.length; r++) {
+      var reg = REGIONS[r];
+      var i;
+      var shapePos = [], shapeTest = [], shapeHosp = [];
+      for (i = 0; i < DAYS; i++) {
+        var mPos = 1 + 0.18 * Math.sin(i * 0.52 + r * 1.13) + 0.06 * Math.cos(i * 0.31 + r * 0.7);
+        var mTest = 1 + 0.10 * Math.sin(i * 0.44 + r * 0.9);
+        // 住院滞后 3 天：住院曲线 = 3 天前的流行曲线
+        var lag = Math.max(0, i - 3);
+        var mHosp = 1 + 0.14 * Math.sin(i * 0.40 + r * 1.3);
+        shapePos.push(wave(i) * mPos);
+        shapeTest.push(ramp(i) * mTest);
+        shapeHosp.push(wave(lag) * mHosp);
+      }
+      var pos = allocate(reg[3], shapePos);
+      var tst = allocate(Math.round(reg[2] * 10000), shapeTest);
+      var hsp = allocate(reg[4], shapeHosp);
+      var days = [];
+      for (i = 0; i < DAYS; i++) {
+        var rt = tst[i] ? Math.round(pos[i] / tst[i] * 10000) / 10000 : 0; // 小数，如 0.0128
+        days.push({
+          region: reg[0], day: i + 1, date: dateOf(i),
+          tests: tst[i], positives: pos[i], hosp: hsp[i],
+          rate: rt, ratePct: Math.round(rt * 10000) / 100 // 百分数，如 1.23
+        });
+      }
+      out.push({ name: reg[0], days: days });
+    }
+    return out;
+  }
+
+  function buildCityDaily(regionDaily) {
+    var rows = [];
+    for (var i = 0; i < DAYS; i++) {
+      var t = 0, p = 0, h = 0;
+      for (var r = 0; r < regionDaily.length; r++) {
+        t += regionDaily[r].days[i].tests;
+        p += regionDaily[r].days[i].positives;
+        h += regionDaily[r].days[i].hosp;
+      }
+      var temp = Math.round((16.5 + 4.1 * Math.sin((i - 7) / 4.6) + 0.9 * Math.cos(i * 0.9)) * 10) / 10;
+      var rt = Math.round(p / t * 10000) / 10000;
+      rows.push({
+        day: i + 1, date: dateOf(i),
+        tests: t, positives: p, hosp: h,
+        rate: rt, ratePct: Math.round(rt * 10000) / 100,
+        temp: temp
+      });
+    }
+    return rows;
+  }
+
+  function buildNetwork() {
+    var nodes = [], links = [], i, j, g, a, b;
+    for (g = 0; g < NET_GROUPS.length; g++) {
+      var grp = NET_GROUPS[g];
+      for (i = 0; i < grp.members.length; i++) nodes.push({ id: grp.members[i], group: g });
+    }
+    var innerPairs = [
+      ['咳嗽', '发热', 46], ['发热', '乏力', 41], ['咽痛', '咳嗽', 33], ['鼻塞', '嗅觉减退', 38],
+      ['肌肉酸痛', '乏力', 29], ['头痛', '发热', 27], ['鼻塞', '咽痛', 22], ['嗅觉减退', '乏力', 18],
+      ['抗原', '检测', 44], ['检测', '复诊', 31], ['复诊', '转阴', 29], ['隔离', '方舱', 35],
+      ['方舱', '转运', 21], ['抗原', '复诊', 16], ['疫苗', '加强针', 37], ['失眠', '焦虑', 30],
+      ['焦虑', '腹泻', 12], ['检测', '疫苗', 14], ['发热', '方舱', 19]
+    ];
+    for (i = 0; i < innerPairs.length; i++) {
+      a = innerPairs[i][0]; b = innerPairs[i][1];
+      links.push({ source: a, target: b, weight: innerPairs[i][2] });
+    }
+    var bridge = [['咳嗽', '检测', 9], ['发热', '抗原', 11], ['乏力', '失眠', 8], ['咽痛', '方舱', 7], ['嗅觉减退', '疫苗', 6]];
+    for (i = 0; i < bridge.length; i++) {
+      links.push({ source: bridge[i][0], target: bridge[i][1], weight: bridge[i][2] });
+    }
+    return { nodes: nodes, links: links, groups: NET_GROUPS };
+  }
+
+  function stats(arr) {
+    var s = arr.slice().sort(function (a, b) { return a - b; });
+    function q(p) {
+      var idx = (s.length - 1) * p, lo = Math.floor(idx), hi = Math.ceil(idx);
+      if (lo === hi) return s[lo];
+      return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+    }
+    var sum = 0, i;
+    for (i = 0; i < s.length; i++) sum += s[i];
+    return {
+      n: s.length, min: s[0], max: s[s.length - 1],
+      q1: q(0.25), median: q(0.5), q3: q(0.75), mean: sum / s.length
+    };
+  }
+
+  function pearson(xs, ys) {
+    var n = xs.length, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, i;
+    for (i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; }
+    var mx = sx / n, my = sy / n;
+    for (i = 0; i < n; i++) {
+      var dx = xs[i] - mx, dy = ys[i] - my;
+      sxx += dx * dx; syy += dy * dy; sxy += dx * dy;
+    }
+    return sxy / Math.sqrt(sxx * syy);
+  }
+
+  var regionDaily = buildRegionDaily();
+  var daily = buildCityDaily(regionDaily);
+
+  var stay = [];
+  for (var si = 0; si < STAY_COUNTS.length; si++) {
+    for (var k = 0; k < STAY_COUNTS[si][1]; k++) stay.push(STAY_COUNTS[si][0]);
+  }
+
+  var regions = REGIONS.map(function (r, idx) {
+    var rd = regionDaily[idx];
+    var obj = {
+      name: r[0], population: r[1],
+      tests: r[2], positives: r[3], hosp: r[4], severe: r[5],
+      days: rd.days,
+      testsSum: rd.days.reduce(function (s, d) { return s + d.tests; }, 0),
+      positivesSum: rd.days.reduce(function (s, d) { return s + d.positives; }, 0),
+      hospSum: rd.days.reduce(function (s, d) { return s + d.hosp; }, 0)
+    };
+    obj.rate = Math.round(obj.positivesSum / obj.testsSum * 10000) / 10000;         // 小数
+    obj.ratePct = Math.round(obj.rate * 10000) / 100;                             // %
+    obj.per100k = Math.round(obj.positivesSum / (r[1] * 10000) * 100000 * 100) / 100;// 人/10万
+    obj.per100kShow = Math.round(obj.per100k);
+    obj.hospRate = Math.round(obj.hospSum / obj.positivesSum * 1000) / 10;          // %
+    return obj;
+  });
+
+  var ages = AGES.map(function (a) { return { label: a[0], value: a[1] }; });
+  var ageTotal = ages.reduce(function (s, a) { return s + a.value; }, 0);
+  ages.forEach(function (a) { a.share = a.value / ageTotal * 100; });
+
+  // 热力图：直接取自区×日明细
+  var MATRIX_DAYS = ['04-10', '04-11', '04-12', '04-13', '04-14', '04-15', '04-16'];
+  var matrixCells = [];
+  MATRIX_DAYS.forEach(function (date) {
+    var di = parseInt(date.slice(3), 10) - 1;
+    regionDaily.forEach(function (rd) {
+      var d = rd.days[di];
+      matrixCells.push({ region: rd.name, day: date, value: Math.round(d.rate * 10000) / 100 });
+    });
+  });
+
+  var D = {
+    meta: {
+      title: '2026 年 4 月某市呼吸道疾病监测哨点',
+      notice: '本页全部数据为教学模拟数据（虚构），仅供教学演示；任何数字都不对应真实疫情。',
+      seedNote: '数据无随机源：所有数值由固定公式或固定表生成，可手工核对。',
+      days: DAYS, regions: regions.length, stayN: stay.length,
+      cityTests: daily.reduce(function (s, d) { return s + d.tests; }, 0),
+      cityPositives: daily.reduce(function (s, d) { return s + d.positives; }, 0),
+      cityHosp: daily.reduce(function (s, d) { return s + d.hosp; }, 0)
+    },
+    days: DAYS,
+    regions: regions,
+    regionDaily: regionDaily,
+    daily: daily,
+    ages: ages,
+    ageTotal: ageTotal,
+    stay: stay,
+    stayCounts: STAY_COUNTS,
+    stayStats: stats(stay),
+    matrix: { days: MATRIX_DAYS, cells: matrixCells },
+    flow: { sources: FLOW_SOURCES, targets: FLOW_TARGETS, matrix: FLOW_MATRIX },
+    network: buildNetwork(),
+    words: WORDS.map(function (w) { return { text: w[0], value: w[1] }; }),
+    pivot: PIVOT,
+    stats: stats,
+    peak: (function () {
+      var best = daily[0];
+      daily.forEach(function (d) { if (d.ratePct > best.ratePct) best = d; });
+      return { day: best.day, date: best.date, ratePct: best.ratePct, positives: best.positives };
+    })(),
+    corr: {
+      tempRate: Math.round(pearson(daily.map(function (d) { return d.temp; }), daily.map(function (d) { return d.ratePct; })) * 1000) / 1000,
+      note: '相关系数 r 来自同一天的日均气温与当日阳性率（全市 30 天）。'
+    }
+  };
+
+  // 口径公式：页面、提示词、讲稿共用，避免「同一个数两种说法」
+  D.metrics = {
+    rate: { name: '阳性率', formula: '阳性人数 ÷ 检测人次 × 100%', unit: '%' },
+    per100k: { name: '每十万人阳性数', formula: '阳性人数 ÷ 常住人口(人) × 100000', unit: '人/10万' },
+    hospRate: { name: '住院率', formula: '住院人数 ÷ 阳性人数 × 100%', unit: '%' },
+    share: { name: '占比', formula: '该类人数 ÷ 全部人数 × 100%', unit: '%' },
+    rateChange: { name: '相对变化', formula: '(后者 − 前者) ÷ 前者 × 100%', unit: '%' }
+  };
+
+  global.DVData = D;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 图表库：全部手写 SVG，无外部依赖、无网络请求，离线可用。
+   每个可交互元素带 data-probe，鼠标悬停显示原生 title，点击进入"追问"面板。 */
+(function (global) {
+  'use strict';
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var PALETTE = ['#15803d', '#b45309', '#1d4ed8', '#b91c1c', '#7e22ce', '#0e7490', '#a16207', '#4338ca'];
+  var SOFT = ['#c9ecd8', '#fde4c8', '#d3ecfa', '#fbd5d5', '#ead7fb', '#c8e8f4', '#f6e4bd', '#d7dbf8'];
+  var INK = '#1f2937', MUTED = '#55606f', GRID = '#d7dce4', AXIS = '#8d97a6';
+
+  var probes = {};
+  function putProbe(el, obj) {
+    if (!obj) return el;
+    var id = 'p' + (Object.keys(probes).length + 1);
+    probes[id] = obj;
+    el.setAttribute('data-probe', id);
+    el.classList.add('dv-hot');
+    return el;
+  }
+
+  function E(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    if (attrs) for (var k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+  function tip(el, text) {
+    var t = E('title', null, text);
+    el.appendChild(t);
+    return el;
+  }
+  function fmt(v, d) {
+    if (v === null || v === undefined || isNaN(v)) return '—';
+    d = d === undefined ? 2 : d;
+    return (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString('zh-CN');
+  }
+  function niceTicks(min, max, count) {
+    count = count || 5;
+    if (min === max) { max = min + 1; }
+    var span = max - min;
+    var step = Math.pow(10, Math.floor(Math.log(span / count) / Math.LN10));
+    var err = (span / count) / step;
+    if (err >= 7.5) step *= 10; else if (err >= 3.5) step *= 5; else if (err >= 1.5) step *= 2;
+    var start = Math.ceil(min / step) * step;
+    var ticks = [];
+    for (var v = start; v <= max + step * 0.001; v += step) ticks.push(Math.round(v * 1e6) / 1e6);
+    return ticks;
+  }
+  function scale(d0, d1, r0, r1) {
+    var span = (d1 - d0) || 1;
+    var f = function (v) { return r0 + (v - d0) / span * (r1 - r0); };
+    f.invert = function (p) { return d0 + (p - r0) / ((r1 - r0) || 1) * span; };
+    f.domain = [d0, d1]; f.range = [r0, r1];
+    return f;
+  }
+  function svgRoot(w, h, label) {
+    var s = E('svg', { viewBox: '0 0 ' + w + ' ' + h, width: '100%', height: '100%', preserveAspectRatio: 'xMidYMid meet', role: 'img' });
+    s.setAttribute('class', 'dv-svg');
+    if (label) s.setAttribute('aria-label', label);
+    return s;
+  }
+  function frame(w, h, pad) {
+    pad = pad || { t: 16, r: 16, b: 38, l: 52 };
+    var g = E('g');
+    g.appendChild(E('rect', { x: 0, y: 0, width: w, height: h, fill: '#fff' }));
+    return { g: g, x0: pad.l, x1: w - pad.r, y0: pad.t, y1: h - pad.b };
+  }
+  function yAxis(g, f, y0, y1, x0, x1, opts) {
+    opts = opts || {};
+    var ticks = opts.ticks || niceTicks(f.domain[0], f.domain[1], opts.count || (opts.mini ? 3 : 5));
+    ticks.forEach(function (t) {
+      var y = f(t);
+      g.appendChild(E('line', { x1: x0, x2: x1, y1: y, y2: y, stroke: GRID, 'stroke-width': 1 }));
+      g.appendChild(E('text', { x: x0 - 8, y: y + 4, 'text-anchor': 'end', class: 'dv-tick' }, opts.fmt ? opts.fmt(t) : fmt(t)));
+    });
+    g.appendChild(E('line', { x1: x0, x2: x1, y1: y1, y2: y1, stroke: AXIS, 'stroke-width': 1 }));
+  }
+  function xLabels(g, labels, xf, y, opts) {
+    opts = opts || {};
+    var stride = opts.stride || 1;
+    var n = labels.length, last = -1, i;
+    for (i = 0; i < n; i++) {
+      if (stride > 1 && i % stride !== 0) continue;
+      g.appendChild(E('text', { x: xf(i), y: y, 'text-anchor': opts.anchor || 'middle', class: 'dv-tick' }, labels[i]));
+      last = i;
+    }
+    // 末尾标签若和前一个挨得太近就不画，避免两个日期叠在一起
+    if (stride > 1 && n - 1 !== last && (n - 1 - last) >= stride / 2) {
+      g.appendChild(E('text', { x: xf(n - 1), y: y, 'text-anchor': opts.anchor || 'middle', class: 'dv-tick' }, labels[n - 1]));
+    }
+  }
+  function axisTitle(g, text, x, y, rotate) {
+    g.appendChild(E('text', {
+      x: x, y: y, 'text-anchor': 'middle', class: 'dv-axistitle',
+      transform: rotate ? 'rotate(' + rotate + ' ' + x + ' ' + y + ')' : null
+    }, text));
+  }
+  function legend(g, items, x, y, maxW) {
+    var colW = 132;
+    var perRow = maxW ? Math.max(1, Math.floor(maxW / colW)) : items.length;
+    items.forEach(function (it, i) {
+      var row = Math.floor(i / perRow), col = i % perRow;
+      var gx = x + col * colW, gy = y + row * 18;
+      g.appendChild(E('rect', { x: gx, y: gy - 9, width: 11, height: 11, rx: 2, fill: it.color }));
+      g.appendChild(E('text', { x: gx + 16, y: gy, class: 'dv-tick' }, it.label));
+    });
+  }
+  function markMini(s, mini) {
+    if (mini) s.setAttribute('class', 'dv-svg dv-mini');
+    return s;
+  }
+
+  /* ============ 折线 / 面积 ============ */
+  function lineChart(host, o) {
+    var w = o.w || 640, h = o.h || 360;
+    var series = o.series, labels = o.labels;
+    var s = svgRoot(w, h, o.aria || '折线图');
+    var f = frame(w, h, o.pad);
+    var g = f.g; s.appendChild(g);
+    var all = [];
+    series.forEach(function (se) { se.values.forEach(function (v) { if (v != null) all.push(v); }); });
+    var lo = o.min !== undefined ? o.min : Math.min.apply(null, all);
+    var hi = o.max !== undefined ? o.max : Math.max.apply(null, all);
+    if (o.zeroBase) lo = 0;
+    if (hi === lo) hi = lo + 1;
+    if (o.cover) {
+      /* 纵轴上下各留一点余量：数据点正好落在边界上时圆点会被画布切掉一半 */
+      var slack = (hi - lo) * 0.04;
+      if (!(slack > 0)) slack = Math.abs(hi) * 0.04 || 1;
+      lo -= slack; hi += slack;
+    }
+    if (o.annotatePeak) hi = hi + (hi - lo) * 0.16; // 给峰值标注留出头顶空间
+    var yf = scale(lo, hi, f.y1, f.y0);
+    var xf = scale(0, labels.length - 1, f.x0, f.x1);
+    yAxis(g, yf, f.y0, f.y1, f.x0, f.x1, { fmt: o.yFmt });
+    if (o.gridX) labels.forEach(function (lb, i) {
+      g.appendChild(E('line', { x1: xf(i), x2: xf(i), y1: f.y0, y2: f.y1, stroke: GRID }));
+    });
+    if (o.reference && o.reference.value !== undefined && o.reference.value !== null) {
+      var ry = yf(o.reference.value);
+      g.appendChild(E('line', { x1: f.x0, x2: f.x1, y1: ry, y2: ry, stroke: o.reference.color || '#6b7280', 'stroke-width': 1.6, 'stroke-dasharray': '6 4' }));
+      g.appendChild(E('text', { x: f.x1, y: ry - 6, 'text-anchor': 'end', class: 'dv-tick' }, o.reference.label || ''));
+    }
+    var peakDrawn = false;
+    series.forEach(function (se, si) {
+      var color = se.color || (o.palette === 'rainbow' ? rainbowColor(si) : PALETTE[si % PALETTE.length]);
+      var d = '', a = '';
+      se.values.forEach(function (v, i) {
+        if (v == null) return;
+        d += (d ? ' L' : 'M') + xf(i) + ' ' + yf(v);
+      });
+      if (o.area) {
+        a = d + ' L' + xf(se.values.length - 1) + ' ' + f.y1 + ' L' + xf(0) + ' ' + f.y1 + ' Z';
+        g.appendChild(E('path', { d: a, fill: color, opacity: 0.16, stroke: 'none' }));
+      }
+      g.appendChild(E('path', { d: d, fill: 'none', stroke: color, 'stroke-width': o.strokeWidth || 2.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+      se.values.forEach(function (v, i) {
+        if (v == null) return;
+        var c = E('circle', { cx: xf(i), cy: yf(v), r: o.dotR || 3.2, fill: '#fff', stroke: color, 'stroke-width': 2 });
+        tip(c, (labels[i] + ' · ' + (se.name || '') + '：' + (o.tipFmt ? o.tipFmt(v) : fmt(v))));
+        if (o.dataLabels) {
+          g.appendChild(E('text', { x: xf(i), y: yf(v) - 10, 'text-anchor': 'middle', class: 'dv-cell', fill: '#374151' }, o.labelFmt ? o.labelFmt(v) : fmt(v)));
+        }
+        /* 峰值标注只画一次：峰值并列多天时，否则几个标签会叠在一起变成"峰值峰值" */
+        if (o.annotatePeak && !peakDrawn && v === o.peak) {
+          peakDrawn = true;
+          g.appendChild(E('text', { x: xf(i), y: yf(v) - (o.dataLabels ? 24 : 12), 'text-anchor': 'middle', class: 'dv-cell', fill: '#b91c1c' }, o.peakLabel || '峰值'));
+        }
+        putProbe(c, o.probeFn ? o.probeFn(se, i, v) : null);
+        g.appendChild(c);
+      });
+    });
+    xLabels(g, labels, xf, f.y1 + 18, { anchor: o.xAnchor || 'middle', stride: o.labelStride || 1 });
+    if (o.yLabel && !o.mini) axisTitle(g, o.yLabel, 14, (f.y0 + f.y1) / 2, -90);
+    if (o.xLabel && !o.mini) axisTitle(g, o.xLabel, (f.x0 + f.x1) / 2, h - 3);
+    if (o.series.length > 1) legend(g, series.map(function (se, i) { return { label: se.name, color: se.color || PALETTE[i % PALETTE.length] }; }), f.x0, f.y0 - 14, f.x1 - f.x0);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 双轴（教学用陷阱） ============ */
+  function dualAxisChart(host, o) {
+    var w = o.w || 640, h = o.h || 360;
+    var s = svgRoot(w, h, '双轴图');
+    var f = frame(w, h, { t: 26, r: 52, b: 40, l: 54 });
+    var g = f.g; s.appendChild(g);
+    var l = o.left, r = o.right, labels = o.labels;
+    var lAll = l.values, rAll = r.values;
+    var lf = scale(Math.min(0, Math.min.apply(null, lAll)), Math.max.apply(null, lAll), f.y1, f.y0);
+    var rf = scale(Math.min(0, Math.min.apply(null, rAll)), Math.max.apply(null, rAll), f.y1, f.y0);
+    var xf = scale(0, labels.length - 1, f.x0, f.x1);
+    yAxis(g, lf, f.y0, f.y1, f.x0, f.x1, { fmt: o.leftFmt, count: 4 });
+    niceTicks(rf.domain[0], rf.domain[1], 4).forEach(function (t) {
+      var y = rf(t);
+      g.appendChild(E('line', { x1: f.x1, x2: f.x1 + 5, y1: y, y2: y, stroke: AXIS }));
+      g.appendChild(E('text', { x: f.x1 + 9, y: y + 4, class: 'dv-tick', fill: r.color }, o.rightFmt ? o.rightFmt(t) : fmt(t)));
+    });
+    function path(vals, f2, color) {
+      var d = '';
+      vals.forEach(function (v, i) { d += (d ? ' L' : 'M') + xf(i) + ' ' + f2(v); });
+      g.appendChild(E('path', { d: d, fill: 'none', stroke: color, 'stroke-width': 2.4 }));
+      vals.forEach(function (v, i) {
+        var c = E('circle', { cx: xf(i), cy: f2(v), r: 3, fill: color });
+        tip(c, labels[i] + '：' + (o.leftFmt ? o.leftFmt(v) : fmt(v)) + ' / ' + (o.rightFmt ? o.rightFmt(v) : fmt(v)));
+        putProbe(c, o.probeFn ? o.probeFn(i, v) : null);
+        g.appendChild(c);
+      });
+    }
+    path(l.values, lf, l.color);
+    path(r.values, rf, r.color);
+    xLabels(g, labels, xf, f.y1 + 18);
+    axisTitle(g, o.leftLabel, (f.x0 + f.x1) / 2, h - 4);
+    g.appendChild(E('text', { x: f.x1 + 9, y: f.y0 - 8, class: 'dv-axistitle', fill: r.color }, o.rightLabel));
+    legend(g, [{ label: l.name, color: l.color }, { label: r.name, color: r.color }], f.x0, f.y0 - 16, f.x1 - f.x0);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 柱 / 条 ============ */
+  function barChart(host, o) {
+    var w = o.w || 640, h = o.h || 360, horiz = !!o.horizontal;
+    var data = o.data, labels = o.labels;
+    var s = svgRoot(w, h, o.aria || '柱状图');
+    var f = frame(w, h, horiz ? { t: 14, r: 52, b: 50, l: 92 } : { t: 14, r: 18, b: 44, l: 54 });
+    var g = f.g; s.appendChild(g);
+    var vals = data.map(function (d) { return d.value; });
+    var max = Math.max.apply(null, vals) * 1.08;
+    if (o.reference && o.reference.value !== undefined && o.reference.value !== null) {
+      max = Math.max(max, o.reference.value * 1.05);
+    }
+    var yMin = horiz ? 0 : (o.yMin || 0);
+    var vf = scale(yMin, max, horiz ? f.x0 : f.y1, horiz ? f.x1 : f.y0);
+    if (horiz) {
+      niceTicks(0, max, 4).forEach(function (t) {
+        g.appendChild(E('line', { x1: vf(t), x2: vf(t), y1: f.y0, y2: f.y1, stroke: GRID }));
+        g.appendChild(E('text', { x: vf(t), y: f.y1 + 17, 'text-anchor': 'middle', class: 'dv-tick' }, o.fmt ? o.fmt(t) : fmt(t)));
+      });
+      g.appendChild(E('line', { x1: f.x0, x2: f.x0, y1: f.y0, y2: f.y1, stroke: AXIS }));
+      g.appendChild(E('line', { x1: f.x0, x2: f.x1, y1: f.y1, y2: f.y1, stroke: AXIS }));
+    } else {
+      yAxis(g, vf, f.y0, f.y1, f.x0, f.x1, { fmt: o.fmt, count: o.mini ? 3 : 4 });
+    }
+    if (o.reference && o.reference.value !== undefined && o.reference.value !== null && !horiz) {
+      var ry2 = vf(o.reference.value);
+      g.appendChild(E('line', { x1: f.x0, x2: f.x1, y1: ry2, y2: ry2, stroke: o.reference.color || '#6b7280', 'stroke-width': 1.6, 'stroke-dasharray': '6 4' }));
+      g.appendChild(E('text', { x: f.x1, y: ry2 - 6, 'text-anchor': 'end', class: 'dv-tick' }, o.reference.label || ''));
+    }
+    var n = data.length;
+    var span = horiz ? (f.y1 - f.y0) : (f.x1 - f.x0);
+    var slot = span / n, bw = Math.min(slot * 0.68, horiz ? 22 : 48);
+    data.forEach(function (d, i) {
+      var color = d.color || (o.palette === 'rainbow' ? rainbowColor(i) : PALETTE[i % PALETTE.length]);
+      var mid = (horiz ? f.y0 : f.x0) + slot * (i + 0.5);
+      var rect = horiz
+        ? E('rect', { x: f.x0, y: mid - bw / 2, width: Math.max(1, vf(d.value) - f.x0), height: bw, rx: 2, fill: color })
+        : E('rect', { x: mid - bw / 2, y: vf(d.value), width: bw, height: Math.max(1, f.y1 - vf(d.value)), rx: 2, fill: color });
+      tip(rect, d.label + '：' + (o.fmt ? o.fmt(d.value) : fmt(d.value)));
+      putProbe(rect, o.probeFn ? o.probeFn(d, i) : null);
+      g.appendChild(rect);
+      var lx = horiz ? f.x0 - 8 : mid;
+      var ly = horiz ? mid + 4 : (d.value >= 0 ? vf(d.value) - 6 : vf(d.value) + 14);
+      g.appendChild(E('text', { x: lx, y: ly, 'text-anchor': horiz ? 'end' : 'middle', class: 'dv-tick' }, d.label));
+      if (o.dataLabels) {
+        if (horiz) {
+          g.appendChild(E('text', { x: vf(d.value) + 6, y: mid + 4, class: 'dv-cell', fill: '#374151' }, o.labelFmt ? o.labelFmt(d.value) : fmt(d.value)));
+        } else {
+          g.appendChild(E('text', { x: mid, y: vf(d.value) - 8, 'text-anchor': 'middle', class: 'dv-cell', fill: '#374151' }, o.labelFmt ? o.labelFmt(d.value) : fmt(d.value)));
+        }
+      }
+    });
+    if (o.note) g.appendChild(E('text', { x: f.x0, y: f.y0 - 6, class: 'dv-note' }, o.note));
+    if (o.xLabel && !o.mini) axisTitle(g, o.xLabel, (f.x0 + f.x1) / 2, h - 4);
+    if (o.yLabel && !horiz && !o.mini) axisTitle(g, o.yLabel, 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 堆叠柱 ============ */
+  function stackedBar(host, o) {
+    var w = o.w || 640, h = o.h || 360;
+    var s = svgRoot(w, h, '堆叠柱状图');
+    var cats = o.categories, series = o.series, mode = o.mode || 'value';
+    var legendPerRow = Math.max(1, Math.floor((w - 72) / 132));
+    var legendRows = Math.ceil(series.length / legendPerRow);
+    var f = frame(w, h, { t: 16 + legendRows * 18, r: 18, b: 42, l: 54 });
+    var g = f.g; s.appendChild(g);
+    var totals = cats.map(function (_, ci) {
+      return series.reduce(function (sum, se) { return sum + (mode === 'percent' ? 0 : se.values[ci]); }, 0);
+    });
+    var max = mode === 'percent' ? 100 : Math.max.apply(null, totals) * 1.08;
+    var vf = scale(0, max, f.y1, f.y0);
+    yAxis(g, vf, f.y0, f.y1, f.x0, f.x1, { fmt: mode === 'percent' ? function (v) { return v + '%'; } : o.fmt, count: 4 });
+    var slot = (f.x1 - f.x0) / cats.length, bw = Math.min(slot * 0.62, 46);
+    cats.forEach(function (c, ci) {
+      var acc = 0;
+      var mid = f.x0 + slot * (ci + 0.5);
+      series.forEach(function (se, si) {
+        var v = mode === 'percent' ? (se.values[ci] / totals[ci] * 100) : se.values[ci];
+        var y0v = vf(acc), y1v = vf(acc + v);
+        var rect = E('rect', { x: mid - bw / 2, y: y1v, width: bw, height: Math.max(1, y0v - y1v), fill: se.color || PALETTE[si % PALETTE.length] });
+        tip(rect, c + ' · ' + se.name + '：' + fmt(v) + (mode === 'percent' ? '%' : ''));
+        putProbe(rect, o.probeFn ? o.probeFn(c, ci, se, v) : null);
+        g.appendChild(rect);
+        acc += v;
+      });
+      if (!o.hideX) g.appendChild(E('text', { x: mid, y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, c));
+    });
+    legend(g, series.map(function (se, i) { return { label: se.name, color: se.color || PALETTE[i % PALETTE.length] }; }), f.x0, f.y0 - 16, f.x1 - f.x0);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 直方图 ============ */
+  function histogram(host, o) {
+    var w = o.w || 640, h = o.h || 360;
+    var s = svgRoot(w, h, '直方图');
+    var f = frame(w, h, { t: 16, r: 18, b: 42, l: 54 });
+    var g = f.g; s.appendChild(g);
+    var bins = o.bins;
+    var max = Math.max.apply(null, bins.map(function (b) { return b.count; })) * 1.1;
+    var vf = scale(0, max, f.y1, f.y0);
+    yAxis(g, vf, f.y0, f.y1, f.x0, f.x1, { count: o.mini ? 3 : 4, mini: o.mini });
+    var slot = (f.x1 - f.x0) / bins.length, bw = slot * 0.92;
+    bins.forEach(function (b, i) {
+      var mid = f.x0 + slot * (i + 0.5);
+      var rect = E('rect', { x: mid - bw / 2, y: vf(b.count), width: bw, height: f.y1 - vf(b.count), fill: o.color || '#15803d', opacity: 0.88 });
+      tip(rect, b.label + '：' + b.count + ' 人');
+      putProbe(rect, o.probeFn ? o.probeFn(b, i) : null);
+      g.appendChild(rect);
+      g.appendChild(E('text', { x: mid, y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, b.label));
+    });
+    if (!o.mini) axisTitle(g, o.xLabel || '', (f.x0 + f.x1) / 2, h - 4);
+    if (o.yLabel && !o.mini) axisTitle(g, o.yLabel, 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 饼 / 环 ============ */
+  function pieChart(host, o) {
+    var w = o.w || 480, h = o.h || 360;
+    var s = svgRoot(w, h, '饼图');
+    var g = E('g'); s.appendChild(g);
+    var data = o.data;
+    var total = data.reduce(function (a, b) { return a + b.value; }, 0);
+    var cx = w * 0.36, cy = h / 2, R = Math.min(w * 0.32, h * 0.42);
+    var inner = o.donut ? R * 0.55 : 0;
+    var a0 = -Math.PI / 2;
+    data.forEach(function (d, i) {
+      var ang = d.value / total * Math.PI * 2;
+      var a1 = a0 + ang;
+      var large = ang > Math.PI ? 1 : 0;
+      var p = ['M', cx, cy,
+        'L', cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        'A', R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        'L', cx + inner * Math.cos(a1), cy + inner * Math.sin(a1),
+        'A', inner, inner, 0, large, 0, cx + inner * Math.cos(a0), cy + inner * Math.sin(a0),
+        'Z'].join(' ');
+      var path = E('path', { d: p, fill: d.color || PALETTE[i % PALETTE.length], stroke: '#fff', 'stroke-width': 2 });
+      tip(path, d.label + '：' + fmt(d.value) + '（' + fmt(d.value / total * 100, 1) + '%）');
+      putProbe(path, o.probeFn ? o.probeFn(d, i, total) : null);
+      g.appendChild(path);
+      a0 = a1;
+    });
+    if (inner) {
+      g.appendChild(E('circle', { cx: cx, cy: cy, r: inner * 0.86, fill: '#fff' }));
+      g.appendChild(E('text', { x: cx, y: cy + 4, 'text-anchor': 'middle', class: 'dv-tick' }, o.centerLabel || ''));
+    }
+    var lx = w * 0.68;
+    data.forEach(function (d, i) {
+      var y = cy - (data.length * 22) / 2 + i * 22 + 12;
+      g.appendChild(E('rect', { x: lx, y: y - 9, width: 11, height: 11, rx: 2, fill: d.color || PALETTE[i % PALETTE.length] }));
+      g.appendChild(E('text', { x: lx + 16, y: y, class: 'dv-tick' }, d.label + '  ' + fmt(d.value / total * 100, 1) + '%'));
+    });
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 雷达 ============ */
+  function radarChart(host, o) {
+    var w = o.w || 480, h = o.h || 400;
+    var s = svgRoot(w, h, '雷达图');
+    var g = E('g'); s.appendChild(g);
+    var cx = w / 2, cy = h / 2 + 4, R = Math.min(w, h) * 0.34;
+    var axes = o.axes, n = axes.length;
+    function pt(i, r) {
+      var a = -Math.PI / 2 + i * 2 * Math.PI / n;
+      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+    }
+    for (var ring = 1; ring <= 4; ring++) {
+      var pts = [];
+      for (var i = 0; i < n; i++) { var p = pt(i, R * ring / 4); pts.push(p[0].toFixed(1) + ',' + p[1].toFixed(1)); }
+      g.appendChild(E('polygon', { points: pts.join(' '), fill: 'none', stroke: GRID }));
+    }
+    axes.forEach(function (ax, i) {
+      var p = pt(i, R);
+      g.appendChild(E('line', { x1: cx, y1: cy, x2: p[0], y2: p[1], stroke: GRID }));
+      var lp = pt(i, R * 1.16);
+      g.appendChild(E('text', { x: lp[0], y: lp[1] + 4, 'text-anchor': 'middle', class: 'dv-tick' }, ax.label));
+    });
+    o.series.forEach(function (se, si) {
+      var color = se.color || PALETTE[si % PALETTE.length];
+      var pts = se.values.map(function (v, i) { var p = pt(i, R * Math.max(0.02, v)); return p[0].toFixed(1) + ',' + p[1].toFixed(1); });
+      g.appendChild(E('polygon', { points: pts.join(' '), fill: color, 'fill-opacity': 0.2, stroke: color, 'stroke-width': 2 }));
+      se.values.forEach(function (v, i) {
+        var p = pt(i, R * Math.max(0.02, v));
+        var c = E('circle', { cx: p[0], cy: p[1], r: 3.4, fill: color });
+        tip(c, axes[i].label + '：' + fmt(v * 100, 1) + '%');
+        putProbe(c, o.probeFn ? o.probeFn(se, i, v) : null);
+        g.appendChild(c);
+      });
+    });
+    legend(g, o.series.map(function (se, i) { return { label: se.name, color: se.color || PALETTE[i % PALETTE.length] }; }), 12, 14, w - 24);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 南丁格尔玫瑰（半径版 vs 面积版） ============ */
+  function roseChart(host, o) {
+    var w = o.w || 480, h = o.h || 400;
+    var s = svgRoot(w, h, '南丁格尔玫瑰图');
+    var g = E('g'); s.appendChild(g);
+    var data = o.data, n = data.length;
+    var max = Math.max.apply(null, data.map(function (d) { return d.value; }));
+    var cx = w / 2, cy = h / 2 + 6, R = Math.min(w, h) * 0.36;
+    var step = 2 * Math.PI / n;
+    data.forEach(function (d, i) {
+      var frac = d.value / max;
+      var rr = o.areaCorrect ? R * Math.sqrt(frac) : R * frac;
+      var a0 = -Math.PI / 2 + i * step, a1 = a0 + step;
+      var p = ['M', cx, cy,
+        'L', cx + rr * Math.cos(a0), cy + rr * Math.sin(a0),
+        'A', rr, rr, 0, (step > Math.PI ? 1 : 0), 1, cx + rr * Math.cos(a1), cy + rr * Math.sin(a1),
+        'Z'].join(' ');
+      var path = E('path', { d: p, fill: d.color || PALETTE[i % PALETTE.length], stroke: '#fff', 'stroke-width': 1.5 });
+      tip(path, d.label + '：' + fmt(d.value) + '（' + fmt(d.value / data.reduce(function (a, b) { return a + b.value; }, 0) * 100, 1) + '%）');
+      putProbe(path, o.probeFn ? o.probeFn(d, i) : null);
+      g.appendChild(path);
+    });
+    g.appendChild(E('text', { x: 12, y: 18, class: 'dv-note' }, o.note || ''));
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 散点 ============ */
+  function scatterChart(host, o) {
+    var w = o.w || 640, h = o.h || 380;
+    var s = svgRoot(w, h, '散点图');
+    var f = frame(w, h, { t: 18, r: 20, b: 46, l: 56 });
+    var g = f.g; s.appendChild(g);
+    var pts = o.points;
+    var xs = pts.map(function (p) { return p.x; }), ys = pts.map(function (p) { return p.y; });
+    var xf = scale(Math.min.apply(null, xs) - 1, Math.max.apply(null, xs) + 1, f.x0, f.x1);
+    var yf = scale(Math.min.apply(null, ys) - 1, Math.max.apply(null, ys) + 1, f.y1, f.y0);
+    yAxis(g, yf, f.y0, f.y1, f.x0, f.x1, { count: o.mini ? 3 : 4, fmt: o.yFmt, mini: o.mini });
+    niceTicks(xf.domain[0], xf.domain[1], 5).forEach(function (t) {
+      g.appendChild(E('line', { x1: xf(t), x2: xf(t), y1: f.y0, y2: f.y1, stroke: GRID }));
+      g.appendChild(E('text', { x: xf(t), y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, o.xFmt ? o.xFmt(t) : fmt(t)));
+    });
+    g.appendChild(E('line', { x1: f.x0, x2: f.x1, y1: f.y1, y2: f.y1, stroke: AXIS }));
+    if (o.fit) {
+      var n = pts.length, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, i;
+      for (i = 0; i < n; i++) { sx += pts[i].x; sy += pts[i].y; }
+      var mx = sx / n, my = sy / n;
+      for (i = 0; i < n; i++) { var dx = pts[i].x - mx, dy = pts[i].y - my; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+      var b = sxy / sxx, a = my - b * mx;
+      g.appendChild(E('line', {
+        x1: xf(xf.domain[0]), y1: yf(a + b * xf.domain[0]),
+        x2: xf(xf.domain[1]), y2: yf(a + b * xf.domain[1]),
+        stroke: '#b91c1c', 'stroke-width': 2, 'stroke-dasharray': '6 4'
+      }));
+    }
+    pts.forEach(function (p, i) {
+      var c = E('circle', { cx: xf(p.x), cy: yf(p.y), r: p.r || 4.6, fill: p.color || 'rgba(29,78,216,0.72)', stroke: '#fff', 'stroke-width': 1 });
+      tip(c, (p.label || '') + '：' + (o.xName || 'x') + ' ' + fmt(p.x, 1) + '，' + (o.yName || 'y') + ' ' + fmt(p.y, 2));
+      putProbe(c, o.probeFn ? o.probeFn(p, i) : null);
+      g.appendChild(c);
+    });
+    if (!o.mini) axisTitle(g, o.xName || '', (f.x0 + f.x1) / 2, h - 6);
+    if (!o.mini) axisTitle(g, o.yName || '', 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 气泡（第三个变量用面积） ============ */
+  function bubbleChart(host, o) {
+    var w = o.w || 640, h = o.h || 400;
+    var s = svgRoot(w, h, '气泡图');
+    var f = frame(w, h, { t: 18, r: 20, b: 46, l: 58 });
+    var g = f.g; s.appendChild(g);
+    var pts = o.points;
+    var xs = pts.map(function (p) { return p.x; }), ys = pts.map(function (p) { return p.y; });
+    var maxS = Math.max.apply(null, pts.map(function (p) { return p.size; }));
+    var xf = scale(Math.min.apply(null, xs) - 1, Math.max.apply(null, xs) + 1, f.x0, f.x1);
+    var yf = scale(Math.min.apply(null, ys) - 1, Math.max.apply(null, ys) + 1, f.y1, f.y0);
+    yAxis(g, yf, f.y0, f.y1, f.x0, f.x1, { count: o.mini ? 3 : 4, fmt: o.yFmt, mini: o.mini });
+    niceTicks(xf.domain[0], xf.domain[1], 5).forEach(function (t) {
+      g.appendChild(E('line', { x1: xf(t), x2: xf(t), y1: f.y0, y2: f.y1, stroke: GRID }));
+      g.appendChild(E('text', { x: xf(t), y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, o.xFmt ? o.xFmt(t) : fmt(t)));
+    });
+    g.appendChild(E('line', { x1: f.x0, x2: f.x1, y1: f.y1, y2: f.y1, stroke: AXIS }));
+    pts.forEach(function (p, i) {
+      var rr = 6 + 26 * Math.sqrt(p.size / maxS);
+      var c = E('circle', { cx: xf(p.x), cy: yf(p.y), r: rr, fill: p.color || 'rgba(21,128,61,0.55)', stroke: '#15803d', 'stroke-width': 1.6 });
+      tip(c, p.label + '：' + (o.xName || 'x') + ' ' + fmt(p.x, 1) + '，' + (o.yName || 'y') + ' ' + fmt(p.y, 1) + '，' + (o.sizeName || '规模') + ' ' + fmt(p.size));
+      putProbe(c, o.probeFn ? o.probeFn(p, i) : null);
+      g.appendChild(c);
+      if (o.showLabels) {
+        g.appendChild(E('text', { x: xf(p.x), y: yf(p.y) + 4, 'text-anchor': 'middle', class: 'dv-tick', fill: '#fff' }, p.label));
+      }
+    });
+    if (!o.mini) axisTitle(g, o.xName || '', (f.x0 + f.x1) / 2, h - 6);
+    if (!o.mini) axisTitle(g, o.yName || '', 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 箱线图 ============ */
+  function boxPlot(host, o) {
+    var w = o.w || 640, h = o.h || 380;
+    var s = svgRoot(w, h, '箱线图');
+    var f = frame(w, h, { t: 18, r: 20, b: 44, l: 56 });
+    var g = f.g; s.appendChild(g);
+    var groups = o.groups;
+    var maxV = Math.max.apply(null, groups.map(function (gr) { return gr.max; }));
+    var vf = scale(0, maxV * 1.08, f.y1, f.y0);
+    yAxis(g, vf, f.y0, f.y1, f.x0, f.x1, { count: o.mini ? 3 : 4, fmt: o.yFmt, mini: o.mini });
+    var slot = (f.x1 - f.x0) / groups.length, bw = Math.min(slot * 0.42, 42);
+    groups.forEach(function (gr, i) {
+      var mid = f.x0 + slot * (i + 0.5);
+      var color = gr.color || PALETTE[i % PALETTE.length];
+      var fliers = gr.fliers || [];
+      fliers.forEach(function (v) {
+        var c = E('circle', { cx: mid, cy: vf(v), r: 3, fill: 'none', stroke: color, 'stroke-width': 1.4 });
+        tip(c, gr.label + ' 离群点：' + fmt(v));
+        putProbe(c, o.probeFn ? o.probeFn(gr, i, v, 'fliers') : null);
+        g.appendChild(c);
+      });
+      g.appendChild(E('line', { x1: mid, x2: mid, y1: vf(gr.min), y2: vf(gr.q1), stroke: color, 'stroke-width': 1.6 }));
+      g.appendChild(E('line', { x1: mid, x2: mid, y1: vf(gr.q3), y2: vf(gr.max), stroke: color, 'stroke-width': 1.6 }));
+      g.appendChild(E('line', { x1: mid - bw / 4, x2: mid + bw / 4, y1: vf(gr.min), y2: vf(gr.min), stroke: color, 'stroke-width': 1.6 }));
+      g.appendChild(E('line', { x1: mid - bw / 4, x2: mid + bw / 4, y1: vf(gr.max), y2: vf(gr.max), stroke: color, 'stroke-width': 1.6 }));
+      var box = E('rect', { x: mid - bw / 2, y: vf(gr.q3), width: bw, height: Math.max(1, vf(gr.q1) - vf(gr.q3)), fill: color, 'fill-opacity': 0.25, stroke: color, 'stroke-width': 1.8 });
+      tip(box, gr.label + '：中位数 ' + fmt(gr.median) + '，Q1 ' + fmt(gr.q1) + '，Q3 ' + fmt(gr.q3));
+      putProbe(box, o.probeFn ? o.probeFn(gr, i, gr.median, 'box') : null);
+      g.appendChild(box);
+      g.appendChild(E('line', { x1: mid - bw / 2, x2: mid + bw / 2, y1: vf(gr.median), y2: vf(gr.median), stroke: color, 'stroke-width': 3 }));
+      g.appendChild(E('text', { x: mid, y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, gr.label));
+    });
+    if (!o.mini) axisTitle(g, o.yName || '', 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 小提琴图 ============ */
+  function violinChart(host, o) {
+    var w = o.w || 640, h = o.h || 380;
+    var s = svgRoot(w, h, '小提琴图');
+    var f = frame(w, h, { t: 18, r: 20, b: 44, l: 56 });
+    var g = f.g; s.appendChild(g);
+    var groups = o.groups;
+    var maxV = Math.max.apply(null, groups.map(function (gr) { return gr.max; }));
+    var vf = scale(0, maxV * 1.08, f.y1, f.y0);
+    yAxis(g, vf, f.y0, f.y1, f.x0, f.x1, { count: o.mini ? 3 : 4, fmt: o.yFmt, mini: o.mini });
+    var slot = (f.x1 - f.x0) / groups.length, half = slot * 0.24;
+    groups.forEach(function (gr, i) {
+      var mid = f.x0 + slot * (i + 0.5);
+      var color = gr.color || PALETTE[i % PALETTE.length];
+      var dens = gr.density; // [{v, d}]
+      var maxD = Math.max.apply(null, dens.map(function (p) { return p.d; }));
+      var right = [], left = [];
+      dens.forEach(function (p) {
+        var y = vf(p.v);
+        var hw = half * (p.d / maxD);
+        right.push((mid + hw).toFixed(1) + ',' + y.toFixed(1));
+        left.push((mid - hw).toFixed(1) + ',' + y.toFixed(1));
+      });
+      var d = 'M' + right.join(' L') + ' L' + left.reverse().join(' L') + ' Z';
+      var path = E('path', { d: d, fill: color, 'fill-opacity': 0.35, stroke: color, 'stroke-width': 1.6 });
+      tip(path, gr.label);
+      putProbe(path, o.probeFn ? o.probeFn(gr, i, gr.median, 'violin') : null);
+      g.appendChild(path);
+      g.appendChild(E('line', { x1: mid, x2: mid, y1: vf(gr.q1), y2: vf(gr.q3), stroke: '#374151', 'stroke-width': 1.4 }));
+      g.appendChild(E('line', { x1: mid - 6, x2: mid + 6, y1: vf(gr.median), y2: vf(gr.median), stroke: '#111827', 'stroke-width': 2.4 }));
+      g.appendChild(E('text', { x: mid, y: f.y1 + 18, 'text-anchor': 'middle', class: 'dv-tick' }, gr.label));
+    });
+    if (!o.mini) axisTitle(g, o.yName || '', 14, (f.y0 + f.y1) / 2, -90);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 热力图 ============ */
+  function heatmap(host, o) {
+    var w = o.w || 680, h = o.h || 400;
+    var s = svgRoot(w, h, '热力图');
+    var g = E('g'); s.appendChild(g);
+    var rows = o.rows, cols = o.cols, cells = o.cells;
+    var lx = Math.min(74, Math.max(34, w * 0.19)), ty = 34, cw = (w - lx - 20) / cols.length, ch = (h - ty - 46) / rows.length;
+    var max = Math.max.apply(null, cells.map(function (c) { return c.value; }));
+    var min = Math.min.apply(null, cells.map(function (c) { return c.value; }));
+    var map = {};
+    cells.forEach(function (c) { map[c.row + '|' + c.col] = c.value; });
+    rows.forEach(function (r, ri) {
+      g.appendChild(E('text', { x: lx - 8, y: ty + ch * ri + ch / 2 + 4, 'text-anchor': 'end', class: 'dv-tick' }, r));
+      cols.forEach(function (c, ci) {
+        var v = map[r + '|' + c];
+        var t = (v - min) / ((max - min) || 1);
+        var rect = E('rect', { x: lx + cw * ci, y: ty + ch * ri, width: cw - 2, height: ch - 2, rx: 2, fill: heatColor(t) });
+        tip(rect, r + ' · ' + c + '：' + fmt(v) + (o.unit || ''));
+        putProbe(rect, o.probeFn ? o.probeFn(r, c, v) : null);
+        g.appendChild(rect);
+        if (cw > 42 && !o.hideCells) g.appendChild(E('text', { x: lx + cw * ci + (cw - 2) / 2, y: ty + ch * ri + ch / 2 + 4, 'text-anchor': 'middle', class: 'dv-cell', fill: t > 0.55 ? '#fff' : '#111827' }, fmt(v)));
+      });
+    });
+    cols.forEach(function (c, ci) {
+      g.appendChild(E('text', { x: lx + cw * ci + (cw - 2) / 2, y: ty - 8, 'text-anchor': 'middle', class: 'dv-tick' }, c));
+    });
+    if (!o.hideLegend) {
+      var lw = 150, lx0 = w - lw - 18, ly0 = h - 30;
+      for (var i = 0; i <= 10; i++) {
+        g.appendChild(E('rect', { x: lx0 + lw * i / 10, y: ly0, width: lw / 10, height: 10, fill: heatColor(i / 10) }));
+      }
+      g.appendChild(E('text', { x: lx0, y: ly0 - 6, class: 'dv-tick' }, fmt(min) + (o.unit || '')));
+      g.appendChild(E('text', { x: lx0 + lw, y: ly0 - 6, 'text-anchor': 'end', class: 'dv-tick' }, fmt(max) + (o.unit || '')));
+    }
+    host.appendChild(s);
+    return s;
+  }
+  function rainbowColor(t) {
+    var h = 270 + t * 270;
+    return hslHex(h, 100, 50);
+  }
+  function hslHex(h, s, l) {
+    h = ((h % 360) + 360) % 360;
+    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+    var r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+    return 'rgb(' + Math.round((r + m) * 255) + ',' + Math.round((g + m) * 255) + ',' + Math.round((b + m) * 255) + ')';
+  }
+  function heatColor(t) {
+    t = Math.max(0, Math.min(1, t));
+    var r = Math.round(255 + (37 - 255) * t);
+    var g = Math.round(247 + (99 - 247) * t);
+    var b = Math.round(251 + (235 - 251) * t);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  /* ============ 桑基图 ============ */
+  function sankey(host, o) {
+    var w = o.w || 680, h = o.h || 400;
+    var s = svgRoot(w, h, '桑基图');
+    var g = E('g'); s.appendChild(g);
+    var src = o.sources, tgt = o.targets, M = o.matrix;
+    var lx = 150, rx = w - 150, top = 34, bot = h - 30;
+    var sTot = src.map(function (_, i) { return M[i].reduce(function (a, b) { return a + b; }, 0); });
+    var tTot = tgt.map(function (_, j) { return M.reduce(function (a, row) { return a + row[j]; }, 0); });
+    var sSum = sTot.reduce(function (a, b) { return a + b; }, 0);
+    var tSum = tTot.reduce(function (a, b) { return a + b; }, 0);
+    var gap = 8;
+    var sH = (bot - top - gap * (src.length - 1)) ;
+    var tH = (bot - top - gap * (tgt.length - 1));
+    var sY = [], acc = top;
+    src.forEach(function (_, i) { sY.push(acc); acc += sTot[i] / sSum * sH + gap; });
+    var tY = [], acc2 = top;
+    tgt.forEach(function (_, j) { tY.push(acc2); acc2 += tTot[j] / tSum * tH + gap; });
+    var sOff = sY.slice(), tOff = tY.slice();
+    for (var i = 0; i < src.length; i++) {
+      for (var j = 0; j < tgt.length; j++) {
+        var v = M[i][j];
+        if (!v) continue;
+        var th = v / sSum * sH;
+        var y0 = sOff[i], y1 = tOff[j];
+        var color = PALETTE[j % PALETTE.length];
+        var x0 = lx, x1 = rx;
+        var path = E('path', {
+          d: 'M' + x0 + ' ' + y0 + ' C' + (x0 + (x1 - x0) / 2) + ' ' + y0 + ' ' + (x0 + (x1 - x0) / 2) + ' ' + y1 + ' ' + x1 + ' ' + y1 +
+            ' L' + x1 + ' ' + (y1 + th) + ' C' + (x0 + (x1 - x0) / 2) + ' ' + (y1 + th) + ' ' + (x0 + (x1 - x0) / 2) + ' ' + (y0 + th) + ' ' + x0 + ' ' + (y0 + th) + ' Z',
+          fill: color, 'fill-opacity': 0.42, stroke: color, 'stroke-width': 0.8
+        });
+        tip(path, src[i] + ' → ' + tgt[j] + '：' + fmt(v) + ' 人（占 ' + fmt(v / sSum * 100, 1) + '%）');
+        putProbe(path, o.probeFn ? o.probeFn(src[i], tgt[j], v) : null);
+        g.appendChild(path);
+        sOff[i] += th; tOff[j] += th;
+      }
+    }
+    src.forEach(function (nm, i) {
+      var hh = sTot[i] / sSum * sH;
+      g.appendChild(E('rect', { x: lx - 16, y: sY[i], width: 16, height: hh, fill: '#334155' }));
+      g.appendChild(E('text', { x: lx - 22, y: sY[i] + hh / 2 + 4, 'text-anchor': 'end', class: 'dv-tick' }, nm));
+    });
+    tgt.forEach(function (nm, j) {
+      var hh = tTot[j] / tSum * tH;
+      g.appendChild(E('rect', { x: rx, y: tY[j], width: 16, height: hh, fill: '#334155' }));
+      g.appendChild(E('text', { x: rx + 22, y: tY[j] + hh / 2 + 4, class: 'dv-tick' }, nm));
+    });
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 网络图（确定性布局） ============ */
+  function networkChart(host, o) {
+    var w = o.w || 680, h = o.h || 440;
+    var s = svgRoot(w, h, '共现网络图');
+    var g = E('g'); s.appendChild(g);
+    var nodes = o.nodes, links = o.links;
+    var groups = o.groups;
+    var cx = w / 2, cy = h / 2;
+    var pos = {};
+    groups.forEach(function (gr, gi) {
+      var ga = -Math.PI / 2 + gi * 2 * Math.PI / groups.length;
+      var gc = [cx + Math.cos(ga) * w * 0.22, cy + Math.sin(ga) * h * 0.22];
+      gr.members.forEach(function (m, mi) {
+        var a = ga + (mi - (gr.members.length - 1) / 2) * 0.26;
+        var rad = mi % 2 === 0 ? 62 : 86;
+        pos[m] = [gc[0] + Math.cos(a) * rad, gc[1] + Math.sin(a) * rad];
+      });
+    });
+    links.forEach(function (l) {
+      var a = pos[l.source], b = pos[l.target];
+      if (!a || !b) return;
+      var line = E('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: l.weight >= 25 ? '#94a3b8' : '#cbd5e1', 'stroke-width': Math.max(1, l.weight / 12), 'stroke-opacity': 0.75 });
+      tip(line, l.source + ' — ' + l.target + '：共现 ' + l.weight + ' 次');
+      putProbe(line, o.probeFn ? o.probeFn(l) : null);
+      g.appendChild(line);
+    });
+    nodes.forEach(function (nd) {
+      var p = pos[nd.id];
+      if (!p) return;
+      var c = E('circle', { cx: p[0], cy: p[1], r: 8, fill: PALETTE[nd.group % PALETTE.length], stroke: '#fff', 'stroke-width': 2 });
+      tip(c, nd.id);
+      putProbe(c, o.probeFn ? o.probeFn(nd) : null);
+      g.appendChild(c);
+      g.appendChild(E('text', { x: p[0], y: p[1] - 13, 'text-anchor': 'middle', class: 'dv-tick' }, nd.id));
+    });
+    legend(g, groups.map(function (gr, i) { return { label: gr.name, color: PALETTE[i % PALETTE.length] }; }), 12, 16, w - 24);
+    host.appendChild(s);
+    return s;
+  }
+
+  /* ============ 词云（贪心排布，确定性） ============ */
+  function wordCloud(host, o) {
+    var w = o.w || 680, h = o.h || 420;
+    var s = svgRoot(w, h, '词云');
+    var g = E('g'); s.appendChild(g);
+    var words = o.words.slice().sort(function (a, b) { return b.value - a.value; });
+    var maxV = words[0].value, minV = words[words.length - 1].value;
+    var placed = [];
+    var fs = function (v) { return Math.min(o.mini ? 26 : 46, 14 + 46 * Math.pow((v - minV) / ((maxV - minV) || 1), 0.75)); };
+    words.forEach(function (wd, i) {
+      var size = fs(wd.value);
+      var text = wd.text;
+      var wpx = text.length * size * 1.02 + 10;
+      var hpx = size * 1.16;
+      var placedOk = false;
+      for (var attempt = 0; attempt < 600 && !placedOk; attempt++) {
+        var room = Math.max(1, w - wpx - 12);
+        var x = 6 + (attempt * 37) % room;
+        var row = Math.floor(attempt / 18) % Math.max(1, Math.floor((h - hpx - 12) / (hpx * 0.72)));
+        var y = 14 + row * hpx * 0.72 + (attempt % 3) * 2;
+        if (y + hpx > h - 6) continue;
+        var hit = placed.some(function (r) {
+          return !(x + wpx < r.x || x > r.x + r.w || y + hpx < r.y || y > r.y + r.h);
+        });
+        if (!hit) {
+          placed.push({ x: x, y: y, w: wpx, h: hpx });
+          var t = E('text', { x: x + wpx / 2, y: y + hpx * 0.78, 'text-anchor': 'middle', class: 'dv-cloud', fill: PALETTE[i % PALETTE.length] }, text);
+          t.setAttribute('font-size', size.toFixed(1));
+          tip(t, text + '：' + wd.value + ' 次');
+          putProbe(t, o.probeFn ? o.probeFn(wd, i) : null);
+          g.appendChild(t);
+          placedOk = true;
+        }
+      }
+    });
+    host.appendChild(s);
+    return s;
+  }
+
+  global.DVCharts = {
+    PALETTE: PALETTE, SOFT: SOFT, E: E, fmt: fmt, scale: scale, niceTicks: niceTicks,
+    probes: probes,
+    line: lineChart, dualAxis: dualAxisChart, bar: barChart, stacked: stackedBar,
+    hist: histogram, pie: pieChart, radar: radarChart, rose: roseChart,
+    scatter: scatterChart, bubble: bubbleChart, box: boxPlot, violin: violinChart,
+    heatmap: heatmap, sankey: sankey, network: networkChart, cloud: wordCloud
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* 第 2 页：同一份数据 → 一个可交互的界面
+   所有面板共用一个状态（指标 / 时间区间 / 地区 / 钻取 / 一句话条件），
+   任何一处改动，其他面板和所有数字一起重算。 */
+(function () {
+  'use strict';
+  var D = window.DVData;
+  var C = window.DVCharts;
+
+  var byName = {};
+  D.regions.forEach(function (r) { byName[r.name] = r; });
+
+  var METRICS = {
+    rate: { name: '阳性率', unit: '%', dec: 2 },
+    positives: { name: '阳性人数', unit: '人', dec: 0 },
+    tests: { name: '检测人次', unit: '人次', dec: 0 },
+    hosp: { name: '住院人数', unit: '人', dec: 0 },
+    hospRate: { name: '住院率', unit: '%', dec: 1 },
+    per100k: { name: '每十万人阳性数', unit: '人/10万', dec: 1 },
+    temp: { name: '日均气温', unit: '℃', dec: 1 }
+  };
+  var METRIC_ORDER = ['rate', 'positives', 'tests', 'hosp', 'hospRate', 'per100k', 'temp'];
+
+  var state = {
+    metric: 'rate',
+    from: 0, to: 29,
+    on: {},
+    focus: null,
+    threshold: null, // {metric, op, value, text}
+    queryText: '',
+    dist: 'age'
+  };
+  D.regions.forEach(function (r) { state.on[r.name] = true; });
+
+  /* ---------------- 基础计算 ---------------- */
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function nf(v, dec) {
+    if (v === null || v === undefined || isNaN(v)) return '—';
+    return Number(v).toLocaleString('zh-CN', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function selectedNames() {
+    return D.regions.filter(function (r) { return state.on[r.name]; }).map(function (r) { return r.name; });
+  }
+
+  // 区间累计（口径与第 1 页完全一致）
+  function aggRegion(r, from, to) {
+    var t = 0, p = 0, h = 0, i;
+    for (i = from; i <= to; i++) {
+      var d = r.days[i];
+      t += d.tests; p += d.positives; h += d.hosp;
+    }
+    return {
+      name: r.name, population: r.population, tests: t, positives: p, hosp: h,
+      rate: t ? p / t * 100 : 0,
+      hospRate: p ? h / p * 100 : 0,
+      per100k: p / (r.population * 10000) * 100000
+    };
+  }
+
+  function aggCity(from, to) {
+    var names = selectedNames();
+    var t = 0, p = 0, h = 0, pop = 0;
+    names.forEach(function (nm) {
+      var r = byName[nm], i;
+      for (i = from; i <= to; i++) {
+        var d = r.days[i];
+        t += d.tests; p += d.positives; h += d.hosp;
+      }
+      pop += r.population;
+    });
+    return {
+      names: names, tests: t, positives: p, hosp: h, population: pop,
+      rate: t ? p / t * 100 : 0,
+      hospRate: p ? h / p * 100 : 0,
+      per100k: pop ? p / (pop * 10000) * 100000 : 0
+    };
+  }
+
+  function metricVal(a, key) {
+    switch (key) {
+      case 'rate': return a.rate;
+      case 'positives': return a.positives;
+      case 'tests': return a.tests;
+      case 'hosp': return a.hosp;
+      case 'hospRate': return a.hospRate;
+      case 'per100k': return a.per100k;
+      default: return a.rate;
+    }
+  }
+
+  // 每日序列（按所选区重新合计）
+  function dailySeries(names) {
+    var rows = [], i;
+    for (i = 0; i < D.days; i++) {
+      var t = 0, p = 0, h = 0;
+      names.forEach(function (nm) {
+        var d = byName[nm].days[i];
+        t += d.tests; p += d.positives; h += d.hosp;
+      });
+      rows.push({
+        day: i + 1, date: D.daily[i].date, tests: t, positives: p, hosp: h,
+        rate: t ? p / t * 100 : 0,
+        hospRate: p ? h / p * 100 : 0,
+        temp: D.daily[i].temp
+      });
+    }
+    return rows;
+  }
+
+  function dailyVal(row, key) {
+    if (key === 'temp') return row.temp;
+    if (key === 'rate') return row.rate;
+    if (key === 'positives') return row.positives;
+    if (key === 'tests') return row.tests;
+    if (key === 'hosp') return row.hosp;
+    if (key === 'hospRate') return row.hospRate;
+    return row.rate;
+  }
+
+  function regionDailyVal(r, i, key) {
+    var d = r.days[i];
+    if (key === 'temp') return D.daily[i].temp;
+    if (key === 'rate') return d.ratePct;
+    if (key === 'positives') return d.positives;
+    if (key === 'tests') return d.tests;
+    if (key === 'hosp') return d.hosp;
+    if (key === 'hospRate') return d.positives ? d.hosp / d.positives * 100 : 0;
+    if (key === 'per100k') return d.positives / (r.population * 10000) * 100000;
+    return d.ratePct;
+  }
+
+  function passesThreshold(a) {
+    if (!state.threshold) return true;
+    var v = metricVal(a, state.threshold.metric);
+    return state.threshold.op === '>' ? v > state.threshold.value : v < state.threshold.value;
+  }
+
+  /* ---------------- 左栏 ---------------- */
+  function renderMetricList() {
+    var box = document.getElementById('metricList');
+    box.innerHTML = '';
+    METRIC_ORDER.forEach(function (key) {
+      var m = METRICS[key];
+      var b = el('button', 'opt' + (state.metric === key ? ' on' : ''),
+        '<span>' + m.name + '</span><span class="unit">' + m.unit + '</span>');
+      b.addEventListener('click', function () { state.metric = key; render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function renderRegionGrid() {
+    var box = document.getElementById('regionGrid');
+    box.innerHTML = '';
+    D.regions.forEach(function (r) {
+      var cls = 'rchip' + (state.on[r.name] ? ' on' : '') + (state.focus === r.name ? ' focus' : '');
+      var b = el('button', cls, r.name);
+      b.addEventListener('click', function () {
+        if (state.focus === r.name) { state.focus = null; }
+        else { state.focus = r.name; }
+        render();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function renderTime() {
+    var from = document.getElementById('rngFrom');
+    var to = document.getElementById('rngTo');
+    from.value = state.from; to.value = state.to;
+    document.getElementById('lblFrom').textContent = D.daily[state.from].date;
+    document.getElementById('lblTo').textContent = D.daily[state.to].date;
+    from.oninput = function () {
+      state.from = Math.min(parseInt(from.value, 10), state.to);
+      render();
+    };
+    to.oninput = function () {
+      state.to = Math.max(parseInt(to.value, 10), state.from);
+      render();
+    };
+    var pre = document.getElementById('timePresets');
+    if (!pre.dataset.built) {
+      var items = [
+        { label: '全部 30 天', act: function () { state.from = 0; state.to = 29; } },
+        { label: '前 7 天', act: function () { state.from = 0; state.to = 6; } },
+        { label: '后 7 天', act: function () { state.from = 23; state.to = 29; } },
+        { label: '峰值周', act: function () { var p = D.peak.day - 4; state.from = Math.max(0, p); state.to = Math.min(29, p + 6); } }
+      ];
+      items.forEach(function (it) {
+        var b = el('button', null, it.label);
+        b.addEventListener('click', function () { it.act(); render(); });
+        pre.appendChild(b);
+      });
+      pre.dataset.built = '1';
+    }
+  }
+
+  /* ---------------- 一句话查询 ---------------- */
+  var QMETRIC = [
+    { re: /阳性率/, key: 'rate' },
+    { re: /每十万人/, key: 'per100k' },
+    { re: /住院率/, key: 'hospRate' },
+    { re: /检测人次|检测量/, key: 'tests' },
+    { re: /阳性人数|阳性数/, key: 'positives' },
+    { re: /住院人数|住院/, key: 'hosp' },
+    { re: /气温|温度/, key: 'temp' }
+  ];
+
+  function parseQuery(text) {
+    var t = String(text || '').replace(/\s+/g, '');
+    var q = { region: null, metric: null, op: null, value: null, top: false };
+    if (!t) return q;
+    D.regions.forEach(function (r) {
+      var short = r.name.replace(/[区县市]$/, '');
+      if (!q.region && (t.indexOf(r.name) >= 0 || (short.length >= 2 && t.indexOf(short) >= 0))) q.region = r.name;
+    });
+    for (var i = 0; i < QMETRIC.length; i++) {
+      if (QMETRIC[i].re.test(t)) { q.metric = QMETRIC[i].key; break; }
+    }
+    if (/最多|最高|最大|排名靠前/.test(t)) q.top = true;
+    var opIdx = -1, op = null;
+    var ops = [
+      { re: /(大于等于|不小于|>=|≥)/, v: '>' },
+      { re: /(小于等于|不大于|<=|≤)/, v: '<' },
+      { re: /(大于|超过|高于|多于|>)/, v: '>' },
+      { re: /(小于|低于|少于|<)/, v: '<' }
+    ];
+    for (var k = 0; k < ops.length; k++) {
+      var m = t.match(ops[k].re);
+      if (m) { op = ops[k].v; opIdx = m.index; q.op = op; break; }
+    }
+    if (op) {
+      var tail = t.slice(opIdx);
+      var nm = tail.match(/(\d+(?:\.\d+)?)/);
+      if (nm) q.value = parseFloat(nm[1]);
+    } else if (q.top) {
+      q.op = '>';
+    }
+    return q;
+  }
+
+  function applyQuery(text) {
+    var out = document.getElementById('qOut');
+    var q = parseQuery(text);
+    state.queryText = text;
+    if (!q.region && !q.metric && !q.top) {
+      out.innerHTML = '<div class="queryhit" style="background:#fef2f2;border-color:#fecaca;color:#7f1d1d">没看懂这句。可以试试：浦东 / 阳性率 大于 1.4 / 住院人数 最多的区</div>';
+      state.threshold = null;
+      render();
+      return;
+    }
+    var hit = 0, hitNames = [];
+    if (q.top) {
+      var key = q.metric || 'positives';
+      var rows = D.regions.map(function (r) { return aggRegion(r, state.from, state.to); })
+        .filter(function (a) { return state.on[a.name]; })
+        .sort(function (a, b) { return metricVal(b, key) - metricVal(a, key); });
+      if (rows.length) {
+        var best = rows[0];
+        state.focus = best.name;
+        state.on = {}; state.on[best.name] = true;
+        hit = 1; hitNames = [best.name];
+        state.threshold = null;
+        out.innerHTML = '<div class="queryhit">按「' + esc(METRICS[key].name) + '」排，' + esc(best.name) + ' 最高（' +
+          nf(metricVal(best, key), METRICS[key].dec) + ' ' + METRICS[key].unit + '）<button id="qClear">清除</button></div>';
+      }
+    } else if (q.region) {
+      state.focus = q.region;
+      state.on = {}; state.on[q.region] = true;
+      if (q.op && q.value !== null && q.metric) {
+        state.threshold = { metric: q.metric, op: q.op, value: q.value };
+        var a = aggRegion(byName[q.region], state.from, state.to);
+        var v = metricVal(a, q.metric);
+        var ok = q.op === '>' ? v > q.value : v < q.value;
+        hit = ok ? 1 : 0;
+        hitNames = [q.region];
+        out.innerHTML = '<div class="queryhit"' + (ok ? '' : ' style="background:#fef2f2;border-color:#fecaca;color:#7f1d1d"') + '>' +
+          esc(q.region) + ' 的' + esc(METRICS[q.metric].name) + ' 是 ' + nf(v, METRICS[q.metric].dec) + ' ' + METRICS[q.metric].unit +
+          '，' + (ok ? '满足' : '不满足') + '「' + (q.op === '>' ? '>' : '<') + ' ' + q.value + '」<button id="qClear">清除</button></div>';
+      } else {
+        out.innerHTML = '<div class="queryhit">已聚焦到 ' + esc(q.region) + '<button id="qClear">清除</button></div>';
+      }
+    } else if (q.op && q.value !== null && q.metric) {
+      state.threshold = { metric: q.metric, op: q.op, value: q.value };
+      D.regions.forEach(function (r) {
+        var a = aggRegion(r, state.from, state.to);
+        if (state.on[a.name] && passesThreshold(a)) { hit++; hitNames.push(a.name); }
+      });
+      out.innerHTML = '<div class="queryhit">' + esc(METRICS[q.metric].name) + ' ' + (q.op === '>' ? '>' : '<') + ' ' + q.value +
+        '：命中 ' + hit + ' 个区' + (hit ? '（' + esc(hitNames.join('、')) + '）' : '') + '<button id="qClear">清除</button></div>';
+    }
+    var clr = document.getElementById('qClear');
+    if (clr) clr.addEventListener('click', clearQuery);
+    render();
+  }
+
+  function clearQuery() {
+    state.threshold = null;
+    state.queryText = '';
+    D.regions.forEach(function (r) { state.on[r.name] = true; });
+    state.focus = null;
+    document.getElementById('qOut').innerHTML = '';
+    document.getElementById('qInput').value = '';
+    render();
+  }
+
+  /* ---------------- KPI ---------------- */
+  function renderKPIs() {
+    var box = document.getElementById('kpis');
+    box.innerHTML = '';
+    var a = aggCity(state.from, state.to);
+    var m = METRICS[state.metric];
+    var peak = null, i;
+    for (i = state.from; i <= state.to; i++) {
+      var d = D.daily[i];
+      var p = 0;
+      selectedNames().forEach(function (nm) { p += byName[nm].days[i].positives; });
+      if (!peak || p > peak.v) peak = { date: d.date, v: p };
+    }
+    var items = [
+      { k: '当前指标：' + m.name, v: nf(metricVal(a, state.metric), m.dec), u: m.unit, sub: '切换左上角指标，所有图一起变' },
+      { k: '区间阳性人数', v: nf(a.positives, 0), u: '人', sub: a.names.length + ' 个区 · ' + D.daily[state.from].date + ' ~ ' + D.daily[state.to].date },
+      { k: '区间阳性率', v: nf(a.rate, 2), u: '%', sub: '阳性人数 ÷ 检测人次' },
+      { k: '区间检测人次', v: nf(a.tests, 0), u: '人次', sub: '' },
+      { k: '区间住院人数', v: nf(a.hosp, 0), u: '人', sub: '' },
+      { k: '住院率', v: nf(a.hospRate, 1), u: '%', sub: '住院人数 ÷ 阳性人数' },
+      { k: '每十万人阳性数', v: nf(a.per100k, 1), u: '人/10万', sub: '' },
+      { k: '区间内阳性峰值日', v: peak ? peak.date : '—', u: '', sub: peak ? nf(peak.v, 0) + ' 人' : '' }
+    ];
+    items.forEach(function (it) {
+      var k = el('div', 'kpi');
+      k.innerHTML = '<div class="k">' + it.k + '</div><div class="v">' + it.v + '<span class="u">' + it.u + '</span></div>' +
+        (it.sub ? '<div class="sub">' + it.sub + '</div>' : '');
+      box.appendChild(k);
+    });
+  }
+
+  /* ---------------- 趋势图（含刷选） ---------------- */
+  var TREND_W = 920, TREND_H = 320, PAD = { t: 26, r: 20, b: 40, l: 56 };
+
+  function renderTrend() {
+    var host = document.getElementById('trendBox');
+    host.innerHTML = '';
+    var names = selectedNames();
+    var rows = dailySeries(names);
+    var m = METRICS[state.metric];
+    var values = rows.map(function (r) { return dailyVal(r, state.metric); });
+    var series = [{ name: names.length === 12 ? '全市（12 区）' : '所选 ' + names.length + ' 个区', values: values }];
+    if (state.focus && names.indexOf(state.focus) >= 0) {
+      var fr = byName[state.focus];
+      series.push({
+        name: state.focus, color: '#b45309',
+        values: rows.map(function (r, i) { return regionDailyVal(fr, i, state.metric); })
+      });
+    }
+    /* 纵轴：取整到好看的刻度，并且必须**包住全部数据点**——
+       否则首尾两天会落到刻度之外、被画布裁掉（切指标时尤其明显）。 */
+    C.line(host, {
+      labels: rows.map(function (r) { return r.date; }),
+      series: series,
+      w: TREND_W, h: TREND_H, pad: PAD,
+      cover: true,
+      labelStride: 3,
+      yFmt: function (v) { return nf(v, m.dec); },
+      xLabel: '日期', yLabel: m.name + ' (' + m.unit + ')',
+      tipFmt: function (v) { return nf(v, m.dec); }
+    });
+    attachBrush(host, rows.length);
+    document.getElementById('trendPh').textContent =
+      '全市 30 天（灰色区间 = 当前筛选范围 ' + D.daily[state.from].date + ' ~ ' + D.daily[state.to].date + '）。' +
+      (state.focus ? '橙色线是正在钻取的 ' + state.focus + '。' : '') +
+      '在图上按住拖动可框选一段日期。';
+    document.getElementById('trendNote').textContent =
+      '当前区间：' + D.daily[state.from].date + ' ~ ' + D.daily[state.to].date +
+      '（共 ' + (state.to - state.from + 1) + ' 天）｜指标：' + m.name + '｜双击图可恢复全部 30 天。';
+  }
+
+  function attachBrush(host, n) {
+    var svg = host.querySelector('svg');
+    if (!svg) return;
+    var NS = 'http://www.w3.org/2000/svg';
+    var x0 = PAD.l, x1 = TREND_W - PAD.r, y0 = PAD.t, y1 = TREND_H - PAD.b;
+    var xf = function (i) { return x0 + (x1 - x0) * (n === 1 ? 0 : i / (n - 1)); };
+    var g = document.createElementNS(NS, 'g');
+
+    function rect(x, y, w, h, attrs) {
+      var r = document.createElementNS(NS, 'rect');
+      for (var k in attrs) r.setAttribute(k, attrs[k]);
+      r.setAttribute('x', x); r.setAttribute('y', y);
+      r.setAttribute('width', Math.max(0, w)); r.setAttribute('height', Math.max(0, h));
+      g.appendChild(r);
+      return r;
+    }
+    var sel = rect(xf(state.from), y0, xf(state.to) - xf(state.from), y1 - y0,
+      { fill: 'rgba(29,78,216,0.10)', stroke: '#1d4ed8', 'stroke-width': 1.4, 'stroke-dasharray': '5 3' });
+    var live = rect(0, y0, 0, y1 - y0, { fill: 'rgba(29,78,216,0.16)', stroke: '#1d4ed8', 'stroke-width': 1.4 });
+    var hit = rect(x0, y0, x1 - x0, y1 - y0, { fill: 'transparent', style: 'cursor:crosshair' });
+
+    svg.appendChild(g);
+
+    function toIndex(clientX) {
+      var r = svg.getBoundingClientRect();
+      var sx = (clientX - r.left) / r.width * TREND_W;
+      var i = Math.round((sx - x0) / ((x1 - x0) / (n - 1)));
+      return Math.max(0, Math.min(n - 1, i));
+    }
+    var dragging = false, a0 = 0, b0 = 0;
+    hit.addEventListener('mousedown', function (e) {
+      dragging = true; a0 = toIndex(e.clientX); b0 = a0;
+      live.setAttribute('x', xf(a0));
+      live.setAttribute('width', 0);
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      b0 = toIndex(e.clientX);
+      var lo = Math.min(a0, b0), hi = Math.max(a0, b0);
+      live.setAttribute('x', xf(lo));
+      live.setAttribute('width', xf(hi) - xf(lo));
+    });
+    window.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      var lo = Math.min(a0, b0), hi = Math.max(a0, b0);
+      if (hi - lo >= 1) {
+        state.from = lo; state.to = hi;
+        render();
+      } else {
+        live.setAttribute('width', 0);
+      }
+    });
+    hit.addEventListener('dblclick', function () {
+      state.from = 0; state.to = n - 1;
+      render();
+    });
+  }
+
+  /* ---------------- 地区排行 ---------------- */
+  function renderRank() {
+    var host = document.getElementById('rankBox');
+    host.innerHTML = '';
+    var m = METRICS[state.metric];
+    var rows = D.regions.map(function (r) { return aggRegion(r, state.from, state.to); })
+      .filter(function (a) { return state.on[a.name] && passesThreshold(a); })
+      .sort(function (a, b) { return metricVal(b, state.metric) - metricVal(a, state.metric); });
+    if (!rows.length) {
+      host.appendChild(el('div', 'chart-err', '当前筛选下没有数据。'));
+      document.getElementById('rankPh').textContent = '没有命中任何区。';
+      return;
+    }
+    var data = rows.map(function (a) {
+      return {
+        label: a.name, value: metricVal(a, state.metric),
+        color: state.focus === a.name ? '#b45309' : '#15803d'
+      };
+    });
+    C.bar(host, {
+      data: data, horizontal: true, dataLabels: true,
+      labelFmt: function (v) { return nf(v, m.dec); },
+      w: 700, h: 380,
+      xLabel: m.name + ' (' + m.unit + ')',
+      fmt: function (v) { return nf(v, m.dec); }
+    });
+    bindTitleClicks(host, function (label) {
+      state.focus = (state.focus === label) ? null : label;
+      render();
+    });
+    document.getElementById('rankPh').textContent =
+      '区间 ' + D.daily[state.from].date + ' ~ ' + D.daily[state.to].date + ' 内各区的' + m.name +
+      '（共 ' + rows.length + ' 个区）。' + (state.focus ? '正在钻取 ' + state.focus + '。' : '点一根条即可钻取。');
+  }
+
+  /* ---------------- 散点 ---------------- */
+  function renderScatter() {
+    var host = document.getElementById('scatterBox');
+    host.innerHTML = '';
+    var m = METRICS[state.metric];
+    var rows = D.regions.map(function (r) { return aggRegion(r, state.from, state.to); })
+      .filter(function (a) { return state.on[a.name] && passesThreshold(a); });
+    if (!rows.length) {
+      host.appendChild(el('div', 'chart-err', '当前筛选下没有数据。'));
+      document.getElementById('scatterPh').textContent = '没有命中任何区。';
+      return;
+    }
+    var xIsPop = state.metric === 'per100k';
+    var points = rows.map(function (a) {
+      return {
+        x: xIsPop ? a.population : a.per100k,
+        y: metricVal(a, state.metric),
+        size: a.population,
+        label: a.name,
+        color: state.focus === a.name ? 'rgba(180,83,9,0.65)' : 'rgba(21,128,61,0.5)'
+      };
+    });
+    C.bubble(host, {
+      points: points,
+      xName: xIsPop ? '常住人口 (万)' : '每十万人阳性数 (人/10万)',
+      yName: m.name + ' (' + m.unit + ')',
+      sizeName: '常住人口 (万)',
+      w: 700, h: 380,
+      xFmt: function (v) { return nf(v, xIsPop ? 0 : 0); },
+      yFmt: function (v) { return nf(v, m.dec); }
+    });
+    bindTitleClicks(host, function (label) {
+      state.focus = (state.focus === label) ? null : label;
+      render();
+    });
+    document.getElementById('scatterPh').textContent =
+      '横轴：' + (xIsPop ? '常住人口' : '每十万人阳性数') + '；纵轴：' + m.name + '；气泡面积：常住人口。';
+  }
+
+  /* ---------------- 钻取 ---------------- */
+  function renderDrill() {
+    var box = document.getElementById('drillBox');
+    var title = document.getElementById('drillTitle');
+    box.innerHTML = '';
+    if (!state.focus) {
+      title.textContent = '（先点一个区）';
+      box.appendChild(el('p', 'hint', '点「12 个区」里的任意一根条，或点散点里的一个气泡，这里就会展开这个区的明细。'));
+      return;
+    }
+    var r = byName[state.focus];
+    var a = aggRegion(r, state.from, state.to);
+    var city = aggCity(state.from, state.to);
+    title.textContent = state.focus;
+    var cells = [
+      { k: '区间阳性人数', v: nf(a.positives, 0), u: '人' },
+      { k: '区间阳性率', v: nf(a.rate, 2), u: '%' },
+      { k: '区间住院人数', v: nf(a.hosp, 0), u: '人' },
+      { k: '区间每十万人阳性数', v: nf(a.per100k, 1), u: '人/10万' }
+    ];
+    var grid = el('div', 'grid');
+    cells.forEach(function (c) {
+      grid.appendChild(el('div', 'cell', '<div class="k">' + c.k + '</div><div class="v">' + c.v + '<span style="font-size:13px;font-weight:500"> ' + c.u + '</span></div>'));
+    });
+    box.appendChild(grid);
+    var cmp = el('p', 'hint');
+    cmp.style.marginTop = '8px';
+    cmp.innerHTML = '对比所选区合计（' + city.names.length + ' 个区）：阳性率 ' + nf(city.rate, 2) + '%，每十万人 ' + nf(city.per100k, 1) +
+      '；该区阳性率是所选区的 ' + (city.rate ? nf(a.rate / city.rate, 2) : '—') + ' 倍。';
+    box.appendChild(cmp);
+
+    var chart = el('div', 'chartbox');
+    box.appendChild(chart);
+    var m = METRICS[state.metric];
+    var vals = [], i;
+    for (i = 0; i < D.days; i++) vals.push(regionDailyVal(r, i, state.metric));
+    C.line(chart, {
+      labels: D.daily.map(function (d) { return d.date; }),
+      series: [{ name: state.focus + ' ' + m.name, values: vals, color: '#b45309' }],
+      w: 900, h: 220, pad: { t: 20, r: 18, b: 42, l: 52 },
+      cover: true,
+      labelStride: 4,
+      xLabel: '日期', yLabel: m.name + ' (' + m.unit + ')',
+      tipFmt: function (v) { return nf(v, m.dec); }
+    });
+  }
+
+  /* ---------------- 明细表 ---------------- */
+  function renderTable() {
+    var box = document.getElementById('tableBox');
+    box.innerHTML = '';
+    var rows = D.regions.map(function (r) { return aggRegion(r, state.from, state.to); })
+      .filter(function (a) { return state.on[a.name] && passesThreshold(a); })
+      .sort(function (a, b) { return metricVal(b, state.metric) - metricVal(a, state.metric); });
+    var t = el('table', 'minitable');
+    var head = '<thead><tr><th>#</th><th>区</th>';
+    METRIC_ORDER.forEach(function (k) {
+      if (k === 'temp') return;
+      head += '<th' + (state.metric === k ? ' style="color:#15803d"' : '') + '>' + METRICS[k].name + '</th>';
+    });
+    head += '</tr></thead>';
+    var body = '<tbody>';
+    rows.forEach(function (a, i) {
+      body += '<tr class="' + (state.focus === a.name ? 'sel' : '') + '" data-nm="' + a.name + '"><td class="num">' + (i + 1) + '</td><td>' + a.name + '</td>';
+      METRIC_ORDER.forEach(function (k) {
+        if (k === 'temp') return;
+        body += '<td class="num">' + nf(metricVal(a, k), METRICS[k].dec) + '</td>';
+      });
+      body += '</tr>';
+    });
+    body += '</tbody>';
+    t.innerHTML = head + body;
+    box.appendChild(t);
+    Array.prototype.forEach.call(t.querySelectorAll('tbody tr'), function (tr) {
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', function () {
+        var nm = tr.getAttribute('data-nm');
+        state.focus = (state.focus === nm) ? null : nm;
+        render();
+      });
+    });
+  }
+
+  /* ---------------- 病例构成 ---------------- */
+  function renderDist() {
+    var host = document.getElementById('distBox');
+    host.innerHTML = '';
+    if (state.dist === 'age') {
+      C.pie(host, {
+        data: D.ages.map(function (a) { return { label: a.label, value: a.value }; }),
+        w: 700, h: 340
+      });
+    } else {
+      var bins = D.stayCounts.map(function (s) { return { label: s[0] + ' 天', count: s[1] }; });
+      C.hist(host, { bins: bins, xLabel: '住院天数', yLabel: '例数', w: 700, h: 340 });
+    }
+  }
+
+  /* ---------------- 状态栏 ---------------- */
+  function renderState() {
+    var box = document.getElementById('stateChips');
+    box.innerHTML = '';
+    var on = selectedNames().length;
+    var chips = [
+      { k: '指标', v: METRICS[state.metric].name },
+      { k: '区间', v: D.daily[state.from].date + ' ~ ' + D.daily[state.to].date },
+      { k: '地区', v: on + ' / 12 个区' },
+      { k: '钻取', v: state.focus || '（无）' }
+    ];
+    if (state.threshold) {
+      chips.push({
+        k: '条件', v: METRICS[state.threshold.metric].name + ' ' + (state.threshold.op === '>' ? '>' : '<') + ' ' + state.threshold.value
+      });
+    }
+    chips.forEach(function (c) {
+      box.appendChild(el('span', 'chip', '<b>' + c.k + '</b>' + esc(c.v)));
+    });
+  }
+
+  /* ---------------- 导出 ---------------- */
+  function exportCSV() {
+    var rows = D.regions.map(function (r) { return aggRegion(r, state.from, state.to); })
+      .filter(function (a) { return state.on[a.name] && passesThreshold(a); })
+      .sort(function (a, b) { return metricVal(b, state.metric) - metricVal(a, state.metric); });
+    var L = ['# 当前视图导出：指标=' + METRICS[state.metric].name + '，区间=' + D.daily[state.from].date + '~' + D.daily[state.to].date];
+    L.push('区,检测人次,阳性人数,阳性率(%),住院人数,住院率(%),每十万人阳性数');
+    rows.forEach(function (a) {
+      L.push([a.name, a.tests, a.positives, a.rate.toFixed(2), a.hosp, a.hospRate.toFixed(1), a.per100k.toFixed(1)].join(','));
+    });
+    var blob = new Blob(['﻿' + L.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a2 = document.createElement('a');
+    a2.href = url;
+    a2.download = '当前视图-' + METRICS[state.metric].name + '.csv';
+    document.body.appendChild(a2); a2.click();
+    document.body.removeChild(a2);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ---------------- 通用：给带 <title> 提示的图元绑点击 ----------------
+     注意：图元上的提示是 <title> **子元素**，不是 title 属性，
+     所以要用 querySelectorAll('title') 取子元素、再回溯到它的父图元来绑事件。 */
+  function bindTitleClicks(host, handler) {
+    var svg = host.querySelector('svg');
+    if (!svg) return;
+    Array.prototype.forEach.call(svg.querySelectorAll('title'), function (t) {
+      var node = t.parentNode;
+      if (!node || node.nodeType !== 1) return;
+      var label = (t.textContent || '').split('：')[0];
+      if (!label) return;
+      node.classList.add('dv-click');
+      node.style.cursor = 'pointer';
+      node.addEventListener('click', function (e) {
+        e.stopPropagation();
+        handler(label);
+      });
+    });
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function render() {
+    renderMetricList();
+    renderRegionGrid();
+    renderTime();
+    renderKPIs();
+    renderTrend();
+    renderRank();
+    renderScatter();
+    renderDrill();
+    renderTable();
+    renderDist();
+    renderState();
+  }
+
+  /* ---------------- 启动 ---------------- */
+  document.getElementById('qGo').addEventListener('click', function () {
+    applyQuery(document.getElementById('qInput').value);
+  });
+  document.getElementById('qInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') applyQuery(this.value);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-q]'), function (b) {
+    b.addEventListener('click', function () {
+      document.getElementById('qInput').value = b.getAttribute('data-q');
+      applyQuery(b.getAttribute('data-q'));
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#regionGrid ~ .presets button, .rail-card .presets button[data-act]'), function (b) {
+    b.addEventListener('click', function () {
+      var act = b.getAttribute('data-act');
+      D.regions.forEach(function (r) {
+        if (act === 'all') state.on[r.name] = true;
+        else if (act === 'none') state.on[r.name] = false;
+        else state.on[r.name] = !state.on[r.name];
+      });
+      render();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-v]'), function (b) {
+    b.addEventListener('click', function () {
+      state.dist = b.getAttribute('data-v');
+      render();
+    });
+  });
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  document.getElementById('btnReset').addEventListener('click', function () {
+    state.from = 0; state.to = 29; state.metric = 'rate'; state.focus = null;
+    state.threshold = null; state.queryText = '';
+    D.regions.forEach(function (r) { state.on[r.name] = true; });
+    document.getElementById('qOut').innerHTML = '';
+    document.getElementById('qInput').value = '';
+    render();
+  });
+
+  render();
+})();
+
+</script>
+</body>
+</html>
