@@ -14,15 +14,18 @@
 
 1. **路径相对化**：上游构建产物里写死了 `/cnn-explainer/...` 的绝对路径，改成相对路径，
    使其能在课程站点的 `projects/cnn-explainer/` 下正常工作。
-2. **去掉统计**：移除 Google Analytics（`googletagmanager`）与 `recommender-overlay` 之外的
-   第三方推荐位。
-3. **加中文署名条**：页面底部固定一条中文说明，写明改编自 CNN Explainer、原作者姓名、
+2. **换成我们自己的页头**：藏掉上游那条黑色标题栏（角上的 arXiv / YouTube / GitHub 外链
+   也在里面）与推荐位组件，改用与「神经网络游乐场」「数据可视化实验室」同一套的
+   浅色课程横幅（中文标题 + 一行说明 + 返回课程主页）。
+3. **去掉统计**：移除 Google Analytics（`googletagmanager`）。
+4. **只保留可交互的部分**：隐藏标题、段落、图注、示意图与视频区块，只留
+   `div.overview`（网络总览图）与 `#detailview-container`（逐层讲解器）；
+   因此也没有随页面发布 `assets/figures/*.gif` 那 10MB 的演示动画。
+5. **居中**：交互部分统一水平居中（`.svelte-1avhf6` 限宽 1180px 居中，
+   总览图与讲解器各自 `margin: 0 auto`）。
+6. **加中文署名条**：页面底部固定一条中文说明，写明改编自 CNN Explainer、原作者姓名、
    论文链接与「返回课程主页」入口（MIT 许可要求保留版权声明）。
-4. **隐藏文字讲解**：按课程需要，只保留交互式可视化
-   （`div.overview` 网络总览图、`#detailview-container` 逐层讲解器），
-   隐藏了标题、段落、图注、示意图与视频区块
-   （因此也没有随页面发布 `assets/figures/*.gif` 那 10MB 的演示动画）。
-5. **未翻译**：交互界面与提示仍是英文。
+7. **未翻译**：交互界面与提示仍是英文。
 
 ## 文件构成
 
