@@ -63,10 +63,14 @@
       if (!target || !buttons.length || !contents.length) return;
 
       function selectLanguage(language) {
-        buttons.forEach(function(button) {
-          const selected = button.dataset.language === language;
-          button.classList.toggle('is-active', selected);
-          button.setAttribute('aria-pressed', String(selected));
+        // Every switcher bound to the same target stays in sync, so a tutorial
+        // part's heading and the cards inside it always show the same language.
+        root.querySelectorAll('[data-language-switcher][data-language-target="' + target + '"]').forEach(function(sibling) {
+          sibling.querySelectorAll('[data-language]').forEach(function(button) {
+            const selected = button.dataset.language === language;
+            button.classList.toggle('is-active', selected);
+            button.setAttribute('aria-pressed', String(selected));
+          });
         });
         contents.forEach(function(content) {
           content.hidden = content.dataset.language !== language;

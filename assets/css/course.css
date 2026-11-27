@@ -534,6 +534,114 @@ body {
   line-height: 1.62;
 }
 
+.course-tutorial-index {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: -16px 0 10px;
+}
+
+.course-tutorial-index__note {
+  margin: 0 0 40px;
+  color: #78889a;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.course-tutorial-index__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.course-tutorial-index a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 9px 16px;
+  border: 1px solid var(--course-line);
+  border-radius: 999px;
+  color: #4b5c6f;
+  background: #fff;
+  font-size: 0.88rem;
+  font-weight: 760;
+  text-decoration: none;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.course-tutorial-index a:hover {
+  color: var(--course-cyan-dark);
+  border-color: rgba(17, 106, 114, 0.42);
+  background: var(--course-pale);
+}
+
+.course-tutorial-index a [data-language="en"] {
+  color: #8493a4;
+  font-size: 0.72rem;
+  font-weight: 820;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.course-tutorial-group + .course-tutorial-group {
+  margin-top: 54px;
+}
+
+.course-tutorial-group__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--course-line);
+}
+
+.course-tutorial-group__label {
+  min-width: 0;
+}
+
+.course-tutorial-group__title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 840;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.course-tutorial-group__note {
+  margin: 9px 0 0;
+  color: #56677a;
+  font-size: 0.97rem;
+  line-height: 1.55;
+}
+
+.course-tutorial-group__note [data-language="en"] {
+  display: block;
+  color: #8593a3;
+  font-size: 0.9rem;
+}
+
+.course-tutorial-group__controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.course-tutorial-group__count {
+  flex: none;
+  padding: 6px 13px;
+  border-radius: 999px;
+  color: var(--course-cyan-dark);
+  background: var(--course-pale);
+  font-size: 0.78rem;
+  font-weight: 820;
+  white-space: nowrap;
+}
+
 .course-project-card {
   display: block;
   border-radius: 12px;
@@ -1502,6 +1610,20 @@ body {
 
   .course-section-heading {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .course-tutorial-index {
+    margin: -6px 0 34px;
+  }
+
+  .course-tutorial-group + .course-tutorial-group {
+    margin-top: 42px;
+  }
+
+  .course-tutorial-group__heading {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
 

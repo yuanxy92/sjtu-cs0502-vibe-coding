@@ -6,7 +6,7 @@
   <meta name="description" content="CS0502 · Vibe Coding · Introduction to AI and Computer Science at Shanghai Jiao Tong University.">
   <title>CS0502 · Vibe Coding · Introduction to AI and Computer Science</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23116a72'/%3E%3Ctext x='32' y='41' fill='white' font-family='Arial,sans-serif' font-size='25' font-weight='700' text-anchor='middle'%3ECS%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./assets/css/course.css?v=20260924-1">
+  <link rel="stylesheet" href="./assets/css/course.css?v=20261127-2">
   <script defer src="./assets/js/fontawesome.all.min.js"></script>
 </head>
 <body>
@@ -114,583 +114,645 @@
       <h2 id="course-tutorials-title">Get ready to build with AI coding agents.</h2>
     </div>
 
-    <details class="course-project-card" id="opencode-tutorials">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">01</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="opencode" data-zh="开始之前" data-en="Before you begin">Before you begin</span></span>
-          <strong data-language-heading="opencode" data-zh="OpenCode 视频教程" data-en="OpenCode video tutorials">OpenCode video tutorials</strong>
-          <span class="course-project-card__summary" data-language-content="opencode" data-language="zh" hidden>通过这组视频，熟悉用 AI coding agent 进行对话、迭代和调试的基本流程，再开始课程项目。</span>
-          <span class="course-project-card__summary" data-language-content="opencode" data-language="en">Use this video series to learn the basic workflow of talking with, iterating with, and debugging through an AI coding agent before beginning the course projects.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="opencode" data-zh="打开教程" data-en="Open tutorials">Open tutorials</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="opencode" data-zh="收起教程" data-en="Close tutorials">Close tutorials</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="opencode" aria-label="OpenCode tutorial language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-        </div>
-        <div class="course-project-note">
-          <i class="fas fa-play-circle" aria-hidden="true"></i>
-          <p data-language-content="opencode" data-language="zh" hidden>建议在开始第一个项目之前观看。视频会帮助你建立一次对话不够、需要持续发现问题并让 agent 改进的工作方式。</p>
-          <p data-language-content="opencode" data-language="en">We recommend watching this before Project 01. It introduces a working rhythm in which one conversation is not enough: notice issues, then guide the agent through focused improvements.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="OpenCode tutorial chapters">
-          <a class="course-video-chapter" href="https://www.bilibili.com/video/BV18RGF6UEqZ/" target="_blank" rel="noopener noreferrer">
-            <span class="course-video-chapter__number">01</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="opencode" data-language="zh" hidden>安装 OpenCode</strong>
-              <strong data-language-content="opencode" data-language="en">Install OpenCode</strong>
-              <small data-language-content="opencode" data-language="zh" hidden>准备本地开发环境</small>
-              <small data-language-content="opencode" data-language="en">Set up your local environment</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="https://www.bilibili.com/video/BV18RGF6UEWz/" target="_blank" rel="noopener noreferrer">
-            <span class="course-video-chapter__number">02</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="opencode" data-language="zh" hidden>配置 DeepSeek <em>（可选）</em></strong>
-              <strong data-language-content="opencode" data-language="en">Configure DeepSeek <em>(Optional)</em></strong>
-              <small data-language-content="opencode" data-language="zh" hidden>连接模型并完成基本配置</small>
-              <small data-language-content="opencode" data-language="en">Connect a model and finish the basics</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="https://www.bilibili.com/video/BV1S4GK6wE8R/" target="_blank" rel="noopener noreferrer">
-            <span class="course-video-chapter__number">03</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="opencode" data-language="zh" hidden>用 OpenCode 给 CNN 调参</strong>
-              <strong data-language-content="opencode" data-language="en">Tune a CNN with OpenCode</strong>
-              <small data-language-content="opencode" data-language="zh" hidden>从对话到一次真实的迭代实验</small>
-              <small data-language-content="opencode" data-language="en">From conversation to a real iteration</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="https://www.bilibili.com/video/BV1X9ub6FEQX/" target="_blank" rel="noopener noreferrer">
-            <span class="course-video-chapter__number">04</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="opencode" data-language="zh" hidden>多模态模型与文本模型</strong>
-              <strong data-language-content="opencode" data-language="en">Multimodal and text models</strong>
-              <small data-language-content="opencode" data-language="zh" hidden>比较不同模型，选择适合任务的工具</small>
-              <small data-language-content="opencode" data-language="en">Compare models and select the right tool for the task</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
 
-    <details class="course-project-card" id="sequential-list-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">02</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="sequential-list" data-zh="数据结构导论" data-en="Introduction to data structures">Introduction to data structures</span></span>
-          <strong data-language-heading="sequential-list" data-zh="顺序表与排序可视化实验室" data-en="Sequential List &amp; Sorting Visual Labs">Sequential List &amp; Sorting Visual Labs</strong>
-          <span class="course-project-card__summary" data-language-content="sequential-list" data-language="zh" hidden>观察顺序表的内存与指针操作，并逐步比较冒泡、选择和快速排序。</span>
-          <span class="course-project-card__summary" data-language-content="sequential-list" data-language="en">Explore sequential-list memory and pointer operations, then compare bubble, selection, and quicksort step by step.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="sequential-list" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="sequential-list" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="sequential-list" aria-label="Sequential list visual lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-        </div>
-        <div class="course-project-note">
-          <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="sequential-list" data-language="zh" hidden>面向数据结构导论课堂的交互式演示，包含顺序表基本操作、链表操作和三种排序算法的逐步可视化。</p>
-          <p data-language-content="sequential-list" data-language="en">Interactive classroom demos for sequential-list operations, linked lists, and step-by-step visualizations of three sorting algorithms.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Sequential list visual lab">
-          <a class="course-video-chapter" href="./projects/data-structure/sequential-list-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="sequential-list" data-language="zh" hidden>顺序表可视化实验室</strong>
-              <strong data-language-content="sequential-list" data-language="en">Sequential List Visual Lab</strong>
-              <small data-language-content="sequential-list" data-language="zh" hidden>课堂演示：base 基地址、i 操作指针、n 下一个可用地址</small>
-              <small data-language-content="sequential-list" data-language="en">Classroom demo: base address, operation pointer i, and next-free-address pointer n</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/data-structure/linked-list-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="sequential-list" data-language="zh" hidden>链表可视化实验室</strong>
-              <strong data-language-content="sequential-list" data-language="en">Linked List Visual Lab</strong>
-              <small data-language-content="sequential-list" data-language="zh" hidden>课堂演示：分散内存、head、tail、i 与 next 指针</small>
-              <small data-language-content="sequential-list" data-language="en">Classroom demo: scattered memory, head, tail, i, and next pointers</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/data-structure/sorting-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="sequential-list" data-language="zh" hidden>顺序表排序可视化实验室</strong>
-              <strong data-language-content="sequential-list" data-language="en">Sequential List Sorting Visual Lab</strong>
-              <small data-language-content="sequential-list" data-language="zh" hidden>课堂演示：冒泡排序、选择排序、Lomuto 快速排序与实际运算计数</small>
-              <small data-language-content="sequential-list" data-language="en">Classroom demo: bubble, selection, and Lomuto quicksort with actual operation counts</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
+    <nav class="course-tutorial-index" aria-label="教程分类 · Tutorial categories">
+      <div class="course-tutorial-index__links">
+        <a href="#tutorial-general"><span data-language-content="tutorial-index" data-language="zh" hidden>通用</span><span data-language-content="tutorial-index" data-language="en">General</span></a>
+        <a href="#tutorial-algorithms"><span data-language-content="tutorial-index" data-language="zh" hidden>数据结构与算法</span><span data-language-content="tutorial-index" data-language="en">Data structures &amp; algorithms</span></a>
+        <a href="#tutorial-systems"><span data-language-content="tutorial-index" data-language="zh" hidden>计算机系统</span><span data-language-content="tutorial-index" data-language="en">Computer systems</span></a>
+        <a href="#tutorial-ai"><span data-language-content="tutorial-index" data-language="zh" hidden>人工智能</span><span data-language-content="tutorial-index" data-language="en">Artificial intelligence</span></a>
       </div>
-    </details>
+      <div class="course-language-switcher" data-language-switcher data-language-target="tutorial-index" aria-label="教程分类语言 · Tutorial index language">
+        <button type="button" data-language="zh" aria-pressed="false">中文</button>
+        <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+      </div>
+    </nav>
+    <p class="course-tutorial-index__note"><span data-language-content="tutorial-index" data-language="zh" hidden>所有实验室均为中文界面、数据内嵌，可离线投影使用。</span><span data-language-content="tutorial-index" data-language="en">Every lab runs in Chinese, embeds its data, and works offline for projection.</span></p>
 
-    <details class="course-project-card" id="binary-tree-visual-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">03</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="binary-tree" data-zh="数据结构导论" data-en="Introduction to data structures">Introduction to data structures</span></span>
-          <strong data-language-heading="binary-tree" data-zh="二叉树与二叉查找树可视化实验室" data-en="Binary Tree &amp; Binary Search Tree Visual Lab">Binary Tree &amp; Binary Search Tree Visual Lab</strong>
-          <span class="course-project-card__summary" data-language-content="binary-tree" data-language="zh" hidden>逐步观察前序、中序、后序与层序遍历，以及二叉查找树的查找、插入和删除。</span>
-          <span class="course-project-card__summary" data-language-content="binary-tree" data-language="en">Explore tree traversals and step-by-step search, insertion, and deletion in a binary search tree.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="binary-tree" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="binary-tree" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="binary-tree" aria-label="Binary tree visual lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+    <div class="course-tutorial-group" id="tutorial-general">
+      <div class="course-tutorial-group__heading">
+        <div class="course-tutorial-group__label">
+          <h3 class="course-tutorial-group__title" data-language-heading="tutorial-general" data-zh="通用" data-en="General">General</h3>
+          <p class="course-tutorial-group__note"><span data-language-content="tutorial-general" data-language="zh" hidden>先学会与 AI coding agent 对话、迭代和调试，再动手做项目。</span><span data-language-content="tutorial-general" data-language="en">Learn to talk to, iterate with, and debug through an AI coding agent before you build.</span></p>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="binary-tree" data-language="zh" hidden>课堂演示：看清节点访问顺序、BST 比较路径，以及插入和删除时树结构的变化。</p>
-          <p data-language-content="binary-tree" data-language="en">Classroom demo: follow node visits, BST comparison paths, and structural changes during insertion and deletion.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Binary tree visual lab">
-          <a class="course-video-chapter" href="./projects/data-structure/binary-tree-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="binary-tree" data-language="zh" hidden>二叉树与二叉查找树可视化实验室</strong>
-              <strong data-language-content="binary-tree" data-language="en">Binary Tree &amp; Binary Search Tree Visual Lab</strong>
-              <small data-language-content="binary-tree" data-language="zh" hidden>课堂演示：四种遍历、BST 查找、插入与删除</small>
-              <small data-language-content="binary-tree" data-language="en">Classroom demo: four traversals, BST search, insertion, and deletion</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
+        <div class="course-tutorial-group__controls"><span class="course-tutorial-group__count"><span data-language-content="tutorial-general" data-language="zh" hidden>1 个教程</span><span data-language-content="tutorial-general" data-language="en">1 tutorial</span></span><div class="course-language-switcher" data-language-switcher data-language-target="tutorial-general" aria-label="通用 · General 语言 Language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div></div>
       </div>
-    </details>
 
-    <details class="course-project-card" id="algorithm-exploration-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">04</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="algorithm-exploration" data-zh="计算机科学导论 · 图算法" data-en="Introduction to CS · Graph algorithms">Introduction to CS · Graph algorithms</span></span>
-          <strong data-language-heading="algorithm-exploration" data-zh="算法可视化实验室" data-en="Algorithm Visualization Labs">Algorithm Visualization Labs</strong>
-          <span class="course-project-card__summary" data-language-content="algorithm-exploration" data-language="zh" hidden>逐步探索图算法、贪心算法与动态规划，在具体问题中比较不同策略。</span>
-          <span class="course-project-card__summary" data-language-content="algorithm-exploration" data-language="en">Explore graph algorithms, greedy methods, and dynamic programming through step-by-step examples.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="algorithm-exploration" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="algorithm-exploration" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="algorithm-exploration" aria-label="Graph exploration visual lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+      <details class="course-project-card" id="opencode-tutorials">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">01</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-general" data-zh="开始之前" data-en="Before you begin">Before you begin</span></span>
+            <strong data-language-heading="tutorial-general" data-zh="OpenCode 视频教程" data-en="OpenCode video tutorials">OpenCode video tutorials</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-general" data-language="zh" hidden>通过这组视频，熟悉用 AI coding agent 进行对话、迭代和调试的基本流程，再开始课程项目。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-general" data-language="en">Use this video series to learn the basic workflow of talking with, iterating with, and debugging through an AI coding agent before beginning the course projects.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-general" data-zh="打开教程" data-en="Open tutorials">Open tutorials</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-general" data-zh="收起教程" data-en="Close tutorials">Close tutorials</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-general" aria-label="OpenCode tutorial language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-play-circle" aria-hidden="true"></i>
+            <p data-language-content="tutorial-general" data-language="zh" hidden>先从这里学会和 agent 对话、发现问题、持续迭代。</p>
+            <p data-language-content="tutorial-general" data-language="en">Start here to learn how to talk with an agent, find issues, and keep iterating.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="OpenCode tutorial chapters">
+            <a class="course-video-chapter" href="https://www.bilibili.com/video/BV18RGF6UEqZ/" target="_blank" rel="noopener noreferrer">
+              <span class="course-video-chapter__number">01</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-general" data-language="zh" hidden>安装 OpenCode</strong>
+                <strong data-language-content="tutorial-general" data-language="en">Install OpenCode</strong>
+                <small data-language-content="tutorial-general" data-language="zh" hidden>准备本地开发环境</small>
+                <small data-language-content="tutorial-general" data-language="en">Set up your local environment</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="https://www.bilibili.com/video/BV18RGF6UEWz/" target="_blank" rel="noopener noreferrer">
+              <span class="course-video-chapter__number">02</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-general" data-language="zh" hidden>配置 DeepSeek <em>（可选）</em></strong>
+                <strong data-language-content="tutorial-general" data-language="en">Configure DeepSeek <em>(Optional)</em></strong>
+                <small data-language-content="tutorial-general" data-language="zh" hidden>连接模型并完成基本配置</small>
+                <small data-language-content="tutorial-general" data-language="en">Connect a model and finish the basics</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="https://www.bilibili.com/video/BV1S4GK6wE8R/" target="_blank" rel="noopener noreferrer">
+              <span class="course-video-chapter__number">03</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-general" data-language="zh" hidden>用 OpenCode 给 CNN 调参</strong>
+                <strong data-language-content="tutorial-general" data-language="en">Tune a CNN with OpenCode</strong>
+                <small data-language-content="tutorial-general" data-language="zh" hidden>从对话到一次真实的迭代实验</small>
+                <small data-language-content="tutorial-general" data-language="en">From conversation to a real iteration</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="https://www.bilibili.com/video/BV1X9ub6FEQX/" target="_blank" rel="noopener noreferrer">
+              <span class="course-video-chapter__number">04</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-general" data-language="zh" hidden>多模态模型与文本模型</strong>
+                <strong data-language-content="tutorial-general" data-language="en">Multimodal and text models</strong>
+                <small data-language-content="tutorial-general" data-language="zh" hidden>比较不同模型，选择适合任务的工具</small>
+                <small data-language-content="tutorial-general" data-language="en">Compare models and select the right tool for the task</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="algorithm-exploration" data-language="zh" hidden>课堂演示：跟随算法选择与状态变化，体验贪心的局部选择以及动态规划逐步填表。</p>
-          <p data-language-content="algorithm-exploration" data-language="en">Classroom demos: follow algorithm choices and state changes, from greedy selection to filling a dynamic-programming table.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Algorithm visualization labs">
-          <a class="course-video-chapter" href="./projects/algorithm-exploration-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="algorithm-exploration" data-language="zh" hidden>图探索与最短路径可视化实验室</strong>
-              <strong data-language-content="algorithm-exploration" data-language="en">Graph Exploration &amp; Shortest Path Visual Lab</strong>
-              <small data-language-content="algorithm-exploration" data-language="zh" hidden>课堂演示：DFS、BFS、Dijkstra 与 A* 单步执行</small>
-              <small data-language-content="algorithm-exploration" data-language="en">Classroom demo: single-step DFS, BFS, Dijkstra, and A*</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/greedy-set-cover/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="algorithm-exploration" data-language="zh" hidden>路由器覆盖：贪心集合覆盖</strong>
-              <strong data-language-content="algorithm-exploration" data-language="en">Router Coverage: Greedy Set Cover</strong>
-              <small data-language-content="algorithm-exploration" data-language="zh" hidden>课堂互动：比较贪心结果与精确最优解（台数与成本）</small>
-              <small data-language-content="algorithm-exploration" data-language="en">Classroom activity: compare greedy results with exact optima for router count and cost</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/knapsack-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="algorithm-exploration" data-language="zh" hidden>背包问题：贪心与动态规划</strong>
-              <strong data-language-content="algorithm-exploration" data-language="en">Knapsack: Greedy vs Dynamic Programming</strong>
-              <small data-language-content="algorithm-exploration" data-language="zh" hidden>课堂互动：比较性价比贪心与 0/1 背包最优解</small>
-              <small data-language-content="algorithm-exploration" data-language="en">Classroom activity: compare value-density greedy with the 0/1 knapsack optimum</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
-    <details class="course-project-card" id="round-robin-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">05</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="round-robin" data-zh="操作系统 · 软件工程" data-en="Operating systems · Software engineering">Operating systems · Software engineering</span></span>
-          <strong data-language-heading="round-robin" data-zh="CPU 时间片轮转模拟器" data-en="CPU Round Robin Scheduling Simulator">CPU Round Robin Scheduling Simulator</strong>
-          <span class="course-project-card__summary" data-language-content="round-robin" data-language="zh" hidden>通过动画观察新进程入队、时间片轮转与完成退出，并体验从需求文档到可运行应用的过程。</span>
-          <span class="course-project-card__summary" data-language-content="round-robin" data-language="en">Watch arrivals, time-slice rotation, and process completion, and explore how a requirements document becomes a working application.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="round-robin" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="round-robin" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="round-robin" aria-label="Round Robin simulator language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-        </div>
-        <div class="course-project-note">
-          <i class="fas fa-microchip" aria-hidden="true"></i>
-          <p data-language-content="round-robin" data-language="zh" hidden>课堂演示：单步观察 CPU 与就绪队列，修改进程参数和时间片，并对照需求文档验证调度与动画结果。模拟器界面为中文，也可保存后离线使用。</p>
-          <p data-language-content="round-robin" data-language="en">Classroom demo: step through the CPU and ready queue, adjust process parameters and the time quantum, and verify the results against the requirements. The simulator has a Chinese interface and can also run offline.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Round Robin simulators">
-          <a class="course-video-chapter" href="./projects/round-robin-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="round-robin" data-language="zh" hidden>打开 CPU 时间片轮转模拟器</strong>
-              <strong data-language-content="round-robin" data-language="en">Open the CPU Round Robin Simulator</strong>
-              <small data-language-content="round-robin" data-language="zh" hidden>课堂例题、单步与自动播放、新到达入队、轮转回队及完成退出动画</small>
-              <small data-language-content="round-robin" data-language="en">Course example, single-step and automatic playback, animated arrivals, requeueing, and completion</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/round-robin-lab/race-examples.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="round-robin" data-language="zh" hidden>扩展：轮转之后，为什么结果错了？</strong>
-              <strong data-language-content="round-robin" data-language="en">Explore: When Interleaving Breaks a Program</strong>
-              <small data-language-content="round-robin" data-language="zh" hidden>计数器、抢票与转账三个交互例子；单步观察错误，对比时间片与加锁方案</small>
-              <small data-language-content="round-robin" data-language="en">Step through lost increments, ticket overselling, and inconsistent transfer reads; compare time quanta and mutex protection</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
-    <details class="course-project-card" id="deadlock-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">06</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="deadlock" data-zh="操作系统 · 并发与同步" data-en="Operating systems · Concurrency and synchronization">Operating systems · Concurrency and synchronization</span></span>
-          <strong data-language-heading="deadlock" data-zh="锁与死锁模拟器" data-en="Locks and Deadlock Simulator">Locks and Deadlock Simulator</strong>
-          <span class="course-project-card__summary" data-language-content="deadlock" data-language="zh" hidden>用打印室门口“有人 / 无人”的牌子理解原子操作，再逐步观察两把锁如何形成死锁。</span>
-          <span class="course-project-card__summary" data-language-content="deadlock" data-language="en">Understand atomic operations with an occupied/vacant sign at a print room, then step through a deadlock involving two locks.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="deadlock" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="deadlock" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="deadlock" aria-label="Locks and deadlock simulator language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-        </div>
-        <div class="course-project-note">
-          <i class="fas fa-lock" aria-hidden="true"></i>
-          <p data-language-content="deadlock" data-language="zh" hidden>课堂演示：先比较“看牌、翻牌分两步”和“合成一步”，再观察两把锁的循环等待，并用统一拿锁顺序避免死锁。模拟器界面为中文，可离线使用。</p>
-          <p data-language-content="deadlock" data-language="en">Classroom demo: compare separate and atomic check-and-set operations, observe circular waiting between two locks, and prevent deadlock with a consistent lock order. The simulator has a Chinese interface and runs offline.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Locks and deadlock simulator">
-          <a class="course-video-chapter" href="./projects/deadlock-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="deadlock" data-language="zh" hidden>打开锁与死锁模拟器</strong>
-              <strong data-language-content="deadlock" data-language="en">Open the Locks and Deadlock Simulator</strong>
-              <small data-language-content="deadlock" data-language="zh" hidden>打印室人物动画、单步与自动播放、原子操作对比、死锁与解决方案</small>
-              <small data-language-content="deadlock" data-language="en">Animated print-room example, step-by-step playback, atomic operations, deadlock, and prevention</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
+      </details>
 
-    <details class="course-project-card" id="routing-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">07</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="routing" data-zh="计算机网络 · 路由与转发" data-en="Computer networks · Routing and forwarding">Computer networks · Routing and forwarding</span></span>
-          <strong data-language-heading="routing" data-zh="网络路由实验室" data-en="Network Routing Lab">Network Routing Lab</strong>
-          <span class="course-project-card__summary" data-language-content="routing" data-language="zh" hidden>逐轮观察 Dijkstra 路由表建立、路由器故障后的重新收敛，以及数据包如何逐跳到达终端。</span>
-          <span class="course-project-card__summary" data-language-content="routing" data-language="en">Explore Dijkstra routing tables round by round, reconverge after a router failure, and follow packets from host to host.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="routing" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="routing" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="routing" aria-label="Network routing lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-        </div>
-        <div class="course-project-note">
-          <i class="fas fa-network-wired" aria-hidden="true"></i>
-          <p data-language-content="routing" data-language="zh" hidden>课堂演示：从第 0 轮开始建表，模拟 R2 离线或 R1–R2 延迟增大，观察直连代价变化、后续改道与重新收敛。在拓扑下方并排对比 R1–R5 的路由表，目的地仅显示 H/R 编号，再发送数据包比较路径。模拟器界面为中文，可离线使用。</p>
-          <p data-language-content="routing" data-language="en">Classroom demo: build tables from round zero, take R2 offline or increase the R1–R2 link cost, and observe direct-cost changes, rerouting, and convergence. Compare all five routing tables side by side below the topology, with destinations shown as host/router IDs, then send packets to compare paths. The simulator has a Chinese interface and runs offline.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Network routing simulator">
-          <a class="course-video-chapter" href="./projects/routing-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="routing" data-language="zh" hidden>打开网络路由实验室</strong>
-              <strong data-language-content="routing" data-language="en">Open the Network Routing Lab</strong>
-              <small data-language-content="routing" data-language="zh" hidden>Dijkstra、轮次选择、终端与路由器路由表、故障改道和数据包逐跳转发</small>
-              <small data-language-content="routing" data-language="en">Dijkstra, round selection, host and router tables, failure recovery, and packet forwarding</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
+    </div>
 
-    <details class="course-project-card" id="rsa-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">08</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="rsa" data-zh="信息安全 · 密码学与数字签名" data-en="Information security · Cryptography and digital signatures">Information security · Cryptography and digital signatures</span></span>
-          <strong data-language-heading="rsa" data-zh="RSA 实验室" data-en="RSA Lab">RSA Lab</strong>
-          <span class="course-project-card__summary" data-language-content="rsa" data-language="zh" hidden>自选 p、q 造一对钥匙，逐步观察 N、φ(N)、E、D 的计算；用公钥加密、私钥解密，再逐个试除破解小 N。卡片内还有配套的数字签名实验室，走完 MD5、签名、加密、解密与验签。</span>
-          <span class="course-project-card__summary" data-language-content="rsa" data-language="en">Choose p and q to build a key pair, follow N, φ(N), E, and D step by step, then encrypt, decrypt, and crack small N values by trial division. The card also includes a companion Digital Signature Lab covering MD5, signing, encryption, decryption, and verification.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="rsa" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="rsa" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="rsa" aria-label="RSA lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+    <div class="course-tutorial-group" id="tutorial-algorithms">
+      <div class="course-tutorial-group__heading">
+        <div class="course-tutorial-group__label">
+          <h3 class="course-tutorial-group__title" data-language-heading="tutorial-algorithms" data-zh="数据结构与算法" data-en="Data structures &amp; algorithms">Data structures &amp; algorithms</h3>
+          <p class="course-tutorial-group__note"><span data-language-content="tutorial-algorithms" data-language="zh" hidden>用可视化实验室看清数据结构与算法每一步发生了什么。</span><span data-language-content="tutorial-algorithms" data-language="en">Watch what happens at every step inside data structures and algorithms.</span></p>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-key" aria-hidden="true"></i>
-          <p data-language-content="rsa" data-language="zh" hidden>课堂演示：两个课件实例与自选 p、q；逐步展示 φ(N) 计数、E 候选、扩展欧几里得求 D 和快速幂过程。灰掉的质数与 E 候选会凑出 E = D 或 gcd(E, φ(N)) ≠ 1，已被排除。破解页用 8 个从小到大的 N 记录试除次数与耗时，并用恢复出的私钥解开密文；移动端会切成逐条卡片。界面为中文，可离线使用。</p>
-          <p data-language-content="rsa" data-language="en">Classroom demo: two slide examples plus a custom p and q. Watch φ(N) counting, E candidates, the extended Euclidean steps for D, and square-and-multiply. Prime pairs and E values that would make E = D or gcd(E, φ(N)) ≠ 1 are disabled. A cracking tab times trial division across eight increasing N values and decrypts the ciphertext with the recovered private key; on phones the table becomes stacked cards. The simulator has a Chinese interface and runs offline.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="RSA and digital signature labs">
-          <a class="course-video-chapter" href="./projects/rsa-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="rsa" data-language="zh" hidden>打开 RSA 实验室</strong>
-              <strong data-language-content="rsa" data-language="en">Open the RSA Lab</strong>
-              <small data-language-content="rsa" data-language="zh" hidden>五步造钥匙、自选 p 和 q、公钥加密/私钥解密、计时破解小 N</small>
-              <small data-language-content="rsa" data-language="en">Five-step key generation, custom p and q, public-key encryption, private-key decryption, and timed cracking of small N</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/signature-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="rsa" data-language="zh" hidden>打开数字签名实验室（MD5 + RSA）</strong>
-              <strong data-language-content="rsa" data-language="en">Open the Digital Signature Lab (MD5 + RSA)</strong>
-              <small data-language-content="rsa" data-language="zh" hidden>输入文字或文件算 MD5，私钥签名、公钥加密、解密后重算散列验签；篡改一个字节即可看到失败</small>
-              <small data-language-content="rsa" data-language="en">Hash text or a file with MD5, sign with the sender's private key, encrypt with the receiver's public key, then decrypt and verify; tamper one byte to see it fail</small>
-            </span>
-            <i class="fas fa-external-link-alt" aria-hidden="true"></i>
-          </a>
-        </div>
+        <div class="course-tutorial-group__controls"><span class="course-tutorial-group__count"><span data-language-content="tutorial-algorithms" data-language="zh" hidden>3 个实验室</span><span data-language-content="tutorial-algorithms" data-language="en">3 labs</span></span><div class="course-language-switcher" data-language-switcher data-language-target="tutorial-algorithms" aria-label="数据结构与算法 · Data structures &amp; algorithms 语言 Language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div></div>
       </div>
-    </details>
 
-    <details class="course-project-card" id="database-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">09</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="database" data-zh="计算机科学导论 · 数据库系统" data-en="Introduction to CS · Database systems">Introduction to CS · Database systems</span></span>
-          <strong data-language-heading="database" data-zh="数据库系统实验室" data-en="Database Systems Lab">Database Systems Lab</strong>
-          <span class="course-project-card__summary" data-language-content="database" data-language="zh" hidden>从关系模型、主键外键与 SQL 出发，动手体验选择、投影、并交差、笛卡尔积与连接，再看查询优化、DBMS 架构与数据库的发展脉络。</span>
-          <span class="course-project-card__summary" data-language-content="database" data-language="en">Start from the relational model, keys, and SQL, then explore selection, projection, set operations, Cartesian product, and joins—followed by query optimization, DBMS architecture, and the evolution of databases.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="database" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="database" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="database" aria-label="Database systems lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+      <details class="course-project-card" id="sequential-list-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">02</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-algorithms" data-zh="数据结构导论" data-en="Introduction to data structures">Introduction to data structures</span></span>
+            <strong data-language-heading="tutorial-algorithms" data-zh="顺序表与排序可视化实验室" data-en="Sequential List &amp; Sorting Visual Labs">Sequential List &amp; Sorting Visual Labs</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="zh" hidden>观察顺序表的内存与指针操作，并逐步比较冒泡、选择和快速排序。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="en">Explore sequential-list memory and pointer operations, then compare bubble, selection, and quicksort step by step.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-algorithms" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-algorithms" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-algorithms" aria-label="Sequential list visual lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p data-language-content="tutorial-algorithms" data-language="zh" hidden>顺序表与链表的内存操作，加上三种排序的逐拍对比。</p>
+            <p data-language-content="tutorial-algorithms" data-language="en">Memory and pointer operations in lists, plus three sorting algorithms step by step.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Sequential list visual lab">
+            <a class="course-video-chapter" href="./projects/data-structure/sequential-list-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>顺序表可视化实验室</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Sequential List Visual Lab</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂演示：base 基地址、i 操作指针、n 下一个可用地址</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom demo: base address, operation pointer i, and next-free-address pointer n</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/data-structure/linked-list-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>链表可视化实验室</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Linked List Visual Lab</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂演示：分散内存、head、tail、i 与 next 指针</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom demo: scattered memory, head, tail, i, and next pointers</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/data-structure/sorting-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>顺序表排序可视化实验室</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Sequential List Sorting Visual Lab</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂演示：冒泡排序、选择排序、Lomuto 快速排序与实际运算计数</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom demo: bubble, selection, and Lomuto quicksort with actual operation counts</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-database" aria-hidden="true"></i>
-          <p data-language-content="database" data-language="zh" hidden>本周课堂围绕教务数据库 Student / Course / Enrolled 三张表展开：把一条 SQL 查询画成关系代数树，观察选择下推如何把上百亿行的中间结果压到千万级；再比较关系型与 NoSQL，了解从 IDS、关系模型到数据仓库与国产数据库的演进。示例语句可配合下方在线 SQL 练习即时运行。</p>
-          <p data-language-content="database" data-language="en">This week centers on the teaching database with the Student / Course / Enrolled tables: translate a SQL query into a relational-algebra tree and see how pushing selections down shrinks an intermediate result from billions to millions of rows; then compare relational and NoSQL systems and trace the evolution from IDS and the relational model to data warehouses and domestic databases. Example statements can be run live in the online SQL playground below.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Database systems lab resources">
-          <a class="course-video-chapter" href="./projects/database-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="database" data-language="zh" hidden>打开 SQL 平台</strong>
-              <strong data-language-content="database" data-language="en">Open the SQL Platform</strong>
-              <small data-language-content="database" data-language="zh" hidden>输入 SQL 即出结果：课件三表或随机大数据，附扫描行数、连接比较与复杂度指标</small>
-              <small data-language-content="database" data-language="en">Type SQL and get results on the course tables or generated data, with scan, join-comparison, and complexity metrics</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/database-lab/exercises.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="database" data-language="zh" hidden>打开课堂练习</strong>
-              <strong data-language-content="database" data-language="en">Open the Exercises</strong>
-              <small data-language-content="database" data-language="zh" hidden>9 题按课件进度递进：每题可运行、看输出，判分对比运行结果与执行速度</small>
-              <small data-language-content="database" data-language="en">Nine exercises in lecture order: run each one, see the output, graded on results and execution cost, not code text</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
+      </details>
 
-    <details class="course-project-card" id="data-mining-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">10</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="datamining" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
-          <strong data-language-heading="datamining" data-zh="数据挖掘实验室" data-en="Data Mining Lab">Data Mining Lab</strong>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="zh" hidden>四个页面：① 频繁项集与关联规则（Apriori）；② 聚类（K-Means＋DBSCAN）；③ 聚类课堂小测（手算）；④ 决策树（分步＋实验＋手机自己画树）。</span>
-          <span class="course-project-card__summary" data-language-content="datamining" data-language="en">Four pages: frequent itemsets &amp; association rules (Apriori), clustering (K-Means + DBSCAN), a hand-computed clustering quiz, and decision trees (walkthrough, experiments, and a mobile build-your-own-tree mode).</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="datamining" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="datamining" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="datamining" aria-label="Data mining lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+      <details class="course-project-card" id="binary-tree-visual-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">03</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-algorithms" data-zh="数据结构导论" data-en="Introduction to data structures">Introduction to data structures</span></span>
+            <strong data-language-heading="tutorial-algorithms" data-zh="二叉树与二叉查找树可视化实验室" data-en="Binary Tree &amp; Binary Search Tree Visual Lab">Binary Tree &amp; Binary Search Tree Visual Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="zh" hidden>逐步观察前序、中序、后序与层序遍历，以及二叉查找树的查找、插入和删除。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="en">Explore tree traversals and step-by-step search, insertion, and deletion in a binary search tree.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-algorithms" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-algorithms" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-algorithms" aria-label="Binary tree visual lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p data-language-content="tutorial-algorithms" data-language="zh" hidden>四种遍历，以及 BST 查找、插入、删除的逐步演示。</p>
+            <p data-language-content="tutorial-algorithms" data-language="en">Four traversals, plus step-by-step BST search, insertion, and deletion.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Binary tree visual lab">
+            <a class="course-video-chapter" href="./projects/data-structure/binary-tree-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>二叉树与二叉查找树可视化实验室</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Binary Tree &amp; Binary Search Tree Visual Lab</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂演示：四种遍历、BST 查找、插入与删除</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom demo: four traversals, BST search, insertion, and deletion</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="datamining" data-language="zh" hidden>课堂演示：频繁项集页逐轮走 Apriori 连接／剪枝／计数／筛选（课件项集格图＋真实购物篮候选账本），置信度单调性手算；聚类页 K-Means 逐拍分步与典型数据实验（K／初值／距离可调，p62 局限性复现）；小测页四道整数坐标手算题（K-Means 两道＋DBSCAN 两道），答案逐步揭示；决策树页 13 拍复现课件捐赠例（错误率平局→基尼破局→p88 板书树→Cindy 预测），实验页 4 份数据×3 种准则实时建树、节点检查器与过拟合现场，「自己画树」模式学生手机扫码即玩、每一刀划分自己选、画完与算法树比正确率与叶数。全部数据内嵌、可离线投影，界面为中文。</p>
-          <p data-language-content="datamining" data-language="en">Classroom demos: the frequent-itemset page walks Apriori join/prune/count/filter round by round (courseware lattice plus a real-basket candidate ledger) with hand-computed confidence monotonicity; the clustering page plays K-Means beat by beat and experiments with typical data (adjustable K, initials and distance, p62 reproduced); the quiz page poses four integer-coordinate hand-computable questions (two K-Means, two DBSCAN) with step-by-step answer reveal; the decision-tree page replays the courseware donation example in 13 beats (error-rate tie broken by Gini, the p88 blackboard tree, Cindy's prediction), rebuilds trees live on 4 datasets × 3 criteria with a node inspector and an overfitting showcase, and offers a build-your-own-tree mode where students scan a QR code, pick every split on their phones, and compare accuracy and leaf count against the algorithm. All data embedded for offline projection; Chinese interface.</p>
-        </div>
-        <div class="course-video-chapters" aria-label="Data mining lab">
-          <a class="course-video-chapter" href="./projects/association-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开频繁项集实验</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Frequent-Itemset Lab</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>项集格图、Apriori 逐轮账本、置信度单调性手算</small>
-              <small data-language-content="datamining" data-language="en">Itemset lattice, per-round Apriori ledger, hand-computed confidence monotonicity</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/clustering-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开聚类实验</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Clustering Lab</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>K-Means 逐拍分步；16 种数据上 K-Means／DBSCAN 一键对照</small>
-              <small data-language-content="datamining" data-language="en">K-Means beat-by-beat player; K-Means vs DBSCAN at one click on 16 datasets</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/clustering-quiz/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开聚类课堂小测</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Clustering Class Quiz</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>K-Means 两道＋DBSCAN 两道，整数坐标手算，答案逐步揭示</small>
-              <small data-language-content="datamining" data-language="en">Two K-Means + two DBSCAN questions with integer coordinates; answers revealed step by step</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/decision-tree-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datamining" data-language="zh" hidden>打开决策树实验</strong>
-              <strong data-language-content="datamining" data-language="en">Open the Decision Tree Lab</strong>
-              <small data-language-content="datamining" data-language="zh" hidden>捐赠例 13 拍分步＋实时建树实验；学生手机扫码「自己画树」，每一刀自己选，画完与算法比</small>
-              <small data-language-content="datamining" data-language="en">13-beat donation walkthrough and live tree experiments; students scan a QR code and build their own tree on phones, picking every split, then compare against the algorithm</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-    </details>
+      </details>
 
-    <details class="course-project-card" id="data-visualization-lab">
-      <summary class="course-project-card__toggle">
-        <span class="course-project-card__number">11</span>
-        <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="datavis" data-zh="计算机科学导论 · 数据可视化" data-en="Introduction to CS · Data visualization">Introduction to CS · Data visualization</span></span>
-          <strong data-language-heading="datavis" data-zh="数据可视化实验室" data-en="Data Visualization Lab">Data Visualization Lab</strong>
-          <span class="course-project-card__summary" data-language-content="datavis" data-language="zh" hidden>两个页面：① 一句话出图（8 条提示词跑一轮，agent 交出代码）；② 同一份数据做成可交互界面。</span>
-          <span class="course-project-card__summary" data-language-content="datavis" data-language="en">Two pages: one sentence to a chart (eight prompts run once, the agent hands you code), and the same dataset as an interactive interface.</span>
-        </span>
-        <span class="course-project-card__action" aria-hidden="true">
-          <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="datavis" data-zh="打开实验室" data-en="Open lab">Open lab</span>
-          <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="datavis" data-zh="收起实验室" data-en="Close lab">Close lab</span>
-          <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-        </span>
-      </summary>
-      <div class="course-project-card__details">
-        <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="datavis" aria-label="Data visualization lab language">
-          <button type="button" data-language="zh" aria-pressed="false">中文</button>
-          <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+      <details class="course-project-card" id="algorithm-exploration-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">04</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-algorithms" data-zh="计算机科学导论 · 图算法" data-en="Introduction to CS · Graph algorithms">Introduction to CS · Graph algorithms</span></span>
+            <strong data-language-heading="tutorial-algorithms" data-zh="算法可视化实验室" data-en="Algorithm Visualization Labs">Algorithm Visualization Labs</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="zh" hidden>逐步探索图算法、贪心算法与动态规划，在具体问题中比较不同策略。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-algorithms" data-language="en">Explore graph algorithms, greedy methods, and dynamic programming through step-by-step examples.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-algorithms" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-algorithms" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-algorithms" aria-label="Graph exploration visual lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p data-language-content="tutorial-algorithms" data-language="zh" hidden>图算法、贪心与动态规划的逐步推演。</p>
+            <p data-language-content="tutorial-algorithms" data-language="en">Graph algorithms, greedy choices, and dynamic programming, step by step.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Algorithm visualization labs">
+            <a class="course-video-chapter" href="./projects/algorithm-exploration-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>图探索与最短路径可视化实验室</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Graph Exploration &amp; Shortest Path Visual Lab</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂演示：DFS、BFS、Dijkstra 与 A* 单步执行</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom demo: single-step DFS, BFS, Dijkstra, and A*</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/greedy-set-cover/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>路由器覆盖：贪心集合覆盖</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Router Coverage: Greedy Set Cover</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂互动：比较贪心结果与精确最优解（台数与成本）</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom activity: compare greedy results with exact optima for router count and cost</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/knapsack-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-algorithms" data-language="zh" hidden>背包问题：贪心与动态规划</strong>
+                <strong data-language-content="tutorial-algorithms" data-language="en">Knapsack: Greedy vs Dynamic Programming</strong>
+                <small data-language-content="tutorial-algorithms" data-language="zh" hidden>课堂互动：比较性价比贪心与 0/1 背包最优解</small>
+                <small data-language-content="tutorial-algorithms" data-language="en">Classroom activity: compare value-density greedy with the 0/1 knapsack optimum</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
         </div>
-        <div class="course-project-note">
-          <i class="fas fa-diagram-project" aria-hidden="true"></i>
-          <p data-language-content="datavis" data-language="zh" hidden>课堂演示：AI 时代做图的两点变化——图可以由一句话生成（agent 交出代码，不是图片），交付物也可以从一张图变成可交互界面。数据内嵌，可离线投影。</p>
-          <p data-language-content="datavis" data-language="en">Classroom demo: two changes in the AI era — a chart can come from one sentence (the agent hands you code, not a picture), and the deliverable can be an interactive interface. Data embedded; works offline.</p>
+      </details>
+
+    </div>
+
+    <div class="course-tutorial-group" id="tutorial-systems">
+      <div class="course-tutorial-group__heading">
+        <div class="course-tutorial-group__label">
+          <h3 class="course-tutorial-group__title" data-language-heading="tutorial-systems" data-zh="计算机系统" data-en="Computer systems">Computer systems</h3>
+          <p class="course-tutorial-group__note"><span data-language-content="tutorial-systems" data-language="zh" hidden>操作系统、网络、安全与数据库：机器到底怎么跑起来。</span><span data-language-content="tutorial-systems" data-language="en">Operating systems, networks, security, and databases: how a machine actually runs.</span></p>
         </div>
-        <div class="course-video-chapters" aria-label="Data visualization lab">
-          <a class="course-video-chapter" href="./projects/data-visualization-lab/index.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datavis" data-language="zh" hidden>打开提示词出图页</strong>
-              <strong data-language-content="datavis" data-language="en">Open the Prompt-to-Chart Page</strong>
-              <small data-language-content="datavis" data-language="zh" hidden>8 条提示词跑一轮，agent 写的代码摊开给你看</small>
-              <small data-language-content="datavis" data-language="en">Eight prompts run once, and the agent's code is opened up</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-          <a class="course-video-chapter" href="./projects/data-visualization-lab/dashboard.html">
-            <span class="course-video-chapter__number">↗</span>
-            <span class="course-video-chapter__content">
-              <strong data-language-content="datavis" data-language="zh" hidden>打开交互界面页</strong>
-              <strong data-language-content="datavis" data-language="en">Open the Interactive Page</strong>
-              <small data-language-content="datavis" data-language="zh" hidden>同一份数据，能筛、能刷、能钻、能问、能导</small>
-              <small data-language-content="datavis" data-language="en">The same data: filter, brush, drill, ask, export</small>
-            </span>
-            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-          </a>
-        </div>
+        <div class="course-tutorial-group__controls"><span class="course-tutorial-group__count"><span data-language-content="tutorial-systems" data-language="zh" hidden>5 个实验室</span><span data-language-content="tutorial-systems" data-language="en">5 labs</span></span><div class="course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="计算机系统 · Computer systems 语言 Language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div></div>
       </div>
-    </details>
+
+      <details class="course-project-card" id="round-robin-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">05</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-systems" data-zh="操作系统 · 软件工程" data-en="Operating systems · Software engineering">Operating systems · Software engineering</span></span>
+            <strong data-language-heading="tutorial-systems" data-zh="CPU 时间片轮转模拟器" data-en="CPU Round Robin Scheduling Simulator">CPU Round Robin Scheduling Simulator</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="zh" hidden>通过动画观察新进程入队、时间片轮转与完成退出，并体验从需求文档到可运行应用的过程。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="en">Watch arrivals, time-slice rotation, and process completion, and explore how a requirements document becomes a working application.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-systems" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-systems" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="Round Robin simulator language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-microchip" aria-hidden="true"></i>
+            <p data-language-content="tutorial-systems" data-language="zh" hidden>单步观察 CPU 调度与就绪队列，并对照需求文档验证。</p>
+            <p data-language-content="tutorial-systems" data-language="en">Step through CPU scheduling and the ready queue, then check the result against the brief.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Round Robin simulators">
+            <a class="course-video-chapter" href="./projects/round-robin-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开 CPU 时间片轮转模拟器</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the CPU Round Robin Simulator</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>课堂例题、单步与自动播放、新到达入队、轮转回队及完成退出动画</small>
+                <small data-language-content="tutorial-systems" data-language="en">Course example, single-step and automatic playback, animated arrivals, requeueing, and completion</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/round-robin-lab/race-examples.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>扩展：轮转之后，为什么结果错了？</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Explore: When Interleaving Breaks a Program</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>计数器、抢票与转账三个交互例子；单步观察错误，对比时间片与加锁方案</small>
+                <small data-language-content="tutorial-systems" data-language="en">Step through lost increments, ticket overselling, and inconsistent transfer reads; compare time quanta and mutex protection</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+      <details class="course-project-card" id="deadlock-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">06</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-systems" data-zh="操作系统 · 并发与同步" data-en="Operating systems · Concurrency and synchronization">Operating systems · Concurrency and synchronization</span></span>
+            <strong data-language-heading="tutorial-systems" data-zh="锁与死锁模拟器" data-en="Locks and Deadlock Simulator">Locks and Deadlock Simulator</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="zh" hidden>用打印室门口“有人 / 无人”的牌子理解原子操作，再逐步观察两把锁如何形成死锁。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="en">Understand atomic operations with an occupied/vacant sign at a print room, then step through a deadlock involving two locks.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-systems" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-systems" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="Locks and deadlock simulator language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-lock" aria-hidden="true"></i>
+            <p data-language-content="tutorial-systems" data-language="zh" hidden>用原子操作和两把锁的循环等待讲清死锁及其避免。</p>
+            <p data-language-content="tutorial-systems" data-language="en">Atomic operations and a two-lock cycle make deadlock, and its avoidance, visible.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Locks and deadlock simulator">
+            <a class="course-video-chapter" href="./projects/deadlock-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开锁与死锁模拟器</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the Locks and Deadlock Simulator</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>打印室人物动画、单步与自动播放、原子操作对比、死锁与解决方案</small>
+                <small data-language-content="tutorial-systems" data-language="en">Animated print-room example, step-by-step playback, atomic operations, deadlock, and prevention</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+      <details class="course-project-card" id="routing-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">07</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-systems" data-zh="计算机网络 · 路由与转发" data-en="Computer networks · Routing and forwarding">Computer networks · Routing and forwarding</span></span>
+            <strong data-language-heading="tutorial-systems" data-zh="网络路由实验室" data-en="Network Routing Lab">Network Routing Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="zh" hidden>逐轮观察 Dijkstra 路由表建立、路由器故障后的重新收敛，以及数据包如何逐跳到达终端。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="en">Explore Dijkstra routing tables round by round, reconverge after a router failure, and follow packets from host to host.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-systems" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-systems" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="Network routing lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-network-wired" aria-hidden="true"></i>
+            <p data-language-content="tutorial-systems" data-language="zh" hidden>逐轮建立路由表，故障后改道并重新收敛。</p>
+            <p data-language-content="tutorial-systems" data-language="en">Build routing tables round by round, then reroute and reconverge after a failure.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Network routing simulator">
+            <a class="course-video-chapter" href="./projects/routing-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开网络路由实验室</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the Network Routing Lab</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>Dijkstra、轮次选择、终端与路由器路由表、故障改道和数据包逐跳转发</small>
+                <small data-language-content="tutorial-systems" data-language="en">Dijkstra, round selection, host and router tables, failure recovery, and packet forwarding</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+      <details class="course-project-card" id="rsa-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">08</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-systems" data-zh="信息安全 · 密码学与数字签名" data-en="Information security · Cryptography and digital signatures">Information security · Cryptography and digital signatures</span></span>
+            <strong data-language-heading="tutorial-systems" data-zh="RSA 实验室" data-en="RSA Lab">RSA Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="zh" hidden>自选 p、q 造一对钥匙，逐步观察 N、φ(N)、E、D 的计算；用公钥加密、私钥解密，再逐个试除破解小 N。卡片内还有配套的数字签名实验室，走完 MD5、签名、加密、解密与验签。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="en">Choose p and q to build a key pair, follow N, φ(N), E, and D step by step, then encrypt, decrypt, and crack small N values by trial division. The card also includes a companion Digital Signature Lab covering MD5, signing, encryption, decryption, and verification.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-systems" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-systems" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="RSA lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            <p data-language-content="tutorial-systems" data-language="zh" hidden>造钥匙、加密解密、破解小 N，并配一套数字签名实验。</p>
+            <p data-language-content="tutorial-systems" data-language="en">Generate keys, encrypt and decrypt, crack a small N, and sign a message.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="RSA and digital signature labs">
+            <a class="course-video-chapter" href="./projects/rsa-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开 RSA 实验室</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the RSA Lab</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>五步造钥匙、自选 p 和 q、公钥加密/私钥解密、计时破解小 N</small>
+                <small data-language-content="tutorial-systems" data-language="en">Five-step key generation, custom p and q, public-key encryption, private-key decryption, and timed cracking of small N</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/signature-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开数字签名实验室（MD5 + RSA）</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the Digital Signature Lab (MD5 + RSA)</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>输入文字或文件算 MD5，私钥签名、公钥加密、解密后重算散列验签；篡改一个字节即可看到失败</small>
+                <small data-language-content="tutorial-systems" data-language="en">Hash text or a file with MD5, sign with the sender's private key, encrypt with the receiver's public key, then decrypt and verify; tamper one byte to see it fail</small>
+              </span>
+              <i class="fas fa-external-link-alt" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+      <details class="course-project-card" id="database-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">09</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-systems" data-zh="计算机科学导论 · 数据库系统" data-en="Introduction to CS · Database systems">Introduction to CS · Database systems</span></span>
+            <strong data-language-heading="tutorial-systems" data-zh="数据库系统实验室" data-en="Database Systems Lab">Database Systems Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="zh" hidden>从关系模型、主键外键与 SQL 出发，动手体验选择、投影、并交差、笛卡尔积与连接，再看查询优化、DBMS 架构与数据库的发展脉络。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-systems" data-language="en">Start from the relational model, keys, and SQL, then explore selection, projection, set operations, Cartesian product, and joins—followed by query optimization, DBMS architecture, and the evolution of databases.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-systems" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-systems" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-systems" aria-label="Database systems lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-database" aria-hidden="true"></i>
+            <p data-language-content="tutorial-systems" data-language="zh" hidden>把 SQL 画成关系代数树，比较不同连接顺序的代价。</p>
+            <p data-language-content="tutorial-systems" data-language="en">Turn SQL into a relational-algebra tree and compare the cost of join orders.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Database systems lab resources">
+            <a class="course-video-chapter" href="./projects/database-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开 SQL 平台</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the SQL Platform</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>输入 SQL 即出结果：课件三表或随机大数据，附扫描行数、连接比较与复杂度指标</small>
+                <small data-language-content="tutorial-systems" data-language="en">Type SQL and get results on the course tables or generated data, with scan, join-comparison, and complexity metrics</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/database-lab/exercises.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-systems" data-language="zh" hidden>打开课堂练习</strong>
+                <strong data-language-content="tutorial-systems" data-language="en">Open the Exercises</strong>
+                <small data-language-content="tutorial-systems" data-language="zh" hidden>9 题按课件进度递进：每题可运行、看输出，判分对比运行结果与执行速度</small>
+                <small data-language-content="tutorial-systems" data-language="en">Nine exercises in lecture order: run each one, see the output, graded on results and execution cost, not code text</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+    </div>
+
+    <div class="course-tutorial-group" id="tutorial-ai">
+      <div class="course-tutorial-group__heading">
+        <div class="course-tutorial-group__label">
+          <h3 class="course-tutorial-group__title" data-language-heading="tutorial-ai" data-zh="人工智能" data-en="Artificial intelligence">Artificial intelligence</h3>
+          <p class="course-tutorial-group__note"><span data-language-content="tutorial-ai" data-language="zh" hidden>从数据挖掘到 AI 出图，看清模型能做什么、不能做什么。</span><span data-language-content="tutorial-ai" data-language="en">From data mining to AI-generated charts: what models can and cannot do.</span></p>
+        </div>
+        <div class="course-tutorial-group__controls"><span class="course-tutorial-group__count"><span data-language-content="tutorial-ai" data-language="zh" hidden>2 个实验室</span><span data-language-content="tutorial-ai" data-language="en">2 labs</span></span><div class="course-language-switcher" data-language-switcher data-language-target="tutorial-ai" aria-label="人工智能 · Artificial intelligence 语言 Language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div></div>
+      </div>
+
+      <details class="course-project-card" id="data-mining-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">10</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-ai" data-zh="计算机科学导论 · 数据挖掘" data-en="Introduction to CS · Data mining">Introduction to CS · Data mining</span></span>
+            <strong data-language-heading="tutorial-ai" data-zh="数据挖掘实验室" data-en="Data Mining Lab">Data Mining Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-ai" data-language="zh" hidden>四个页面：① 频繁项集与关联规则（Apriori）；② 聚类（K-Means＋DBSCAN）；③ 聚类课堂小测（手算）；④ 决策树（分步＋实验＋手机自己画树）。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-ai" data-language="en">Four pages: frequent itemsets &amp; association rules (Apriori), clustering (K-Means + DBSCAN), a hand-computed clustering quiz, and decision trees (walkthrough, experiments, and a mobile build-your-own-tree mode).</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-ai" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-ai" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-ai" aria-label="Data mining lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p data-language-content="tutorial-ai" data-language="zh" hidden>Apriori 逐轮账本、K-Means 逐拍分步、手算小测与决策树建树实验。</p>
+            <p data-language-content="tutorial-ai" data-language="en">Apriori round by round, K-Means beat by beat, a hand-computed quiz, and live decision trees.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Data mining lab">
+            <a class="course-video-chapter" href="./projects/association-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开频繁项集实验</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Frequent-Itemset Lab</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>项集格图、Apriori 逐轮账本、置信度单调性手算</small>
+                <small data-language-content="tutorial-ai" data-language="en">Itemset lattice, per-round Apriori ledger, hand-computed confidence monotonicity</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/clustering-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开聚类实验</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Clustering Lab</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>K-Means 逐拍分步；16 种数据上 K-Means／DBSCAN 一键对照</small>
+                <small data-language-content="tutorial-ai" data-language="en">K-Means beat-by-beat player; K-Means vs DBSCAN at one click on 16 datasets</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/clustering-quiz/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开聚类课堂小测</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Clustering Class Quiz</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>K-Means 两道＋DBSCAN 两道，整数坐标手算，答案逐步揭示</small>
+                <small data-language-content="tutorial-ai" data-language="en">Two K-Means + two DBSCAN questions with integer coordinates; answers revealed step by step</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/decision-tree-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开决策树实验</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Decision Tree Lab</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>捐赠例 13 拍分步＋实时建树实验；学生手机扫码「自己画树」，每一刀自己选，画完与算法比</small>
+                <small data-language-content="tutorial-ai" data-language="en">13-beat donation walkthrough and live tree experiments; students scan a QR code and build their own tree on phones, picking every split, then compare against the algorithm</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+      <details class="course-project-card" id="data-visualization-lab">
+        <summary class="course-project-card__toggle">
+          <span class="course-project-card__number">11</span>
+          <span class="course-project-card__main">
+            <span class="course-project-card__meta"><span data-language-heading="tutorial-ai" data-zh="计算机科学导论 · 数据可视化" data-en="Introduction to CS · Data visualization">Introduction to CS · Data visualization</span></span>
+            <strong data-language-heading="tutorial-ai" data-zh="数据可视化实验室" data-en="Data Visualization Lab">Data Visualization Lab</strong>
+            <span class="course-project-card__summary" data-language-content="tutorial-ai" data-language="zh" hidden>两个页面：① 一句话出图（8 条提示词跑一轮，agent 交出代码）；② 同一份数据做成可交互界面。</span>
+            <span class="course-project-card__summary" data-language-content="tutorial-ai" data-language="en">Two pages: one sentence to a chart (eight prompts run once, the agent hands you code), and the same dataset as an interactive interface.</span>
+          </span>
+          <span class="course-project-card__action" aria-hidden="true">
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="tutorial-ai" data-zh="打开实验室" data-en="Open lab">Open lab</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="tutorial-ai" data-zh="收起实验室" data-en="Close lab">Close lab</span>
+            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
+          </span>
+        </summary>
+        <div class="course-project-card__details">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="tutorial-ai" aria-label="Data visualization lab language">
+            <button type="button" data-language="zh" aria-pressed="false">中文</button>
+            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
+          </div>
+          <div class="course-project-note">
+            <i class="fas fa-diagram-project" aria-hidden="true"></i>
+            <p data-language-content="tutorial-ai" data-language="zh" hidden>一句话生成图，以及同一份数据做成交互界面。</p>
+            <p data-language-content="tutorial-ai" data-language="en">A chart from one sentence, and the same data as an interactive interface.</p>
+          </div>
+          <div class="course-video-chapters" aria-label="Data visualization lab">
+            <a class="course-video-chapter" href="./projects/data-visualization-lab/index.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开提示词出图页</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Prompt-to-Chart Page</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>8 条提示词跑一轮，agent 写的代码摊开给你看</small>
+                <small data-language-content="tutorial-ai" data-language="en">Eight prompts run once, and the agent's code is opened up</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/data-visualization-lab/dashboard.html">
+              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="tutorial-ai" data-language="zh" hidden>打开交互界面页</strong>
+                <strong data-language-content="tutorial-ai" data-language="en">Open the Interactive Page</strong>
+                <small data-language-content="tutorial-ai" data-language="zh" hidden>同一份数据，能筛、能刷、能钻、能问、能导</small>
+                <small data-language-content="tutorial-ai" data-language="en">The same data: filter, brush, drill, ask, export</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </details>
+
+    </div>
+
   </section>
 
   <section class="course-projects" id="course-projects" aria-labelledby="course-projects-title">
@@ -704,7 +766,7 @@
         <span class="course-project-card__number">01</span>
         <span class="course-project-card__main">
           <span class="course-project-card__meta">
-            <span data-language-heading="turing" data-zh="计算基础" data-en="Foundations of computation">计算基础</span>
+            <span data-language-heading="turing" data-zh="通用" data-en="General">通用</span>
           </span>
           <strong data-language-heading="turing" data-zh="图灵机" data-en="Turing Machine">图灵机</strong>
           <span class="course-project-card__summary" data-language-content="turing" data-language="zh">
@@ -728,8 +790,8 @@
         </div>
         <div class="course-project-note">
           <i class="fas fa-info-circle" aria-hidden="true"></i>
-          <p data-language-content="turing" data-language="zh">使用下方提示词与 coding agent 多轮迭代，并提交可运行 HTML、简短录屏和图文迭代报告。</p>
-          <p data-language-content="turing" data-language="en" hidden>Use the prompt below, iterate with your coding agent, and submit a runnable HTML file, a short recording, and an illustrated iteration report.</p>
+          <p data-language-content="turing" data-language="zh">用下方提示词与 agent 多轮迭代，提交可运行 HTML、录屏和迭代报告。</p>
+          <p data-language-content="turing" data-language="en" hidden>Iterate with the prompt below, then submit a runnable HTML file, a recording, and an iteration report.</p>
         </div>
 
         <section class="course-task-panel" aria-labelledby="requirements-title">
@@ -998,8 +1060,8 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
         </div>
         <div class="course-project-note">
           <i class="fas fa-compass" aria-hidden="true"></i>
-          <p data-language-content="data-structures" data-language="zh">本项目提供项目网页、任务说明和建议提示词；请自行设计并迭代与 AI coding agent 的对话策略。没有参考实现。</p>
-          <p data-language-content="data-structures" data-language="en" hidden>This project provides a project web page, a task brief, and suggested prompts. Design and iterate on your own conversations with an AI coding agent; no reference implementation is provided.</p>
+          <p data-language-content="data-structures" data-language="zh">提供项目网页、任务说明与建议提示词，没有参考实现。</p>
+          <p data-language-content="data-structures" data-language="en" hidden>A project page, a task brief, and prompt suggestions; no reference implementation.</p>
         </div>
 
         <section class="course-task-panel" aria-labelledby="data-structures-task-title">
@@ -1049,8 +1111,8 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
 
         <div class="course-project-note course-project-note--warning">
           <i class="fas fa-tools" aria-hidden="true"></i>
-          <p data-language-content="data-structures" data-language="zh">项目网页中的查找与寻路算法尚未实现。选择起终点后点击“运行寻路”，页面会明确提示“算法尚未实现”；这正是你需要完成的部分。</p>
-          <p data-language-content="data-structures" data-language="en" hidden>The project web page does not implement search or pathfinding algorithms yet. After selecting endpoints, clicking “Run pathfinding” clearly reports that the algorithm is not implemented; that is the work you will complete.</p>
+          <p data-language-content="data-structures" data-language="zh">项目网页尚未实现查找与寻路算法，这正是你要完成的部分。</p>
+          <p data-language-content="data-structures" data-language="en" hidden>The project page leaves search and pathfinding unimplemented; that is your part to build.</p>
         </div>
 
         <div class="course-data-actions" aria-label="Campus Pathfinding Project materials">
@@ -1080,7 +1142,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
       <summary class="course-project-card__toggle">
         <span class="course-project-card__number">03</span>
         <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="peer-drop" data-zh="网络、安全与操作系统" data-en="Networks, security &amp; operating systems">Networks, security &amp; operating systems</span></span>
+          <span class="course-project-card__meta"><span data-language-heading="peer-drop" data-zh="计算机系统" data-en="Computer systems">Computer systems</span></span>
           <strong data-language-heading="peer-drop" data-zh="同学快传" data-en="PeerDrop">PeerDrop</strong>
           <span class="course-project-card__summary" data-language-content="peer-drop" data-language="zh" hidden>在可信局域网中的两台独立设备之间，构建一个具有加密、认证和完整性校验的真实文件传输系统。</span>
           <span class="course-project-card__summary" data-language-content="peer-drop" data-language="en">Build a real file-transfer system between two devices on a trusted local network, with encryption, authentication, and integrity verification.</span>
@@ -1089,7 +1151,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
       </summary>
       <div class="course-project-card__details">
         <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="peer-drop" aria-label="PeerDrop project language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div>
-        <div class="course-project-note"><i class="fas fa-share-alt" aria-hidden="true"></i><p data-language-content="peer-drop" data-language="zh" hidden>本项目不提供完整提示词或参考实现。请自行设计与 AI coding agent 的协作策略、技术方案和测试方法。</p><p data-language-content="peer-drop" data-language="en">This project provides no complete prompt or reference implementation. Design your own AI-agent collaboration, technical approach, and testing strategy.</p></div>
+        <div class="course-project-note"><i class="fas fa-share-alt" aria-hidden="true"></i><p data-language-content="peer-drop" data-language="zh" hidden>不提供完整提示词或参考实现，协作策略与测试方法自行设计。</p><p data-language-content="peer-drop" data-language="en">No complete prompt or reference implementation; design your own approach and tests.</p></div>
         <section class="course-task-panel" aria-labelledby="peer-drop-task-title"><div class="course-task-panel__heading"><div><p class="course-panel-label" data-language-heading="peer-drop" data-zh="项目任务" data-en="Project task">Project task</p><h4 id="peer-drop-task-title" data-language-heading="peer-drop" data-zh="构建安全的局域网文件传输" data-en="Build secure local-network file transfer">Build secure local-network file transfer</h4></div></div>
           <ol class="course-task-list course-task-list--single" data-language-content="peer-drop" data-language="zh" hidden>
             <li><span class="course-task-list__number">01</span><div><strong>完成真实跨设备传输。</strong><p>两台独立设备在同一可信局域网中；手动输入接收端 IP 地址与端口，发送并保存一个真实文件。</p></div></li>
@@ -1106,7 +1168,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
           <ol class="course-task-list" data-language-content="peer-drop" data-language="zh" hidden><li><span class="course-task-list__number">01</span><div><strong>基础：可运行项目与完整代码。</strong><p>提交包含全部 HTML、Python 与其他源代码的完整项目文件夹或 ZIP，以及 README；代码必须足以复现演示结果。</p></div></li><li><span class="course-task-list__number">02</span><div><strong>基础：双设备录屏。</strong><p>用 60–120 秒展示真实传输、签名验证、解密、SHA-256 比对和最终保存结果。</p></div></li><li><span class="course-task-list__number">03</span><div><strong>基础：图文迭代报告。</strong><p>记录 AI agent 对话、问题、后续提示词、解决方案和截图；解释 RSA 公钥/私钥、文件密钥、SHA-256、签名，以及保密性、认证和完整性的区别。</p></div></li><li class="course-task-list__item--bonus"><span class="course-task-list__number">+1 / +2</span><div><strong>加分：可靠性与体验扩展。</strong><p>配对码与接受/拒绝、传输状态和进度、错误处理、自动发现、历史记录、多文件队列等均可加分。</p></div></li></ol>
           <ol class="course-task-list" data-language-content="peer-drop" data-language="en"><li><span class="course-task-list__number">01</span><div><strong>Core: runnable project and complete source code.</strong><p>Submit the full project folder or a ZIP containing all HTML, Python, and other source code, plus a README. The code must reproduce the demonstrated result.</p></div></li><li><span class="course-task-list__number">02</span><div><strong>Core: two-device recording.</strong><p>In 60–120 seconds, show a real transfer, signature verification, decryption, SHA-256 comparison, and the saved result.</p></div></li><li><span class="course-task-list__number">03</span><div><strong>Core: illustrated iteration report.</strong><p>Record AI-agent rounds, issues, follow-up prompts, resolutions, and screenshots. Explain RSA public/private keys, the file key, SHA-256, signatures, and the difference between confidentiality, authentication, and integrity.</p></div></li><li class="course-task-list__item--bonus"><span class="course-task-list__number">+1 / +2</span><div><strong>Bonus: reliability and experience.</strong><p>Pairing and accept/reject, transfer status and progress, error handling, automatic discovery, history, and multi-file queues can earn bonus credit.</p></div></li></ol>
         </section>
-        <div class="course-project-note course-project-note--warning"><i class="fas fa-shield-alt" aria-hidden="true"></i><p data-language-content="peer-drop" data-language="zh" hidden>项目网页只提供界面参考，不包含真实传输或密码学功能。建议先体验 LocalSend，观察成熟局域网传输产品的交互与边界；仅在自己控制的设备和可信局域网中测试，不要暴露到公网或传输敏感文件。</p><p data-language-content="peer-drop" data-language="en">The project web page is an interface reference only; it contains no real transfer or cryptographic implementation. Try LocalSend first to observe a mature local-network transfer product’s interactions and boundaries. Test only on devices and trusted local networks you control; never expose it to the public internet or transfer sensitive files.</p></div>
+        <div class="course-project-note course-project-note--warning"><i class="fas fa-shield-alt" aria-hidden="true"></i><p data-language-content="peer-drop" data-language="zh" hidden>项目网页只是界面参考，不含真实传输与密码学功能；先体验 LocalSend，仅在自己控制的设备和可信局域网中测试。</p><p data-language-content="peer-drop" data-language="en">The project page is an interface reference with no real transfer or crypto. Try LocalSend first, and test only on devices and networks you control.</p></div>
         <div class="course-data-actions" aria-label="PeerDrop project materials"><a class="course-data-action course-data-action--primary" href="./projects/peer-drop/CS0502-peer-drop-starter.zip" download><i class="fas fa-download" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>下载项目资料</span><span data-language-content="peer-drop" data-language="en">Download project materials</span></a><a class="course-data-action" href="./projects/peer-drop/STUDENT_TASKS.md" download><i class="far fa-file-alt" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>任务说明</span><span data-language-content="peer-drop" data-language="en">Task brief</span></a><a class="course-data-action" href="./projects/peer-drop/README.md" download><i class="far fa-file-code" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>使用说明</span><span data-language-content="peer-drop" data-language="en">README</span></a><a class="course-data-action" href="./projects/peer-drop/LAN_SETUP.md" download><i class="fas fa-wifi" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>局域网连接教程</span><span data-language-content="peer-drop" data-language="en">LAN setup guide</span></a><a class="course-data-action course-data-action--primary" href="./projects/peer-drop/web/index.html" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>打开项目网页</span><span data-language-content="peer-drop" data-language="en">Open project web</span></a><a class="course-data-action" href="https://localsend.org/" target="_blank" rel="noopener noreferrer"><i class="fas fa-paper-plane" aria-hidden="true"></i><span data-language-content="peer-drop" data-language="zh" hidden>体验 LocalSend</span><span data-language-content="peer-drop" data-language="en">Explore LocalSend</span><i class="fas fa-external-link-alt" aria-hidden="true"></i></a></div>
       </div>
     </details>
@@ -1115,7 +1177,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
       <summary class="course-project-card__toggle">
         <span class="course-project-card__number">04</span>
         <span class="course-project-card__main">
-          <span class="course-project-card__meta"><span data-language-heading="ai-project" data-zh="人工智能基础" data-en="Foundations of Artificial Intelligence">Foundations of Artificial Intelligence</span></span>
+          <span class="course-project-card__meta"><span data-language-heading="ai-project" data-zh="人工智能" data-en="Artificial intelligence">Artificial intelligence</span></span>
           <strong data-language-heading="ai-project" data-zh="人工智能基础" data-en="Foundations of Artificial Intelligence">Foundations of Artificial Intelligence</strong>
           <span class="course-project-card__summary" data-language-content="ai-project" data-language="zh" hidden>三选一：从数据挖掘、神经网络与深度学习、微型语言模型三个固定项目中选择一个，完成自己的 AI 应用。</span>
           <span class="course-project-card__summary" data-language-content="ai-project" data-language="en">Choose exactly one of three fixed projects—data mining, neural networks and deep learning, or small language models—then build your own AI application.</span>
@@ -1124,7 +1186,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
       </summary>
       <div class="course-project-card__details">
         <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="ai-project" aria-label="Foundations of Artificial Intelligence language"><button type="button" data-language="zh" aria-pressed="false">中文</button><button type="button" class="is-active" data-language="en" aria-pressed="true">English</button></div>
-        <div class="course-project-note"><i class="fas fa-compass" aria-hidden="true"></i><p data-language-content="ai-project" data-language="zh" hidden>这是个人三选一项目：从 A、B、C 三个固定项目中选择一个独立完成。教师提供题目、数据或模型说明；不提供完整 AI 提示词，也没有参考实现。</p><p data-language-content="ai-project" data-language="en">This is an individual choose-one-of-three project. Select exactly one fixed project—A, B, or C. The instructor provides the task, data, or model notes; no complete AI prompt or reference implementation is provided.</p></div>
+        <div class="course-project-note"><i class="fas fa-compass" aria-hidden="true"></i><p data-language-content="ai-project" data-language="zh" hidden>A、B、C 三个固定项目选一个，独立完成。</p><p data-language-content="ai-project" data-language="en">Pick exactly one of the three fixed projects and complete it on your own.</p></div>
         <section class="course-task-panel" aria-labelledby="ai-project-task-title"><div class="course-task-panel__heading"><div><p class="course-panel-label" data-language-heading="ai-project" data-zh="三选一：选择一个项目" data-en="Choose exactly one of three projects">Choose exactly one of three projects</p><h4 id="ai-project-task-title" data-language-heading="ai-project" data-zh="用 AI agent 构建你的 AI 项目" data-en="Build your AI project with an AI agent">Build your AI project with an AI agent</h4></div></div>
           <ol class="course-task-list course-task-list--single" data-language-content="ai-project" data-language="zh" hidden><li><span class="course-task-list__number">A</span><div><strong>零售客户分群与洞察。</strong><p>从交易数据构建 RFM 特征，以 K-Means 分群；展示群体画像、业务建议，以及一种不同设置下的对照结果。</p></div></li><li><span class="course-task-list__number">B</span><div><strong>手机活动识别：MLP 与一维 CNN。</strong><p>用 UCI HAR 同时训练 MLP 与一维 CNN；比较准确率、混淆矩阵和一组容易混淆的活动。</p></div></li><li><span class="course-task-list__number">C</span><div><strong>MiniMind：部署、多模态与新闻 LoRA。</strong><p>在三个 MiniMind 任务中任选两个完成：运行基础 MiniMind-3、部署 MiniMind-O 多模态 WebUI，或微调“财经／体育／游戏”新闻主题 LoRA；每项均须提交运行证据与简短分析。</p></div></li></ol>
           <ol class="course-task-list course-task-list--single" data-language-content="ai-project" data-language="en"><li><span class="course-task-list__number">A</span><div><strong>Retail customer segmentation and insights.</strong><p>Construct RFM features from transaction data and cluster with K-Means; show segment profiles, business suggestions, and one changed-setting comparison.</p></div></li><li><span class="course-task-list__number">B</span><div><strong>Smartphone activity recognition: MLP vs. 1D CNN.</strong><p>Train both an MLP and 1D CNN with UCI HAR; compare accuracy, confusion matrices, and one easily confused activity pair.</p></div></li><li><span class="course-task-list__number">C</span><div><strong>MiniMind: deployment, multimodality, and news LoRA.</strong><p>Complete any two of three MiniMind tasks: run base MiniMind-3, deploy the MiniMind-O multimodal WebUI, or fine-tune a finance/sports/gaming news-topic LoRA. Every task needs run evidence and a short analysis.</p></div></li></ol>
@@ -1133,7 +1195,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
           <ol class="course-task-list" data-language-content="ai-project" data-language="zh" hidden><li><span class="course-task-list__number">01</span><div><strong>完整项目与代码。</strong><p>提交包含 HTML、Python 与其他源代码的完整项目文件夹或 ZIP、可运行 App 和 README。</p></div></li><li><span class="course-task-list__number">02</span><div><strong>项目录屏。</strong><p>展示程序实际运行、主要结果，以及所选项目要求的模型或设置比较。</p></div></li><li><span class="course-task-list__number">03</span><div><strong>图文项目报告。</strong><p>说明数据、方法、结果、AI agent 迭代、问题、局限性或失败案例；按所选项目要求完成解释与分析。</p></div></li><li class="course-task-list__item--bonus"><span class="course-task-list__number">+1</span><div><strong>扩展实验或交互。</strong><p>完成所选项目中列出的加分实验、错误分析、可视化或网页交互改进。</p></div></li></ol>
           <ol class="course-task-list" data-language-content="ai-project" data-language="en"><li><span class="course-task-list__number">01</span><div><strong>Complete project and code.</strong><p>Submit the full project folder or ZIP containing HTML, Python, and other source code, plus a runnable app and README.</p></div></li><li><span class="course-task-list__number">02</span><div><strong>Project recording.</strong><p>Show the app running, its main results, and the model or setting comparison required by your selected project.</p></div></li><li><span class="course-task-list__number">03</span><div><strong>Illustrated project report.</strong><p>Explain data, method, results, AI-agent iteration, problems, and a limitation or failure case; complete the project-specific analysis.</p></div></li><li class="course-task-list__item--bonus"><span class="course-task-list__number">+1</span><div><strong>Extended experiments or interaction.</strong><p>Complete a listed bonus experiment, error analysis, visualization, or web-interaction improvement from your selected project.</p></div></li></ol>
         </section>
-        <div class="course-project-note course-project-note--warning"><i class="fas fa-lock" aria-hidden="true"></i><p data-language-content="ai-project" data-language="zh" hidden>完整提示词仅供助教验证项目可行性，学生不提供也不应索取。请自行设计提示词，并在报告中记录自己的对话与迭代过程。</p><p data-language-content="ai-project" data-language="en">Complete prompts are kept only for staff feasibility checks; they are neither provided to nor expected from students. Design your own prompts and record your dialogue and iteration in the report.</p></div>
+        <div class="course-project-note course-project-note--warning"><i class="fas fa-lock" aria-hidden="true"></i><p data-language-content="ai-project" data-language="zh" hidden>完整提示词只供助教核验可行性；提示词由学生自行设计，迭代过程记入报告。</p><p data-language-content="ai-project" data-language="en">Complete prompts are kept for staff feasibility checks; design your own and record your iteration in the report.</p></div>
         <div class="course-data-actions" aria-label="Foundations of Artificial Intelligence materials"><a class="course-data-action course-data-action--primary" href="./projects/ai-project/AI_PROJECT_BRIEF.md" download><i class="far fa-file-alt" aria-hidden="true"></i><span data-language-content="ai-project" data-language="zh" hidden>下载项目说明</span><span data-language-content="ai-project" data-language="en">Download project brief</span></a><a class="course-data-action" href="./projects/ai-project/README.md" download><i class="far fa-file-code" aria-hidden="true"></i><span data-language-content="ai-project" data-language="zh" hidden>使用说明</span><span data-language-content="ai-project" data-language="en">README</span></a><a class="course-data-action" data-ai-project-data="all" href="#" aria-disabled="true"><i class="fas fa-database" aria-hidden="true"></i><span data-language-content="ai-project" data-language="zh" hidden>下载项目数据（提取码：<b data-extraction-code hidden></b>）</span><span data-language-content="ai-project" data-language="en">Download project data (code: <b data-extraction-code hidden></b>)</span><i class="fas fa-external-link-alt" aria-hidden="true"></i></a></div>
       </div>
     </details>
@@ -1182,7 +1244,7 @@ Support both a table editor and pasted textual rules such as q0,1 -&gt; q1,0,R. 
     <a href="https://xiaoyunyuan.net/">OpticAI Lab, Shanghai Jiao Tong University</a>
   </footer>
   <script src="./assets/js/cs0502-ai-data-links.js"></script>
-  <script src="./assets/js/cs0502-course.js"></script>
+  <script src="./assets/js/cs0502-course.js?v=20261127-1"></script>
   <script>document.addEventListener('DOMContentLoaded', function () { window.initCS0502Course(); });</script>
 </body>
 </html>
