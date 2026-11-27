@@ -1061,6 +1061,38 @@ footer .links a:hover {
     body.task-images .only-points { display: none !important; }
     body.task-points .only-images { display: none !important; }
 
+    /* 图像模式自己控制三栏：官方那套是四个固定宽度的栏 + space-between，
+       图像模式下中间会空出一大块，还会被滑块的负边距挤到隔壁栏。
+       这里换成网格，列宽固定、间距可控。 */
+    body.task-images #main-part {
+      display: grid;
+      grid-template-columns: 225px minmax(0, 1fr) 330px;
+      gap: 26px;
+      align-items: start;
+    }
+    body.task-images .data.column,
+    body.task-images .features.column,
+    body.task-images .output.column { width: auto; }
+    body.task-images .hidden-layers.column { display: none; }
+    body.task-images #main-part p.slider { margin: 0 0 18px; }
+    body.task-images .features.column > #network { width: 100%; }
+    body.task-images #svg { display: block; margin: 0; }
+
+    /* 图像模式：网络参数横排一行，放在结构图上方 */
+    body.task-images #image-layers {
+      display: flex; align-items: flex-end; gap: 22px; margin: 10px 0 4px 0;
+    }
+    body.task-images #image-layers .control { margin-bottom: 0; }
+    body.task-images #image-layers .control label {
+      display: block; color: #777; font-size: 13px; font-weight: 300; margin-bottom: 3px;
+    }
+    body.task-images #image-layers select {
+      -webkit-appearance: none; -moz-appearance: none; appearance: none;
+      display: block; width: 110px; background: none;
+      border: none; border-bottom: 1px solid #ccc; padding: 5px 2px; font-size: 14px;
+    }
+    body.task-images #image-params { margin: 0 0 6px 4px; }
+
     /* 图像任务：图案缩略图 */
     .pattern-list { display: flex; gap: 10px; margin: 6px 0 8px 0; flex-wrap: wrap; }
     .pattern-item { text-align: center; }
@@ -1069,8 +1101,11 @@ footer .links a:hover {
       background: #fff; display: block;
     }
     .pattern-item .pattern-label { font-size: 11px; color: #6b857c; margin-top: 3px; }
-    .pattern-hint { line-height: 1.75; margin-top: 6px; }
-    .image-hint { margin-top: 12px; line-height: 1.6; }
+    .pattern-hint { line-height: 1.85; margin-top: 10px; }
+    .image-hint { margin-top: 12px; line-height: 1.7; }
+    #image-layers { margin-top: 18px; }
+    #image-layers h4 { margin-bottom: 6px; }
+    #image-layers .control { margin-bottom: 8px; }
 
     /* 图像任务：输出区 */
     .image-stats { display: flex; gap: 20px; margin: 4px 0 10px 0; }
@@ -1196,7 +1231,7 @@ footer .links a:hover {
           </select>
         </div>
       </div>
-      <div class="control ui-problem">
+      <div class="control ui-problem only-points">
         <label for="problem">任务类型</label>
         <div class="select">
           <select id="problem">
@@ -1252,8 +1287,7 @@ footer .links a:hover {
           <div class="pattern-list" id="pattern-list"></div>
           <p class="label pattern-hint">
             训练集平移 ±1 像素，测试集平移 ±2 像素——位置变了，形状没变。
-            把像素拉平喂给 MLP，它记的是「哪一格亮」，换个位置就认不出了；
-            CNN 学的是「一小块里是什么」，位置反而不重要。
+            MLP 记的是「哪一格亮」，换个位置就认不出；CNN 学的是「一小块里是什么」，位置不重要。
           </p>
         </div>
         <div class="ui-noise">
@@ -1278,6 +1312,33 @@ footer .links a:hover {
     <div class="column features">
       <h4>特征</h4>
       <p>想喂给网络哪些特征？</p>
+      <!-- 图像任务的网络参数：横排一行，在结构图上方 -->
+      <div class="only-images" id="image-layers">
+        <div class="control">
+          <label for="cnn-blocks">卷积块个数</label>
+          <select id="cnn-blocks">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="cnn-filters">每块的卷积核个数</label>
+          <select id="cnn-filters">
+            <option value="4">4</option>
+            <option value="8" selected>8</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="mlp-hidden">MLP 隐层宽度</label>
+          <select id="mlp-hidden">
+            <option value="64">64</option>
+            <option value="128" selected>128</option>
+            <option value="256">256</option>
+          </select>
+        </div>
+        <p class="label image-hint" id="image-params"></p>
+      </div>
       <div id="network">
         <svg id="svg" width="510" height="450">
           <defs>
@@ -1318,9 +1379,14 @@ footer .links a:hover {
           </div>
         </div>
       </div>
+      <!-- 图像任务：CNN 学到的卷积核（放在结构图下面，讲「它学到了什么」时正好对着看） -->
+      <div class="only-images image-block" id="kernel-block">
+        <div class="label">第一个卷积块学到的卷积核（蓝=正，橙=负）</div>
+        <canvas id="kernel-grid" width="300" height="110"></canvas>
+      </div>
     </div>
 
-    <!-- 隐藏层栏 -->
+    <!-- 隐藏层栏（只有平面任务用得上：那里放的是每层神经元的 +/- 按钮） -->
     <div class="column hidden-layers">
       <h4 class="only-points">
         <div class="ui-numHiddenLayers">
@@ -1335,40 +1401,6 @@ footer .links a:hover {
         <span id="layers-label"></span>
       </h4>
       <div class="bracket only-points"></div>
-      <!-- 图像任务的网络参数 -->
-      <div class="only-images" id="image-layers">
-        <h4>网络</h4>
-        <div class="control">
-          <label for="cnn-blocks">卷积块个数</label>
-          <div class="select">
-            <select id="cnn-blocks">
-              <option value="1">1</option>
-              <option value="2" selected>2</option>
-            </select>
-          </div>
-        </div>
-        <div class="control">
-          <label for="cnn-filters">每块的卷积核个数</label>
-          <div class="select">
-            <select id="cnn-filters">
-              <option value="4">4</option>
-              <option value="8" selected>8</option>
-              <option value="16">16</option>
-            </select>
-          </div>
-        </div>
-        <div class="control">
-          <label for="mlp-hidden">MLP 隐层宽度</label>
-          <div class="select">
-            <select id="mlp-hidden">
-              <option value="64">64</option>
-              <option value="128" selected>128</option>
-              <option value="256">256</option>
-            </select>
-          </div>
-        </div>
-        <p class="label image-hint" id="image-params"></p>
-      </div>
     </div>
 
     <!-- 输出栏 -->
@@ -1401,10 +1433,6 @@ footer .links a:hover {
         <div class="image-block">
           <div class="label">测试集：绿=认对，红=认错</div>
           <canvas id="image-grid" width="300" height="240"></canvas>
-        </div>
-        <div class="image-block" id="kernel-block">
-          <div class="label">第一个卷积块学到的卷积核（蓝=正，橙=负）</div>
-          <canvas id="kernel-grid" width="300" height="110"></canvas>
         </div>
       </div>
       <div class="only-points" style="float:left;margin-top:20px">
@@ -4292,7 +4320,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
         state.discretize
       );
     });
-    function addCommas(s) {
+    function addCommas2(s) {
       return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     function humanReadable(n) {
@@ -4300,7 +4328,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     }
     d34.select("#loss-train").text(humanReadable(lossTrain));
     d34.select("#loss-test").text(humanReadable(lossTest));
-    d34.select("#iter-number").text(addCommas(String(iter)));
+    d34.select("#iter-number").text(addCommas2(String(iter)));
     lineChart.addDataPoint([lossTrain, lossTest]);
   }
   function constructInputIds() {
@@ -4461,7 +4489,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     if (!list || !patternSet) return;
     list.innerHTML = "";
     const G = patternSet.grid;
-    const scale = 4;
+    const scale = 3;
     for (let c = 0; c < patternSet.k; c++) {
       let idx = -1;
       for (let i = 0; i < patternSet.train.n; i++) {
@@ -4498,16 +4526,29 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     svg.select("g.core").remove();
     d34.select("#network").selectAll("div.canvas").remove();
     d34.select("#network").selectAll("div.plus-minus-neurons").remove();
-    const W = 186, boxH = 34, gap = 15;
-    svg.attr("width", W).attr("height", net.layers.length * (boxH + gap) + 8);
-    const g = svg.append("g").classed("core", true).attr("transform", "translate(4,4)");
+    const boxW = 84, boxH = 34, gap = 9, rowGap = 22;
+    const col = document.querySelector(".column.features");
+    const avail = Math.max(240, (col ? col.clientWidth : 640) - 12);
+    const perRow = Math.max(2, Math.floor((avail + gap) / (boxW + gap)));
+    const n = net.layers.length;
+    const rows = Math.ceil(n / perRow);
+    const W = perRow * boxW + (perRow - 1) * gap;
+    svg.attr("width", W).attr("height", rows * (boxH + rowGap) + 6);
+    const g = svg.append("g").classed("core", true).attr("transform", "translate(2,2)");
     net.layers.forEach((L, i) => {
-      const y = i * (boxH + gap);
-      g.append("rect").attr("x", 0).attr("y", y).attr("width", W - 8).attr("height", boxH).attr("rx", 5).attr("fill", "#f2f6f4").attr("stroke", "#b9c8c1");
-      g.append("text").attr("x", 10).attr("y", y + 14).attr("font-size", 12.5).attr("fill", "#14322a").text(L.name);
-      g.append("text").attr("x", 10).attr("y", y + 27).attr("font-size", 11).attr("fill", "#6b857c").text(L.shape);
+      const row = Math.floor(i / perRow), c = i % perRow;
+      const x = c * (boxW + gap), y = row * (boxH + rowGap);
+      g.append("rect").attr("x", x).attr("y", y).attr("width", boxW).attr("height", boxH).attr("rx", 5).attr("fill", "#f2f6f4").attr("stroke", "#b9c8c1");
+      g.append("text").attr("x", x + 8).attr("y", y + 15).attr("font-size", 12).attr("fill", "#14322a").text(L.name);
+      g.append("text").attr("x", x + 8).attr("y", y + 27).attr("font-size", 10).attr("fill", "#6b857c").text(L.shape);
       if (i > 0) {
-        g.append("line").attr("x1", (W - 8) / 2).attr("x2", (W - 8) / 2).attr("y1", y - gap + 1).attr("y2", y - 2).attr("stroke", "#9fb3aa").attr("stroke-width", 1.5).attr("marker-end", "url(#markerArrow)");
+        const prevX = (c - 1) * (boxW + gap);
+        const prevY = (row - (c === 0 ? 1 : 0)) * (boxH + rowGap);
+        if (c === 0) {
+          g.append("line").attr("x1", prevX + boxW / 2).attr("x2", prevX + boxW / 2).attr("y1", prevY + boxH).attr("y2", y - 2).attr("stroke", "#9fb3aa").attr("stroke-width", 1.5).attr("marker-end", "url(#markerArrow)");
+        } else {
+          g.append("line").attr("x1", prevX + boxW).attr("x2", x - 2).attr("y1", prevY + boxH / 2).attr("y2", y + boxH / 2).attr("stroke", "#9fb3aa").attr("stroke-width", 1.5).attr("marker-end", "url(#markerArrow)");
+        }
       }
     });
     d34.select("#image-params").text(
@@ -4519,15 +4560,15 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     if (!cv || !patternSet) return;
     const ctx = cv.getContext("2d");
     const G = patternSet.grid;
-    const px = 2, cell = G * px + 8, cols = 8;
-    const count = Math.min(40, patternSet.test.n);
+    const px = 3, cell = G * px + 10, cols = 6;
+    const count = Math.min(30, patternSet.test.n);
     const rows = Math.ceil(count / cols);
     cv.width = cols * cell;
-    cv.height = rows * (cell + 12);
+    cv.height = rows * (cell + 13);
     ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.font = "10px sans-serif";
+    ctx.font = "11px sans-serif";
     for (let i = 0; i < count; i++) {
-      const x = i % cols * cell, y = Math.floor(i / cols) * (cell + 12);
+      const x = i % cols * cell, y = Math.floor(i / cols) * (cell + 13);
       const img = patternSet.test.X[i];
       const truth = patternSet.test.y[i];
       const ok = pred.pred[i] === truth;
@@ -4535,28 +4576,36 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
         for (let c = 0; c < G; c++) {
           const g = Math.round(Math.max(0, Math.min(1, img[r * G + c])) * 255);
           ctx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
-          ctx.fillRect(x + 4 + c * px, y + 4 + r * px, px, px);
+          ctx.fillRect(x + 5 + c * px, y + 5 + r * px, px, px);
         }
       }
       ctx.strokeStyle = ok ? "#2e9e6b" : "#d94b3a";
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
       ctx.fillStyle = ok ? "#2e9e6b" : "#d94b3a";
-      ctx.fillText(patternSet.labels[truth], x + 4, y + cell + 2);
+      ctx.fillText(
+        ok ? patternSet.labels[truth] : patternSet.labels[truth] + "\u2192" + patternSet.labels[pred.pred[i]],
+        x + 5,
+        y + cell + 3
+      );
     }
   }
   function drawKernels() {
     const cv = document.getElementById("kernel-grid");
+    const block = document.getElementById("kernel-block");
     if (!cv || !imageNet) return;
     const ctx = cv.getContext("2d");
     const info = convKernels(imageNet);
-    ctx.clearRect(0, 0, cv.width, cv.height);
     if (!info.kernels.length) {
+      if (block) block.style.display = "";
+      cv.height = 18;
+      ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.fillStyle = "#6b857c";
       ctx.font = "12px sans-serif";
-      ctx.fillText("MLP \u6CA1\u6709\u5377\u79EF\u6838\u2014\u2014\u5B83\u76F4\u63A5\u8FDE\u6BCF\u4E00\u683C\u50CF\u7D20\u3002", 10, 30);
+      ctx.fillText("MLP \u6CA1\u6709\u5377\u79EF\u6838\u2014\u2014\u5B83\u76F4\u63A5\u628A\u6BCF\u4E00\u683C\u50CF\u7D20\u8FDE\u5230\u4E0B\u4E00\u5C42\u3002", 2, 13);
       return;
     }
+    if (block) block.style.display = "";
     const K = info.k, n = info.kernels.length;
     const cell = Math.max(24, Math.min(40, Math.floor(290 / n)));
     const px = Math.floor(cell / K);
@@ -4582,6 +4631,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   function updateImageUI() {
     d34.select("#loss-train").text(lossTrain.toFixed(3));
     d34.select("#loss-test").text(lossTest.toFixed(3));
+    d34.select("#iter-number").text(addCommas(String(iter)));
     const testPred = imagePredict(imageNet, imageTestBatch);
     const trainPred = imagePredict(imageNet, imageTrainBatch);
     d34.select("#acc-test").text((testPred.acc * 100).toFixed(1) + "%");
@@ -4589,6 +4639,9 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     drawImageGrid(testPred);
     drawKernels();
     lineChart.addDataPoint([lossTrain, lossTest]);
+  }
+  function addCommas(s) {
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function drawDatasetThumbnails() {
     function renderThumbnail(canvas, dataGenerator) {
@@ -4760,6 +4813,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       },
       quietTrain: (epochs) => {
         for (let i = 0; i < epochs; i++) {
+          iter++;
           trainImageEpoch(
             imageNet,
             imageTrainBatch,
