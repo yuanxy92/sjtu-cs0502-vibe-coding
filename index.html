@@ -751,119 +751,59 @@
         </div>
       </details>
 
-      <details class="course-project-card" id="neural-net-playground">
+      <details class="course-project-card" id="neural-network-tools">
         <summary class="course-project-card__toggle">
           <span class="course-project-card__number">12</span>
           <span class="course-project-card__main">
-            <span class="course-project-card__meta"><span data-language-heading="playground-lab" data-zh="计算机科学导论 · 神经网络" data-en="Introduction to CS · Neural networks">Introduction to CS · Neural networks</span></span>
-            <strong data-language-heading="playground-lab" data-zh="神经网络游乐场" data-en="Neural Network Playground">Neural Network Playground</strong>
-            <span class="course-project-card__summary" data-language-content="playground-lab" data-language="zh" hidden>浏览器里亲手调一个多层感知机：改结构、点运行，看决策边界实时变化。</span>
-            <span class="course-project-card__summary" data-language-content="playground-lab" data-language="en">Tinker with a multilayer perceptron in the browser: change the shape, hit run, watch the decision boundary move.</span>
+            <span class="course-project-card__meta"><span data-language-heading="nn-tools" data-zh="计算机科学导论 · 神经网络" data-en="Introduction to CS · Neural networks">Introduction to CS · Neural networks</span></span>
+            <strong data-language-heading="nn-tools" data-zh="神经网络游乐场与讲解器" data-en="Neural Network Playground &amp; Explainers">Neural Network Playground &amp; Explainers</strong>
+            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="zh" hidden>一个入口，三件动手的事：自己调一个多层感知机，再逐层打开卷积网络与 Transformer。</span>
+            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="en">One card, three hands-on tools: tune a multilayer perceptron yourself, then open up convolutional networks and Transformers layer by layer.</span>
           </span>
           <span class="course-project-card__action" aria-hidden="true">
-            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="playground-lab" data-zh="打开游乐场" data-en="Open playground">Open playground</span>
-            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="playground-lab" data-zh="收起游乐场" data-en="Close playground">Close playground</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="nn-tools" data-zh="展开三个工具" data-en="Open the three tools">Open the three tools</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="nn-tools" data-zh="收起" data-en="Close">Close</span>
             <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
           </span>
         </summary>
         <div class="course-project-card__details">
-          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="playground-lab" aria-label="Neural network playground language">
+          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="nn-tools" aria-label="Neural network tools language">
             <button type="button" data-language="zh" aria-pressed="false">中文</button>
             <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
           </div>
           <div class="course-project-note">
             <i class="fas fa-project-diagram" aria-hidden="true"></i>
-            <p data-language-content="playground-lab" data-language="zh" hidden>交互式神经网络教学页：改结构、调参数，看决策边界随训练实时变化。训练用课程自研引擎，CNN/RNN/Transformer 正在接入。</p>
-            <p data-language-content="playground-lab" data-language="en">An interactive neural-network toy: change the shape, watch the decision boundary follow the training. Trained by the course's own engine; CNN/RNN/Transformer are on the way.</p>
+            <p data-language-content="nn-tools" data-language="zh" hidden>游乐场用课程自研引擎（中文、离线可用）；两个讲解器改编自 poloclub 的 CNN Explainer 与 Transformer Explainer（MIT 许可），我们做了本地部署、去统计与加载稳定性处理。交互部分保留，讲解文字未译。</p>
+            <p data-language-content="nn-tools" data-language="en">The playground runs on the course's own engine (in Chinese, works offline). The two explainers are adapted from poloclub's CNN Explainer and Transformer Explainer (MIT licence), locally deployed with analytics removed and a more robust model download. The interaction is kept; the prose is not translated.</p>
           </div>
-          <div class="course-video-chapters" aria-label="Neural network playground">
+          <div class="course-video-chapters" aria-label="Neural network tools">
             <a class="course-video-chapter" href="./projects/playground-mlp/index.html">
-              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__number">01</span>
               <span class="course-video-chapter__content">
-                <strong data-language-content="playground-lab" data-language="zh" hidden>打开神经网络游乐场</strong>
-                <strong data-language-content="playground-lab" data-language="en">Open the Neural Network Playground</strong>
-                <small data-language-content="playground-lab" data-language="zh" hidden>中文界面，离线可用，训练内核为自研引擎</small>
-                <small data-language-content="playground-lab" data-language="en">In Chinese, works offline, trained by our own engine</small>
+                <strong data-language-content="nn-tools" data-language="zh" hidden>神经网络游乐场</strong>
+                <strong data-language-content="nn-tools" data-language="en">Neural Network Playground</strong>
+                <small data-language-content="nn-tools" data-language="zh" hidden>改结构、调参数，看决策边界随训练实时变化</small>
+                <small data-language-content="nn-tools" data-language="en">Change the shape, watch the decision boundary follow the training</small>
               </span>
               <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
             </a>
-          </div>
-        </div>
-      </details>
-
-      <details class="course-project-card" id="cnn-explainer">
-        <summary class="course-project-card__toggle">
-          <span class="course-project-card__number">13</span>
-          <span class="course-project-card__main">
-            <span class="course-project-card__meta"><span data-language-heading="cnnx-lab" data-zh="计算机科学导论 · 卷积网络" data-en="Introduction to CS · Convolutional networks">Introduction to CS · Convolutional networks</span></span>
-            <strong data-language-heading="cnnx-lab" data-zh="卷积网络讲解器" data-en="CNN Explainer">CNN Explainer</strong>
-            <span class="course-project-card__summary" data-language-content="cnnx-lab" data-language="zh" hidden>逐层看卷积、池化、全连接在做什么；可以上传自己的图片看它怎么被分类。</span>
-            <span class="course-project-card__summary" data-language-content="cnnx-lab" data-language="en">See what convolution, pooling and the dense layer actually do; upload your own image and watch it get classified.</span>
-          </span>
-          <span class="course-project-card__action" aria-hidden="true">
-            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="cnnx-lab" data-zh="打开讲解器" data-en="Open explainer">Open explainer</span>
-            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="cnnx-lab" data-zh="收起讲解器" data-en="Close explainer">Close explainer</span>
-            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-          </span>
-        </summary>
-        <div class="course-project-card__details">
-          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="cnnx-lab" aria-label="CNN explainer language">
-            <button type="button" data-language="zh" aria-pressed="false">中文</button>
-            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-          </div>
-          <div class="course-project-note">
-            <i class="fas fa-diagram-project" aria-hidden="true"></i>
-            <p data-language-content="cnnx-lab" data-language="zh" hidden>源自 poloclub 的 CNN Explainer（MIT 许可），我们做了本地部署与去统计处理。交互部分保留，文字讲解未译。</p>
-            <p data-language-content="cnnx-lab" data-language="en">Adapted from poloclub's CNN Explainer (MIT licence), locally deployed with analytics removed. The interaction is kept; the prose is not translated.</p>
-          </div>
-          <div class="course-video-chapters" aria-label="CNN explainer">
             <a class="course-video-chapter" href="./projects/cnn-explainer/index.html">
-              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__number">02</span>
               <span class="course-video-chapter__content">
-                <strong data-language-content="cnnx-lab" data-language="zh" hidden>打开卷积网络讲解器</strong>
-                <strong data-language-content="cnnx-lab" data-language="en">Open the CNN Explainer</strong>
-                <small data-language-content="cnnx-lab" data-language="zh" hidden>可交互、可上传图片，致谢原作者</small>
-                <small data-language-content="cnnx-lab" data-language="en">Interactive, upload your own image, credits to the authors</small>
+                <strong data-language-content="nn-tools" data-language="zh" hidden>卷积网络讲解器</strong>
+                <strong data-language-content="nn-tools" data-language="en">CNN Explainer</strong>
+                <small data-language-content="nn-tools" data-language="zh" hidden>逐层看卷积、池化、全连接在做什么，还能上传自己的图片</small>
+                <small data-language-content="nn-tools" data-language="en">See what convolution, pooling and the dense layer do; upload your own image</small>
               </span>
               <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
             </a>
-          </div>
-        </div>
-      </details>
-
-      <details class="course-project-card" id="transformer-explainer">
-        <summary class="course-project-card__toggle">
-          <span class="course-project-card__number">14</span>
-          <span class="course-project-card__main">
-            <span class="course-project-card__meta"><span data-language-heading="transformer-lab" data-zh="计算机科学导论 · 注意力机制" data-en="Introduction to CS · Attention">Introduction to CS · Attention</span></span>
-            <strong data-language-heading="transformer-lab" data-zh="Transformer 讲解器" data-en="Transformer Explainer">Transformer Explainer</strong>
-            <span class="course-project-card__summary" data-language-content="transformer-lab" data-language="zh" hidden>自己写一句话，看它逐词生成：注意力权重、Q/K/V、位置编码都能点开看。</span>
-            <span class="course-project-card__summary" data-language-content="transformer-lab" data-language="en">Write a sentence and watch it generate token by token; tap into attention weights, Q/K/V and positional encoding.</span>
-          </span>
-          <span class="course-project-card__action" aria-hidden="true">
-            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="transformer-lab" data-zh="打开讲解器" data-en="Open explainer">Open explainer</span>
-            <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="transformer-lab" data-zh="收起讲解器" data-en="Close explainer">Close explainer</span>
-            <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
-          </span>
-        </summary>
-        <div class="course-project-card__details">
-          <div class="course-project-card__language course-language-switcher" data-language-switcher data-language-target="transformer-lab" aria-label="Transformer explainer language">
-            <button type="button" data-language="zh" aria-pressed="false">中文</button>
-            <button type="button" class="is-active" data-language="en" aria-pressed="true">English</button>
-          </div>
-          <div class="course-project-note">
-            <i class="fas fa-diagram-project" aria-hidden="true"></i>
-            <p data-language-content="transformer-lab" data-language="zh" hidden>源自 poloclub 的 Transformer Explainer（MIT 许可），我们做了本地部署、去统计与加载稳定性处理。首次打开需下载约 630MB 模型，之后走浏览器缓存。交互部分保留，文字讲解未译。</p>
-            <p data-language-content="transformer-lab" data-language="en">Adapted from poloclub's Transformer Explainer (MIT licence), locally deployed with analytics removed and a more robust model download. The first visit pulls a ~630 MB model; later visits use the browser cache. The interaction is kept; the prose is not translated.</p>
-          </div>
-          <div class="course-video-chapters" aria-label="Transformer explainer">
             <a class="course-video-chapter" href="./projects/transformer-explainer/index.html">
-              <span class="course-video-chapter__number">↗</span>
+              <span class="course-video-chapter__number">03</span>
               <span class="course-video-chapter__content">
-                <strong data-language-content="transformer-lab" data-language="zh" hidden>打开 Transformer 讲解器</strong>
-                <strong data-language-content="transformer-lab" data-language="en">Open the Transformer Explainer</strong>
-                <small data-language-content="transformer-lab" data-language="zh" hidden>可交互、逐词生成，致谢原作者</small>
-                <small data-language-content="transformer-lab" data-language="en">Interactive, token-by-token, credits to the authors</small>
+                <strong data-language-content="nn-tools" data-language="zh" hidden>Transformer 讲解器</strong>
+                <strong data-language-content="nn-tools" data-language="en">Transformer Explainer</strong>
+                <small data-language-content="nn-tools" data-language="zh" hidden>写一句话看它逐词生成，点开注意力权重与 Q/K/V（首次打开需下载约 630MB 模型）</small>
+                <small data-language-content="nn-tools" data-language="en">Write a sentence, watch it generate token by token; tap into attention weights and Q/K/V (~630 MB model on the first visit)</small>
               </span>
               <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
             </a>
