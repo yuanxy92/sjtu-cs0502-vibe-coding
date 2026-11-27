@@ -1075,6 +1075,11 @@ footer .links a:hover {
     body.task-images .output.column { width: auto; }
     body.task-images .hidden-layers.column { display: none; }
     body.task-images #main-part p.slider { margin: 0 0 18px; }
+    /* 官方把 #network（网络图容器）设成 position:absolute，让图浮在栏上——
+       图像模式里图下面还要放卷积核，绝对定位会让两者叠在一起，改回常规流 */
+    body.task-images .features.column > #network {
+      position: static; top: auto; left: auto;
+    }
     body.task-images .features.column > #network { width: 100%; }
     body.task-images #svg { display: block; margin: 0; }
 
@@ -1092,6 +1097,12 @@ footer .links a:hover {
       border: none; border-bottom: 1px solid #ccc; padding: 5px 2px; font-size: 14px;
     }
     body.task-images #image-params { margin: 0 0 6px 4px; }
+    /* 图像模式：曲线画的是准确率，给个说明；官方那块 metrics 只有 60px 高，
+       这里留出一条位置放说明文字 */
+    body.task-images .metrics { height: 76px; }
+    body.task-images .chart-caption {
+      position: absolute; right: 0; bottom: 2px; font-size: 10.5px; color: #999;
+    }
 
     /* 图像任务：图案缩略图 */
     .pattern-list { display: flex; gap: 10px; margin: 6px 0 8px 0; flex-wrap: wrap; }
@@ -1416,6 +1427,7 @@ footer .links a:hover {
           <div class="value" id="loss-train"></div>
         </div>
         <div id="linechart"></div>
+        <span class="chart-caption only-images">曲线：训练 / 测试准确率</span>
       </div>
       <div id="heatmap" class="only-points"></div>
       <!-- 图像任务的输出：准确率 + 测试图像网格 + 卷积核 -->
@@ -1511,7 +1523,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
-  // labs/playground-mlp/engine/nn-core.js
+  // engine/nn-core.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1764,7 +1776,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/engine/nn-mlp.js
+  // engine/nn-mlp.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1948,7 +1960,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/engine/nn-cnn.js
+  // engine/nn-cnn.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -2365,7 +2377,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/engine/nn-data.js
+  // engine/nn-data.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -2605,7 +2617,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/src/nn-engine.ts
+  // src/nn-engine.ts
   var NN = window.NN;
   var core = NN.core;
   var Activations = class {
@@ -3029,7 +3041,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return { k: K, kernels };
   }
 
-  // labs/playground-mlp/src/heatmap.ts
+  // src/heatmap.ts
   var d3 = window.d3;
   var NUM_SHADES = 30;
   var HeatMap = class {
@@ -3163,7 +3175,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return result;
   }
 
-  // labs/playground-mlp/src/dataset.ts
+  // src/dataset.ts
   var d32 = window.d3;
   function shuffle(array) {
     let counter = array.length;
@@ -3321,7 +3333,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // labs/playground-mlp/src/state.ts
+  // src/state.ts
   var HIDE_STATE_SUFFIX = "_hide";
   var activations = {
     "relu": Activations.RELU,
@@ -3538,7 +3550,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   ]);
   var State = _State;
 
-  // labs/playground-mlp/src/linechart.ts
+  // src/linechart.ts
   var d33 = window.d3;
   var AppendingLineChart = class {
     constructor(container, lineColors) {
@@ -3600,7 +3612,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     }
   };
 
-  // labs/playground-mlp/src/playground.ts
+  // src/playground.ts
   var d34 = window.d3;
   var mainWidth;
   d34.select(".more button").on("click", function() {
@@ -4560,13 +4572,13 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     if (!cv || !patternSet) return;
     const ctx = cv.getContext("2d");
     const G = patternSet.grid;
-    const px = 3, cell = G * px + 10, cols = 6;
+    const px = 3, cell = G * px + 16, cols = 6;
     const count = Math.min(30, patternSet.test.n);
     const rows = Math.ceil(count / cols);
     cv.width = cols * cell;
     cv.height = rows * (cell + 13);
     ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.font = "11px sans-serif";
+    ctx.font = "9.5px sans-serif";
     for (let i = 0; i < count; i++) {
       const x = i % cols * cell, y = Math.floor(i / cols) * (cell + 13);
       const img = patternSet.test.X[i];
@@ -4576,7 +4588,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
         for (let c = 0; c < G; c++) {
           const g = Math.round(Math.max(0, Math.min(1, img[r * G + c])) * 255);
           ctx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
-          ctx.fillRect(x + 5 + c * px, y + 5 + r * px, px, px);
+          ctx.fillRect(x + 7 + c * px, y + 5 + r * px, px, px);
         }
       }
       ctx.strokeStyle = ok ? "#2e9e6b" : "#d94b3a";
@@ -4585,7 +4597,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       ctx.fillStyle = ok ? "#2e9e6b" : "#d94b3a";
       ctx.fillText(
         ok ? patternSet.labels[truth] : patternSet.labels[truth] + "\u2192" + patternSet.labels[pred.pred[i]],
-        x + 5,
+        x + 3,
         y + cell + 3
       );
     }
@@ -4638,7 +4650,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     d34.select("#acc-train").text((trainPred.acc * 100).toFixed(1) + "%");
     drawImageGrid(testPred);
     drawKernels();
-    lineChart.addDataPoint([lossTrain, lossTest]);
+    lineChart.addDataPoint([trainPred.acc, testPred.acc]);
   }
   function addCommas(s) {
     return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
