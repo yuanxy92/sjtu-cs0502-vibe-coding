@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="CNN Explainer" />
+    <meta
+      name="description"
+      content="An interactive visualization system designed to help non-experts learn about Convolutional Neural Networks (CNNs)."
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://poloclub.github.io/cnn-explainer/"
+    />
+    <meta property="og:title" content="CNN Explainer" />
+    <meta
+      property="og:description"
+      content="An interactive visualization system designed to help non-experts learn about Convolutional Neural Networks (CNNs)."
+    />
+    <meta
+      property="og:image"
+      content="https://poloclub.github.io./assets/figures/preview.png"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://poloclub.github.io/cnn-explainer/"
+    />
+    <meta property="twitter:title" content="CNN Explainer" />
+    <meta
+      property="twitter:description"
+      content="An interactive visualization system designed to help non-experts learn about Convolutional Neural Networks (CNNs)."
+    />
+    <meta
+      property="twitter:image"
+      content="https://poloclub.github.io./assets/figures/preview.png"
+    />
+    <meta property="twitter:site" content="@jay4w" />
+    <meta property="twitter:creator" content="@jay4w" />
+
+    <title>CNN Explainer</title>
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="./assets/img/favicon.png"
+    />
+    <link rel="stylesheet" href="./global.css" />
+    <link rel="stylesheet" href="./bundle.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Neucha&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+    ></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/smooth-scroll@15/dist/smooth-scroll.polyfills.min.js"></script>
+    <script
+      id="MathJax-script"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+    ></script>
+
+    <script
+      type="module"
+      src="https://unpkg.com/recommender-overlay/dist/recommender-overlay.es.js"
+    ></script>
+
+    <script defer src="./bundle.js"></script>
+
+    
+
+    <style>
+      @font-face {
+        font-family: 'A Love of Thunder';
+        src: URL('./assets/font/A Love of Thunder.ttf')
+          format('truetype');
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <style>
+      .course-attribution {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+        display: flex; gap: 14px; align-items: center; justify-content: center;
+        flex-wrap: wrap;
+        padding: 7px 14px; font-size: 12.5px; line-height: 1.5;
+        background: rgba(255, 255, 255, .94); color: #556;
+        border-top: 1px solid rgba(0, 0, 0, .08);
+      }
+      .course-attribution a { color: #1a6fb5; }
+      .course-attribution .sep { color: #bbb; }
+      /* 讲解文章（纯文字 + 配图）收起来，只留交互式可视化：
+         保留 div.overview（网络总览图）与 #detailview-container（逐层讲解器），
+         标题、段落、图注、示意图、视频区块全部隐藏。
+         （配图 assets/figures/*.gif 有 10MB，按需要不随页面发布） */
+      .svelte-1avhf6 h2,
+      .svelte-1avhf6 h4,
+      .svelte-1avhf6 h6,
+      .svelte-1avhf6 p:not(:has(#detailview-container)),
+      .svelte-1avhf6 ol,
+      .svelte-1avhf6 ul,
+      .svelte-1avhf6 div.figure,
+      .svelte-1avhf6 div.video { display: none !important; }
+    </style>
+    <div class="course-attribution">
+      <a href="../../index.html">← 返回课程主页</a>
+      <span class="sep">|</span>
+      <span>本页改编自 <a href="https://github.com/poloclub/cnn-explainer" target="_blank" rel="noopener">CNN Explainer</a>
+        （MIT 许可），原作者 Zijie J. Wang、Robert Turko、Omar Shaikh 等（Georgia Tech / Oregon State），
+        论文见 <a href="https://arxiv.org/abs/2004.15004" target="_blank" rel="noopener">arXiv:2004.15004</a>。课程教学使用，谨致谢意。</span>
+    </div>
+  </body>
+</html>
