@@ -1,8 +1,9 @@
 <!doctype html>
 <!--
-  基于 TensorFlow Playground（Copyright 2016 Google Inc.，Apache License 2.0）
-  中文本地化 + 课程化改造。原始文件见 vendor/playground/index.orig.html
-  许可与致谢见 LICENSE-THIRD-PARTY.md
+  界面改编自 TensorFlow Playground（Copyright 2016 Google Inc.，Apache License 2.0）：
+  决策边界、网络结构图、损失曲线等界面代码来自原项目，
+  神经网络训练由课程自研引擎（src/nn-engine.ts + engine/）完成，页面不加载任何 TensorFlow 库。
+  原始文件见 vendor/playground/index.orig.html，许可与致谢见 NOTICE.md
 -->
 <html lang="zh-CN">
 <head>
@@ -1067,7 +1068,7 @@ footer .links a:hover {
       <p class="course-meta">
         计算机科学导论 · 神经网络游乐场 ｜
         <a href="../../index.html">← 返回课程主页</a> ｜
-        原始项目：TensorFlow Playground（Apache-2.0，已本地化，离线可用）
+        界面改编自 TensorFlow Playground（Apache-2.0），训练内核为课程自研引擎
       </p>
       <div class="course-note">
         <b>课堂提示：</b>网络结构（几层、每层几个神经元）决定"能画多复杂的边界"，
@@ -1354,17 +1355,18 @@ footer .links a:hover {
   <footer>
     <div class="l--body">
       <div class="links">
-        <a href="https://github.com/tensorflow/playground">原项目源码（GitHub）</a> ·
+        <a href="https://github.com/tensorflow/playground">界面来源：TensorFlow Playground（GitHub）</a> ·
         <a href="../../index.html">返回课程主页</a>
       </div>
       <p class="license-note">
-        计算机科学导论 · 神经网络游乐场 ｜ 离线单文件版，字体与脚本均已本地打包 ｜
-        界面基于 TensorFlow Playground（Apache-2.0），训练内核为课程自研引擎
+        计算机科学导论 · 神经网络游乐场 ｜ 单文件离线版：不加载任何外部库，不发起网络请求 ｜
+        界面代码改编自 TensorFlow Playground（Apache-2.0，原作者 Daniel Smilkov、Shan Carter），
+        神经网络训练由课程自研引擎完成
       </p>
     </div>
   </footer>
 
-  <!-- 统计脚本桩：官方 bundle.js 在训练开始时会调用 ga() 上报事件，
+  <!-- 统计脚本桩：打包后的脚本在训练开始时会调用 ga() 上报事件，
        我们移除了 analytics.js，这里给一个空实现，避免点击运行时抛错 -->
   <script>window.ga = window.ga || function () {}; window.gtag = window.gtag || function () {};</script>
   <script id="vendor-lib">
