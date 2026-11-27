@@ -3377,10 +3377,6 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
         state.discretize
       );
     });
-    function zeroPad(n) {
-      let pad = "000000";
-      return (pad + n).slice(-pad.length);
-    }
     function addCommas(s) {
       return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
@@ -3389,7 +3385,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     }
     d34.select("#loss-train").text(humanReadable(lossTrain));
     d34.select("#loss-test").text(humanReadable(lossTest));
-    d34.select("#iter-number").text(addCommas(zeroPad(iter)));
+    d34.select("#iter-number").text(addCommas(String(iter)));
     lineChart.addDataPoint([lossTrain, lossTest]);
   }
   function constructInputIds() {
