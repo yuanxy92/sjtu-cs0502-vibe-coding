@@ -1056,6 +1056,29 @@ footer .links a:hover {
     .task-list b { color: var(--course-accent); }
     footer .links a { color: var(--course-accent); }
     .license-note { font-size: 12.5px; color: #6b857c; line-height: 1.8; margin-top: 10px; }
+
+    /* 任务切换：散点 / 图像 */
+    body.task-images .only-points { display: none !important; }
+    body.task-points .only-images { display: none !important; }
+
+    /* 图像任务：图案缩略图 */
+    .pattern-list { display: flex; gap: 10px; margin: 6px 0 8px 0; flex-wrap: wrap; }
+    .pattern-item { text-align: center; }
+    .pattern-item canvas {
+      image-rendering: pixelated; border: 1px solid #d7ded9; border-radius: 3px;
+      background: #fff; display: block;
+    }
+    .pattern-item .pattern-label { font-size: 11px; color: #6b857c; margin-top: 3px; }
+    .pattern-hint { line-height: 1.75; margin-top: 6px; }
+    .image-hint { margin-top: 12px; line-height: 1.6; }
+
+    /* 图像任务：输出区 */
+    .image-stats { display: flex; gap: 20px; margin: 4px 0 10px 0; }
+    .image-block { margin: 10px 0 18px 0; }
+    .image-block .label { margin-bottom: 5px; }
+    #image-grid, #kernel-grid {
+      border: 1px solid #dfe7e3; border-radius: 4px; background: #fff; display: block;
+    }
   </style>
 </head>
 <body>
@@ -1092,12 +1115,21 @@ footer .links a:hover {
           <i class="material-icons">skip_next</i>
         </button>
       </div>
+      <div class="control ui-taskType">
+        <label for="task-type">任务</label>
+        <div class="select">
+          <select id="task-type">
+            <option value="points" selected>散点（平面分类 / 回归）</option>
+            <option value="images">图像（图案识别）</option>
+          </select>
+        </div>
+      </div>
       <div class="control ui-networkType">
         <label for="network-type">网络类型</label>
         <div class="select">
           <select id="network-type">
             <option value="mlp" selected>MLP 多层感知机</option>
-            <option value="cnn" disabled>CNN 卷积网络（接入中）</option>
+            <option value="cnn">CNN 卷积网络</option>
             <option value="rnn" disabled>RNN 循环网络（接入中）</option>
             <option value="transformer" disabled>Transformer（接入中）</option>
           </select>
@@ -1115,6 +1147,7 @@ footer .links a:hover {
             <option value="0.0001">0.0001</option>
             <option value="0.001">0.001</option>
             <option value="0.003">0.003</option>
+            <option value="0.005">0.005</option>
             <option value="0.01">0.01</option>
             <option value="0.03">0.03</option>
             <option value="0.1">0.1</option>
@@ -1183,7 +1216,7 @@ footer .links a:hover {
       <h4>
         <span>数据</span>
       </h4>
-      <div class="ui-dataset">
+      <div class="ui-dataset only-points">
         <p>想用哪份数据？</p>
         <div class="dataset-list">
           <div class="dataset" title="环形（可分）">
@@ -1207,10 +1240,20 @@ footer .links a:hover {
         </div>
       </div>
       <div>
-        <div class="ui-percTrainData">
+        <div class="ui-percTrainData only-points">
           <label for="percTrainData">训练集占比:&nbsp;&nbsp;<span class="value">XX</span>%</label>
           <p class="slider">
             <input class="mdl-slider mdl-js-slider" type="range" id="percTrainData" min="10" max="90" step="10">
+          </p>
+        </div>
+        <!-- 图像任务：四类图案 -->
+        <div class="only-images" id="pattern-panel">
+          <p>四类 12×12 灰度图案：</p>
+          <div class="pattern-list" id="pattern-list"></div>
+          <p class="label pattern-hint">
+            训练集平移 ±1 像素，测试集平移 ±2 像素——位置变了，形状没变。
+            把像素拉平喂给 MLP，它记的是「哪一格亮」，换个位置就认不出了；
+            CNN 学的是「一小块里是什么」，位置反而不重要。
           </p>
         </div>
         <div class="ui-noise">
@@ -1244,11 +1287,11 @@ footer .links a:hover {
           </defs>
         </svg>
         <!-- 悬停卡片 -->
-        <div id="hovercard">
+        <div id="hovercard" class="only-points">
           <div style="font-size:10px">点击任意位置即可编辑。</div>
           <div><span class="type">权重/偏置</span> 是 <span class="value">0.2</span><span><input type="number"/></span>。</div>
         </div>
-        <div class="callout thumbnail">
+        <div class="callout thumbnail only-points">
           <svg viewBox="0 0 30 30">
             <defs>
               <marker id="arrow" markerWidth="5" markerHeight="5" refx="5" refy="2.5" orient="auto" markerUnits="userSpaceOnUse">
@@ -1261,7 +1304,7 @@ footer .links a:hover {
             这是一个<b>神经元</b>的输出，鼠标悬停可放大查看。
           </div>
         </div>
-        <div class="callout weights">
+        <div class="callout weights only-points">
           <svg viewBox="0 0 30 30">
             <defs>
               <marker id="arrow" markerWidth="5" markerHeight="5" refx="5" refy="2.5" orient="auto" markerUnits="userSpaceOnUse">
@@ -1279,7 +1322,7 @@ footer .links a:hover {
 
     <!-- 隐藏层栏 -->
     <div class="column hidden-layers">
-      <h4>
+      <h4 class="only-points">
         <div class="ui-numHiddenLayers">
           <button id="add-layers" class="mdl-button mdl-js-button mdl-button--icon">
             <i class="material-icons">add</i>
@@ -1291,7 +1334,41 @@ footer .links a:hover {
         <span id="num-layers"></span>
         <span id="layers-label"></span>
       </h4>
-      <div class="bracket"></div>
+      <div class="bracket only-points"></div>
+      <!-- 图像任务的网络参数 -->
+      <div class="only-images" id="image-layers">
+        <h4>网络</h4>
+        <div class="control">
+          <label for="cnn-blocks">卷积块个数</label>
+          <div class="select">
+            <select id="cnn-blocks">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+            </select>
+          </div>
+        </div>
+        <div class="control">
+          <label for="cnn-filters">每块的卷积核个数</label>
+          <div class="select">
+            <select id="cnn-filters">
+              <option value="4">4</option>
+              <option value="8" selected>8</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+        </div>
+        <div class="control">
+          <label for="mlp-hidden">MLP 隐层宽度</label>
+          <div class="select">
+            <select id="mlp-hidden">
+              <option value="64">64</option>
+              <option value="128" selected>128</option>
+              <option value="256">256</option>
+            </select>
+          </div>
+        </div>
+        <p class="label image-hint" id="image-params"></p>
+      </div>
     </div>
 
     <!-- 输出栏 -->
@@ -1308,8 +1385,29 @@ footer .links a:hover {
         </div>
         <div id="linechart"></div>
       </div>
-      <div id="heatmap"></div>
-      <div style="float:left;margin-top:20px">
+      <div id="heatmap" class="only-points"></div>
+      <!-- 图像任务的输出：准确率 + 测试图像网格 + 卷积核 -->
+      <div class="only-images" id="image-panel">
+        <div class="image-stats">
+          <div class="output-stats">
+            <span>测试集准确率</span>
+            <div class="value" id="acc-test">—</div>
+          </div>
+          <div class="output-stats train">
+            <span>训练集准确率</span>
+            <div class="value" id="acc-train">—</div>
+          </div>
+        </div>
+        <div class="image-block">
+          <div class="label">测试集：绿=认对，红=认错</div>
+          <canvas id="image-grid" width="300" height="240"></canvas>
+        </div>
+        <div class="image-block" id="kernel-block">
+          <div class="label">第一个卷积块学到的卷积核（蓝=正，橙=负）</div>
+          <canvas id="kernel-grid" width="300" height="110"></canvas>
+        </div>
+      </div>
+      <div class="only-points" style="float:left;margin-top:20px">
         <div style="display:flex; align-items:center;">
 
           <!-- 颜色标尺 -->
@@ -1385,7 +1483,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
-  // engine/nn-core.js
+  // labs/playground-mlp/engine/nn-core.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1638,7 +1736,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // engine/nn-mlp.js
+  // labs/playground-mlp/engine/nn-mlp.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1822,7 +1920,664 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // src/nn-engine.ts
+  // labs/playground-mlp/engine/nn-cnn.js
+  (function(global) {
+    "use strict";
+    var NN2 = global.NN = global.NN || {};
+    var core2 = NN2.core;
+    function defaultCfg() {
+      return {
+        layers: 2,
+        /* 卷积块个数：卷积 + ReLU + 最大池化 */
+        filters: 8,
+        /* 每个卷积块的卷积核个数 */
+        kernel: 3,
+        /* 卷积核边长（奇数） */
+        activation: "relu"
+        /* 卷积后的激活函数 */
+      };
+    }
+    function tIndex(i, c, h, w, C, H, W) {
+      return ((i * C + c) * H + h) * W + w;
+    }
+    function convForward(W, bias, aIn, n, Cin, H, Wd, Cout, K, pad) {
+      var Ho = H + 2 * pad - K + 1;
+      var Wo = Wd + 2 * pad - K + 1;
+      var z = new Float64Array(n * Cout * Ho * Wo);
+      var i, co, oy, ox, ci, ky, kx;
+      for (i = 0; i < n; i++) {
+        for (co = 0; co < Cout; co++) {
+          for (oy = 0; oy < Ho; oy++) {
+            for (ox = 0; ox < Wo; ox++) {
+              var s = bias[co];
+              for (ci = 0; ci < Cin; ci++) {
+                for (ky = 0; ky < K; ky++) {
+                  var iy = oy + ky - pad;
+                  if (iy < 0 || iy >= H) continue;
+                  for (kx = 0; kx < K; kx++) {
+                    var ix = ox + kx - pad;
+                    if (ix < 0 || ix >= Wd) continue;
+                    s += aIn[tIndex(i, ci, iy, ix, Cin, H, Wd)] * W[((ci * K + ky) * K + kx) * Cout + co];
+                  }
+                }
+              }
+              z[tIndex(i, co, oy, ox, Cout, Ho, Wo)] = s;
+            }
+          }
+        }
+      }
+      return z;
+    }
+    function convBackward(model, blk, dz, aIn, n) {
+      var Wp = core2.param(model, blk.wName);
+      var bp = core2.param(model, blk.bName);
+      var Wd = Wp.data, dW = Wp.grad, db = bp.grad;
+      var Cin = blk.Cin, H = blk.H, Wd2 = blk.Wd;
+      var Cout = blk.Cout, Ho = blk.Ho, Wo = blk.Wo;
+      var K = blk.K, pad = blk.pad;
+      var dAIn = new Float64Array(n * Cin * H * Wd2);
+      var i, co, oy, ox, ci, ky, kx;
+      for (i = 0; i < n; i++) {
+        for (co = 0; co < Cout; co++) {
+          for (oy = 0; oy < Ho; oy++) {
+            for (ox = 0; ox < Wo; ox++) {
+              var d = dz[tIndex(i, co, oy, ox, Cout, Ho, Wo)];
+              if (d === 0) continue;
+              db[co] += d;
+              for (ci = 0; ci < Cin; ci++) {
+                for (ky = 0; ky < K; ky++) {
+                  var iy = oy + ky - pad;
+                  if (iy < 0 || iy >= H) continue;
+                  for (kx = 0; kx < K; kx++) {
+                    var ix = ox + kx - pad;
+                    if (ix < 0 || ix >= Wd2) continue;
+                    var wIdx = ((ci * K + ky) * K + kx) * Cout + co;
+                    dW[wIdx] += d * aIn[tIndex(i, ci, iy, ix, Cin, H, Wd2)];
+                    dAIn[tIndex(i, ci, iy, ix, Cin, H, Wd2)] += d * Wd[wIdx];
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      return dAIn;
+    }
+    function poolForward(a, n, C, H, Wd) {
+      var Hp = H >> 1, Wp = Wd >> 1;
+      var out = new Float64Array(n * C * Hp * Wp);
+      var idx = new Int32Array(n * C * Hp * Wp);
+      var i, c, py, px, dy, dx;
+      for (i = 0; i < n; i++) {
+        for (c = 0; c < C; c++) {
+          var plane = (i * C + c) * H * Wd;
+          for (py = 0; py < Hp; py++) {
+            for (px = 0; px < Wp; px++) {
+              var best = -Infinity, bestIdx = 0;
+              for (dy = 0; dy < 2; dy++) {
+                for (dx = 0; dx < 2; dx++) {
+                  var h = py * 2 + dy, w = px * 2 + dx;
+                  var v = a[plane + h * Wd + w];
+                  if (v > best) {
+                    best = v;
+                    bestIdx = h * Wd + w;
+                  }
+                }
+              }
+              var o = tIndex(i, c, py, px, C, Hp, Wp);
+              out[o] = best;
+              idx[o] = bestIdx;
+            }
+          }
+        }
+      }
+      return { out, idx, Hp, Wp };
+    }
+    function poolBackward(dOut, cb, n) {
+      var C = cb.Cout, H = cb.Ho, Wd = cb.Wo, Hp = cb.Hp, Wp = cb.Wp;
+      var dIn = new Float64Array(n * C * H * Wd);
+      var i, c, py, px;
+      for (i = 0; i < n; i++) {
+        for (c = 0; c < C; c++) {
+          var plane = (i * C + c) * H * Wd;
+          for (py = 0; py < Hp; py++) {
+            for (px = 0; px < Wp; px++) {
+              var o = tIndex(i, c, py, px, C, Hp, Wp);
+              dIn[plane + cb.poolIdx[o]] += dOut[o];
+            }
+          }
+        }
+      }
+      return dIn;
+    }
+    function create(cfg, task) {
+      cfg = Object.assign(defaultCfg(), cfg || {});
+      var nBlocks = cfg.convLayers != null ? cfg.convLayers : cfg.layers;
+      nBlocks = Math.max(1, Math.min(2, nBlocks | 0));
+      var F = Math.max(1, cfg.filters | 0);
+      var K = Math.max(1, cfg.kernel | 0);
+      if (K % 2 === 0) K += 1;
+      var G = task.grid || 8;
+      var model = {
+        kind: "cnn",
+        cfg,
+        task,
+        grid: G,
+        k: task.k,
+        act: core2.acts[cfg.activation] || core2.acts.relu
+      };
+      var defs = [];
+      var blocks = [];
+      var Cin = 1, H = G, Wd = G;
+      var b;
+      for (b = 0; b < nBlocks; b++) {
+        var pad = (K - 1) / 2;
+        var Ho = H + 2 * pad - K + 1, Wo = Wd + 2 * pad - K + 1;
+        var Hp = Ho >> 1, Wp = Wo >> 1;
+        blocks.push({
+          Cin,
+          H,
+          Wd,
+          Cout: F,
+          Ho,
+          Wo,
+          Hp,
+          Wp,
+          K,
+          pad,
+          wName: "conv" + b + "W",
+          bName: "conv" + b + "b"
+        });
+        defs.push({ name: "conv" + b + "W", shape: [Cin * K * K, F], init: "he" });
+        defs.push({ name: "conv" + b + "b", shape: [F], init: "zero" });
+        Cin = F;
+        H = Hp;
+        Wd = Wp;
+      }
+      model.blocks = blocks;
+      var flatSize = Cin * H * Wd;
+      model.flatSize = flatSize;
+      defs.push({ name: "fcW", shape: [flatSize, model.k], init: "he" });
+      defs.push({ name: "fcb", shape: [model.k], init: "zero" });
+      core2.alloc(model, defs);
+      for (b = 0; b < model.blocks.length; b++) {
+        core2.param(model, model.blocks[b].bName).data.fill(0.1);
+      }
+      bind(model);
+      return model;
+    }
+    function forward(model, batch) {
+      var n = batch.n;
+      var k = model.k;
+      var cache = { n, k, blocks: [] };
+      var i, b;
+      var aIn = new Float64Array(n * model.grid * model.grid);
+      aIn.set(batch.X.subarray(0, aIn.length));
+      for (b = 0; b < model.blocks.length; b++) {
+        var blk = model.blocks[b];
+        var Wc = core2.param(model, blk.wName).data;
+        var bc = core2.param(model, blk.bName).data;
+        var z = convForward(Wc, bc, aIn, n, blk.Cin, blk.H, blk.Wd, blk.Cout, blk.K, blk.pad);
+        var aPost = new Float64Array(z.length);
+        for (i = 0; i < z.length; i++) aPost[i] = model.act.f(z[i]);
+        var pool = poolForward(aPost, n, blk.Cout, blk.Ho, blk.Wo);
+        cache.blocks.push({
+          aIn,
+          z,
+          aPost,
+          poolIdx: pool.idx,
+          poolOut: pool.out,
+          Cin: blk.Cin,
+          H: blk.H,
+          Wd: blk.Wd,
+          Cout: blk.Cout,
+          Ho: blk.Ho,
+          Wo: blk.Wo,
+          Hp: pool.Hp,
+          Wp: pool.Wp
+        });
+        aIn = pool.out;
+      }
+      var flat = aIn;
+      var flatSize = model.flatSize;
+      var Wfc = core2.param(model, "fcW").data;
+      var bfc = core2.param(model, "fcb").data;
+      var logits = new Float64Array(n * k);
+      var j, o;
+      for (i = 0; i < n; i++) {
+        var fo = i * flatSize, lo = i * k;
+        for (o = 0; o < k; o++) {
+          var s = bfc[o];
+          for (j = 0; j < flatSize; j++) s += flat[fo + j] * Wfc[j * k + o];
+          logits[lo + o] = s;
+        }
+      }
+      var probs = new Float64Array(n * k);
+      core2.softmaxRows(logits, n, k, probs);
+      cache.flat = flat;
+      cache.logits = logits;
+      cache.probs = probs;
+      return { probs, cache };
+    }
+    function backward(model, cache, dProbs) {
+      var n = cache.n;
+      var k = model.k;
+      var i, j, o;
+      var probs = cache.probs;
+      var dlog = new Float64Array(n * k);
+      for (i = 0; i < n; i++) {
+        var off = i * k, S = 0;
+        for (j = 0; j < k; j++) S += dProbs[off + j] * probs[off + j];
+        for (j = 0; j < k; j++) dlog[off + j] = probs[off + j] * (dProbs[off + j] - S);
+      }
+      var Wp = core2.param(model, "fcW");
+      var bp = core2.param(model, "fcb");
+      var Wd = Wp.data, dW = Wp.grad, db = bp.grad;
+      var flatSize = model.flatSize;
+      var flat = cache.flat;
+      var dFlat = new Float64Array(n * flatSize);
+      for (i = 0; i < n; i++) {
+        var fo = i * flatSize, lo = i * k;
+        for (o = 0; o < k; o++) {
+          var d = dlog[lo + o];
+          if (d === 0) continue;
+          db[o] += d;
+          for (j = 0; j < flatSize; j++) {
+            dW[j * k + o] += flat[fo + j] * d;
+            dFlat[fo + j] += Wd[j * k + o] * d;
+          }
+        }
+      }
+      for (var b = model.blocks.length - 1; b >= 0; b--) {
+        var blk = model.blocks[b];
+        var cb = cache.blocks[b];
+        var dConvPost = poolBackward(dFlat, cb, n);
+        var dz = new Float64Array(dConvPost.length);
+        for (i = 0; i < dz.length; i++) dz[i] = dConvPost[i] * model.act.df(cb.z[i]);
+        dFlat = convBackward(model, blk, dz, cb.aIn, n);
+      }
+    }
+    function describe(model) {
+      var layers = [], edges = [];
+      var G = model.grid, k = model.k;
+      var b, blk, li;
+      layers.push({ id: "in", type: "input", count: G * G, act: "" });
+      li = 1;
+      var convIdx = [], poolIdx = [];
+      for (b = 0; b < model.blocks.length; b++) {
+        blk = model.blocks[b];
+        convIdx.push(li);
+        layers.push({ id: "c" + b, type: "hidden", count: blk.Cout, act: model.act.label });
+        li++;
+        poolIdx.push(li);
+        layers.push({ id: "p" + b, type: "hidden", count: blk.Cout, act: "\u6700\u5927\u6C60\u5316" });
+        li++;
+      }
+      var flatIdx = li;
+      layers.push({ id: "flat", type: "hidden", count: model.flatSize, act: "" });
+      li++;
+      var outIdx = li;
+      layers.push({ id: "out", type: "output", count: k, act: "\u7EBF\u6027" });
+      function addEdge(fromL, toL, fromN, toN, w) {
+        edges.push({ from: { l: fromL, n: fromN }, to: { l: toL, n: toN }, w });
+      }
+      function picks(total, count) {
+        var out = [];
+        if (total <= 0 || count <= 0) return out;
+        if (total <= count) {
+          for (var t = 0; t < total; t++) out.push(t);
+          return out;
+        }
+        var step = total / count;
+        for (var s = 0; s < count; s++) out.push(Math.floor(s * step));
+        return out;
+      }
+      var blk0 = model.blocks[0];
+      var W0 = core2.param(model, blk0.wName).data;
+      var F0 = blk0.Cout, K0 = blk0.K;
+      var tapsPer = Math.max(1, Math.floor(20 / F0));
+      for (var co = 0; co < F0; co++) {
+        var taps = picks(K0 * K0, tapsPer);
+        for (var t2 = 0; t2 < taps.length; t2++) {
+          var kIdx = taps[t2];
+          var ky = Math.floor(kIdx / K0), kx = kIdx % K0;
+          addEdge(
+            0,
+            convIdx[0],
+            ky * G + kx,
+            co,
+            W0[(ky * K0 + kx) * F0 + co]
+          );
+        }
+      }
+      for (b = 0; b < model.blocks.length; b++) {
+        blk = model.blocks[b];
+        var Wb = core2.param(model, blk.wName).data;
+        var chans = picks(blk.Cout, 8);
+        for (var c2 = 0; c2 < chans.length; c2++) {
+          var ch = chans[c2], best = 0, bestAbs = -1;
+          for (var wi = 0; wi < blk.Cin * blk.K * blk.K; wi++) {
+            var wv = Wb[wi * blk.Cout + ch];
+            if (Math.abs(wv) > bestAbs) {
+              bestAbs = Math.abs(wv);
+              best = wv;
+            }
+          }
+          addEdge(convIdx[b], poolIdx[b], ch, ch, best);
+        }
+      }
+      for (b = 1; b < model.blocks.length; b++) {
+        blk = model.blocks[b];
+        var Wc = core2.param(model, blk.wName).data;
+        var pairs = picks(blk.Cout * blk.Cout, 16);
+        for (var p2 = 0; p2 < pairs.length; p2++) {
+          var ci = Math.floor(pairs[p2] / blk.Cout), cf = pairs[p2] % blk.Cout;
+          var bestI = 0, bestA = -1;
+          for (var wj = 0; wj < blk.K * blk.K; wj++) {
+            var vv = Wc[((ci * blk.K + Math.floor(wj / blk.K)) * blk.K + wj % blk.K) * blk.Cout + cf];
+            if (Math.abs(vv) > bestA) {
+              bestA = Math.abs(vv);
+              bestI = vv;
+            }
+          }
+          addEdge(poolIdx[b - 1], convIdx[b], ci, cf, bestI);
+        }
+      }
+      var lastB = model.blocks.length - 1;
+      var lastChans = picks(model.blocks[lastB].Cout, 8);
+      for (var c3 = 0; c3 < lastChans.length; c3++) {
+        var ch3 = lastChans[c3];
+        addEdge(
+          poolIdx[lastB],
+          flatIdx,
+          ch3,
+          ch3 * model.blocks[lastB].Hp * model.blocks[lastB].Wp,
+          1
+        );
+      }
+      var Wf = core2.param(model, "fcW").data;
+      var fp = picks(model.flatSize * k, 30);
+      for (var f2 = 0; f2 < fp.length; f2++) {
+        var jn = Math.floor(fp[f2] / k), on = fp[f2] % k;
+        addEdge(flatIdx, outIdx, jn, on, Wf[fp[f2]]);
+      }
+      return { layers, edges };
+    }
+    function bind(model) {
+      model.forward = function(batch) {
+        return forward(model, batch);
+      };
+      model.backward = function(cache, dProbs) {
+        return backward(model, cache, dProbs);
+      };
+      model.describe = function() {
+        return describe(model);
+      };
+      model.paramCount = function() {
+        return core2.paramCount(model);
+      };
+    }
+    NN2.registry = NN2.registry || {};
+    NN2.registry.cnn = {
+      id: "cnn",
+      label: "\u5377\u79EF\u7F51\u7EDC",
+      abbr: "CNN",
+      tasks: ["images"],
+      note: "\u7528\u5171\u4EAB\u7684\u5C0F\u5377\u79EF\u6838\u626B\u63CF\u56FE\u50CF\u63D0\u53D6\u5C40\u90E8\u7279\u5F81\uFF0C\u518D\u6C60\u5316\u538B\u7F29\u5206\u8FA8\u7387\uFF0C\u6700\u540E\u5168\u8FDE\u63A5\u5206\u7C7B\uFF1A\u5BF9\u5E73\u79FB\u4E0D\u654F\u611F\u3002",
+      defaultCfg,
+      controls: [
+        { key: "layers", label: "\u5377\u79EF\u5C42\u6570", min: 1, max: 2, step: 1 },
+        { key: "filters", label: "\u5377\u79EF\u6838\u6570\u91CF", min: 1, max: 16, step: 1 },
+        { key: "kernel", label: "\u5377\u79EF\u6838\u5927\u5C0F", min: 3, max: 5, step: 2 }
+      ],
+      create,
+      forward,
+      backward,
+      describe
+    };
+  })(typeof window !== "undefined" ? window : globalThis);
+
+  // labs/playground-mlp/engine/nn-data.js
+  (function(global) {
+    "use strict";
+    var NN2 = global.NN = global.NN || {};
+    var core2 = NN2.core;
+    var data = NN2.data = {};
+    var LOGITS = {
+      circle: function(x, y) {
+        return 0.52 - Math.sqrt(x * x + y * y);
+      },
+      gauss: function(x, y) {
+        return 2.4 * x + 0.6 * (y * y - 0.3);
+      },
+      spiral: function(x, y) {
+        var r = Math.sqrt(x * x + y * y) + 1e-6;
+        var th = Math.atan2(y, x);
+        return Math.sin(3 * (th - 2.6 * r));
+      },
+      xor: function(x, y) {
+        return x * y;
+      }
+    };
+    data.pointSets = [
+      { id: "circle", label: "\u540C\u5FC3\u5706", en: "concentric circles" },
+      { id: "gauss", label: "\u9AD8\u65AF\u56E2", en: "gaussian clusters" },
+      { id: "spiral", label: "\u87BA\u65CB", en: "spiral" },
+      { id: "xor", label: "\u5F02\u6216", en: "xor" }
+    ];
+    data.pointSetLabel = function(id) {
+      for (var i = 0; i < data.pointSets.length; i++) if (data.pointSets[i].id === id) return data.pointSets[i];
+      return data.pointSets[0];
+    };
+    data.features = [
+      { id: "x", label: "X\u2081", on: true },
+      { id: "y", label: "X\u2082", on: true },
+      { id: "xy", label: "X\u2081X\u2082", on: false },
+      { id: "x2", label: "X\u2081\xB2", on: false },
+      { id: "y2", label: "X\u2082\xB2", on: false },
+      { id: "cosx", label: "cos(X\u2081)", on: false },
+      { id: "sinx", label: "sin(X\u2081)", on: false },
+      { id: "cosy", label: "cos(X\u2082)", on: false },
+      { id: "siny", label: "sin(X\u2082)", on: false }
+    ];
+    data.featureVector = function(x, y, feats) {
+      var v = [];
+      for (var i = 0; i < feats.length; i++) {
+        switch (feats[i].id) {
+          case "x":
+            v.push(x);
+            break;
+          case "y":
+            v.push(y);
+            break;
+          case "xy":
+            v.push(x * y);
+            break;
+          case "x2":
+            v.push(x * x);
+            break;
+          case "y2":
+            v.push(y * y);
+            break;
+          case "cosx":
+            v.push(Math.cos(x));
+            break;
+          case "sinx":
+            v.push(Math.sin(x));
+            break;
+          case "cosy":
+            v.push(Math.cos(y));
+            break;
+          case "siny":
+            v.push(Math.sin(y));
+            break;
+        }
+      }
+      return v;
+    };
+    data.makePoints = function(setId, opts) {
+      opts = opts || {};
+      var nTrain = opts.trainCount || 300;
+      var nTest = opts.testCount || 200;
+      var noise = opts.noise || 0;
+      var feats = opts.features || data.features.filter(function(f) {
+        return f.on;
+      });
+      var logit = LOGITS[setId] || LOGITS.circle;
+      core2.setSeed(opts.seed || 12345);
+      var trainX = [], trainY = [], testX = [], testY = [];
+      var i, x, y, l, tries;
+      for (i = 0; i < nTrain; i++) {
+        tries = 0;
+        do {
+          x = core2.random() * 2 - 1;
+          y = core2.random() * 2 - 1;
+          l = logit(x, y);
+          tries++;
+        } while (Math.abs(l) < 0.06 && tries < 60);
+        var lab = l > 0 ? 1 : 0;
+        if (core2.random() < noise) lab = 1 - lab;
+        trainX.push([x, y]);
+        trainY.push(lab);
+      }
+      for (i = 0; i < nTest; i++) {
+        x = core2.random() * 2 - 1;
+        y = core2.random() * 2 - 1;
+        testX.push([x, y]);
+        testY.push(logit(x, y) > 0 ? 1 : 0);
+      }
+      return {
+        kind: "points",
+        k: 2,
+        d: feats.length,
+        features: feats,
+        grid: 8,
+        labels: ["\u8D1F\u7C7B", "\u6B63\u7C7B"],
+        train: { n: nTrain, X: trainX, y: trainY },
+        test: { n: nTest, X: testX, y: testY },
+        logit
+      };
+    };
+    var GRID = 12;
+    data.GRID = GRID;
+    data.patternClasses = [
+      { id: "ring", label: "\u5706\u73AF" },
+      { id: "block", label: "\u65B9\u5757" },
+      { id: "vbar", label: "\u7AD6\u6761" },
+      { id: "hbar", label: "\u6A2A\u6761" }
+    ];
+    function template(kind) {
+      var g = [], i, j;
+      for (i = 0; i < GRID; i++) {
+        g.push([]);
+        for (j = 0; j < GRID; j++) g[i].push(0);
+      }
+      var c = (GRID - 1) / 2;
+      if (kind === "ring") {
+        var r1 = GRID * 0.15, r2 = GRID * 0.3;
+        for (i = 0; i < GRID; i++) for (j = 0; j < GRID; j++) {
+          var dx = i - c, dy = j - c, r = Math.sqrt(dx * dx + dy * dy);
+          if (r > r1 && r < r2) g[i][j] = 1;
+        }
+      } else if (kind === "block") {
+        var a = Math.round(GRID * 0.28), b2 = Math.round(GRID * 0.72);
+        for (i = a; i < b2; i++) for (j = a; j < b2; j++) g[i][j] = 1;
+      } else if (kind === "vbar") {
+        var w = Math.max(2, Math.round(GRID * 0.22));
+        var r0 = Math.round(GRID * 0.1), r1 = Math.round(GRID * 0.9);
+        var c0 = Math.round((GRID - w) / 2);
+        for (i = r0; i < r1; i++) for (j = c0; j < c0 + w; j++) g[i][j] = 1;
+      } else {
+        var w2 = Math.max(2, Math.round(GRID * 0.22));
+        var c0b = Math.round(GRID * 0.1), c1b = Math.round(GRID * 0.9);
+        var r0b = Math.round((GRID - w2) / 2);
+        for (i = r0b; i < r0b + w2; i++) for (j = c0b; j < c1b; j++) g[i][j] = 1;
+      }
+      return g;
+    }
+    var TEMPLATES = {
+      ring: template("ring"),
+      block: template("block"),
+      vbar: template("vbar"),
+      hbar: template("hbar")
+    };
+    function render(kind, shiftX, shiftY, drop, noiseSigma) {
+      var t = TEMPLATES[kind];
+      var g = [], i, j;
+      for (i = 0; i < GRID; i++) {
+        g.push([]);
+        for (j = 0; j < GRID; j++) g[i].push(0);
+      }
+      for (i = 0; i < GRID; i++) for (j = 0; j < GRID; j++) {
+        var ii = i + shiftX, jj = j + shiftY;
+        if (ii < 0 || ii >= GRID || jj < 0 || jj >= GRID) continue;
+        if (t[i][j]) g[ii][jj] = 1;
+      }
+      for (i = 0; i < drop; i++) {
+        var r = core2.randInt(GRID), c = core2.randInt(GRID);
+        g[r][c] = 0;
+      }
+      var out = new Float64Array(GRID * GRID);
+      for (i = 0; i < GRID; i++) for (j = 0; j < GRID; j++) {
+        var v = g[i][j] + core2.gauss() * noiseSigma;
+        out[i * GRID + j] = Math.max(0, Math.min(1, v));
+      }
+      return out;
+    }
+    data.makePatterns = function(opts) {
+      opts = opts || {};
+      var nTrain = opts.trainCount || 480;
+      var nTest = opts.testCount || 240;
+      var noise = opts.noise || 0.1;
+      core2.setSeed(opts.seed || 24680);
+      function build(count, maxShift) {
+        var X = [], y = [], i;
+        for (i = 0; i < count; i++) {
+          var c = i % 4;
+          var kind = ["ring", "block", "vbar", "hbar"][c];
+          var sx = core2.randInt(maxShift * 2 + 1) - maxShift;
+          var sy = core2.randInt(maxShift * 2 + 1) - maxShift;
+          X.push(render(kind, sx, sy, core2.randInt(3), noise));
+          y.push(c);
+        }
+        return { n: count, X, y };
+      }
+      var train = build(nTrain, 1);
+      var test = build(nTest, 2);
+      return {
+        kind: "images",
+        k: 4,
+        d: GRID * GRID,
+        grid: GRID,
+        features: null,
+        labels: data.patternClasses.map(function(c) {
+          return c.label;
+        }),
+        train,
+        test,
+        logit: null
+      };
+    };
+    data.toBatch = function(set, part, idx) {
+      var n = idx ? idx.length : part.n;
+      var X = new Float64Array(n * set.d);
+      var y = new Int32Array(n);
+      for (var i = 0; i < n; i++) {
+        var s = idx ? idx[i] : i;
+        var src = part.X[s];
+        if (set.kind === "points") {
+          var v = data.featureVector(src[0], src[1], set.features);
+          for (var j = 0; j < set.d; j++) X[i * set.d + j] = v[j];
+        } else {
+          for (j = 0; j < set.d; j++) X[i * set.d + j] = src[j];
+        }
+        y[i] = part.y[s];
+      }
+      return { n, k: set.k, d: set.d, X, y };
+    };
+  })(typeof window !== "undefined" ? window : globalThis);
+
+  // labs/playground-mlp/src/nn-engine.ts
   var NN = window.NN;
   var core = NN.core;
   var Activations = class {
@@ -2122,8 +2877,131 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     outNode.inputLinks[0].weight = value;
     return outNode.inputLinks[0].weight;
   }
+  function makePatternDataset(opts) {
+    return NN.data.makePatterns(opts || {});
+  }
+  function patternBatches(set) {
+    return {
+      train: NN.data.toBatch(set, set.train, null),
+      test: NN.data.toBatch(set, set.test, null)
+    };
+  }
+  function actKeyOf(act) {
+    return actKey(act);
+  }
+  function buildImageNetwork(kind, cfg, task) {
+    cfg = cfg || {};
+    if (kind === "cnn") {
+      const model2 = NN.registry.cnn.create({
+        layers: cfg.convLayers != null ? cfg.convLayers : 2,
+        filters: cfg.filters != null ? cfg.filters : 8,
+        kernel: cfg.kernel != null ? cfg.kernel : 3,
+        activation: cfg.activation || "relu"
+      }, task);
+      const layers = [{ name: "\u8F93\u5165", shape: `${task.grid}\xD7${task.grid}\xD71` }];
+      for (const blk of model2.blocks) {
+        layers.push({ name: `\u5377\u79EF ${blk.K}\xD7${blk.K}`, shape: `${blk.Ho}\xD7${blk.Wo}\xD7${blk.Cout}` });
+        layers.push({ name: "\u6700\u5927\u6C60\u5316", shape: `${blk.Hp}\xD7${blk.Wp}\xD7${blk.Cout}` });
+      }
+      layers.push({ name: "\u5C55\u5E73", shape: `${model2.flatSize}` });
+      layers.push({ name: "\u5168\u8FDE\u63A5", shape: `${task.k}` });
+      return { kind, model: model2, task, layers, params: core.paramCount(model2) };
+    }
+    const h = cfg.hidden != null ? cfg.hidden : 128;
+    const model = NN.registry.mlp.create({
+      sizes: [task.d, h, task.k],
+      activation: cfg.activation || "relu",
+      head: "softmax"
+    }, task);
+    return {
+      kind: "mlp",
+      model,
+      task,
+      layers: [
+        { name: "\u8F93\u5165\uFF08\u50CF\u7D20\u62C9\u5E73\uFF09", shape: `${task.d}` },
+        { name: "\u5168\u8FDE\u63A5", shape: `${h}` },
+        { name: "\u8F93\u51FA", shape: `${task.k}` }
+      ],
+      params: core.paramCount(model)
+    };
+  }
+  function sliceBatch(batch, idx) {
+    const d = batch.d;
+    const X = new Float64Array(idx.length * d);
+    const y = new batch.y.constructor(idx.length);
+    for (let i = 0; i < idx.length; i++) {
+      X.set(batch.X.subarray(idx[i] * d, idx[i] * d + d), i * d);
+      y[i] = batch.y[idx[i]];
+    }
+    return { n: idx.length, k: batch.k, d, X, y };
+  }
+  function trainImageEpoch(net, batch, batchSize, learningRate, regularization, regularizationRate) {
+    const model = net.model;
+    const bs = Math.max(1, batchSize | 0);
+    const order = [];
+    for (let i = 0; i < batch.n; i++) order.push(i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(core.random() * (i + 1));
+      const t = order[i];
+      order[i] = order[j];
+      order[j] = t;
+    }
+    for (let start = 0; start < order.length; start += bs) {
+      const idx = order.slice(start, start + bs);
+      const sub = sliceBatch(batch, idx);
+      const out = model.forward(sub);
+      const dProbs = core.crossEntropyGrad(out.probs, sub);
+      core.zeroGrads(model);
+      model.backward(out.cache, dProbs);
+      if (regularization === RegularizationFunction.L1) {
+        core.applyL1(model, regularizationRate);
+      } else if (regularization === RegularizationFunction.L2) {
+        core.applyL2(model, regularizationRate);
+      }
+      core.step(model, learningRate, "adam");
+    }
+  }
+  function imageLoss(net, batch) {
+    return core.crossEntropy(net.model, batch);
+  }
+  function imagePredict(net, batch) {
+    const out = net.model.forward(batch);
+    const k = batch.k;
+    const pred = new Int32Array(batch.n);
+    let hit = 0;
+    for (let i = 0; i < batch.n; i++) {
+      let best = 0;
+      for (let c = 1; c < k; c++) {
+        if (out.probs[i * k + c] > out.probs[i * k + best]) best = c;
+      }
+      pred[i] = best;
+      if (best === batch.y[i]) hit++;
+    }
+    return { probs: out.probs, pred, hit, acc: hit / Math.max(1, batch.n) };
+  }
+  function convKernels(net) {
+    if (net.kind !== "cnn") return { k: 0, kernels: [] };
+    const model = net.model;
+    const blk = model.blocks[0];
+    const W = core.param(model, blk.wName).data;
+    const F = blk.Cout;
+    const K = blk.K;
+    const kernels = [];
+    for (let f = 0; f < F; f++) {
+      const kern = [];
+      for (let r = 0; r < K; r++) {
+        const row = [];
+        for (let c = 0; c < K; c++) {
+          row.push(W[(r * K + c) * F + f]);
+        }
+        kern.push(row);
+      }
+      kernels.push(kern);
+    }
+    return { k: K, kernels };
+  }
 
-  // src/heatmap.ts
+  // labs/playground-mlp/src/heatmap.ts
   var d3 = window.d3;
   var NUM_SHADES = 30;
   var HeatMap = class {
@@ -2257,7 +3135,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return result;
   }
 
-  // src/dataset.ts
+  // labs/playground-mlp/src/dataset.ts
   var d32 = window.d3;
   function shuffle(array) {
     let counter = array.length;
@@ -2415,7 +3293,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // src/state.ts
+  // labs/playground-mlp/src/state.ts
   var HIDE_STATE_SUFFIX = "_hide";
   var activations = {
     "relu": Activations.RELU,
@@ -2471,6 +3349,10 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       __publicField(this, "batchSize", 10);
       __publicField(this, "discretize", false);
       __publicField(this, "tutorial", null);
+      /** 任务：points（平面散点）/ images（图案识别） */
+      __publicField(this, "task", null);
+      /** 网络类型：mlp / cnn / rnn / transformer */
+      __publicField(this, "netType", null);
       __publicField(this, "percTrainData", 50);
       __publicField(this, "activation", Activations.TANH);
       __publicField(this, "regularization", null);
@@ -2620,13 +3502,15 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     { name: "sinY", type: 4 /* BOOLEAN */ },
     { name: "collectStats", type: 4 /* BOOLEAN */ },
     { name: "tutorial", type: 0 /* STRING */ },
+    { name: "task", type: 0 /* STRING */ },
+    { name: "netType", type: 0 /* STRING */ },
     { name: "problem", type: 5 /* OBJECT */, keyMap: problems },
     { name: "initZero", type: 4 /* BOOLEAN */ },
     { name: "hideText", type: 4 /* BOOLEAN */ }
   ]);
   var State = _State;
 
-  // src/linechart.ts
+  // labs/playground-mlp/src/linechart.ts
   var d33 = window.d3;
   var AppendingLineChart = class {
     constructor(container, lineColors) {
@@ -2688,7 +3572,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     }
   };
 
-  // src/playground.ts
+  // labs/playground-mlp/src/playground.ts
   var d34 = window.d3;
   var mainWidth;
   d34.select(".more button").on("click", function() {
@@ -2805,6 +3689,11 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   var testData = [];
   var network = null;
   var networkType = "mlp";
+  var taskKind = "points";
+  var imageNet = null;
+  var patternSet = null;
+  var imageTrainBatch = null;
+  var imageTestBatch = null;
   var lossTrain = 0;
   var lossTest = 0;
   var player = new Player();
@@ -2837,10 +3726,33 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       generateData();
       parametersChanged = true;
     });
+    d34.select("#task-type").on("change", function() {
+      taskKind = this.value;
+      state.task = taskKind;
+      state.serialize();
+      updateTaskUI();
+      generateData();
+      parametersChanged = true;
+      reset();
+    });
     d34.select("#network-type").on("change", function() {
       const value = this.value;
-      if (value !== "mlp") return;
       networkType = value;
+      state.netType = value;
+      state.serialize();
+      parametersChanged = true;
+      reset();
+    });
+    d34.select("#cnn-blocks").on("change", function() {
+      parametersChanged = true;
+      reset();
+    });
+    d34.select("#cnn-filters").on("change", function() {
+      parametersChanged = true;
+      reset();
+    });
+    d34.select("#mlp-hidden").on("change", function() {
+      parametersChanged = true;
       reset();
     });
     let dataThumbnails = d34.selectAll("canvas[data-dataset]");
@@ -2990,7 +3902,11 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       let newWidth = document.querySelector("#main-part").getBoundingClientRect().width;
       if (newWidth !== mainWidth) {
         mainWidth = newWidth;
-        drawNetwork(network);
+        if (taskKind === "images") {
+          if (imageNet) drawImageNetwork(imageNet);
+        } else {
+          drawNetwork(network);
+        }
         updateUI(true);
       }
     });
@@ -3361,6 +4277,10 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return getLoss(network2, dataPoints, (p) => constructInput(p.x, p.y));
   }
   function updateUI(firstStep = false) {
+    if (taskKind === "images") {
+      updateImageUI();
+      return;
+    }
     updateWeightsUI(network, d34.select("g.core"));
     updateBiasesUI(network);
     updateDecisionBoundary(network, firstStep);
@@ -3403,6 +4323,20 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   }
   function oneStep() {
     iter++;
+    if (taskKind === "images") {
+      trainImageEpoch(
+        imageNet,
+        imageTrainBatch,
+        state.batchSize,
+        state.learningRate,
+        state.regularization,
+        state.regularizationRate
+      );
+      lossTrain = imageLoss(imageNet, imageTrainBatch);
+      lossTest = imageLoss(imageNet, imageTestBatch);
+      updateUI();
+      return;
+    }
     trainEpoch(
       network,
       trainData,
@@ -3437,6 +4371,23 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       userHasInteracted();
     }
     player.pause();
+    if (taskKind === "images") {
+      iter = 0;
+      const task = { d: patternSet.d, k: patternSet.k, grid: patternSet.grid };
+      const cfg = {
+        convLayers: +d34.select("#cnn-blocks").property("value"),
+        filters: +d34.select("#cnn-filters").property("value"),
+        kernel: 3,
+        hidden: +d34.select("#mlp-hidden").property("value"),
+        activation: actKeyOf(state.activation)
+      };
+      imageNet = buildImageNetwork(networkType, cfg, task);
+      lossTrain = imageLoss(imageNet, imageTrainBatch);
+      lossTest = imageLoss(imageNet, imageTestBatch);
+      drawImageNetwork(imageNet);
+      updateUI(true);
+      return;
+    }
     let suffix = state.numHiddenLayers !== 1 ? "s" : "";
     d34.select("#layers-label").text("\u9690\u85CF\u5C42");
     d34.select("#num-layers").text(state.numHiddenLayers);
@@ -3480,6 +4431,164 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
         document.title = title.text();
       }
     });
+  }
+  function updateTaskUI() {
+    d34.select("body").classed("task-points", taskKind === "points").classed("task-images", taskKind === "images");
+    d34.selectAll("#network-type option").each(function() {
+      const v = this.value;
+      const ok = taskKind === "points" ? v === "mlp" : v === "mlp" || v === "cnn";
+      this.disabled = !ok;
+    });
+    if (taskKind === "points" && networkType !== "mlp") networkType = "mlp";
+    d34.select("#network-type").property("value", networkType);
+    d34.select("#task-type").property("value", taskKind);
+    if (taskKind === "images") {
+      d34.select("#activations").property("value", "relu");
+      state.activation = activations["relu"];
+      d34.select("#learningRate").property("value", "0.005");
+      state.learningRate = 5e-3;
+    } else {
+      d34.select("#activations").property("value", "tanh");
+      state.activation = activations["tanh"];
+      d34.select("#learningRate").property("value", "0.03");
+      state.learningRate = 0.03;
+    }
+    d34.select(".column.features h4").text(taskKind === "images" ? "\u7F51\u7EDC\u7ED3\u6784" : "\u7279\u5F81");
+    d34.select(".column.features > p").text(taskKind === "images" ? "\u6BCF\u4E00\u5C42\u5728\u505A\u4EC0\u4E48\uFF1A" : "\u60F3\u5582\u7ED9\u7F51\u7EDC\u54EA\u4E9B\u7279\u5F81\uFF1F");
+  }
+  function drawPatternThumbnails() {
+    const list = document.getElementById("pattern-list");
+    if (!list || !patternSet) return;
+    list.innerHTML = "";
+    const G = patternSet.grid;
+    const scale = 4;
+    for (let c = 0; c < patternSet.k; c++) {
+      let idx = -1;
+      for (let i = 0; i < patternSet.train.n; i++) {
+        if (patternSet.train.y[i] === c) {
+          idx = i;
+          break;
+        }
+      }
+      if (idx < 0) continue;
+      const item = document.createElement("div");
+      item.className = "pattern-item";
+      const cv = document.createElement("canvas");
+      cv.width = G * scale;
+      cv.height = G * scale;
+      const ctx = cv.getContext("2d");
+      const img = patternSet.train.X[idx];
+      for (let r = 0; r < G; r++) {
+        for (let cc = 0; cc < G; cc++) {
+          const g = Math.round(Math.max(0, Math.min(1, img[r * G + cc])) * 255);
+          ctx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
+          ctx.fillRect(cc * scale, r * scale, scale, scale);
+        }
+      }
+      const label = document.createElement("div");
+      label.className = "pattern-label";
+      label.textContent = patternSet.labels[c];
+      item.appendChild(cv);
+      item.appendChild(label);
+      list.appendChild(item);
+    }
+  }
+  function drawImageNetwork(net) {
+    const svg = d34.select("#svg");
+    svg.select("g.core").remove();
+    d34.select("#network").selectAll("div.canvas").remove();
+    d34.select("#network").selectAll("div.plus-minus-neurons").remove();
+    const W = 186, boxH = 34, gap = 15;
+    svg.attr("width", W).attr("height", net.layers.length * (boxH + gap) + 8);
+    const g = svg.append("g").classed("core", true).attr("transform", "translate(4,4)");
+    net.layers.forEach((L, i) => {
+      const y = i * (boxH + gap);
+      g.append("rect").attr("x", 0).attr("y", y).attr("width", W - 8).attr("height", boxH).attr("rx", 5).attr("fill", "#f2f6f4").attr("stroke", "#b9c8c1");
+      g.append("text").attr("x", 10).attr("y", y + 14).attr("font-size", 12.5).attr("fill", "#14322a").text(L.name);
+      g.append("text").attr("x", 10).attr("y", y + 27).attr("font-size", 11).attr("fill", "#6b857c").text(L.shape);
+      if (i > 0) {
+        g.append("line").attr("x1", (W - 8) / 2).attr("x2", (W - 8) / 2).attr("y1", y - gap + 1).attr("y2", y - 2).attr("stroke", "#9fb3aa").attr("stroke-width", 1.5).attr("marker-end", "url(#markerArrow)");
+      }
+    });
+    d34.select("#image-params").text(
+      `\u53C2\u6570\u91CF ${net.params}\u3000\u8F93\u5165 ${net.task.d} \u7EF4\uFF08${net.task.grid}\xD7${net.task.grid} \u50CF\u7D20\uFF09`
+    );
+  }
+  function drawImageGrid(pred) {
+    const cv = document.getElementById("image-grid");
+    if (!cv || !patternSet) return;
+    const ctx = cv.getContext("2d");
+    const G = patternSet.grid;
+    const px = 2, cell = G * px + 8, cols = 8;
+    const count = Math.min(40, patternSet.test.n);
+    const rows = Math.ceil(count / cols);
+    cv.width = cols * cell;
+    cv.height = rows * (cell + 12);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "10px sans-serif";
+    for (let i = 0; i < count; i++) {
+      const x = i % cols * cell, y = Math.floor(i / cols) * (cell + 12);
+      const img = patternSet.test.X[i];
+      const truth = patternSet.test.y[i];
+      const ok = pred.pred[i] === truth;
+      for (let r = 0; r < G; r++) {
+        for (let c = 0; c < G; c++) {
+          const g = Math.round(Math.max(0, Math.min(1, img[r * G + c])) * 255);
+          ctx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
+          ctx.fillRect(x + 4 + c * px, y + 4 + r * px, px, px);
+        }
+      }
+      ctx.strokeStyle = ok ? "#2e9e6b" : "#d94b3a";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
+      ctx.fillStyle = ok ? "#2e9e6b" : "#d94b3a";
+      ctx.fillText(patternSet.labels[truth], x + 4, y + cell + 2);
+    }
+  }
+  function drawKernels() {
+    const cv = document.getElementById("kernel-grid");
+    if (!cv || !imageNet) return;
+    const ctx = cv.getContext("2d");
+    const info = convKernels(imageNet);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    if (!info.kernels.length) {
+      ctx.fillStyle = "#6b857c";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("MLP \u6CA1\u6709\u5377\u79EF\u6838\u2014\u2014\u5B83\u76F4\u63A5\u8FDE\u6BCF\u4E00\u683C\u50CF\u7D20\u3002", 10, 30);
+      return;
+    }
+    const K = info.k, n = info.kernels.length;
+    const cell = Math.max(24, Math.min(40, Math.floor(290 / n)));
+    const px = Math.floor(cell / K);
+    cv.width = Math.ceil(n / 8) * (cell + 6);
+    cv.height = Math.ceil(n / 8) * (cell + 16) + 4;
+    for (let f = 0; f < n; f++) {
+      const ox = f % 8 * (cell + 6), oy = Math.floor(f / 8) * (cell + 16);
+      const kern = info.kernels[f];
+      for (let r = 0; r < K; r++) {
+        for (let c = 0; c < K; c++) {
+          ctx.fillStyle = colorScale(kern[r][c]);
+          ctx.fillRect(ox + c * px, oy + r * px, px - 1, px - 1);
+        }
+      }
+      ctx.strokeStyle = "#c9d4ce";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ox - 0.5, oy - 0.5, cell, cell);
+      ctx.fillStyle = "#6b857c";
+      ctx.font = "9px sans-serif";
+      ctx.fillText("\u6838" + (f + 1), ox + 1, oy + cell + 9);
+    }
+  }
+  function updateImageUI() {
+    d34.select("#loss-train").text(lossTrain.toFixed(3));
+    d34.select("#loss-test").text(lossTest.toFixed(3));
+    const testPred = imagePredict(imageNet, imageTestBatch);
+    const trainPred = imagePredict(imageNet, imageTrainBatch);
+    d34.select("#acc-test").text((testPred.acc * 100).toFixed(1) + "%");
+    d34.select("#acc-train").text((trainPred.acc * 100).toFixed(1) + "%");
+    drawImageGrid(testPred);
+    drawKernels();
+    lineChart.addDataPoint([lossTrain, lossTest]);
   }
   function drawDatasetThumbnails() {
     function renderThumbnail(canvas, dataGenerator) {
@@ -3544,6 +4653,19 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     d34.select(".hide-controls-link").attr("href", window.location.href);
   }
   function generateData(firstTime = false) {
+    if (taskKind === "images") {
+      patternSet = makePatternDataset({
+        trainCount: 480,
+        testCount: 240,
+        noise: state.noise / 100,
+        seed: state.seed ? parseInt(state.seed, 10) || 24680 : 24680
+      });
+      const batches = patternBatches(patternSet);
+      imageTrainBatch = batches.train;
+      imageTestBatch = batches.test;
+      drawPatternThumbnails();
+      return;
+    }
     if (!firstTime) {
       state.seed = Math.random().toFixed(5);
       state.serialize();
@@ -3586,6 +4708,9 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   drawDatasetThumbnails();
   initTutorial();
   makeGUI();
+  if (state.task === "images") taskKind = "images";
+  if (state.netType === "cnn" || state.netType === "mlp") networkType = state.netType;
+  updateTaskUI();
   generateData(true);
   reset(true);
   hideControls();
@@ -3620,7 +4745,51 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       link: firstLinkWeight(network),
       param: paramValue(network, "W" + (network.length - 2), 0)
     }),
-    setLink: (v) => setFirstLinkWeight(network, v)
+    setLink: (v) => setFirstLinkWeight(network, v),
+    /** 图像任务：切任务 / 切网络 / 静默训练 / 读状态 */
+    img: {
+      setTask: (kind) => {
+        const sel = document.getElementById("task-type");
+        sel.value = kind;
+        sel.dispatchEvent(new Event("change"));
+      },
+      setNetwork: (kind) => {
+        const sel = document.getElementById("network-type");
+        sel.value = kind;
+        sel.dispatchEvent(new Event("change"));
+      },
+      quietTrain: (epochs) => {
+        for (let i = 0; i < epochs; i++) {
+          trainImageEpoch(
+            imageNet,
+            imageTrainBatch,
+            state.batchSize,
+            state.learningRate,
+            state.regularization,
+            state.regularizationRate
+          );
+        }
+        lossTrain = imageLoss(imageNet, imageTrainBatch);
+        lossTest = imageLoss(imageNet, imageTestBatch);
+        updateUI();
+        return { train: lossTrain, test: lossTest };
+      },
+      status: () => {
+        const t = imagePredict(imageNet, imageTestBatch);
+        const tr = imagePredict(imageNet, imageTrainBatch);
+        return {
+          kind: imageNet.kind,
+          accTrain: tr.acc,
+          accTest: t.acc,
+          params: imageNet.params,
+          layers: imageNet.layers.map((l) => l.name + " " + l.shape),
+          grid: patternSet.grid,
+          classes: patternSet.labels
+        };
+      },
+      taskKind: () => taskKind,
+      networkType: () => networkType
+    }
   };
 })();
 
