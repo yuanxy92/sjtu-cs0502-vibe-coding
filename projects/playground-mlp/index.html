@@ -1350,47 +1350,6 @@ footer .links a:hover {
 
   </div>
 
-  <!-- 展开说明 -->
-  <div class="more">
-    <button class="mdl-button mdl-js-button mdl-button--fab">
-      <i class="material-icons">keyboard_arrow_down</i>
-    </button>
-  </div>
-
-  <!-- ============ 说明文章 ============ -->
-  <article id="article-text">
-    <div class="l--body">
-      <h2>四个课堂实验（建议按顺序做）</h2>
-      <ol class="task-list">
-        <li><b>异或：一个神经元为什么不够。</b>选"异或"数据，不加隐藏层，运行——两个类别怎么都分不开。然后加一层隐藏层（4 个神经元），边界立刻成形。说明：单层只能画出直线。</li>
-        <li><b>加宽 vs 加深。</b>保持螺旋数据，分别试"1 层 × 8 个"和"2 层 × 4 个"，比谁更快收敛、谁更容易过拟合。</li>
-        <li><b>特征工程改变问题难度。</b>螺旋数据很难分，但勾上 X₁²、X₂²、sin(X₁)、sin(X₂) 之后难度会显著下降——说明特征本身就是一种先验。</li>
-        <li><b>过拟合与正则化。</b>把训练集占比调到 90%，训练集损失趋近 0，测试集损失却开始回升；再把正则化系数调大，看测试集损失怎么被拉回来。</li>
-      </ol>
-      <p>进阶：点开网络图里任意一条连线或神经元，可以直接改它的权重或偏置；鼠标悬停看单个神经元的输出值。</p>
-    </div>
-
-    <div class="l--body">
-      <h2>颜色都代表什么？</h2>
-      <p>橙色和蓝色贯穿整个界面，但含义略有差别：一般来说，<b>橙色代表负值，蓝色代表正值</b>。</p>
-      <p>数据点（小圆点）初始是橙或蓝，分别对应标签 +1 和 −1。</p>
-      <p>隐藏层里，连线的颜色表示这条连接的权重：蓝色是正权重，橙色是负权重；线越粗，权重绝对值越大。</p>
-      <p>输出层的点按原始值着色，背景色是网络在该区域的预测，颜色越深表示越确信。</p>
-    </div>
-
-    <div class="l--body">
-      <h2>用了什么库？</h2>
-      <p>没有用任何机器学习库。为了这个教学可视化，作者写了一个很小的神经网络库（<a href="https://github.com/tensorflow/playground/blob/master/src/nn.ts">nn.ts</a>，约几百行 TypeScript）。真实工程请用 <a href="https://www.tensorflow.org/">TensorFlow</a> 或 PyTorch。</p>
-    </div>
-
-    <div class="l--body">
-      <h2>许可与致谢</h2>
-      <p>本页面基于 <a href="https://github.com/tensorflow/playground">TensorFlow Playground</a>（Daniel Smilkov 与 Shan Carter，2016）制作，按其 <a href="https://github.com/tensorflow/playground/blob/master/LICENSE">Apache License 2.0</a> 发布；此版本做了中文本地化、离线打包与课程化改造，并移除了统计脚本。原始项目还承蒙 Andrej Karpathy 的 <a href="http://cs.stanford.edu/people/karpathy/convnetjs/demo/classify2d.html">convnet.js</a>、Chris Olah 的网络文章，以及 Fernanda Viégas、Martin Wattenberg 与 Google Brain 团队的建议。</p>
-      <p>本课程页面属于教学材料，可自由使用。</p>
-      <div class="hide-controls"></div>
-    </div>
-  </article>
-
   <!-- ============ 页脚 ============ -->
   <footer>
     <div class="l--body">
@@ -1400,7 +1359,7 @@ footer .links a:hover {
       </div>
       <p class="license-note">
         计算机科学导论 · 神经网络游乐场 ｜ 离线单文件版，字体与脚本均已本地打包 ｜
-        基于 TensorFlow Playground，Apache-2.0
+        界面基于 TensorFlow Playground（Apache-2.0），训练内核为课程自研引擎
       </p>
     </div>
   </footer>
@@ -1431,7 +1390,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
-  // labs/playground-mlp/engine/nn-core.js
+  // engine/nn-core.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1684,7 +1643,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/engine/nn-mlp.js
+  // engine/nn-mlp.js
   (function(global) {
     "use strict";
     var NN2 = global.NN = global.NN || {};
@@ -1868,7 +1827,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     };
   })(typeof window !== "undefined" ? window : globalThis);
 
-  // labs/playground-mlp/src/nn-engine.ts
+  // src/nn-engine.ts
   var NN = window.NN;
   var core = NN.core;
   var Activations = class {
@@ -2169,7 +2128,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return outNode.inputLinks[0].weight;
   }
 
-  // labs/playground-mlp/src/heatmap.ts
+  // src/heatmap.ts
   var d3 = window.d3;
   var NUM_SHADES = 30;
   var HeatMap = class {
@@ -2303,7 +2262,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return result;
   }
 
-  // labs/playground-mlp/src/dataset.ts
+  // src/dataset.ts
   var d32 = window.d3;
   function shuffle(array) {
     let counter = array.length;
@@ -2461,7 +2420,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // labs/playground-mlp/src/state.ts
+  // src/state.ts
   var HIDE_STATE_SUFFIX = "_hide";
   var activations = {
     "relu": Activations.RELU,
@@ -2672,7 +2631,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
   ]);
   var State = _State;
 
-  // labs/playground-mlp/src/linechart.ts
+  // src/linechart.ts
   var d33 = window.d3;
   var AppendingLineChart = class {
     constructor(container, lineColors) {
@@ -2734,7 +2693,7 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     }
   };
 
-  // labs/playground-mlp/src/playground.ts
+  // src/playground.ts
   var d34 = window.d3;
   var mainWidth;
   d34.select(".more button").on("click", function() {
@@ -3041,9 +3000,10 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       }
     });
     if (state.hideText) {
-      d34.select("#article-text").style("display", "none");
-      d34.select("div.more").style("display", "none");
-      d34.select("header").style("display", "none");
+      ["#article-text", "div.more", "header"].forEach((sel) => {
+        const el = document.querySelector(sel);
+        if (el) el.style.display = "none";
+      });
     }
   }
   function updateBiasesUI(network2) {
@@ -3510,6 +3470,9 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
     if (state.tutorial == null || state.tutorial === "" || state.hideText) {
       return;
     }
+    if (!document.querySelector("article")) {
+      return;
+    }
     d34.selectAll("article div.l--body").remove();
     let tutorial = d34.select("article").append("div").attr("class", "l--body");
     d34.html(`tutorials/${state.tutorial}.html`, (err, htmlFragment) => {
@@ -3567,6 +3530,9 @@ if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=M
       controls.style("display", "none");
     });
     let hideControls2 = d34.select(".hide-controls");
+    if (hideControls2.empty()) {
+      return;
+    }
     HIDABLE_CONTROLS.forEach(([text, id]) => {
       let label = hideControls2.append("label").attr("class", "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect");
       let input = label.append("input").attr({
