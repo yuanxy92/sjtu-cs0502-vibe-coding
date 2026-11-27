@@ -108,11 +108,13 @@
       .course-attribution .sep { color: #bbb; }
       /* 藏掉上游的 logo 角标（以及页头里的外链） */
       header .logo, header .icons { display: none !important; }
-      /* 只留可交互的部分：文字与配图收起来，交互组件都在 div 里 */
-      .article p, .article ol, .article ul,
-      .article .figure, .article .figure-caption { display: none !important; }
+      /* 只留可交互的部分：上游的文章区（讲解标题、段落、配图、嵌视频）整块不要，
+         可交互的图形都在上方的主画布里 */
+      .article { display: none !important; }
       /* 上游默认弹在架构图上的英文说明卡（What is a Transformer?） */
       .floating-container { display: none !important; }
+      /* 文章里嵌的 YouTube 视频也去掉 */
+      .video-container { display: none !important; }
       /* 居中 */
       .article { max-width: 1180px; margin: 0 auto !important; }
       body { padding-bottom: 34px; }
@@ -120,7 +122,7 @@
     <div class="course-banner">
       <div class="container">
         <h1>把 <b>Transformer</b> 拆开看</h1>
-        <p>上面可以自己写一句话，让模型逐词生成；下面每一节都能点开，看注意力、Q/K/V、位置编码这些部件到底怎么工作。</p>
+        <p>在上面写一句话，让模型逐词生成；再点开架构图上的任意部件，看注意力、Q/K/V、位置编码到底怎么工作。</p>
         <p class="course-meta">
           计算机科学导论 · 注意力机制 ｜
           <a href="../../index.html">← 返回课程主页</a> ｜

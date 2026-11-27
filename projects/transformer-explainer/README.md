@@ -23,10 +23,12 @@
 3. **换成我们自己的页头**：藏掉上游的黑色 logo 与右上角 arXiv / YouTube / GitHub
    图标，改用与「神经网络游乐场」「数据可视化实验室」同一套的浅色课程横幅
    （中文标题 + 一行说明 + 返回课程主页）。
-4. **只保留可交互的部分**：隐藏上游的讲解段落与配图（`p / ol / ul / .figure /
-   .figure-caption`），保留标题层级与所有交互组件（顶部的输入框 + Generate +
-   Temperature 滑块，以及正文的 206 个 SVG / Canvas 图形：注意力矩阵、Q/K/V、
-   位置编码、残差连接等）。
+4. **只保留可交互的部分**：整块隐藏上游的文章区（`.article`）——讲解标题层级
+   （What is a Transformer? / Transformer Architecture / Embedding / Step 1…）、
+   段落、配图与内嵌的 YouTube 视频全部不要；可交互的图形都在上方的主画布里
+   （顶部的输入框 + Generate + Temperature/Sampling 滑块，以及架构图里的
+   注意力矩阵、Q/K/V、残差连接等 206 个 SVG / Canvas 图形）。
+   同时藏掉上游默认弹在架构图上的英文说明卡（`.floating-container`）。
 5. **居中**：`.article` 限宽 1180px 水平居中。
 6. **加中文署名条**：页面底部固定一条中文说明，写明改编自 Transformer Explainer、
    原作者姓名、论文链接与「返回课程主页」入口（MIT 许可要求保留版权声明）。
