@@ -167,8 +167,6 @@ table.minitable tr.sel td { background: var(--green-soft); }
 .codewrap > summary { cursor: pointer; font-size: 15.5px; color: var(--blue); }
 .codebox { margin: 8px 0 0; padding: 12px 14px; background: #0f172a; border-radius: 9px; overflow-x: auto; }
 .codebox pre { margin: 0; color: #e2e8f0; font-family: var(--mono); font-size: 14px; line-height: 1.65; white-space: pre; }
-.regen { margin-top: 10px; display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
-.regen textarea { flex: 1; min-width: 280px; font-size: 16px; }
 .runmeta { margin-top: 8px; font-size: 14.5px; color: var(--muted); font-family: var(--mono); }
 
 /* ---------- ④ 更多图型 ---------- */
@@ -353,6 +351,7 @@ body.zoomed { overflow: hidden; }
     <p class="notice">
       数据说明：以下全部为<b>教学模拟数据（虚构）</b>，无随机源，数值可手工核对；不指向任何真实疫情。
       本页的图由页内的一个离线解析器生成（相当于把一次 LLM 回答固化成规则）；现场可以让 agent 按同样的提示词重跑。
+      本页<b>不提供"改提示词再生成"</b>的入口——离线页面里跑不到模型，要改一句话请交给现场的真 agent。
     </p>
   </header>
 
@@ -420,7 +419,7 @@ body.zoomed { overflow: hidden; }
   <h3 class="sec">③ 提示词 → 生成结果</h3>
   <p class="lead muted" style="margin-bottom:14px">
     每张卡片 = 一句提示词 + agent 对它的理解 + 跑出来的图 + 它写的那段代码。
-    展开「代码」，再改一句提示词点「重新生成」——同一份数据，图会跟着变。
+    展开「代码」看 agent 是怎么写的；
     <b>图看着小？点一下图就全屏放大</b>（放大视图里图、规格、代码在一起，Esc 关闭）。
   </p>
   <div class="cards" id="cards"></div>
@@ -2277,26 +2276,12 @@ body.zoomed { overflow: hidden; }
     if (item.answer) card.appendChild(el('p', 'answer', '<b>这张图回答：</b>' + esc(item.answer)));
 
     var det = el('details', 'codewrap');
-    det.appendChild(el('summary', null, 'agent 写的代码 / 改一句试试'));
+    det.appendChild(el('summary', null, 'agent 写的代码'));
     var box = el('div', 'codebox');
     box.appendChild(codePre);
     det.appendChild(box);
-
-    var regen = el('div', 'regen');
-    var ta = el('textarea');
-    ta.rows = 2;
-    ta.value = item.prompt;
-    var go = el('button', 'primary', '重新生成');
-    regen.appendChild(ta);
-    regen.appendChild(go);
-    det.appendChild(regen);
     det.appendChild(meta);
     card.appendChild(det);
-
-    go.addEventListener('click', function () { execute(rec, ta.value); });
-    ta.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); execute(rec, ta.value); }
-    });
 
     cards.push(rec);
     return card;
