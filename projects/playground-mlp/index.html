@@ -1073,6 +1073,12 @@ footer .links a:hover {
         <b>课堂提示：</b>网络结构（几层、每层几个神经元）决定"能画多复杂的边界"，
         训练轮次、学习率决定"边界稳不稳"。先不动结构，只看训练；再改结构，只看边界。分两次做，才看得出因果。
       </div>
+      <div class="course-note" style="background:#eef4ff; border-left-color:#3a6ea5; color:#204060">
+        <b>这一版的网络是课程自研引擎训练的：</b>前向、反向、小批量 SGD、交叉熵 / 均方误差、正则化都写在
+        <code>engine/nn-core.js</code> 与 <code>engine/nn-mlp.js</code> 里（数值梯度检验通过），
+        官方 Playground 那套 <code>nn.ts</code> 已经换掉；界面还是官方的。
+        接下来 CNN / RNN / Transformer 会接进同一个引擎，用右上角的「网络类型」切换。
+      </div>
     </div>
   </div>
 
@@ -1090,6 +1096,17 @@ footer .links a:hover {
         <button class="mdl-button mdl-js-button mdl-button--icon ui-stepButton" id="next-step-button" title="单步训练">
           <i class="material-icons">skip_next</i>
         </button>
+      </div>
+      <div class="control ui-networkType">
+        <label for="network-type">网络类型</label>
+        <div class="select">
+          <select id="network-type">
+            <option value="mlp" selected>MLP 多层感知机</option>
+            <option value="cnn" disabled>CNN 卷积网络（接入中）</option>
+            <option value="rnn" disabled>RNN 循环网络（接入中）</option>
+            <option value="transformer" disabled>Transformer（接入中）</option>
+          </select>
+        </div>
       </div>
       <div class="control">
         <span class="label">训练轮次</span>
@@ -1343,12 +1360,6 @@ footer .links a:hover {
   <!-- ============ 说明文章 ============ -->
   <article id="article-text">
     <div class="l--body">
-      <h2>神经网络是什么？</h2>
-      <p>它是一种"从数据里学出程序"的技术，做法和大脑的工作方式有一点点像：先造出一堆软件"神经元"，把它们连起来互相传消息；然后反复尝试解决同一个问题，每一次都把通向成功的连接加强、把通向失败的连接减弱。</p>
-      <p>这个页面里的网络就是真的在训练：右上角的测试集损失是它对没见过的数据的真实表现，不是预先画好的动画。</p>
-    </div>
-
-    <div class="l--body">
       <h2>四个课堂实验（建议按顺序做）</h2>
       <ol class="task-list">
         <li><b>异或：一个神经元为什么不够。</b>选"异或"数据，不加隐藏层，运行——两个类别怎么都分不开。然后加一层隐藏层（4 个神经元），边界立刻成形。说明：单层只能画出直线。</li>
@@ -1415,8 +1426,2246 @@ shortDays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],months:["January","Februar
 if(t==e.dx){for((r||f>e.dy)&&(f=e.dy);++u<o;)i=n[u],i.x=a,i.y=c,i.dy=f,a+=i.dx=Math.min(e.x+e.dx-a,f?l(i.area/f):0);i.z=!0,i.dx+=e.x+e.dx-a,e.y+=f,e.dy-=f}else{for((r||f>e.dx)&&(f=e.dx);++u<o;)i=n[u],i.x=a,i.y=c,i.dx=f,c+=i.dy=Math.min(e.y+e.dy-c,f?l(i.area/f):0);i.z=!1,i.dy+=e.y+e.dy-c,e.x+=f,e.dx-=f}}function u(r){var i=o||a(r),u=i[0];return u.x=u.y=0,u.value?(u.dx=c[0],u.dy=c[1]):u.dx=u.dy=0,o&&a.revalue(u),n([u],u.dx*u.dy/u.value),(o?e:t)(u),h&&(o=i),i}var o,a=ao.layout.hierarchy(),l=Math.round,c=[1,1],f=null,s=Oi,h=!1,p="squarify",g=.5*(1+Math.sqrt(5));return u.size=function(n){return arguments.length?(c=n,u):c},u.padding=function(n){function t(t){var e=n.call(u,t,t.depth);return null==e?Oi(t):Ii(t,"number"==typeof e?[e,e,e,e]:e)}function e(t){return Ii(t,n)}if(!arguments.length)return f;var r;return s=null==(f=n)?Oi:"function"==(r=typeof n)?t:"number"===r?(n=[n,n,n,n],e):e,u},u.round=function(n){return arguments.length?(l=n?Math.round:Number,u):l!=Number},u.sticky=function(n){return arguments.length?(h=n,o=null,u):h},u.ratio=function(n){return arguments.length?(g=n,u):g},u.mode=function(n){return arguments.length?(p=n+"",u):p},ii(u,a)},ao.random={normal:function(n,t){var e=arguments.length;return 2>e&&(t=1),1>e&&(n=0),function(){var e,r,i;do e=2*Math.random()-1,r=2*Math.random()-1,i=e*e+r*r;while(!i||i>1);return n+t*e*Math.sqrt(-2*Math.log(i)/i)}},logNormal:function(){var n=ao.random.normal.apply(ao,arguments);return function(){return Math.exp(n())}},bates:function(n){var t=ao.random.irwinHall(n);return function(){return t()/n}},irwinHall:function(n){return function(){for(var t=0,e=0;n>e;e++)t+=Math.random();return t}}},ao.scale={};var Sl={floor:m,ceil:m};ao.scale.linear=function(){return Wi([0,1],[0,1],Mr,!1)};var kl={s:1,g:1,p:1,r:1,e:1};ao.scale.log=function(){return ru(ao.scale.linear().domain([0,1]),10,!0,[1,10])};var Nl=ao.format(".0e"),El={floor:function(n){return-Math.ceil(-n)},ceil:function(n){return-Math.floor(-n)}};ao.scale.pow=function(){return iu(ao.scale.linear(),1,[0,1])},ao.scale.sqrt=function(){return ao.scale.pow().exponent(.5)},ao.scale.ordinal=function(){return ou([],{t:"range",a:[[]]})},ao.scale.category10=function(){return ao.scale.ordinal().range(Al)},ao.scale.category20=function(){return ao.scale.ordinal().range(Cl)},ao.scale.category20b=function(){return ao.scale.ordinal().range(zl)},ao.scale.category20c=function(){return ao.scale.ordinal().range(Ll)};var Al=[2062260,16744206,2924588,14034728,9725885,9197131,14907330,8355711,12369186,1556175].map(xn),Cl=[2062260,11454440,16744206,16759672,2924588,10018698,14034728,16750742,9725885,12955861,9197131,12885140,14907330,16234194,8355711,13092807,12369186,14408589,1556175,10410725].map(xn),zl=[3750777,5395619,7040719,10264286,6519097,9216594,11915115,13556636,9202993,12426809,15186514,15190932,8666169,11356490,14049643,15177372,8077683,10834324,13528509,14589654].map(xn),Ll=[3244733,7057110,10406625,13032431,15095053,16616764,16625259,16634018,3253076,7652470,10607003,13101504,7695281,10394312,12369372,14342891,6513507,9868950,12434877,14277081].map(xn);ao.scale.quantile=function(){return au([],[])},ao.scale.quantize=function(){return lu(0,1,[0,1])},ao.scale.threshold=function(){return cu([.5],[0,1])},ao.scale.identity=function(){return fu([0,1])},ao.svg={},ao.svg.arc=function(){function n(){var n=Math.max(0,+e.apply(this,arguments)),c=Math.max(0,+r.apply(this,arguments)),f=o.apply(this,arguments)-Io,s=a.apply(this,arguments)-Io,h=Math.abs(s-f),p=f>s?0:1;if(n>c&&(g=c,c=n,n=g),h>=Oo)return t(c,p)+(n?t(n,1-p):"")+"Z";var g,v,d,y,m,M,x,b,_,w,S,k,N=0,E=0,A=[];if((y=(+l.apply(this,arguments)||0)/2)&&(d=u===ql?Math.sqrt(n*n+c*c):+u.apply(this,arguments),p||(E*=-1),c&&(E=tn(d/c*Math.sin(y))),n&&(N=tn(d/n*Math.sin(y)))),c){m=c*Math.cos(f+E),M=c*Math.sin(f+E),x=c*Math.cos(s-E),b=c*Math.sin(s-E);var C=Math.abs(s-f-2*E)<=Fo?0:1;if(E&&yu(m,M,x,b)===p^C){var z=(f+s)/2;m=c*Math.cos(z),M=c*Math.sin(z),x=b=null}}else m=M=0;if(n){_=n*Math.cos(s-N),w=n*Math.sin(s-N),S=n*Math.cos(f+N),k=n*Math.sin(f+N);var L=Math.abs(f-s+2*N)<=Fo?0:1;if(N&&yu(_,w,S,k)===1-p^L){var q=(f+s)/2;_=n*Math.cos(q),w=n*Math.sin(q),S=k=null}}else _=w=0;if(h>Uo&&(g=Math.min(Math.abs(c-n)/2,+i.apply(this,arguments)))>.001){v=c>n^p?0:1;var T=g,R=g;if(Fo>h){var D=null==S?[_,w]:null==x?[m,M]:Re([m,M],[S,k],[x,b],[_,w]),P=m-D[0],U=M-D[1],j=x-D[0],F=b-D[1],H=1/Math.sin(Math.acos((P*j+U*F)/(Math.sqrt(P*P+U*U)*Math.sqrt(j*j+F*F)))/2),O=Math.sqrt(D[0]*D[0]+D[1]*D[1]);R=Math.min(g,(n-O)/(H-1)),T=Math.min(g,(c-O)/(H+1))}if(null!=x){var I=mu(null==S?[_,w]:[S,k],[m,M],c,T,p),Y=mu([x,b],[_,w],c,T,p);g===T?A.push("M",I[0],"A",T,",",T," 0 0,",v," ",I[1],"A",c,",",c," 0 ",1-p^yu(I[1][0],I[1][1],Y[1][0],Y[1][1]),",",p," ",Y[1],"A",T,",",T," 0 0,",v," ",Y[0]):A.push("M",I[0],"A",T,",",T," 0 1,",v," ",Y[0])}else A.push("M",m,",",M);if(null!=S){var Z=mu([m,M],[S,k],n,-R,p),V=mu([_,w],null==x?[m,M]:[x,b],n,-R,p);g===R?A.push("L",V[0],"A",R,",",R," 0 0,",v," ",V[1],"A",n,",",n," 0 ",p^yu(V[1][0],V[1][1],Z[1][0],Z[1][1]),",",1-p," ",Z[1],"A",R,",",R," 0 0,",v," ",Z[0]):A.push("L",V[0],"A",R,",",R," 0 0,",v," ",Z[0])}else A.push("L",_,",",w)}else A.push("M",m,",",M),null!=x&&A.push("A",c,",",c," 0 ",C,",",p," ",x,",",b),A.push("L",_,",",w),null!=S&&A.push("A",n,",",n," 0 ",L,",",1-p," ",S,",",k);return A.push("Z"),A.join("")}function t(n,t){return"M0,"+n+"A"+n+","+n+" 0 1,"+t+" 0,"+-n+"A"+n+","+n+" 0 1,"+t+" 0,"+n}var e=hu,r=pu,i=su,u=ql,o=gu,a=vu,l=du;return n.innerRadius=function(t){return arguments.length?(e=En(t),n):e},n.outerRadius=function(t){return arguments.length?(r=En(t),n):r},n.cornerRadius=function(t){return arguments.length?(i=En(t),n):i},n.padRadius=function(t){return arguments.length?(u=t==ql?ql:En(t),n):u},n.startAngle=function(t){return arguments.length?(o=En(t),n):o},n.endAngle=function(t){return arguments.length?(a=En(t),n):a},n.padAngle=function(t){return arguments.length?(l=En(t),n):l},n.centroid=function(){var n=(+e.apply(this,arguments)+ +r.apply(this,arguments))/2,t=(+o.apply(this,arguments)+ +a.apply(this,arguments))/2-Io;return[Math.cos(t)*n,Math.sin(t)*n]},n};var ql="auto";ao.svg.line=function(){return Mu(m)};var Tl=ao.map({linear:xu,"linear-closed":bu,step:_u,"step-before":wu,"step-after":Su,basis:zu,"basis-open":Lu,"basis-closed":qu,bundle:Tu,cardinal:Eu,"cardinal-open":ku,"cardinal-closed":Nu,monotone:Fu});Tl.forEach(function(n,t){t.key=n,t.closed=/-closed$/.test(n)});var Rl=[0,2/3,1/3,0],Dl=[0,1/3,2/3,0],Pl=[0,1/6,2/3,1/6];ao.svg.line.radial=function(){var n=Mu(Hu);return n.radius=n.x,delete n.x,n.angle=n.y,delete n.y,n},wu.reverse=Su,Su.reverse=wu,ao.svg.area=function(){return Ou(m)},ao.svg.area.radial=function(){var n=Ou(Hu);return n.radius=n.x,delete n.x,n.innerRadius=n.x0,delete n.x0,n.outerRadius=n.x1,delete n.x1,n.angle=n.y,delete n.y,n.startAngle=n.y0,delete n.y0,n.endAngle=n.y1,delete n.y1,n},ao.svg.chord=function(){function n(n,a){var l=t(this,u,n,a),c=t(this,o,n,a);return"M"+l.p0+r(l.r,l.p1,l.a1-l.a0)+(e(l,c)?i(l.r,l.p1,l.r,l.p0):i(l.r,l.p1,c.r,c.p0)+r(c.r,c.p1,c.a1-c.a0)+i(c.r,c.p1,l.r,l.p0))+"Z"}function t(n,t,e,r){var i=t.call(n,e,r),u=a.call(n,i,r),o=l.call(n,i,r)-Io,f=c.call(n,i,r)-Io;return{r:u,a0:o,a1:f,p0:[u*Math.cos(o),u*Math.sin(o)],p1:[u*Math.cos(f),u*Math.sin(f)]}}function e(n,t){return n.a0==t.a0&&n.a1==t.a1}function r(n,t,e){return"A"+n+","+n+" 0 "+ +(e>Fo)+",1 "+t}function i(n,t,e,r){return"Q 0,0 "+r}var u=Me,o=xe,a=Iu,l=gu,c=vu;return n.radius=function(t){return arguments.length?(a=En(t),n):a},n.source=function(t){return arguments.length?(u=En(t),n):u},n.target=function(t){return arguments.length?(o=En(t),n):o},n.startAngle=function(t){return arguments.length?(l=En(t),n):l},n.endAngle=function(t){return arguments.length?(c=En(t),n):c},n},ao.svg.diagonal=function(){function n(n,i){var u=t.call(this,n,i),o=e.call(this,n,i),a=(u.y+o.y)/2,l=[u,{x:u.x,y:a},{x:o.x,y:a},o];return l=l.map(r),"M"+l[0]+"C"+l[1]+" "+l[2]+" "+l[3]}var t=Me,e=xe,r=Yu;return n.source=function(e){return arguments.length?(t=En(e),n):t},n.target=function(t){return arguments.length?(e=En(t),n):e},n.projection=function(t){return arguments.length?(r=t,n):r},n},ao.svg.diagonal.radial=function(){var n=ao.svg.diagonal(),t=Yu,e=n.projection;return n.projection=function(n){return arguments.length?e(Zu(t=n)):t},n},ao.svg.symbol=function(){function n(n,r){return(Ul.get(t.call(this,n,r))||$u)(e.call(this,n,r))}var t=Xu,e=Vu;return n.type=function(e){return arguments.length?(t=En(e),n):t},n.size=function(t){return arguments.length?(e=En(t),n):e},n};var Ul=ao.map({circle:$u,cross:function(n){var t=Math.sqrt(n/5)/2;return"M"+-3*t+","+-t+"H"+-t+"V"+-3*t+"H"+t+"V"+-t+"H"+3*t+"V"+t+"H"+t+"V"+3*t+"H"+-t+"V"+t+"H"+-3*t+"Z"},diamond:function(n){var t=Math.sqrt(n/(2*Fl)),e=t*Fl;return"M0,"+-t+"L"+e+",0 0,"+t+" "+-e+",0Z"},square:function(n){var t=Math.sqrt(n)/2;return"M"+-t+","+-t+"L"+t+","+-t+" "+t+","+t+" "+-t+","+t+"Z"},"triangle-down":function(n){var t=Math.sqrt(n/jl),e=t*jl/2;return"M0,"+e+"L"+t+","+-e+" "+-t+","+-e+"Z"},"triangle-up":function(n){var t=Math.sqrt(n/jl),e=t*jl/2;return"M0,"+-e+"L"+t+","+e+" "+-t+","+e+"Z"}});ao.svg.symbolTypes=Ul.keys();var jl=Math.sqrt(3),Fl=Math.tan(30*Yo);Co.transition=function(n){for(var t,e,r=Hl||++Zl,i=Ku(n),u=[],o=Ol||{time:Date.now(),ease:Nr,delay:0,duration:250},a=-1,l=this.length;++a<l;){u.push(t=[]);for(var c=this[a],f=-1,s=c.length;++f<s;)(e=c[f])&&Qu(e,f,i,r,o),t.push(e)}return Wu(u,i,r)},Co.interrupt=function(n){return this.each(null==n?Il:Bu(Ku(n)))};var Hl,Ol,Il=Bu(Ku()),Yl=[],Zl=0;Yl.call=Co.call,Yl.empty=Co.empty,Yl.node=Co.node,Yl.size=Co.size,ao.transition=function(n,t){return n&&n.transition?Hl?n.transition(t):n:ao.selection().transition(n)},ao.transition.prototype=Yl,Yl.select=function(n){var t,e,r,i=this.id,u=this.namespace,o=[];n=A(n);for(var a=-1,l=this.length;++a<l;){o.push(t=[]);for(var c=this[a],f=-1,s=c.length;++f<s;)(r=c[f])&&(e=n.call(r,r.__data__,f,a))?("__data__"in r&&(e.__data__=r.__data__),Qu(e,f,u,i,r[u][i]),t.push(e)):t.push(null)}return Wu(o,u,i)},Yl.selectAll=function(n){var t,e,r,i,u,o=this.id,a=this.namespace,l=[];n=C(n);for(var c=-1,f=this.length;++c<f;)for(var s=this[c],h=-1,p=s.length;++h<p;)if(r=s[h]){u=r[a][o],e=n.call(r,r.__data__,h,c),l.push(t=[]);for(var g=-1,v=e.length;++g<v;)(i=e[g])&&Qu(i,g,a,o,u),t.push(i)}return Wu(l,a,o)},Yl.filter=function(n){var t,e,r,i=[];"function"!=typeof n&&(n=O(n));for(var u=0,o=this.length;o>u;u++){i.push(t=[]);for(var e=this[u],a=0,l=e.length;l>a;a++)(r=e[a])&&n.call(r,r.__data__,a,u)&&t.push(r)}return Wu(i,this.namespace,this.id)},Yl.tween=function(n,t){var e=this.id,r=this.namespace;return arguments.length<2?this.node()[r][e].tween.get(n):Y(this,null==t?function(t){t[r][e].tween.remove(n)}:function(i){i[r][e].tween.set(n,t)})},Yl.attr=function(n,t){function e(){this.removeAttribute(a)}function r(){this.removeAttributeNS(a.space,a.local)}function i(n){return null==n?e:(n+="",function(){var t,e=this.getAttribute(a);return e!==n&&(t=o(e,n),function(n){this.setAttribute(a,t(n))})})}function u(n){return null==n?r:(n+="",function(){var t,e=this.getAttributeNS(a.space,a.local);return e!==n&&(t=o(e,n),function(n){this.setAttributeNS(a.space,a.local,t(n))})})}if(arguments.length<2){for(t in n)this.attr(t,n[t]);return this}var o="transform"==n?$r:Mr,a=ao.ns.qualify(n);return Ju(this,"attr."+n,t,a.local?u:i)},Yl.attrTween=function(n,t){function e(n,e){var r=t.call(this,n,e,this.getAttribute(i));return r&&function(n){this.setAttribute(i,r(n))}}function r(n,e){var r=t.call(this,n,e,this.getAttributeNS(i.space,i.local));return r&&function(n){this.setAttributeNS(i.space,i.local,r(n))}}var i=ao.ns.qualify(n);return this.tween("attr."+n,i.local?r:e)},Yl.style=function(n,e,r){function i(){this.style.removeProperty(n)}function u(e){return null==e?i:(e+="",function(){var i,u=t(this).getComputedStyle(this,null).getPropertyValue(n);return u!==e&&(i=Mr(u,e),function(t){this.style.setProperty(n,i(t),r)})})}var o=arguments.length;if(3>o){if("string"!=typeof n){2>o&&(e="");for(r in n)this.style(r,n[r],e);return this}r=""}return Ju(this,"style."+n,e,u)},Yl.styleTween=function(n,e,r){function i(i,u){var o=e.call(this,i,u,t(this).getComputedStyle(this,null).getPropertyValue(n));return o&&function(t){this.style.setProperty(n,o(t),r)}}return arguments.length<3&&(r=""),this.tween("style."+n,i)},Yl.text=function(n){return Ju(this,"text",n,Gu)},Yl.remove=function(){var n=this.namespace;return this.each("end.transition",function(){var t;this[n].count<2&&(t=this.parentNode)&&t.removeChild(this)})},Yl.ease=function(n){var t=this.id,e=this.namespace;return arguments.length<1?this.node()[e][t].ease:("function"!=typeof n&&(n=ao.ease.apply(ao,arguments)),Y(this,function(r){r[e][t].ease=n}))},Yl.delay=function(n){var t=this.id,e=this.namespace;return arguments.length<1?this.node()[e][t].delay:Y(this,"function"==typeof n?function(r,i,u){r[e][t].delay=+n.call(r,r.__data__,i,u)}:(n=+n,function(r){r[e][t].delay=n}))},Yl.duration=function(n){var t=this.id,e=this.namespace;return arguments.length<1?this.node()[e][t].duration:Y(this,"function"==typeof n?function(r,i,u){r[e][t].duration=Math.max(1,n.call(r,r.__data__,i,u))}:(n=Math.max(1,n),function(r){r[e][t].duration=n}))},Yl.each=function(n,t){var e=this.id,r=this.namespace;if(arguments.length<2){var i=Ol,u=Hl;try{Hl=e,Y(this,function(t,i,u){Ol=t[r][e],n.call(t,t.__data__,i,u)})}finally{Ol=i,Hl=u}}else Y(this,function(i){var u=i[r][e];(u.event||(u.event=ao.dispatch("start","end","interrupt"))).on(n,t)});return this},Yl.transition=function(){for(var n,t,e,r,i=this.id,u=++Zl,o=this.namespace,a=[],l=0,c=this.length;c>l;l++){a.push(n=[]);for(var t=this[l],f=0,s=t.length;s>f;f++)(e=t[f])&&(r=e[o][i],Qu(e,f,o,u,{time:r.time,ease:r.ease,delay:r.delay+r.duration,duration:r.duration})),n.push(e)}return Wu(a,o,u)},ao.svg.axis=function(){function n(n){n.each(function(){var n,c=ao.select(this),f=this.__chart__||e,s=this.__chart__=e.copy(),h=null==l?s.ticks?s.ticks.apply(s,a):s.domain():l,p=null==t?s.tickFormat?s.tickFormat.apply(s,a):m:t,g=c.selectAll(".tick").data(h,s),v=g.enter().insert("g",".domain").attr("class","tick").style("opacity",Uo),d=ao.transition(g.exit()).style("opacity",Uo).remove(),y=ao.transition(g.order()).style("opacity",1),M=Math.max(i,0)+o,x=Zi(s),b=c.selectAll(".domain").data([0]),_=(b.enter().append("path").attr("class","domain"),ao.transition(b));v.append("line"),v.append("text");var w,S,k,N,E=v.select("line"),A=y.select("line"),C=g.select("text").text(p),z=v.select("text"),L=y.select("text"),q="top"===r||"left"===r?-1:1;if("bottom"===r||"top"===r?(n=no,w="x",k="y",S="x2",N="y2",C.attr("dy",0>q?"0em":".71em").style("text-anchor","middle"),_.attr("d","M"+x[0]+","+q*u+"V0H"+x[1]+"V"+q*u)):(n=to,w="y",k="x",S="y2",N="x2",C.attr("dy",".32em").style("text-anchor",0>q?"end":"start"),_.attr("d","M"+q*u+","+x[0]+"H0V"+x[1]+"H"+q*u)),E.attr(N,q*i),z.attr(k,q*M),A.attr(S,0).attr(N,q*i),L.attr(w,0).attr(k,q*M),s.rangeBand){var T=s,R=T.rangeBand()/2;f=s=function(n){return T(n)+R}}else f.rangeBand?f=s:d.call(n,s,f);v.call(n,f,s),y.call(n,s,s)})}var t,e=ao.scale.linear(),r=Vl,i=6,u=6,o=3,a=[10],l=null;return n.scale=function(t){return arguments.length?(e=t,n):e},n.orient=function(t){return arguments.length?(r=t in Xl?t+"":Vl,n):r},n.ticks=function(){return arguments.length?(a=co(arguments),n):a},n.tickValues=function(t){return arguments.length?(l=t,n):l},n.tickFormat=function(e){return arguments.length?(t=e,n):t},n.tickSize=function(t){var e=arguments.length;return e?(i=+t,u=+arguments[e-1],n):i},n.innerTickSize=function(t){return arguments.length?(i=+t,n):i},n.outerTickSize=function(t){return arguments.length?(u=+t,n):u},n.tickPadding=function(t){return arguments.length?(o=+t,n):o},n.tickSubdivide=function(){return arguments.length&&n},n};var Vl="bottom",Xl={top:1,right:1,bottom:1,left:1};ao.svg.brush=function(){function n(t){t.each(function(){var t=ao.select(this).style("pointer-events","all").style("-webkit-tap-highlight-color","rgba(0,0,0,0)").on("mousedown.brush",u).on("touchstart.brush",u),o=t.selectAll(".background").data([0]);o.enter().append("rect").attr("class","background").style("visibility","hidden").style("cursor","crosshair"),t.selectAll(".extent").data([0]).enter().append("rect").attr("class","extent").style("cursor","move");var a=t.selectAll(".resize").data(v,m);a.exit().remove(),a.enter().append("g").attr("class",function(n){return"resize "+n}).style("cursor",function(n){return $l[n]}).append("rect").attr("x",function(n){return/[ew]$/.test(n)?-3:null}).attr("y",function(n){return/^[ns]/.test(n)?-3:null}).attr("width",6).attr("height",6).style("visibility","hidden"),a.style("display",n.empty()?"none":null);var l,s=ao.transition(t),h=ao.transition(o);c&&(l=Zi(c),h.attr("x",l[0]).attr("width",l[1]-l[0]),r(s)),f&&(l=Zi(f),h.attr("y",l[0]).attr("height",l[1]-l[0]),i(s)),e(s)})}function e(n){n.selectAll(".resize").attr("transform",function(n){return"translate("+s[+/e$/.test(n)]+","+h[+/^s/.test(n)]+")"})}function r(n){n.select(".extent").attr("x",s[0]),n.selectAll(".extent,.n>rect,.s>rect").attr("width",s[1]-s[0])}function i(n){n.select(".extent").attr("y",h[0]),n.selectAll(".extent,.e>rect,.w>rect").attr("height",h[1]-h[0])}function u(){function u(){32==ao.event.keyCode&&(C||(M=null,L[0]-=s[1],L[1]-=h[1],C=2),S())}function v(){32==ao.event.keyCode&&2==C&&(L[0]+=s[1],L[1]+=h[1],C=0,S())}function d(){var n=ao.mouse(b),t=!1;x&&(n[0]+=x[0],n[1]+=x[1]),C||(ao.event.altKey?(M||(M=[(s[0]+s[1])/2,(h[0]+h[1])/2]),L[0]=s[+(n[0]<M[0])],L[1]=h[+(n[1]<M[1])]):M=null),E&&y(n,c,0)&&(r(k),t=!0),A&&y(n,f,1)&&(i(k),t=!0),t&&(e(k),w({type:"brush",mode:C?"move":"resize"}))}function y(n,t,e){var r,i,u=Zi(t),l=u[0],c=u[1],f=L[e],v=e?h:s,d=v[1]-v[0];return C&&(l-=f,c-=d+f),r=(e?g:p)?Math.max(l,Math.min(c,n[e])):n[e],C?i=(r+=f)+d:(M&&(f=Math.max(l,Math.min(c,2*M[e]-r))),r>f?(i=r,r=f):i=f),v[0]!=r||v[1]!=i?(e?a=null:o=null,v[0]=r,v[1]=i,!0):void 0}function m(){d(),k.style("pointer-events","all").selectAll(".resize").style("display",n.empty()?"none":null),ao.select("body").style("cursor",null),q.on("mousemove.brush",null).on("mouseup.brush",null).on("touchmove.brush",null).on("touchend.brush",null).on("keydown.brush",null).on("keyup.brush",null),z(),w({type:"brushend"})}var M,x,b=this,_=ao.select(ao.event.target),w=l.of(b,arguments),k=ao.select(b),N=_.datum(),E=!/^(n|s)$/.test(N)&&c,A=!/^(e|w)$/.test(N)&&f,C=_.classed("extent"),z=W(b),L=ao.mouse(b),q=ao.select(t(b)).on("keydown.brush",u).on("keyup.brush",v);if(ao.event.changedTouches?q.on("touchmove.brush",d).on("touchend.brush",m):q.on("mousemove.brush",d).on("mouseup.brush",m),k.interrupt().selectAll("*").interrupt(),C)L[0]=s[0]-L[0],L[1]=h[0]-L[1];else if(N){var T=+/w$/.test(N),R=+/^n/.test(N);x=[s[1-T]-L[0],h[1-R]-L[1]],L[0]=s[T],L[1]=h[R]}else ao.event.altKey&&(M=L.slice());k.style("pointer-events","none").selectAll(".resize").style("display",null),ao.select("body").style("cursor",_.style("cursor")),w({type:"brushstart"}),d()}var o,a,l=N(n,"brushstart","brush","brushend"),c=null,f=null,s=[0,0],h=[0,0],p=!0,g=!0,v=Bl[0];return n.event=function(n){n.each(function(){var n=l.of(this,arguments),t={x:s,y:h,i:o,j:a},e=this.__chart__||t;this.__chart__=t,Hl?ao.select(this).transition().each("start.brush",function(){o=e.i,a=e.j,s=e.x,h=e.y,n({type:"brushstart"})}).tween("brush:brush",function(){var e=xr(s,t.x),r=xr(h,t.y);return o=a=null,function(i){s=t.x=e(i),h=t.y=r(i),n({type:"brush",mode:"resize"})}}).each("end.brush",function(){o=t.i,a=t.j,n({type:"brush",mode:"resize"}),n({type:"brushend"})}):(n({type:"brushstart"}),n({type:"brush",mode:"resize"}),n({type:"brushend"}))})},n.x=function(t){return arguments.length?(c=t,v=Bl[!c<<1|!f],n):c},n.y=function(t){return arguments.length?(f=t,v=Bl[!c<<1|!f],n):f},n.clamp=function(t){return arguments.length?(c&&f?(p=!!t[0],g=!!t[1]):c?p=!!t:f&&(g=!!t),n):c&&f?[p,g]:c?p:f?g:null},n.extent=function(t){var e,r,i,u,l;return arguments.length?(c&&(e=t[0],r=t[1],f&&(e=e[0],r=r[0]),o=[e,r],c.invert&&(e=c(e),r=c(r)),e>r&&(l=e,e=r,r=l),e==s[0]&&r==s[1]||(s=[e,r])),f&&(i=t[0],u=t[1],c&&(i=i[1],u=u[1]),a=[i,u],f.invert&&(i=f(i),u=f(u)),i>u&&(l=i,i=u,u=l),i==h[0]&&u==h[1]||(h=[i,u])),n):(c&&(o?(e=o[0],r=o[1]):(e=s[0],r=s[1],c.invert&&(e=c.invert(e),r=c.invert(r)),e>r&&(l=e,e=r,r=l))),f&&(a?(i=a[0],u=a[1]):(i=h[0],u=h[1],f.invert&&(i=f.invert(i),u=f.invert(u)),i>u&&(l=i,i=u,u=l))),c&&f?[[e,i],[r,u]]:c?[e,r]:f&&[i,u])},n.clear=function(){return n.empty()||(s=[0,0],h=[0,0],o=a=null),n},n.empty=function(){return!!c&&s[0]==s[1]||!!f&&h[0]==h[1]},ao.rebind(n,l,"on")};var $l={n:"ns-resize",e:"ew-resize",s:"ns-resize",w:"ew-resize",nw:"nwse-resize",ne:"nesw-resize",se:"nwse-resize",sw:"nesw-resize"},Bl=[["n","e","s","w","nw","ne","se","sw"],["e","w"],["n","s"],[]],Wl=ga.format=xa.timeFormat,Jl=Wl.utc,Gl=Jl("%Y-%m-%dT%H:%M:%S.%LZ");Wl.iso=Date.prototype.toISOString&&+new Date("2000-01-01T00:00:00.000Z")?eo:Gl,eo.parse=function(n){var t=new Date(n);return isNaN(t)?null:t},eo.toString=Gl.toString,ga.second=On(function(n){return new va(1e3*Math.floor(n/1e3))},function(n,t){n.setTime(n.getTime()+1e3*Math.floor(t))},function(n){return n.getSeconds()}),ga.seconds=ga.second.range,ga.seconds.utc=ga.second.utc.range,ga.minute=On(function(n){return new va(6e4*Math.floor(n/6e4))},function(n,t){n.setTime(n.getTime()+6e4*Math.floor(t))},function(n){return n.getMinutes()}),ga.minutes=ga.minute.range,ga.minutes.utc=ga.minute.utc.range,ga.hour=On(function(n){var t=n.getTimezoneOffset()/60;return new va(36e5*(Math.floor(n/36e5-t)+t))},function(n,t){n.setTime(n.getTime()+36e5*Math.floor(t))},function(n){return n.getHours()}),ga.hours=ga.hour.range,ga.hours.utc=ga.hour.utc.range,ga.month=On(function(n){return n=ga.day(n),n.setDate(1),n},function(n,t){n.setMonth(n.getMonth()+t)},function(n){return n.getMonth()}),ga.months=ga.month.range,ga.months.utc=ga.month.utc.range;var Kl=[1e3,5e3,15e3,3e4,6e4,3e5,9e5,18e5,36e5,108e5,216e5,432e5,864e5,1728e5,6048e5,2592e6,7776e6,31536e6],Ql=[[ga.second,1],[ga.second,5],[ga.second,15],[ga.second,30],[ga.minute,1],[ga.minute,5],[ga.minute,15],[ga.minute,30],[ga.hour,1],[ga.hour,3],[ga.hour,6],[ga.hour,12],[ga.day,1],[ga.day,2],[ga.week,1],[ga.month,1],[ga.month,3],[ga.year,1]],nc=Wl.multi([[".%L",function(n){return n.getMilliseconds()}],[":%S",function(n){return n.getSeconds()}],["%I:%M",function(n){return n.getMinutes()}],["%I %p",function(n){return n.getHours()}],["%a %d",function(n){return n.getDay()&&1!=n.getDate()}],["%b %d",function(n){return 1!=n.getDate()}],["%B",function(n){return n.getMonth()}],["%Y",zt]]),tc={range:function(n,t,e){return ao.range(Math.ceil(n/e)*e,+t,e).map(io)},floor:m,ceil:m};Ql.year=ga.year,ga.scale=function(){return ro(ao.scale.linear(),Ql,nc)};var ec=Ql.map(function(n){return[n[0].utc,n[1]]}),rc=Jl.multi([[".%L",function(n){return n.getUTCMilliseconds()}],[":%S",function(n){return n.getUTCSeconds()}],["%I:%M",function(n){return n.getUTCMinutes()}],["%I %p",function(n){return n.getUTCHours()}],["%a %d",function(n){return n.getUTCDay()&&1!=n.getUTCDate()}],["%b %d",function(n){return 1!=n.getUTCDate()}],["%B",function(n){return n.getUTCMonth()}],["%Y",zt]]);ec.year=ga.year.utc,ga.scale.utc=function(){return ro(ao.scale.linear(),ec,rc)},ao.text=An(function(n){return n.responseText}),ao.json=function(n,t){return Cn(n,"application/json",uo,t)},ao.html=function(n,t){return Cn(n,"text/html",oo,t)},ao.xml=An(function(n){return n.responseXML}),"function"==typeof define&&define.amd?(this.d3=ao,define(ao)):"object"==typeof module&&module.exports?module.exports=ao:this.d3=ao}();!function(a,b){function c(c,j,k){var n=[];j=1==j?{entropy:!0}:j||{};var s=g(f(j.entropy?[c,i(a)]:null==c?h():c,3),n),t=new d(n),u=function(){for(var a=t.g(m),b=p,c=0;q>a;)a=(a+c)*l,b*=l,c=t.g(1);for(;a>=r;)a/=2,b/=2,c>>>=1;return(a+c)/b};return u.int32=function(){return 0|t.g(4)},u.quick=function(){return t.g(4)/4294967296},u["double"]=u,g(i(t.S),a),(j.pass||k||function(a,c,d,f){return f&&(f.S&&e(f,t),a.state=function(){return e(t,{})}),d?(b[o]=a,c):a})(u,s,"global"in j?j.global:this==b,j.state)}function d(a){var b,c=a.length,d=this,e=0,f=d.i=d.j=0,g=d.S=[];for(c||(a=[c++]);l>e;)g[e]=e++;for(e=0;l>e;e++)g[e]=g[f=s&f+a[e%c]+(b=g[e])],g[f]=b;(d.g=function(a){for(var b,c=0,e=d.i,f=d.j,g=d.S;a--;)b=g[e=s&e+1],c=c*l+g[s&(g[e]=g[f=s&f+b])+(g[f]=b)];return d.i=e,d.j=f,c})(l)}function e(a,b){return b.i=a.i,b.j=a.j,b.S=a.S.slice(),b}function f(a,b){var c,d=[],e=typeof a;if(b&&"object"==e)for(c in a)try{d.push(f(a[c],b-1))}catch(g){}return d.length?d:"string"==e?a:a+"\0"}function g(a,b){for(var c,d=a+"",e=0;e<d.length;)b[s&e]=s&(c^=19*b[s&e])+d.charCodeAt(e++);return i(b)}function h(){try{if(j)return i(j.randomBytes(l));var b=new Uint8Array(l);return(k.crypto||k.msCrypto).getRandomValues(b),i(b)}catch(c){var d=k.navigator,e=d&&d.plugins;return[+new Date,k,e,k.screen,i(a)]}}function i(a){return String.fromCharCode.apply(0,a)}var j,k=this,l=256,m=6,n=52,o="random",p=b.pow(l,m),q=b.pow(2,n),r=2*q,s=l-1;if(b["seed"+o]=c,g(b.random(),a),"object"==typeof module&&module.exports){module.exports=c;try{j=require("crypto")}catch(t){}}else"function"==typeof define&&define.amd&&define(function(){return c})}([],Math);
 </script>
   <script id="vendor-bundle">
-!function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a="function"==typeof require&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}for(var i="function"==typeof require&&require,o=0;o<r.length;o++)s(r[o]);s}({1:[function(require,module,exports){"use strict";function shuffle(array){for(var counter=array.length,temp=0,index=0;counter>0;)index=Math.floor(Math.random()*counter),counter--,temp=array[counter],array[counter]=array[index],array[index]=temp}function classifyTwoGaussData(numSamples,noise){function genGauss(cx,cy,label){for(var i=0;i<numSamples/2;i++){var x=normalRandom(cx,variance),y=normalRandom(cy,variance);points.push({x:x,y:y,label:label})}}var points=[],varianceScale=d3.scale.linear().domain([0,.5]).range([.5,4]),variance=varianceScale(noise);return genGauss(2,2,1),genGauss(-2,-2,-1),points}function regressPlane(numSamples,noise){for(var labelScale=d3.scale.linear().domain([-10,10]).range([-1,1]),getLabel=function(x,y){return labelScale(x+y)},points=[],i=0;i<numSamples;i++){var x=randUniform(-6,6),y=randUniform(-6,6),noiseX=randUniform(-6,6)*noise,noiseY=randUniform(-6,6)*noise,label=getLabel(x+noiseX,y+noiseY);points.push({x:x,y:y,label:label})}return points}function regressGaussian(numSamples,noise){function getLabel(x,y){var label=0;return gaussians.forEach(function(_a){var cx=_a[0],cy=_a[1],sign=_a[2],newLabel=sign*labelScale(dist({x:x,y:y},{x:cx,y:cy}));Math.abs(newLabel)>Math.abs(label)&&(label=newLabel)}),label}for(var points=[],labelScale=d3.scale.linear().domain([0,2]).range([1,0]).clamp(!0),gaussians=[[-4,2.5,1],[0,2.5,-1],[4,2.5,1],[-4,-2.5,-1],[0,-2.5,1],[4,-2.5,-1]],i=0;i<numSamples;i++){var x=randUniform(-6,6),y=randUniform(-6,6),noiseX=randUniform(-6,6)*noise,noiseY=randUniform(-6,6)*noise,label=getLabel(x+noiseX,y+noiseY);points.push({x:x,y:y,label:label})}return points}function classifySpiralData(numSamples,noise){function genSpiral(deltaT,label){for(var i=0;i<n;i++){var r=i/n*5,t=1.75*i/n*2*Math.PI+deltaT,x=r*Math.sin(t)+randUniform(-1,1)*noise,y=r*Math.cos(t)+randUniform(-1,1)*noise;points.push({x:x,y:y,label:label})}}var points=[],n=numSamples/2;return genSpiral(0,1),genSpiral(Math.PI,-1),points}function classifyCircleData(numSamples,noise){function getCircleLabel(p,center){return dist(p,center)<2.5?1:-1}for(var points=[],i=0;i<numSamples/2;i++){var r=randUniform(0,2.5),angle=randUniform(0,2*Math.PI),x=r*Math.sin(angle),y=r*Math.cos(angle),noiseX=randUniform(-5,5)*noise,noiseY=randUniform(-5,5)*noise,label=getCircleLabel({x:x+noiseX,y:y+noiseY},{x:0,y:0});points.push({x:x,y:y,label:label})}for(var i=0;i<numSamples/2;i++){var r=randUniform(3.5,5),angle=randUniform(0,2*Math.PI),x=r*Math.sin(angle),y=r*Math.cos(angle),noiseX=randUniform(-5,5)*noise,noiseY=randUniform(-5,5)*noise,label=getCircleLabel({x:x+noiseX,y:y+noiseY},{x:0,y:0});points.push({x:x,y:y,label:label})}return points}function classifyXORData(numSamples,noise){function getXORLabel(p){return p.x*p.y>=0?1:-1}for(var points=[],i=0;i<numSamples;i++){var x=randUniform(-5,5);x+=x>0?.3:-.3;var y=randUniform(-5,5);y+=y>0?.3:-.3;var noiseX=randUniform(-5,5)*noise,noiseY=randUniform(-5,5)*noise,label=getXORLabel({x:x+noiseX,y:y+noiseY});points.push({x:x,y:y,label:label})}return points}function randUniform(a,b){return Math.random()*(b-a)+a}function normalRandom(mean,variance){void 0===mean&&(mean=0),void 0===variance&&(variance=1);var v1,v2,s;do v1=2*Math.random()-1,v2=2*Math.random()-1,s=v1*v1+v2*v2;while(s>1);var result=Math.sqrt(-2*Math.log(s)/s)*v1;return mean+Math.sqrt(variance)*result}function dist(a,b){var dx=a.x-b.x,dy=a.y-b.y;return Math.sqrt(dx*dx+dy*dy)}exports.shuffle=shuffle,exports.classifyTwoGaussData=classifyTwoGaussData,exports.regressPlane=regressPlane,exports.regressGaussian=regressGaussian,exports.classifySpiralData=classifySpiralData,exports.classifyCircleData=classifyCircleData,exports.classifyXORData=classifyXORData},{}],2:[function(require,module,exports){"use strict";function reduceMatrix(matrix,factor){if(matrix.length!==matrix[0].length)throw new Error("The provided matrix must be a square matrix");if(matrix.length%factor!=0)throw new Error("The width/height of the matrix must be divisible by the reduction factor");for(var result=new Array(matrix.length/factor),i=0;i<matrix.length;i+=factor){result[i/factor]=new Array(matrix.length/factor);for(var j=0;j<matrix.length;j+=factor){for(var avg=0,k=0;k<factor;k++)for(var l=0;l<factor;l++)avg+=matrix[i+k][j+l];avg/=factor*factor,result[i/factor][j/factor]=avg}}return result}var HeatMap=function(){function HeatMap(width,numSamples,xDomain,yDomain,container,userSettings){this.settings={showAxes:!1,noSvg:!1},this.numSamples=numSamples;var height=width,padding=userSettings.showAxes?20:0;if(null!=userSettings)for(var prop in userSettings)this.settings[prop]=userSettings[prop];this.xScale=d3.scale.linear().domain(xDomain).range([0,width-2*padding]),this.yScale=d3.scale.linear().domain(yDomain).range([height-2*padding,0]);var tmpScale=d3.scale.linear().domain([0,.5,1]).range(["#f59322","#e8eaeb","#0877bd"]).clamp(!0),colors=d3.range(0,1+1e-9,1/30).map(function(a){return tmpScale(a)});if(this.color=d3.scale.quantize().domain([-1,1]).range(colors),container=container.append("div").style({width:width+"px",height:height+"px",position:"relative",top:"-"+padding+"px",left:"-"+padding+"px"}),this.canvas=container.append("canvas").attr("width",numSamples).attr("height",numSamples).style("width",width-2*padding+"px").style("height",height-2*padding+"px").style("position","absolute").style("top",padding+"px").style("left",padding+"px"),this.settings.noSvg||(this.svg=container.append("svg").attr({width:width,height:height}).style({position:"absolute",left:"0",top:"0"}).append("g").attr("transform","translate("+padding+","+padding+")"),this.svg.append("g").attr("class","train"),this.svg.append("g").attr("class","test")),this.settings.showAxes){var xAxis=d3.svg.axis().scale(this.xScale).orient("bottom"),yAxis=d3.svg.axis().scale(this.yScale).orient("right");this.svg.append("g").attr("class","x axis").attr("transform","translate(0,"+(height-2*padding)+")").call(xAxis),this.svg.append("g").attr("class","y axis").attr("transform","translate("+(width-2*padding)+",0)").call(yAxis)}}return HeatMap.prototype.updateTestPoints=function(points){if(this.settings.noSvg)throw Error("Can't add points since noSvg=true");this.updateCircles(this.svg.select("g.test"),points)},HeatMap.prototype.updatePoints=function(points){if(this.settings.noSvg)throw Error("Can't add points since noSvg=true");this.updateCircles(this.svg.select("g.train"),points)},HeatMap.prototype.updateBackground=function(data,discretize){var dx=data[0].length,dy=data.length;if(dx!==this.numSamples||dy!==this.numSamples)throw new Error("The provided data matrix must be of size numSamples X numSamples");for(var context=this.canvas.node().getContext("2d"),image=context.createImageData(dx,dy),y=0,p=-1;y<dy;++y)for(var x=0;x<dx;++x){var value=data[x][y];discretize&&(value=value>=0?1:-1);var c=d3.rgb(this.color(value));image.data[++p]=c.r,image.data[++p]=c.g,image.data[++p]=c.b,image.data[++p]=160}context.putImageData(image,0,0)},HeatMap.prototype.updateCircles=function(container,points){var _this=this,xDomain=this.xScale.domain(),yDomain=this.yScale.domain();points=points.filter(function(p){return p.x>=xDomain[0]&&p.x<=xDomain[1]&&p.y>=yDomain[0]&&p.y<=yDomain[1]});var selection=container.selectAll("circle").data(points);selection.enter().append("circle").attr("r",3),selection.attr({cx:function(d){return _this.xScale(d.x)},cy:function(d){return _this.yScale(d.y)}}).style("fill",function(d){return _this.color(d.label)}),selection.exit().remove()},HeatMap}();exports.HeatMap=HeatMap,exports.reduceMatrix=reduceMatrix},{}],3:[function(require,module,exports){"use strict";var AppendingLineChart=function(){function AppendingLineChart(container,lineColors){this.data=[],this.minY=Number.MAX_VALUE,this.maxY=Number.MIN_VALUE,this.lineColors=lineColors,this.numLines=lineColors.length;var node=container.node(),totalWidth=node.offsetWidth,totalHeight=node.offsetHeight,margin={top:2,right:0,bottom:2,left:2},width=totalWidth-margin.left-margin.right,height=totalHeight-margin.top-margin.bottom;this.xScale=d3.scale.linear().domain([0,0]).range([0,width]),this.yScale=d3.scale.linear().domain([0,0]).range([height,0]),this.svg=container.append("svg").attr("width",width+margin.left+margin.right).attr("height",height+margin.top+margin.bottom).append("g").attr("transform","translate("+margin.left+","+margin.top+")"),this.paths=new Array(this.numLines);for(var i=0;i<this.numLines;i++)this.paths[i]=this.svg.append("path").attr("class","line").style({fill:"none",stroke:lineColors[i],"stroke-width":"1.5px"})}return AppendingLineChart.prototype.reset=function(){this.data=[],this.redraw(),this.minY=Number.MAX_VALUE,this.maxY=Number.MIN_VALUE},AppendingLineChart.prototype.addDataPoint=function(dataPoint){var _this=this;if(dataPoint.length!==this.numLines)throw Error("Length of dataPoint must equal number of lines");dataPoint.forEach(function(y){_this.minY=Math.min(_this.minY,y),_this.maxY=Math.max(_this.maxY,y)}),this.data.push({x:this.data.length+1,y:dataPoint}),this.redraw()},AppendingLineChart.prototype.redraw=function(){var _this=this;this.xScale.domain([1,this.data.length]),this.yScale.domain([this.minY,this.maxY]);for(var getPathMap=function(lineIndex){return d3.svg.line().x(function(d){return _this.xScale(d.x)}).y(function(d){return _this.yScale(d.y[lineIndex])})},i=0;i<this.numLines;i++)this.paths[i].datum(this.data).attr("d",getPathMap(i))},AppendingLineChart}();exports.AppendingLineChart=AppendingLineChart},{}],4:[function(require,module,exports){"use strict";function buildNetwork(networkShape,activation,outputActivation,regularization,inputIds,initZero){for(var numLayers=networkShape.length,id=1,network=[],layerIdx=0;layerIdx<numLayers;layerIdx++){var isOutputLayer=layerIdx===numLayers-1,isInputLayer=0===layerIdx,currentLayer=[];network.push(currentLayer);for(var numNodes=networkShape[layerIdx],i=0;i<numNodes;i++){var nodeId=id.toString();isInputLayer?nodeId=inputIds[i]:id++;var node=new Node(nodeId,isOutputLayer?outputActivation:activation,initZero);if(currentLayer.push(node),layerIdx>=1)for(var j=0;j<network[layerIdx-1].length;j++){var prevNode=network[layerIdx-1][j],link=new Link(prevNode,node,regularization,initZero);prevNode.outputs.push(link),node.inputLinks.push(link)}}}return network}function forwardProp(network,inputs){var inputLayer=network[0];if(inputs.length!==inputLayer.length)throw new Error("The number of inputs must match the number of nodes in the input layer");for(var i=0;i<inputLayer.length;i++){var node=inputLayer[i];node.output=inputs[i]}for(var layerIdx=1;layerIdx<network.length;layerIdx++)for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++){var node=currentLayer[i];node.updateOutput()}return network[network.length-1][0].output}function backProp(network,target,errorFunc){var outputNode=network[network.length-1][0];outputNode.outputDer=errorFunc.der(outputNode.output,target);for(var layerIdx=network.length-1;layerIdx>=1;layerIdx--){for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++){var node=currentLayer[i];node.inputDer=node.outputDer*node.activation.der(node.totalInput),node.accInputDer+=node.inputDer,node.numAccumulatedDers++}for(var i=0;i<currentLayer.length;i++)for(var node=currentLayer[i],j=0;j<node.inputLinks.length;j++){var link=node.inputLinks[j];link.isDead||(link.errorDer=node.inputDer*link.source.output,link.accErrorDer+=link.errorDer,link.numAccumulatedDers++)}if(1!==layerIdx)for(var prevLayer=network[layerIdx-1],i=0;i<prevLayer.length;i++){var node=prevLayer[i];node.outputDer=0;for(var j=0;j<node.outputs.length;j++){var output=node.outputs[j];node.outputDer+=output.weight*output.dest.inputDer}}}}function updateWeights(network,learningRate,regularizationRate){for(var layerIdx=1;layerIdx<network.length;layerIdx++)for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++){var node=currentLayer[i];node.numAccumulatedDers>0&&(node.bias-=learningRate*node.accInputDer/node.numAccumulatedDers,node.accInputDer=0,node.numAccumulatedDers=0);for(var j=0;j<node.inputLinks.length;j++){var link=node.inputLinks[j];if(!link.isDead){var regulDer=link.regularization?link.regularization.der(link.weight):0;if(link.numAccumulatedDers>0){link.weight=link.weight-learningRate/link.numAccumulatedDers*link.accErrorDer;var newLinkWeight=link.weight-learningRate*regularizationRate*regulDer;link.regularization===RegularizationFunction.L1&&link.weight*newLinkWeight<0?(link.weight=0,link.isDead=!0):link.weight=newLinkWeight,link.accErrorDer=0,link.numAccumulatedDers=0}}}}}function forEachNode(network,ignoreInputs,accessor){for(var layerIdx=ignoreInputs?1:0;layerIdx<network.length;layerIdx++)for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++){var node=currentLayer[i];accessor(node)}}function getOutputNode(network){return network[network.length-1][0]}var Node=function(){function Node(id,activation,initZero){this.inputLinks=[],this.bias=.1,this.outputs=[],this.outputDer=0,this.inputDer=0,this.accInputDer=0,this.numAccumulatedDers=0,this.id=id,this.activation=activation,initZero&&(this.bias=0)}return Node.prototype.updateOutput=function(){this.totalInput=this.bias;for(var j=0;j<this.inputLinks.length;j++){var link=this.inputLinks[j];this.totalInput+=link.weight*link.source.output}return this.output=this.activation.output(this.totalInput),this.output},Node}();exports.Node=Node;var Errors=function(){function Errors(){}return Errors}();Errors.SQUARE={error:function(output,target){return.5*Math.pow(output-target,2)},der:function(output,target){return output-target}},exports.Errors=Errors,Math.tanh=Math.tanh||function(x){if(x===1/0)return 1;if(x===-(1/0))return-1;var e2x=Math.exp(2*x);return(e2x-1)/(e2x+1)};var Activations=function(){function Activations(){}return Activations}();Activations.TANH={output:function(x){return Math.tanh(x)},der:function(x){var output=Activations.TANH.output(x);return 1-output*output}},Activations.RELU={output:function(x){return Math.max(0,x)},der:function(x){return x<=0?0:1}},Activations.SIGMOID={output:function(x){return 1/(1+Math.exp(-x))},der:function(x){var output=Activations.SIGMOID.output(x);return output*(1-output)}},Activations.LINEAR={output:function(x){return x},der:function(x){return 1}},exports.Activations=Activations;var RegularizationFunction=function(){function RegularizationFunction(){}return RegularizationFunction}();RegularizationFunction.L1={output:function(w){return Math.abs(w)},der:function(w){return w<0?-1:w>0?1:0}},RegularizationFunction.L2={output:function(w){return.5*w*w},der:function(w){return w}},exports.RegularizationFunction=RegularizationFunction;var Link=function(){function Link(source,dest,regularization,initZero){this.weight=Math.random()-.5,this.isDead=!1,this.errorDer=0,this.accErrorDer=0,this.numAccumulatedDers=0,this.id=source.id+"-"+dest.id,this.source=source,this.dest=dest,this.regularization=regularization,initZero&&(this.weight=0)}return Link}();exports.Link=Link,exports.buildNetwork=buildNetwork,exports.forwardProp=forwardProp,exports.backProp=backProp,exports.updateWeights=updateWeights,exports.forEachNode=forEachNode,exports.getOutputNode=getOutputNode},{}],5:[function(require,module,exports){"use strict";function scrollTween(offset){return function(){var i=d3.interpolateNumber(window.pageYOffset||document.documentElement.scrollTop,offset);return function(t){scrollTo(0,i(t))}}}function makeGUI(){d3.select("#reset-button").on("click",function(){reset(),userHasInteracted(),d3.select("#play-pause-button")}),d3.select("#play-pause-button").on("click",function(){userHasInteracted(),player.playOrPause()}),player.onPlayPause(function(isPlaying){d3.select("#play-pause-button").classed("playing",isPlaying)}),d3.select("#next-step-button").on("click",function(){player.pause(),userHasInteracted(),0===iter&&simulationStarted(),oneStep()}),d3.select("#data-regen-button").on("click",function(){generateData(),parametersChanged=!0});var dataThumbnails=d3.selectAll("canvas[data-dataset]");dataThumbnails.on("click",function(){var newDataset=state_1.datasets[this.dataset.dataset];newDataset!==state.dataset&&(state.dataset=newDataset,dataThumbnails.classed("selected",!1),d3.select(this).classed("selected",!0),generateData(),parametersChanged=!0,reset())});var datasetKey=state_1.getKeyFromValue(state_1.datasets,state.dataset);d3.select("canvas[data-dataset="+datasetKey+"]").classed("selected",!0);var regDataThumbnails=d3.selectAll("canvas[data-regDataset]");regDataThumbnails.on("click",function(){var newDataset=state_1.regDatasets[this.dataset.regdataset];newDataset!==state.regDataset&&(state.regDataset=newDataset,regDataThumbnails.classed("selected",!1),d3.select(this).classed("selected",!0),generateData(),parametersChanged=!0,reset())});var regDatasetKey=state_1.getKeyFromValue(state_1.regDatasets,state.regDataset);d3.select("canvas[data-regDataset="+regDatasetKey+"]").classed("selected",!0),d3.select("#add-layers").on("click",function(){state.numHiddenLayers>=6||(state.networkShape[state.numHiddenLayers]=2,state.numHiddenLayers++,parametersChanged=!0,reset())}),d3.select("#remove-layers").on("click",function(){state.numHiddenLayers<=0||(state.numHiddenLayers--,state.networkShape.splice(state.numHiddenLayers),parametersChanged=!0,reset())}),d3.select("#show-test-data").on("change",function(){state.showTestData=this.checked,state.serialize(),userHasInteracted(),heatMap.updateTestPoints(state.showTestData?testData:[])}).property("checked",state.showTestData),d3.select("#discretize").on("change",function(){state.discretize=this.checked,state.serialize(),userHasInteracted(),updateUI()}).property("checked",state.discretize),d3.select("#percTrainData").on("input",function(){state.percTrainData=this.value,d3.select("label[for='percTrainData'] .value").text(this.value),generateData(),parametersChanged=!0,reset()}).property("value",state.percTrainData),d3.select("label[for='percTrainData'] .value").text(state.percTrainData),d3.select("#noise").on("input",function(){state.noise=this.value,d3.select("label[for='noise'] .value").text(this.value),generateData(),parametersChanged=!0,reset()}).property("value",state.noise),d3.select("label[for='noise'] .value").text(state.noise),d3.select("#batchSize").on("input",function(){state.batchSize=this.value,d3.select("label[for='batchSize'] .value").text(this.value),parametersChanged=!0,reset()}).property("value",state.batchSize),d3.select("label[for='batchSize'] .value").text(state.batchSize),d3.select("#activations").on("change",function(){state.activation=state_1.activations[this.value],parametersChanged=!0,reset()}).property("value",state_1.getKeyFromValue(state_1.activations,state.activation)),d3.select("#learningRate").on("change",function(){state.learningRate=+this.value,state.serialize(),userHasInteracted(),parametersChanged=!0}).property("value",state.learningRate),d3.select("#regularizations").on("change",function(){state.regularization=state_1.regularizations[this.value],parametersChanged=!0,reset()}).property("value",state_1.getKeyFromValue(state_1.regularizations,state.regularization)),d3.select("#regularRate").on("change",function(){state.regularizationRate=+this.value,parametersChanged=!0,reset()}).property("value",state.regularizationRate),d3.select("#problem").on("change",function(){state.problem=state_1.problems[this.value],generateData(),drawDatasetThumbnails(),parametersChanged=!0,reset()}).property("value",state_1.getKeyFromValue(state_1.problems,state.problem));var x=d3.scale.linear().domain([-1,1]).range([0,144]),xAxis=d3.svg.axis().scale(x).orient("bottom").tickValues([-1,0,1]).tickFormat(d3.format("d"));d3.select("#colormap g.core").append("g").attr("class","x axis").attr("transform","translate(0,10)").call(xAxis),window.addEventListener("resize",function(){var newWidth=document.querySelector("#main-part").getBoundingClientRect().width;newWidth!==mainWidth&&(mainWidth=newWidth,drawNetwork(network),updateUI(!0))}),state.hideText&&(d3.select("#article-text").style("display","none"),d3.select("div.more").style("display","none"),d3.select("header").style("display","none"))}function updateBiasesUI(network){nn.forEachNode(network,!0,function(node){d3.select("rect#bias-"+node.id).style("fill",colorScale(node.bias))})}function updateWeightsUI(network,container){for(var layerIdx=1;layerIdx<network.length;layerIdx++)for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++)for(var node=currentLayer[i],j=0;j<node.inputLinks.length;j++){var link=node.inputLinks[j];container.select("#link"+link.source.id+"-"+link.dest.id).style({"stroke-dashoffset":-iter/3,"stroke-width":linkWidthScale(Math.abs(link.weight)),stroke:colorScale(link.weight)}).datum(link)}}function drawNode(cx,cy,nodeId,isInput,container,node){var x=cx-15,y=cy-15,nodeGroup=container.append("g").attr({class:"node",id:"node"+nodeId,transform:"translate("+x+","+y+")"});nodeGroup.append("rect").attr({x:0,y:0,width:30,height:30});var activeOrNotClass=state[nodeId]?"active":"inactive";if(isInput){var label=null!=INPUTS[nodeId].label?INPUTS[nodeId].label:nodeId,text=nodeGroup.append("text").attr({class:"main-label",x:-10,y:15,"text-anchor":"end"});if(/[_^]/.test(label)){for(var myRe=/(.*?)([_^])(.)/g,myArray=void 0,lastIndex=void 0;null!=(myArray=myRe.exec(label));){lastIndex=myRe.lastIndex;var prefix=myArray[1],sep=myArray[2],suffix=myArray[3];prefix&&text.append("tspan").text(prefix),text.append("tspan").attr("baseline-shift","_"===sep?"sub":"super").style("font-size","9px").text(suffix)}label.substring(lastIndex)&&text.append("tspan").text(label.substring(lastIndex))}else text.append("tspan").text(label);nodeGroup.classed(activeOrNotClass,!0)}isInput||nodeGroup.append("rect").attr({id:"bias-"+nodeId,x:-7,y:28,width:5,height:5}).on("mouseenter",function(){updateHoverCard(HoverType.BIAS,node,d3.mouse(container.node()))}).on("mouseleave",function(){updateHoverCard(null)});var div=d3.select("#network").insert("div",":first-child").attr({id:"canvas-"+nodeId,class:"canvas"}).style({position:"absolute",left:x+3+"px",top:y+3+"px"}).on("mouseenter",function(){selectedNodeId=nodeId,div.classed("hovered",!0),nodeGroup.classed("hovered",!0),updateDecisionBoundary(network,!1),heatMap.updateBackground(boundary[nodeId],state.discretize)}).on("mouseleave",function(){selectedNodeId=null,div.classed("hovered",!1),nodeGroup.classed("hovered",!1),updateDecisionBoundary(network,!1),heatMap.updateBackground(boundary[nn.getOutputNode(network).id],state.discretize)});isInput&&(div.on("click",function(){state[nodeId]=!state[nodeId],parametersChanged=!0,reset()}),div.style("cursor","pointer")),isInput&&div.classed(activeOrNotClass,!0);var nodeHeatMap=new heatmap_1.HeatMap(30,10,xDomain,xDomain,div,{noSvg:!0});div.datum({heatmap:nodeHeatMap,id:nodeId})}function drawNetwork(network){var svg=d3.select("#svg");svg.select("g.core").remove(),d3.select("#network").selectAll("div.canvas").remove(),d3.select("#network").selectAll("div.plus-minus-neurons").remove();var co=d3.select(".column.output").node(),cf=d3.select(".column.features").node(),width=co.offsetLeft-cf.offsetLeft;svg.attr("width",width);var node2coord={},container=svg.append("g").classed("core",!0).attr("transform","translate(3,3)"),numLayers=network.length,layerScale=d3.scale.ordinal().domain(d3.range(1,numLayers-1)).rangePoints([118,width-30],.7),nodeIndexScale=function(nodeIndex){return 55*nodeIndex},calloutThumb=d3.select(".callout.thumbnail").style("display","none"),calloutWeights=d3.select(".callout.weights").style("display","none"),idWithCallout=null,targetIdWithCallout=null,cx=65,nodeIds=Object.keys(INPUTS),maxY=nodeIndexScale(nodeIds.length);nodeIds.forEach(function(nodeId,i){var cy=nodeIndexScale(i)+15;node2coord[nodeId]={cx:cx,cy:cy},drawNode(cx,cy,nodeId,!0,container)});for(var layerIdx=1;layerIdx<numLayers-1;layerIdx++){var numNodes=network[layerIdx].length,cx_1=layerScale(layerIdx)+15;maxY=Math.max(maxY,nodeIndexScale(numNodes)),addPlusMinusControl(layerScale(layerIdx),layerIdx);for(var i=0;i<numNodes;i++){var node_1=network[layerIdx][i],cy_1=nodeIndexScale(i)+15;node2coord[node_1.id]={cx:cx_1,cy:cy_1},drawNode(cx_1,cy_1,node_1.id,!1,container,node_1);var numNodes_1=network[layerIdx].length,nextNumNodes=network[layerIdx+1].length;null==idWithCallout&&i===numNodes_1-1&&nextNumNodes<=numNodes_1&&(calloutThumb.style({display:null,top:23+cy_1+"px",left:cx_1+"px"}),idWithCallout=node_1.id);for(var j=0;j<node_1.inputLinks.length;j++){var link=node_1.inputLinks[j],path=drawLink(link,node2coord,network,container,0===j,j,node_1.inputLinks.length).node(),prevLayer=network[layerIdx-1],lastNodePrevLayer=prevLayer[prevLayer.length-1];if(null==targetIdWithCallout&&i===numNodes_1-1&&link.source.id===lastNodePrevLayer.id&&(link.source.id!==idWithCallout||numLayers<=5)&&link.dest.id!==idWithCallout&&prevLayer.length>=numNodes_1){var midPoint=path.getPointAtLength(.7*path.getTotalLength());calloutWeights.style({display:null,top:midPoint.y+5+"px",left:midPoint.x+3+"px"}),targetIdWithCallout=link.dest.id}}}}cx=width+15;var node=network[numLayers-1][0],cy=nodeIndexScale(0)+15;node2coord[node.id]={cx:cx,cy:cy};for(var i=0;i<node.inputLinks.length;i++){var link=node.inputLinks[i];drawLink(link,node2coord,network,container,0===i,i,node.inputLinks.length)}svg.attr("height",maxY);var height=Math.max(getRelativeHeight(calloutThumb),getRelativeHeight(calloutWeights),getRelativeHeight(d3.select("#network")));d3.select(".column.features").style("height",height+"px")}function getRelativeHeight(selection){var node=selection.node();return node.offsetHeight+node.offsetTop}function addPlusMinusControl(x,layerIdx){var div=d3.select("#network").append("div").classed("plus-minus-neurons",!0).style("left",x-10+"px"),i=layerIdx-1,firstRow=div.append("div").attr("class","ui-numNodes"+layerIdx);firstRow.append("button").attr("class","mdl-button mdl-js-button mdl-button--icon").on("click",function(){state.networkShape[i]>=8||(state.networkShape[i]++,parametersChanged=!0,reset())}).append("i").attr("class","material-icons").text("add"),firstRow.append("button").attr("class","mdl-button mdl-js-button mdl-button--icon").on("click",function(){state.networkShape[i]<=1||(state.networkShape[i]--,parametersChanged=!0,reset())}).append("i").attr("class","material-icons").text("remove");var suffix=state.networkShape[i]>1?"s":"";div.append("div").text(state.networkShape[i]+" neuron"+suffix)}function updateHoverCard(type,nodeOrLink,coordinates){var hovercard=d3.select("#hovercard");if(null==type)return hovercard.style("display","none"),void d3.select("#svg").on("click",null);d3.select("#svg").on("click",function(){hovercard.select(".value").style("display","none");var input=hovercard.select("input");input.style("display",null),input.on("input",function(){null!=this.value&&""!==this.value&&(type===HoverType.WEIGHT?nodeOrLink.weight=+this.value:nodeOrLink.bias=+this.value,updateUI())}),input.on("keypress",function(){13===d3.event.keyCode&&updateHoverCard(type,nodeOrLink,coordinates)}),input.node().focus()});var value=type===HoverType.WEIGHT?nodeOrLink.weight:nodeOrLink.bias,name=type===HoverType.WEIGHT?"权重":"偏置";hovercard.style({left:coordinates[0]+20+"px",top:coordinates[1]+"px",display:"block"}),hovercard.select(".type").text(name),hovercard.select(".value").style("display",null).text(value.toPrecision(2)),hovercard.select("input").property("value",value.toPrecision(2)).style("display","none")}function drawLink(input,node2coord,network,container,isFirst,index,length){var line=container.insert("path",":first-child"),source=node2coord[input.source.id],dest=node2coord[input.dest.id],datum={source:{y:source.cx+15+2,x:source.cy},target:{y:dest.cx-15,x:dest.cy+(index-(length-1)/2)/length*12}},diagonal=d3.svg.diagonal().projection(function(d){return[d.y,d.x]});return line.attr({"marker-start":"url(#markerArrow)",class:"link",id:"link"+input.source.id+"-"+input.dest.id,d:diagonal(datum,0)}),container.append("path").attr("d",diagonal(datum,0)).attr("class","link-hover").on("mouseenter",function(){updateHoverCard(HoverType.WEIGHT,input,d3.mouse(this))}).on("mouseleave",function(){updateHoverCard(null)}),line}function updateDecisionBoundary(network,firstTime){if(firstTime){boundary={},nn.forEachNode(network,!0,function(node){boundary[node.id]=new Array(100)});for(var nodeId in INPUTS)boundary[nodeId]=new Array(100)}var xScale=d3.scale.linear().domain([0,99]).range(xDomain),yScale=d3.scale.linear().domain([99,0]).range(xDomain),i=0,j=0;for(i=0;i<100;i++){if(firstTime){nn.forEachNode(network,!0,function(node){boundary[node.id][i]=new Array(100)});for(var nodeId in INPUTS)boundary[nodeId][i]=new Array(100)}for(j=0;j<100;j++){var x=xScale(i),y=yScale(j),input=constructInput(x,y);if(nn.forwardProp(network,input),nn.forEachNode(network,!0,function(node){boundary[node.id][i][j]=node.output}),firstTime)for(var nodeId in INPUTS)boundary[nodeId][i][j]=INPUTS[nodeId].f(x,y)}}}function getLoss(network,dataPoints){for(var loss=0,i=0;i<dataPoints.length;i++){var dataPoint=dataPoints[i],input=constructInput(dataPoint.x,dataPoint.y),output=nn.forwardProp(network,input);loss+=nn.Errors.SQUARE.error(output,dataPoint.label)}return loss/dataPoints.length}function updateUI(firstStep){function zeroPad(n){return("000000"+n).slice(-"000000".length)}function addCommas(s){return s.replace(/\B(?=(\d{3})+(?!\d))/g,",")}function humanReadable(n){return n.toFixed(3)}void 0===firstStep&&(firstStep=!1),updateWeightsUI(network,d3.select("g.core")),updateBiasesUI(network),updateDecisionBoundary(network,firstStep);var selectedId=null!=selectedNodeId?selectedNodeId:nn.getOutputNode(network).id;heatMap.updateBackground(boundary[selectedId],state.discretize),d3.select("#network").selectAll("div.canvas").each(function(data){data.heatmap.updateBackground(heatmap_1.reduceMatrix(boundary[data.id],10),state.discretize)}),d3.select("#loss-train").text(humanReadable(lossTrain)),d3.select("#loss-test").text(humanReadable(lossTest)),d3.select("#iter-number").text(addCommas(zeroPad(iter))),lineChart.addDataPoint([lossTrain,lossTest])}function constructInputIds(){var result=[];for(var inputName in INPUTS)state[inputName]&&result.push(inputName);return result}function constructInput(x,y){var input=[];for(var inputName in INPUTS)state[inputName]&&input.push(INPUTS[inputName].f(x,y));return input}function oneStep(){iter++,trainData.forEach(function(point,i){var input=constructInput(point.x,point.y);nn.forwardProp(network,input),nn.backProp(network,point.label,nn.Errors.SQUARE),(i+1)%state.batchSize==0&&nn.updateWeights(network,state.learningRate,state.regularizationRate)}),lossTrain=getLoss(network,trainData),lossTest=getLoss(network,testData),updateUI()}function getOutputWeights(network){for(var weights=[],layerIdx=0;layerIdx<network.length-1;layerIdx++)for(var currentLayer=network[layerIdx],i=0;i<currentLayer.length;i++)for(var node=currentLayer[i],j=0;j<node.outputs.length;j++){var output=node.outputs[j];weights.push(output.weight)}return weights}function reset(onStartup){void 0===onStartup&&(onStartup=!1),lineChart.reset(),state.serialize(),onStartup||userHasInteracted(),player.pause();var suffix=1!==state.numHiddenLayers?"s":"";d3.select("#layers-label").text("隐藏层"),d3.select("#num-layers").text(state.numHiddenLayers),iter=0;var numInputs=constructInput(0,0).length,shape=[numInputs].concat(state.networkShape).concat([1]),outputActivation=state.problem===state_1.Problem.REGRESSION?nn.Activations.LINEAR:nn.Activations.TANH
-;network=nn.buildNetwork(shape,state.activation,outputActivation,state.regularization,constructInputIds(),state.initZero),lossTrain=getLoss(network,trainData),lossTest=getLoss(network,testData),drawNetwork(network),updateUI(!0)}function initTutorial(){if(null!=state.tutorial&&""!==state.tutorial&&!state.hideText){d3.selectAll("article div.l--body").remove();var tutorial=d3.select("article").append("div").attr("class","l--body");d3.html("tutorials/"+state.tutorial+".html",function(err,htmlFragment){if(err)throw err;tutorial.node().appendChild(htmlFragment);var title=tutorial.select("title");title.size()&&(d3.select("header h1").style({"margin-top":"20px","margin-bottom":"20px"}).text(title.text()),document.title=title.text())})}}function drawDatasetThumbnails(){function renderThumbnail(canvas,dataGenerator){canvas.setAttribute("width",100),canvas.setAttribute("height",100);var context=canvas.getContext("2d");dataGenerator(200,0).forEach(function(d){context.fillStyle=colorScale(d.label),context.fillRect(100*(d.x+6)/12,100*(d.y+6)/12,4,4)}),d3.select(canvas.parentNode).style("display",null)}if(d3.selectAll(".dataset").style("display","none"),state.problem===state_1.Problem.CLASSIFICATION)for(var dataset in state_1.datasets){var canvas=document.querySelector("canvas[data-dataset="+dataset+"]"),dataGenerator=state_1.datasets[dataset];renderThumbnail(canvas,dataGenerator)}if(state.problem===state_1.Problem.REGRESSION)for(var regDataset in state_1.regDatasets){var canvas=document.querySelector("canvas[data-regDataset="+regDataset+"]"),dataGenerator=state_1.regDatasets[regDataset];renderThumbnail(canvas,dataGenerator)}}function hideControls(){var hiddenProps=state.getHiddenProps();hiddenProps.forEach(function(prop){var controls=d3.selectAll(".ui-"+prop);0===controls.size()&&console.warn("0 html elements found with class .ui-"+prop),controls.style("display","none")});var hideControls=d3.select(".hide-controls");HIDABLE_CONTROLS.forEach(function(_a){var text=_a[0],id=_a[1],label=hideControls.append("label").attr("class","mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect"),input=label.append("input").attr({type:"checkbox",class:"mdl-checkbox__input"});hiddenProps.indexOf(id)===-1&&input.attr("checked","true"),input.on("change",function(){state.setHideProperty(id,!this.checked),state.serialize(),userHasInteracted(),d3.select(".hide-controls-link").attr("href",window.location.href)}),label.append("span").attr("class","mdl-checkbox__label label").text(text)}),d3.select(".hide-controls-link").attr("href",window.location.href)}function generateData(firstTime){void 0===firstTime&&(firstTime=!1),firstTime||(state.seed=Math.random().toFixed(5),state.serialize(),userHasInteracted()),Math.seedrandom(state.seed);var numSamples=state.problem===state_1.Problem.REGRESSION?1200:500,generator=state.problem===state_1.Problem.CLASSIFICATION?state.dataset:state.regDataset,data=generator(numSamples,state.noise/100);dataset_1.shuffle(data);var splitIndex=Math.floor(data.length*state.percTrainData/100);trainData=data.slice(0,splitIndex),testData=data.slice(splitIndex),heatMap.updatePoints(trainData),heatMap.updateTestPoints(state.showTestData?testData:[])}function userHasInteracted(){if(firstInteraction){firstInteraction=!1;var page="index";null!=state.tutorial&&""!==state.tutorial&&(page="/v/tutorials/"+state.tutorial),ga("set","page",page),ga("send","pageview",{sessionControl:"start"})}}function simulationStarted(){ga("send",{hitType:"event",eventCategory:"Starting Simulation",eventAction:parametersChanged?"changed":"unchanged",eventLabel:null==state.tutorial?"":state.tutorial}),parametersChanged=!1}var mainWidth,nn=require("./nn"),heatmap_1=require("./heatmap"),state_1=require("./state"),dataset_1=require("./dataset"),linechart_1=require("./linechart");d3.select(".more button").on("click",function(){d3.transition().duration(1e3).tween("scroll",scrollTween(800))});var HoverType;!function(HoverType){HoverType[HoverType.BIAS=0]="BIAS",HoverType[HoverType.WEIGHT=1]="WEIGHT"}(HoverType||(HoverType={}));var INPUTS={x:{f:function(x,y){return x},label:"X_1"},y:{f:function(x,y){return y},label:"X_2"},xSquared:{f:function(x,y){return x*x},label:"X_1^2"},ySquared:{f:function(x,y){return y*y},label:"X_2^2"},xTimesY:{f:function(x,y){return x*y},label:"X_1X_2"},sinX:{f:function(x,y){return Math.sin(x)},label:"sin(X_1)"},sinY:{f:function(x,y){return Math.sin(y)},label:"sin(X_2)"}},HIDABLE_CONTROLS=[["显示测试数据","showTestData"],["输出离散化","discretize"],["开始 / 暂停","playButton"],["单步训练","stepButton"],["重置网络","resetButton"],["学习率","learningRate"],["激活函数","activation"],["正则化","regularization"],["正则化系数","regularizationRate"],["任务类型","problem"],["选择数据集","dataset"],["训练集占比","percTrainData"],["噪声","noise"],["批量大小","batchSize"],["隐藏层数量","numHiddenLayers"]],Player=function(){function Player(){this.timerIndex=0,this.isPlaying=!1,this.callback=null}return Player.prototype.playOrPause=function(){this.isPlaying?(this.isPlaying=!1,this.pause()):(this.isPlaying=!0,0===iter&&simulationStarted(),this.play())},Player.prototype.onPlayPause=function(callback){this.callback=callback},Player.prototype.play=function(){this.pause(),this.isPlaying=!0,this.callback&&this.callback(this.isPlaying),this.start(this.timerIndex)},Player.prototype.pause=function(){this.timerIndex++,this.isPlaying=!1,this.callback&&this.callback(this.isPlaying)},Player.prototype.start=function(localTimerIndex){var _this=this;d3.timer(function(){return localTimerIndex<_this.timerIndex||(oneStep(),!1)},0)},Player}(),state=state_1.State.deserializeState();state.getHiddenProps().forEach(function(prop){prop in INPUTS&&delete INPUTS[prop]});var boundary={},selectedNodeId=null,xDomain=[-6,6],heatMap=new heatmap_1.HeatMap(300,100,xDomain,xDomain,d3.select("#heatmap"),{showAxes:!0}),linkWidthScale=d3.scale.linear().domain([0,5]).range([1,10]).clamp(!0),colorScale=d3.scale.linear().domain([-1,0,1]).range(["#f59322","#e8eaeb","#0877bd"]).clamp(!0),iter=0,trainData=[],testData=[],network=null,lossTrain=0,lossTest=0,player=new Player,lineChart=new linechart_1.AppendingLineChart(d3.select("#linechart"),["#777","black"]);exports.getOutputWeights=getOutputWeights;var firstInteraction=!0,parametersChanged=!1;drawDatasetThumbnails(),initTutorial(),makeGUI(),generateData(!0),reset(!0),hideControls()},{"./dataset":1,"./heatmap":2,"./linechart":3,"./nn":4,"./state":6}],6:[function(require,module,exports){"use strict";function getKeyFromValue(obj,value){for(var key in obj)if(obj[key]===value)return key}function endsWith(s,suffix){return s.substr(-suffix.length)===suffix}function getHideProps(obj){var result=[];for(var prop in obj)endsWith(prop,"_hide")&&result.push(prop);return result}var nn=require("./nn"),dataset=require("./dataset");exports.activations={relu:nn.Activations.RELU,tanh:nn.Activations.TANH,sigmoid:nn.Activations.SIGMOID,linear:nn.Activations.LINEAR},exports.regularizations={none:null,L1:nn.RegularizationFunction.L1,L2:nn.RegularizationFunction.L2},exports.datasets={circle:dataset.classifyCircleData,xor:dataset.classifyXORData,gauss:dataset.classifyTwoGaussData,spiral:dataset.classifySpiralData},exports.regDatasets={"reg-plane":dataset.regressPlane,"reg-gauss":dataset.regressGaussian},exports.getKeyFromValue=getKeyFromValue;var Type;!function(Type){Type[Type.STRING=0]="STRING",Type[Type.NUMBER=1]="NUMBER",Type[Type.ARRAY_NUMBER=2]="ARRAY_NUMBER",Type[Type.ARRAY_STRING=3]="ARRAY_STRING",Type[Type.BOOLEAN=4]="BOOLEAN",Type[Type.OBJECT=5]="OBJECT"}(Type=exports.Type||(exports.Type={}));var Problem;!function(Problem){Problem[Problem.CLASSIFICATION=0]="CLASSIFICATION",Problem[Problem.REGRESSION=1]="REGRESSION"}(Problem=exports.Problem||(exports.Problem={})),exports.problems={classification:Problem.CLASSIFICATION,regression:Problem.REGRESSION};var State=function(){function State(){this.learningRate=.03,this.regularizationRate=0,this.showTestData=!1,this.noise=0,this.batchSize=10,this.discretize=!1,this.tutorial=null,this.percTrainData=50,this.activation=nn.Activations.TANH,this.regularization=null,this.problem=Problem.CLASSIFICATION,this.initZero=!1,this.hideText=!1,this.collectStats=!1,this.numHiddenLayers=1,this.hiddenLayerControls=[],this.networkShape=[4,2],this.x=!0,this.y=!0,this.xTimesY=!1,this.xSquared=!1,this.ySquared=!1,this.cosX=!1,this.sinX=!1,this.cosY=!1,this.sinY=!1,this.dataset=dataset.classifyCircleData,this.regDataset=dataset.regressPlane}return State.deserializeState=function(){function hasKey(name){return name in map&&null!=map[name]&&""!==map[name].trim()}function parseArray(value){return""===value.trim()?[]:value.split(",")}for(var map={},_i=0,_a=window.location.hash.slice(1).split("&");_i<_a.length;_i++){var keyvalue=_a[_i],_b=keyvalue.split("="),name_1=_b[0],value=_b[1];map[name_1]=value}var state=new State;return State.PROPS.forEach(function(_a){var name=_a.name,type=_a.type,keyMap=_a.keyMap;switch(type){case Type.OBJECT:if(null==keyMap)throw Error("A key-value map must be provided for state variables of type Object");hasKey(name)&&map[name]in keyMap&&(state[name]=keyMap[map[name]]);break;case Type.NUMBER:hasKey(name)&&(state[name]=+map[name]);break;case Type.STRING:hasKey(name)&&(state[name]=map[name]);break;case Type.BOOLEAN:hasKey(name)&&(state[name]="false"!==map[name]);break;case Type.ARRAY_NUMBER:name in map&&(state[name]=parseArray(map[name]).map(Number));break;case Type.ARRAY_STRING:name in map&&(state[name]=parseArray(map[name]));break;default:throw Error("Encountered an unknown type for a state variable")}}),getHideProps(map).forEach(function(prop){state[prop]="true"===map[prop]}),state.numHiddenLayers=state.networkShape.length,null==state.seed&&(state.seed=Math.random().toFixed(5)),Math.seedrandom(state.seed),state},State.prototype.serialize=function(){var _this=this,props=[];State.PROPS.forEach(function(_a){var name=_a.name,type=_a.type,keyMap=_a.keyMap,value=_this[name];null!=value&&(type===Type.OBJECT?value=getKeyFromValue(keyMap,value):type!==Type.ARRAY_NUMBER&&type!==Type.ARRAY_STRING||(value=value.join(",")),props.push(name+"="+value))}),getHideProps(this).forEach(function(prop){props.push(prop+"="+_this[prop])}),window.location.hash=props.join("&")},State.prototype.getHiddenProps=function(){var result=[];for(var prop in this)endsWith(prop,"_hide")&&"true"===String(this[prop])&&result.push(prop.replace("_hide",""));return result},State.prototype.setHideProperty=function(name,hidden){this[name+"_hide"]=hidden},State}();State.PROPS=[{name:"activation",type:Type.OBJECT,keyMap:exports.activations},{name:"regularization",type:Type.OBJECT,keyMap:exports.regularizations},{name:"batchSize",type:Type.NUMBER},{name:"dataset",type:Type.OBJECT,keyMap:exports.datasets},{name:"regDataset",type:Type.OBJECT,keyMap:exports.regDatasets},{name:"learningRate",type:Type.NUMBER},{name:"regularizationRate",type:Type.NUMBER},{name:"noise",type:Type.NUMBER},{name:"networkShape",type:Type.ARRAY_NUMBER},{name:"seed",type:Type.STRING},{name:"showTestData",type:Type.BOOLEAN},{name:"discretize",type:Type.BOOLEAN},{name:"percTrainData",type:Type.NUMBER},{name:"x",type:Type.BOOLEAN},{name:"y",type:Type.BOOLEAN},{name:"xTimesY",type:Type.BOOLEAN},{name:"xSquared",type:Type.BOOLEAN},{name:"ySquared",type:Type.BOOLEAN},{name:"cosX",type:Type.BOOLEAN},{name:"sinX",type:Type.BOOLEAN},{name:"cosY",type:Type.BOOLEAN},{name:"sinY",type:Type.BOOLEAN},{name:"collectStats",type:Type.BOOLEAN},{name:"tutorial",type:Type.STRING},{name:"problem",type:Type.OBJECT,keyMap:exports.problems},{name:"initZero",type:Type.BOOLEAN},{name:"hideText",type:Type.BOOLEAN}],exports.State=State},{"./dataset":1,"./nn":4}]},{},[5]);
+(() => {
+  var __defProp = Object.defineProperty;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+  // labs/playground-mlp/engine/nn-core.js
+  (function(global) {
+    "use strict";
+    var NN2 = global.NN = global.NN || {};
+    var core2 = NN2.core = {};
+    var seed = 1;
+    core2.setSeed = function(s) {
+      seed = s >>> 0 || 1;
+    };
+    core2.random = function() {
+      seed ^= seed << 13;
+      seed >>>= 0;
+      seed ^= seed >> 17;
+      seed ^= seed << 5;
+      seed >>>= 0;
+      return seed / 4294967296;
+    };
+    core2.gauss = function() {
+      var u = 1 - core2.random(), v = core2.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    core2.randInt = function(n) {
+      return Math.floor(core2.random() * n) % n;
+    };
+    core2.alloc = function(model, defs) {
+      model.params = [];
+      defs.forEach(function(d) {
+        var n = 1;
+        d.shape.forEach(function(s) {
+          n *= s;
+        });
+        var data = new Float64Array(n);
+        var fanIn = d.shape.length > 1 ? d.shape[0] : 1;
+        var fanOut = d.shape.length > 1 ? d.shape[1] : d.shape[0];
+        var v;
+        if (d.init === "zero") v = 0;
+        else if (d.init === "normal") v = d.scale || 0.05;
+        else if (d.init === "xavier") v = Math.sqrt(2 / (fanIn + fanOut));
+        else v = Math.sqrt(2 / fanIn);
+        for (var i = 0; i < n; i++) data[i] = core2.gauss() * v;
+        model.params.push({
+          name: d.name,
+          shape: d.shape.slice(),
+          data,
+          grad: new Float64Array(n),
+          m: new Float64Array(n),
+          v: new Float64Array(n)
+        });
+      });
+      return model;
+    };
+    core2.param = function(model, name) {
+      for (var i = 0; i < model.params.length; i++) {
+        if (model.params[i].name === name) return model.params[i];
+      }
+      throw new Error("\u672A\u627E\u5230\u53C2\u6570\uFF1A" + name);
+    };
+    core2.paramCount = function(model) {
+      var n = 0;
+      model.params.forEach(function(p) {
+        n += p.data.length;
+      });
+      return n;
+    };
+    core2.zeroGrads = function(model) {
+      model.params.forEach(function(p) {
+        p.grad.fill(0);
+      });
+    };
+    core2.step = function(model, lr, opt) {
+      opt = opt || "adam";
+      var t = model._t = (model._t || 0) + 1;
+      var b1 = 0.9, b2 = 0.999, eps = 1e-8;
+      for (var i = 0; i < model.params.length; i++) {
+        var pr = model.params[i];
+        for (var j = 0; j < pr.data.length; j++) {
+          var g = pr.grad[j];
+          if (!isFinite(g)) continue;
+          if (opt === "sgd") {
+            pr.data[j] -= lr * g;
+            continue;
+          }
+          pr.m[j] = b1 * pr.m[j] + (1 - b1) * g;
+          pr.v[j] = b2 * pr.v[j] + (1 - b2) * g * g;
+          var mh = pr.m[j] / (1 - Math.pow(b1, t));
+          var vh = pr.v[j] / (1 - Math.pow(b2, t));
+          pr.data[j] -= lr * mh / (Math.sqrt(vh) + eps);
+        }
+      }
+    };
+    core2.applyL2 = function(model, l2) {
+      if (!l2) return;
+      for (var i = 0; i < model.params.length; i++) {
+        var pr = model.params[i];
+        if (/bias|b$/.test(pr.name)) continue;
+        for (var j = 0; j < pr.data.length; j++) pr.grad[j] += l2 * pr.data[j];
+      }
+    };
+    core2.applyL1 = function(model, l1) {
+      if (!l1) return;
+      for (var i = 0; i < model.params.length; i++) {
+        var pr = model.params[i];
+        if (/bias|b$/.test(pr.name)) continue;
+        for (var j = 0; j < pr.data.length; j++) pr.grad[j] += l1 * Math.sign(pr.data[j]);
+      }
+    };
+    core2.scaleGrads = function(model, s) {
+      if (s === 1) return;
+      for (var i = 0; i < model.params.length; i++) {
+        var g = model.params[i].grad;
+        for (var j = 0; j < g.length; j++) g[j] *= s;
+      }
+    };
+    core2.bce = function(model, batch) {
+      var out = model.forward(batch);
+      var loss = 0;
+      for (var i = 0; i < batch.n; i++) {
+        var p = Math.min(Math.max(out.probs[i], 1e-12), 1 - 1e-12);
+        var y = batch.y[i];
+        loss += -(y * Math.log(p) + (1 - y) * Math.log(1 - p));
+      }
+      return loss / batch.n;
+    };
+    core2.bceGrad = function(probs, batch) {
+      var d = new Float64Array(probs.length);
+      for (var i = 0; i < batch.n; i++) {
+        var p = Math.min(Math.max(probs[i], 1e-12), 1 - 1e-12);
+        d[i] = (p - batch.y[i]) / (batch.n * p * (1 - p));
+      }
+      return d;
+    };
+    core2.mse = function(model, batch) {
+      var out = model.forward(batch);
+      var s = 0;
+      for (var i = 0; i < batch.n; i++) {
+        var d = out.probs[i] - batch.y[i];
+        s += d * d;
+      }
+      return s / batch.n;
+    };
+    core2.mseGrad = function(probs, batch) {
+      var d = new Float64Array(probs.length);
+      for (var i = 0; i < batch.n; i++) {
+        d[i] = 2 * (probs[i] - batch.y[i]) / batch.n;
+      }
+      return d;
+    };
+    core2.softmaxRows = function(logits, n, k, out) {
+      for (var i = 0; i < n; i++) {
+        var off = i * k, mx = -Infinity;
+        for (var c = 0; c < k; c++) if (logits[off + c] > mx) mx = logits[off + c];
+        var sum = 0;
+        for (c = 0; c < k; c++) {
+          var e = Math.exp(logits[off + c] - mx);
+          out[off + c] = e;
+          sum += e;
+        }
+        for (c = 0; c < k; c++) out[off + c] /= sum || 1;
+      }
+      return out;
+    };
+    core2.acts = {
+      relu: {
+        label: "ReLU",
+        f: function(x) {
+          return x > 0 ? x : 0;
+        },
+        df: function(x) {
+          return x > 0 ? 1 : 0;
+        }
+      },
+      tanh: {
+        label: "Tanh",
+        f: function(x) {
+          var t = Math.tanh(x);
+          return t;
+        },
+        df: function(x) {
+          var t = Math.tanh(x);
+          return 1 - t * t;
+        }
+      },
+      sigmoid: {
+        label: "Sigmoid",
+        f: function(x) {
+          return 1 / (1 + Math.exp(-x));
+        },
+        df: function(x) {
+          var s = 1 / (1 + Math.exp(-x));
+          return s * (1 - s);
+        }
+      },
+      linear: {
+        label: "\u7EBF\u6027",
+        f: function(x) {
+          return x;
+        },
+        df: function() {
+          return 1;
+        }
+      }
+    };
+    core2.crossEntropy = function(model, batch) {
+      var out = model.forward(batch);
+      var loss = 0;
+      for (var i = 0; i < batch.n; i++) {
+        loss += -Math.log(Math.max(out.probs[i * batch.k + batch.y[i]], 1e-12));
+      }
+      return loss / batch.n;
+    };
+    core2.crossEntropyGrad = function(probs, batch) {
+      var d = new Float64Array(probs.length);
+      for (var i = 0; i < batch.n; i++) {
+        var off = i * batch.k;
+        var py = Math.max(probs[off + batch.y[i]], 1e-12);
+        d[off + batch.y[i]] = -1 / (batch.n * py);
+      }
+      return d;
+    };
+    core2.gradcheck = function(model, batch, eps) {
+      eps = eps || 1e-4;
+      var out = model.forward(batch);
+      var dProbs = core2.crossEntropyGrad(out.probs, batch);
+      core2.zeroGrads(model);
+      model.backward(out.cache, dProbs);
+      var maxRel = 0, worst = "", skipped = 0;
+      for (var i = 0; i < model.params.length; i++) {
+        var pr = model.params[i];
+        for (var j = 0; j < pr.data.length; j++) {
+          var old = pr.data[j];
+          pr.data[j] = old + eps;
+          var lp = core2.crossEntropy(model, batch);
+          pr.data[j] = old - eps;
+          var lm = core2.crossEntropy(model, batch);
+          pr.data[j] = old;
+          var num = (lp - lm) / (2 * eps);
+          var ana = pr.grad[j];
+          if (Math.abs(num) < 1e-7 && Math.abs(ana) < 1e-7) {
+            skipped++;
+            continue;
+          }
+          var den = Math.max(1e-6, Math.abs(num) + Math.abs(ana));
+          var rel = Math.abs(num - ana) / den;
+          if (rel > maxRel) {
+            maxRel = rel;
+            worst = pr.name + "[" + j + "] num=" + num.toFixed(8) + " ana=" + ana.toFixed(8);
+          }
+        }
+      }
+      return { maxRel, detail: worst, skipped };
+    };
+  })(typeof window !== "undefined" ? window : globalThis);
+
+  // labs/playground-mlp/engine/nn-mlp.js
+  (function(global) {
+    "use strict";
+    var NN2 = global.NN = global.NN || {};
+    var core2 = NN2.core;
+    function defaultCfg() {
+      return { layers: 2, units: 8, activation: "relu", sizes: null, head: "softmax" };
+    }
+    function create(cfg, task) {
+      cfg = Object.assign(defaultCfg(), cfg || {});
+      var model = { kind: "mlp", cfg, task };
+      var sizes;
+      if (cfg.sizes && cfg.sizes.length >= 2) {
+        sizes = cfg.sizes.slice();
+      } else {
+        var L = Math.max(1, cfg.layers | 0);
+        var U = Math.max(1, cfg.units | 0);
+        sizes = [task.d];
+        for (var i = 0; i < L; i++) sizes.push(U);
+        sizes.push(task.k);
+      }
+      model.sizes = sizes;
+      model.head = cfg.head || "softmax";
+      var defs = [];
+      for (i = 0; i < sizes.length - 1; i++) {
+        defs.push({ name: "W" + i, shape: [sizes[i], sizes[i + 1]], init: cfg.initZero ? "zero" : "he" });
+        defs.push({ name: "b" + i, shape: [sizes[i + 1]], init: "zero" });
+      }
+      core2.alloc(model, defs);
+      bind(model);
+      return model;
+    }
+    function actOf(model) {
+      return core2.acts[model.cfg.activation] || core2.acts.relu;
+    }
+    function forward(model, batch) {
+      var act = actOf(model);
+      var L = model.sizes.length - 1;
+      var n = batch.n, k = batch.k;
+      var cache = { acts: [], zs: [] };
+      var i, j, o;
+      var a = new Float64Array(n * model.sizes[0]);
+      a.set(batch.X.subarray(0, n * model.sizes[0]));
+      cache.acts.push(a);
+      cache.zs.push(null);
+      for (var l = 0; l < L; l++) {
+        var W = core2.param(model, "W" + l).data;
+        var b = core2.param(model, "b" + l).data;
+        var inN = model.sizes[l], outN = model.sizes[l + 1];
+        var z = new Float64Array(n * outN);
+        for (i = 0; i < n; i++) {
+          var ao = i * inN, zo = i * outN;
+          for (o = 0; o < outN; o++) {
+            var s = b[o];
+            for (j = 0; j < inN; j++) s += a[ao + j] * W[j * outN + o];
+            z[zo + o] = s;
+          }
+        }
+        var last = l === L - 1;
+        var an = new Float64Array(n * outN);
+        if (last) {
+          if (model.head === "binary") {
+            for (i = 0; i < n * outN; i++) an[i] = 1 / (1 + Math.exp(-z[i]));
+          } else {
+            an.set(z);
+          }
+        } else for (i = 0; i < n * outN; i++) an[i] = act.f(z[i]);
+        cache.zs.push(z);
+        cache.acts.push(an);
+        a = an;
+      }
+      var probs;
+      if (model.head === "softmax") {
+        probs = new Float64Array(n * k);
+        core2.softmaxRows(a, n, k, probs);
+      } else {
+        probs = a;
+      }
+      cache.probs = probs;
+      cache.logits = a;
+      return { probs, cache };
+    }
+    function backward(model, cache, dProbs) {
+      var act = actOf(model);
+      var L = model.sizes.length - 1;
+      var n = dProbs.length / model.task.k;
+      var k = model.task.k;
+      var i, j, o;
+      var probs = cache.probs;
+      var dlog;
+      if (model.head === "softmax") {
+        dlog = new Float64Array(n * k);
+        for (i = 0; i < n; i++) {
+          var off = i * k, S = 0;
+          for (j = 0; j < k; j++) S += dProbs[off + j] * probs[off + j];
+          for (j = 0; j < k; j++) dlog[off + j] = probs[off + j] * (dProbs[off + j] - S);
+        }
+      } else if (model.head === "binary") {
+        dlog = new Float64Array(n);
+        for (i = 0; i < n; i++) dlog[i] = dProbs[i] * probs[i] * (1 - probs[i]);
+      } else {
+        dlog = dProbs;
+      }
+      var delta = dlog;
+      for (var l = L - 1; l >= 0; l--) {
+        var Wp = core2.param(model, "W" + l);
+        var bp = core2.param(model, "b" + l);
+        var inN = model.sizes[l], outN = model.sizes[l + 1];
+        var aPrev = cache.acts[l];
+        var z = cache.zs[l];
+        var gW = Wp.grad, gb = bp.grad;
+        for (i = 0; i < n; i++) {
+          for (o = 0; o < outN; o++) {
+            var d = delta[i * outN + o];
+            if (d === 0) continue;
+            gb[o] += d;
+            for (j = 0; j < inN; j++) gW[j * outN + o] += aPrev[i * inN + j] * d;
+          }
+        }
+        if (l > 0) {
+          var dprev = new Float64Array(n * inN);
+          for (i = 0; i < n; i++) {
+            for (j = 0; j < inN; j++) {
+              var s = 0;
+              for (o = 0; o < outN; o++) s += Wp.data[j * outN + o] * delta[i * outN + o];
+              dprev[i * inN + j] = s * act.df(z[i * inN + j]);
+            }
+          }
+          delta = dprev;
+        }
+      }
+    }
+    function describe(model) {
+      var layers = [], edges = [];
+      var sizes = model.sizes;
+      for (var l = 0; l < sizes.length; l++) {
+        layers.push({
+          id: l === 0 ? "in" : l === sizes.length - 1 ? "out" : "h" + l,
+          type: l === 0 ? "input" : l === sizes.length - 1 ? "output" : "hidden",
+          count: sizes[l],
+          act: l === 0 || l === sizes.length - 1 ? "" : (core2.acts[model.cfg.activation] || core2.acts.relu).label
+        });
+      }
+      for (var l2 = 0; l2 < sizes.length - 1; l2++) {
+        var W = core2.param(model, "W" + l2).data;
+        var inN = sizes[l2], outN = sizes[l2 + 1];
+        var total = inN * outN;
+        var step = total > 60 ? Math.ceil(total / 60) : 1;
+        for (var idx = 0; idx < total; idx += step) {
+          var j = Math.floor(idx / outN), o = idx % outN;
+          edges.push({ from: { l: l2, n: j }, to: { l: l2 + 1, n: o }, w: W[idx] });
+        }
+      }
+      return { layers, edges };
+    }
+    function bind(model) {
+      model.forward = function(batch) {
+        return forward(model, batch);
+      };
+      model.backward = function(cache, dProbs) {
+        return backward(model, cache, dProbs);
+      };
+      model.describe = function() {
+        return describe(model);
+      };
+      model.paramCount = function() {
+        return core2.paramCount(model);
+      };
+    }
+    NN2.registry = NN2.registry || {};
+    NN2.registry.mlp = {
+      id: "mlp",
+      label: "\u591A\u5C42\u611F\u77E5\u673A",
+      abbr: "MLP",
+      tasks: ["points", "images"],
+      note: "\u6700\u57FA\u7840\u7684\u5168\u8FDE\u63A5\u7F51\u7EDC\uFF1A\u6BCF\u4E00\u5C42\u628A\u4E0A\u4E00\u5C42\u6BCF\u4E2A\u795E\u7ECF\u5143\u90FD\u8FDE\u5230\u4E0B\u4E00\u5C42\u6BCF\u4E2A\u795E\u7ECF\u5143\u3002",
+      defaultCfg,
+      create,
+      forward,
+      backward,
+      describe
+    };
+  })(typeof window !== "undefined" ? window : globalThis);
+
+  // labs/playground-mlp/src/nn-engine.ts
+  var NN = window.NN;
+  var core = NN.core;
+  var Activations = class {
+  };
+  __publicField(Activations, "TANH", {
+    output: (x) => Math.tanh(x),
+    der: (x) => {
+      const o = Math.tanh(x);
+      return 1 - o * o;
+    }
+  });
+  __publicField(Activations, "RELU", {
+    output: (x) => Math.max(0, x),
+    der: (x) => x <= 0 ? 0 : 1
+  });
+  __publicField(Activations, "SIGMOID", {
+    output: (x) => 1 / (1 + Math.exp(-x)),
+    der: (x) => {
+      const o = 1 / (1 + Math.exp(-x));
+      return o * (1 - o);
+    }
+  });
+  __publicField(Activations, "LINEAR", {
+    output: (x) => x,
+    der: () => 1
+  });
+  var RegularizationFunction = class {
+  };
+  __publicField(RegularizationFunction, "L1", {
+    output: (w) => Math.abs(w),
+    der: (w) => w < 0 ? -1 : w > 0 ? 1 : 0
+  });
+  __publicField(RegularizationFunction, "L2", {
+    output: (w) => 0.5 * w * w,
+    der: (w) => w
+  });
+  var Errors = class {
+  };
+  __publicField(Errors, "SQUARE", {
+    error: (output, target) => 0.5 * Math.pow(output - target, 2),
+    der: (output, target) => output - target
+  });
+  var Node = class {
+    constructor(id, activation, initZero) {
+      __publicField(this, "id");
+      /** 输入连线 */
+      __publicField(this, "inputLinks", []);
+      __publicField(this, "bias", 0.1);
+      /** 输出连线 */
+      __publicField(this, "outputs", []);
+      __publicField(this, "totalInput", 0);
+      __publicField(this, "output", 0);
+      __publicField(this, "outputDer", 0);
+      __publicField(this, "inputDer", 0);
+      __publicField(this, "accInputDer", 0);
+      __publicField(this, "numAccumulatedDers", 0);
+      __publicField(this, "activation");
+      this.id = id;
+      this.activation = activation;
+      if (initZero) this.bias = 0;
+    }
+    /** 按连线手工算一遍输出（官方 nn.ts 的做法，界面上不用） */
+    updateOutput() {
+      this.totalInput = this.bias;
+      for (const link of this.inputLinks) {
+        this.totalInput += link.weight * link.source.output;
+      }
+      this.output = this.activation.output(this.totalInput);
+      return this.output;
+    }
+  };
+  var Link = class {
+    constructor(source, dest, regularization, initZero, get, set) {
+      __publicField(this, "id");
+      __publicField(this, "source");
+      __publicField(this, "dest");
+      __publicField(this, "isDead", false);
+      __publicField(this, "errorDer", 0);
+      __publicField(this, "accErrorDer", 0);
+      __publicField(this, "numAccumulatedDers", 0);
+      __publicField(this, "regularization");
+      __publicField(this, "_w");
+      __publicField(this, "_get");
+      __publicField(this, "_set");
+      this.id = source.id + "-" + dest.id;
+      this.source = source;
+      this.dest = dest;
+      this.regularization = regularization;
+      this._w = initZero ? 0 : Math.random() - 0.5;
+      this._get = get || null;
+      this._set = set || null;
+    }
+    get weight() {
+      return this._get ? this._get() : this._w;
+    }
+    set weight(v) {
+      if (this._set) this._set(v);
+      else this._w = v;
+    }
+  };
+  var engines = /* @__PURE__ */ new WeakMap();
+  function stateOf(network2) {
+    const st = engines.get(network2);
+    if (!st) throw new Error("\u8FD9\u5F20\u7F51\u7EDC\u8FD8\u6CA1\u6709\u63A5\u4E0A\u81EA\u7814\u5F15\u64CE");
+    return st;
+  }
+  function actKey(act) {
+    if (act === Activations.RELU) return "relu";
+    if (act === Activations.TANH) return "tanh";
+    if (act === Activations.SIGMOID) return "sigmoid";
+    return "linear";
+  }
+  function buildNetwork(networkShape, activation, outputActivation, regularization, inputIds, initZero) {
+    const sizes = networkShape.slice();
+    const d = sizes[0];
+    const head = outputActivation === Activations.LINEAR ? "linear" : "binary";
+    const model = NN.registry.mlp.create({
+      sizes,
+      activation: actKey(activation),
+      head,
+      initZero: !!initZero
+    }, { d, k: 1 });
+    const network2 = [];
+    let id = 1;
+    for (let li = 0; li < sizes.length; li++) {
+      const layer = [];
+      network2.push(layer);
+      const isOutput = li === sizes.length - 1;
+      for (let i = 0; i < sizes[li]; i++) {
+        const nodeId = li === 0 ? inputIds[i] : (id++).toString();
+        const act = li === 0 ? Activations.LINEAR : isOutput ? outputActivation : activation;
+        const node = new Node(nodeId, act, initZero);
+        layer.push(node);
+        if (li >= 1) {
+          const W = core.param(model, "W" + (li - 1)).data;
+          const b = core.param(model, "b" + (li - 1)).data;
+          const outN = sizes[li];
+          const prev = network2[li - 1];
+          for (let j = 0; j < prev.length; j++) {
+            const idx = j * outN + i;
+            const link = new Link(
+              prev[j],
+              node,
+              regularization,
+              initZero,
+              () => W[idx],
+              (v) => {
+                W[idx] = v;
+              }
+            );
+            prev[j].outputs.push(link);
+            node.inputLinks.push(link);
+          }
+          const bi = i;
+          Object.defineProperty(node, "bias", {
+            configurable: true,
+            get: () => b[bi],
+            set: (v) => {
+              b[bi] = v;
+            }
+          });
+        }
+      }
+    }
+    engines.set(network2, {
+      model,
+      head,
+      task: { d, k: 1 },
+      cache: null,
+      regularization,
+      gradCount: 0
+    });
+    return network2;
+  }
+  function forwardProp(network2, inputs) {
+    const st = stateOf(network2);
+    const X = new Float64Array(inputs.length);
+    X.set(inputs);
+    const batch = { n: 1, k: st.task.k, d: inputs.length, X, y: [0] };
+    const out = st.model.forward(batch);
+    st.cache = out.cache;
+    const acts = out.cache.acts;
+    const zs = out.cache.zs;
+    for (let li = 0; li < network2.length; li++) {
+      const a = acts[li];
+      const z = zs[li];
+      const layer = network2[li];
+      for (let i = 0; i < layer.length; i++) {
+        layer[i].output = a[i];
+        if (z) layer[i].totalInput = z[i];
+      }
+    }
+    let disp;
+    if (st.head === "binary") {
+      disp = 2 * out.probs[0] - 1;
+    } else {
+      disp = out.probs[0];
+    }
+    const outLayer = network2[network2.length - 1];
+    if (outLayer.length === 1) outLayer[0].output = disp;
+    return disp;
+  }
+  function backProp(network2, target, errorFunc) {
+    const st = stateOf(network2);
+    const cache = st.cache;
+    if (!cache) return;
+    const y = st.head === "linear" ? target : target > 0 ? 1 : 0;
+    const batch = { n: 1, k: st.task.k, d: st.task.d, X: null, y: [y] };
+    let dProbs;
+    if (st.head === "binary") {
+      dProbs = core.bceGrad(cache.probs, batch);
+    } else if (st.head === "linear") {
+      dProbs = core.mseGrad(cache.probs, batch);
+    } else {
+      dProbs = core.crossEntropyGrad(cache.probs, batch);
+    }
+    st.model.backward(cache, dProbs);
+    st.gradCount++;
+  }
+  function applyUpdate(st, learningRate, regularization, regularizationRate, count) {
+    core.scaleGrads(st.model, 1 / Math.max(1, count));
+    if (regularization === RegularizationFunction.L1) {
+      core.applyL1(st.model, regularizationRate);
+    } else if (regularization === RegularizationFunction.L2) {
+      core.applyL2(st.model, regularizationRate);
+    }
+    core.step(st.model, learningRate, "sgd");
+    core.zeroGrads(st.model);
+  }
+  function trainEpoch(network2, dataPoints, batchSize, learningRate, regularization, regularizationRate, inputFn) {
+    const st = stateOf(network2);
+    const bs = Math.max(1, batchSize | 0);
+    let acc = 0;
+    core.zeroGrads(st.model);
+    for (let i = 0; i < dataPoints.length; i++) {
+      const point = dataPoints[i];
+      forwardProp(network2, inputFn(point));
+      backProp(network2, point.label, Errors.SQUARE);
+      acc++;
+      if (acc === bs) {
+        applyUpdate(st, learningRate, regularization, regularizationRate, acc);
+        acc = 0;
+      }
+    }
+    if (acc > 0) {
+      applyUpdate(st, learningRate, regularization, regularizationRate, acc);
+    }
+    st.gradCount = 0;
+  }
+  function getLoss(network2, dataPoints, inputFn) {
+    const st = stateOf(network2);
+    const n = dataPoints.length;
+    if (n === 0) return 0;
+    const d = st.task.d;
+    const X = new Float64Array(n * d);
+    const y = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const inp = inputFn(dataPoints[i]);
+      for (let j = 0; j < d && j < inp.length; j++) X[i * d + j] = inp[j];
+      y[i] = st.head === "linear" ? dataPoints[i].label : dataPoints[i].label > 0 ? 1 : 0;
+    }
+    const batch = { n, k: st.task.k, d, X, y };
+    if (st.head === "binary") return core.bce(st.model, batch);
+    if (st.head === "linear") return core.mse(st.model, batch);
+    return core.crossEntropy(st.model, batch);
+  }
+  function forEachNode(network2, ignoreInputs, accessor) {
+    for (let layerIdx = ignoreInputs ? 1 : 0; layerIdx < network2.length; layerIdx++) {
+      const currentLayer = network2[layerIdx];
+      for (let i = 0; i < currentLayer.length; i++) {
+        accessor(currentLayer[i]);
+      }
+    }
+  }
+  function getOutputNode(network2) {
+    return network2[network2.length - 1][0];
+  }
+  function engineInfo(network2) {
+    const st = stateOf(network2);
+    return {
+      kind: st.model.kind,
+      head: st.head,
+      params: core.paramCount(st.model),
+      sizes: st.model.sizes.slice()
+    };
+  }
+  function paramValue(network2, name, index) {
+    const st = stateOf(network2);
+    return core.param(st.model, name).data[index];
+  }
+  function firstLinkWeight(network2) {
+    const outNode = getOutputNode(network2);
+    return outNode.inputLinks[0].weight;
+  }
+  function setFirstLinkWeight(network2, value) {
+    const outNode = getOutputNode(network2);
+    outNode.inputLinks[0].weight = value;
+    return outNode.inputLinks[0].weight;
+  }
+
+  // labs/playground-mlp/src/heatmap.ts
+  var d3 = window.d3;
+  var NUM_SHADES = 30;
+  var HeatMap = class {
+    constructor(width, numSamples, xDomain2, yDomain, container, userSettings) {
+      __publicField(this, "settings", {
+        showAxes: false,
+        noSvg: false
+      });
+      __publicField(this, "xScale");
+      __publicField(this, "yScale");
+      __publicField(this, "numSamples");
+      __publicField(this, "color");
+      __publicField(this, "canvas");
+      __publicField(this, "svg");
+      this.numSamples = numSamples;
+      let height = width;
+      let padding = userSettings.showAxes ? 20 : 0;
+      if (userSettings != null) {
+        for (let prop in userSettings) {
+          this.settings[prop] = userSettings[prop];
+        }
+      }
+      this.xScale = d3.scale.linear().domain(xDomain2).range([0, width - 2 * padding]);
+      this.yScale = d3.scale.linear().domain(yDomain).range([height - 2 * padding, 0]);
+      let tmpScale = d3.scale.linear().domain([0, 0.5, 1]).range(["#f59322", "#e8eaeb", "#0877bd"]).clamp(true);
+      let colors = d3.range(0, 1 + 1e-9, 1 / NUM_SHADES).map((a) => {
+        return tmpScale(a);
+      });
+      this.color = d3.scale.quantize().domain([-1, 1]).range(colors);
+      container = container.append("div").style({
+        width: `${width}px`,
+        height: `${height}px`,
+        position: "relative",
+        top: `-${padding}px`,
+        left: `-${padding}px`
+      });
+      this.canvas = container.append("canvas").attr("width", numSamples).attr("height", numSamples).style("width", width - 2 * padding + "px").style("height", height - 2 * padding + "px").style("position", "absolute").style("top", `${padding}px`).style("left", `${padding}px`);
+      if (!this.settings.noSvg) {
+        this.svg = container.append("svg").attr({
+          "width": width,
+          "height": height
+        }).style({
+          // Overlay the svg on top of the canvas.
+          "position": "absolute",
+          "left": "0",
+          "top": "0"
+        }).append("g").attr("transform", `translate(${padding},${padding})`);
+        this.svg.append("g").attr("class", "train");
+        this.svg.append("g").attr("class", "test");
+      }
+      if (this.settings.showAxes) {
+        let xAxis = d3.svg.axis().scale(this.xScale).orient("bottom");
+        let yAxis = d3.svg.axis().scale(this.yScale).orient("right");
+        this.svg.append("g").attr("class", "x axis").attr("transform", `translate(0,${height - 2 * padding})`).call(xAxis);
+        this.svg.append("g").attr("class", "y axis").attr("transform", "translate(" + (width - 2 * padding) + ",0)").call(yAxis);
+      }
+    }
+    updateTestPoints(points) {
+      if (this.settings.noSvg) {
+        throw Error("Can't add points since noSvg=true");
+      }
+      this.updateCircles(this.svg.select("g.test"), points);
+    }
+    updatePoints(points) {
+      if (this.settings.noSvg) {
+        throw Error("Can't add points since noSvg=true");
+      }
+      this.updateCircles(this.svg.select("g.train"), points);
+    }
+    updateBackground(data, discretize) {
+      let dx = data[0].length;
+      let dy = data.length;
+      if (dx !== this.numSamples || dy !== this.numSamples) {
+        throw new Error(
+          "The provided data matrix must be of size numSamples X numSamples"
+        );
+      }
+      let context = this.canvas.node().getContext("2d");
+      let image = context.createImageData(dx, dy);
+      for (let y = 0, p = -1; y < dy; ++y) {
+        for (let x = 0; x < dx; ++x) {
+          let value = data[x][y];
+          if (discretize) {
+            value = value >= 0 ? 1 : -1;
+          }
+          let c = d3.rgb(this.color(value));
+          image.data[++p] = c.r;
+          image.data[++p] = c.g;
+          image.data[++p] = c.b;
+          image.data[++p] = 160;
+        }
+      }
+      context.putImageData(image, 0, 0);
+    }
+    updateCircles(container, points) {
+      let xDomain2 = this.xScale.domain();
+      let yDomain = this.yScale.domain();
+      points = points.filter((p) => {
+        return p.x >= xDomain2[0] && p.x <= xDomain2[1] && p.y >= yDomain[0] && p.y <= yDomain[1];
+      });
+      let selection = container.selectAll("circle").data(points);
+      selection.enter().append("circle").attr("r", 3);
+      selection.attr({
+        cx: (d) => this.xScale(d.x),
+        cy: (d) => this.yScale(d.y)
+      }).style("fill", (d) => this.color(d.label));
+      selection.exit().remove();
+    }
+  };
+  function reduceMatrix(matrix, factor) {
+    if (matrix.length !== matrix[0].length) {
+      throw new Error("The provided matrix must be a square matrix");
+    }
+    if (matrix.length % factor !== 0) {
+      throw new Error("The width/height of the matrix must be divisible by the reduction factor");
+    }
+    let result = new Array(matrix.length / factor);
+    for (let i = 0; i < matrix.length; i += factor) {
+      result[i / factor] = new Array(matrix.length / factor);
+      for (let j = 0; j < matrix.length; j += factor) {
+        let avg = 0;
+        for (let k = 0; k < factor; k++) {
+          for (let l = 0; l < factor; l++) {
+            avg += matrix[i + k][j + l];
+          }
+        }
+        avg /= factor * factor;
+        result[i / factor][j / factor] = avg;
+      }
+    }
+    return result;
+  }
+
+  // labs/playground-mlp/src/dataset.ts
+  var d32 = window.d3;
+  function shuffle(array) {
+    let counter = array.length;
+    let temp = 0;
+    let index = 0;
+    while (counter > 0) {
+      index = Math.floor(Math.random() * counter);
+      counter--;
+      temp = array[counter];
+      array[counter] = array[index];
+      array[index] = temp;
+    }
+  }
+  function classifyTwoGaussData(numSamples, noise) {
+    let points = [];
+    let varianceScale = d32.scale.linear().domain([0, 0.5]).range([0.5, 4]);
+    let variance = varianceScale(noise);
+    function genGauss(cx, cy, label) {
+      for (let i = 0; i < numSamples / 2; i++) {
+        let x = normalRandom(cx, variance);
+        let y = normalRandom(cy, variance);
+        points.push({ x, y, label });
+      }
+    }
+    genGauss(2, 2, 1);
+    genGauss(-2, -2, -1);
+    return points;
+  }
+  function regressPlane(numSamples, noise) {
+    let radius = 6;
+    let labelScale = d32.scale.linear().domain([-10, 10]).range([-1, 1]);
+    let getLabel = (x, y) => labelScale(x + y);
+    let points = [];
+    for (let i = 0; i < numSamples; i++) {
+      let x = randUniform(-radius, radius);
+      let y = randUniform(-radius, radius);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      let label = getLabel(x + noiseX, y + noiseY);
+      points.push({ x, y, label });
+    }
+    return points;
+  }
+  function regressGaussian(numSamples, noise) {
+    let points = [];
+    let labelScale = d32.scale.linear().domain([0, 2]).range([1, 0]).clamp(true);
+    let gaussians = [
+      [-4, 2.5, 1],
+      [0, 2.5, -1],
+      [4, 2.5, 1],
+      [-4, -2.5, -1],
+      [0, -2.5, 1],
+      [4, -2.5, -1]
+    ];
+    function getLabel(x, y) {
+      let label = 0;
+      gaussians.forEach(([cx, cy, sign]) => {
+        let newLabel = sign * labelScale(dist({ x, y }, { x: cx, y: cy }));
+        if (Math.abs(newLabel) > Math.abs(label)) {
+          label = newLabel;
+        }
+      });
+      return label;
+    }
+    let radius = 6;
+    for (let i = 0; i < numSamples; i++) {
+      let x = randUniform(-radius, radius);
+      let y = randUniform(-radius, radius);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      let label = getLabel(x + noiseX, y + noiseY);
+      points.push({ x, y, label });
+    }
+    ;
+    return points;
+  }
+  function classifySpiralData(numSamples, noise) {
+    let points = [];
+    let n = numSamples / 2;
+    function genSpiral(deltaT, label) {
+      for (let i = 0; i < n; i++) {
+        let r = i / n * 5;
+        let t = 1.75 * i / n * 2 * Math.PI + deltaT;
+        let x = r * Math.sin(t) + randUniform(-1, 1) * noise;
+        let y = r * Math.cos(t) + randUniform(-1, 1) * noise;
+        points.push({ x, y, label });
+      }
+    }
+    genSpiral(0, 1);
+    genSpiral(Math.PI, -1);
+    return points;
+  }
+  function classifyCircleData(numSamples, noise) {
+    let points = [];
+    let radius = 5;
+    function getCircleLabel(p, center) {
+      return dist(p, center) < radius * 0.5 ? 1 : -1;
+    }
+    for (let i = 0; i < numSamples / 2; i++) {
+      let r = randUniform(0, radius * 0.5);
+      let angle = randUniform(0, 2 * Math.PI);
+      let x = r * Math.sin(angle);
+      let y = r * Math.cos(angle);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      let label = getCircleLabel({ x: x + noiseX, y: y + noiseY }, { x: 0, y: 0 });
+      points.push({ x, y, label });
+    }
+    for (let i = 0; i < numSamples / 2; i++) {
+      let r = randUniform(radius * 0.7, radius);
+      let angle = randUniform(0, 2 * Math.PI);
+      let x = r * Math.sin(angle);
+      let y = r * Math.cos(angle);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      let label = getCircleLabel({ x: x + noiseX, y: y + noiseY }, { x: 0, y: 0 });
+      points.push({ x, y, label });
+    }
+    return points;
+  }
+  function classifyXORData(numSamples, noise) {
+    function getXORLabel(p) {
+      return p.x * p.y >= 0 ? 1 : -1;
+    }
+    let points = [];
+    for (let i = 0; i < numSamples; i++) {
+      let x = randUniform(-5, 5);
+      let padding = 0.3;
+      x += x > 0 ? padding : -padding;
+      let y = randUniform(-5, 5);
+      y += y > 0 ? padding : -padding;
+      let noiseX = randUniform(-5, 5) * noise;
+      let noiseY = randUniform(-5, 5) * noise;
+      let label = getXORLabel({ x: x + noiseX, y: y + noiseY });
+      points.push({ x, y, label });
+    }
+    return points;
+  }
+  function randUniform(a, b) {
+    return Math.random() * (b - a) + a;
+  }
+  function normalRandom(mean = 0, variance = 1) {
+    let v1, v2, s;
+    do {
+      v1 = 2 * Math.random() - 1;
+      v2 = 2 * Math.random() - 1;
+      s = v1 * v1 + v2 * v2;
+    } while (s > 1);
+    let result = Math.sqrt(-2 * Math.log(s) / s) * v1;
+    return mean + Math.sqrt(variance) * result;
+  }
+  function dist(a, b) {
+    let dx = a.x - b.x;
+    let dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // labs/playground-mlp/src/state.ts
+  var HIDE_STATE_SUFFIX = "_hide";
+  var activations = {
+    "relu": Activations.RELU,
+    "tanh": Activations.TANH,
+    "sigmoid": Activations.SIGMOID,
+    "linear": Activations.LINEAR
+  };
+  var regularizations = {
+    "none": null,
+    "L1": RegularizationFunction.L1,
+    "L2": RegularizationFunction.L2
+  };
+  var datasets = {
+    "circle": classifyCircleData,
+    "xor": classifyXORData,
+    "gauss": classifyTwoGaussData,
+    "spiral": classifySpiralData
+  };
+  var regDatasets = {
+    "reg-plane": regressPlane,
+    "reg-gauss": regressGaussian
+  };
+  function getKeyFromValue(obj, value) {
+    for (let key in obj) {
+      if (obj[key] === value) {
+        return key;
+      }
+    }
+    return void 0;
+  }
+  function endsWith(s, suffix) {
+    return s.substr(-suffix.length) === suffix;
+  }
+  function getHideProps(obj) {
+    let result = [];
+    for (let prop in obj) {
+      if (endsWith(prop, HIDE_STATE_SUFFIX)) {
+        result.push(prop);
+      }
+    }
+    return result;
+  }
+  var problems = {
+    "classification": 0 /* CLASSIFICATION */,
+    "regression": 1 /* REGRESSION */
+  };
+  var _State = class _State {
+    constructor() {
+      __publicField(this, "learningRate", 0.03);
+      __publicField(this, "regularizationRate", 0);
+      __publicField(this, "showTestData", false);
+      __publicField(this, "noise", 0);
+      __publicField(this, "batchSize", 10);
+      __publicField(this, "discretize", false);
+      __publicField(this, "tutorial", null);
+      __publicField(this, "percTrainData", 50);
+      __publicField(this, "activation", Activations.TANH);
+      __publicField(this, "regularization", null);
+      __publicField(this, "problem", 0 /* CLASSIFICATION */);
+      __publicField(this, "initZero", false);
+      __publicField(this, "hideText", false);
+      __publicField(this, "collectStats", false);
+      __publicField(this, "numHiddenLayers", 1);
+      __publicField(this, "hiddenLayerControls", []);
+      __publicField(this, "networkShape", [4, 2]);
+      __publicField(this, "x", true);
+      __publicField(this, "y", true);
+      __publicField(this, "xTimesY", false);
+      __publicField(this, "xSquared", false);
+      __publicField(this, "ySquared", false);
+      __publicField(this, "cosX", false);
+      __publicField(this, "sinX", false);
+      __publicField(this, "cosY", false);
+      __publicField(this, "sinY", false);
+      __publicField(this, "dataset", classifyCircleData);
+      __publicField(this, "regDataset", regressPlane);
+      __publicField(this, "seed");
+    }
+    /**
+     * Deserializes the state from the url hash.
+     */
+    static deserializeState() {
+      let map = {};
+      for (let keyvalue of window.location.hash.slice(1).split("&")) {
+        let [name, value] = keyvalue.split("=");
+        map[name] = value;
+      }
+      let state2 = new _State();
+      function hasKey(name) {
+        return name in map && map[name] != null && map[name].trim() !== "";
+      }
+      function parseArray(value) {
+        return value.trim() === "" ? [] : value.split(",");
+      }
+      _State.PROPS.forEach(({ name, type, keyMap }) => {
+        switch (type) {
+          case 5 /* OBJECT */:
+            if (keyMap == null) {
+              throw Error("A key-value map must be provided for state variables of type Object");
+            }
+            if (hasKey(name) && map[name] in keyMap) {
+              state2[name] = keyMap[map[name]];
+            }
+            break;
+          case 1 /* NUMBER */:
+            if (hasKey(name)) {
+              state2[name] = +map[name];
+            }
+            break;
+          case 0 /* STRING */:
+            if (hasKey(name)) {
+              state2[name] = map[name];
+            }
+            break;
+          case 4 /* BOOLEAN */:
+            if (hasKey(name)) {
+              state2[name] = map[name] === "false" ? false : true;
+            }
+            break;
+          case 2 /* ARRAY_NUMBER */:
+            if (name in map) {
+              state2[name] = parseArray(map[name]).map(Number);
+            }
+            break;
+          case 3 /* ARRAY_STRING */:
+            if (name in map) {
+              state2[name] = parseArray(map[name]);
+            }
+            break;
+          default:
+            throw Error("Encountered an unknown type for a state variable");
+        }
+      });
+      getHideProps(map).forEach((prop) => {
+        state2[prop] = map[prop] === "true" ? true : false;
+      });
+      state2.numHiddenLayers = state2.networkShape.length;
+      if (state2.seed == null) {
+        state2.seed = Math.random().toFixed(5);
+      }
+      Math.seedrandom(state2.seed);
+      return state2;
+    }
+    /**
+     * Serializes the state into the url hash.
+     */
+    serialize() {
+      let props = [];
+      _State.PROPS.forEach(({ name, type, keyMap }) => {
+        let value = this[name];
+        if (value == null) {
+          return;
+        }
+        if (type === 5 /* OBJECT */) {
+          value = getKeyFromValue(keyMap, value);
+        } else if (type === 2 /* ARRAY_NUMBER */ || type === 3 /* ARRAY_STRING */) {
+          value = value.join(",");
+        }
+        props.push(`${name}=${value}`);
+      });
+      getHideProps(this).forEach((prop) => {
+        props.push(`${prop}=${this[prop]}`);
+      });
+      window.location.hash = props.join("&");
+    }
+    /** Returns all the hidden properties. */
+    getHiddenProps() {
+      let result = [];
+      for (let prop in this) {
+        if (endsWith(prop, HIDE_STATE_SUFFIX) && String(this[prop]) === "true") {
+          result.push(prop.replace(HIDE_STATE_SUFFIX, ""));
+        }
+      }
+      return result;
+    }
+    setHideProperty(name, hidden) {
+      this[name + HIDE_STATE_SUFFIX] = hidden;
+    }
+  };
+  __publicField(_State, "PROPS", [
+    { name: "activation", type: 5 /* OBJECT */, keyMap: activations },
+    { name: "regularization", type: 5 /* OBJECT */, keyMap: regularizations },
+    { name: "batchSize", type: 1 /* NUMBER */ },
+    { name: "dataset", type: 5 /* OBJECT */, keyMap: datasets },
+    { name: "regDataset", type: 5 /* OBJECT */, keyMap: regDatasets },
+    { name: "learningRate", type: 1 /* NUMBER */ },
+    { name: "regularizationRate", type: 1 /* NUMBER */ },
+    { name: "noise", type: 1 /* NUMBER */ },
+    { name: "networkShape", type: 2 /* ARRAY_NUMBER */ },
+    { name: "seed", type: 0 /* STRING */ },
+    { name: "showTestData", type: 4 /* BOOLEAN */ },
+    { name: "discretize", type: 4 /* BOOLEAN */ },
+    { name: "percTrainData", type: 1 /* NUMBER */ },
+    { name: "x", type: 4 /* BOOLEAN */ },
+    { name: "y", type: 4 /* BOOLEAN */ },
+    { name: "xTimesY", type: 4 /* BOOLEAN */ },
+    { name: "xSquared", type: 4 /* BOOLEAN */ },
+    { name: "ySquared", type: 4 /* BOOLEAN */ },
+    { name: "cosX", type: 4 /* BOOLEAN */ },
+    { name: "sinX", type: 4 /* BOOLEAN */ },
+    { name: "cosY", type: 4 /* BOOLEAN */ },
+    { name: "sinY", type: 4 /* BOOLEAN */ },
+    { name: "collectStats", type: 4 /* BOOLEAN */ },
+    { name: "tutorial", type: 0 /* STRING */ },
+    { name: "problem", type: 5 /* OBJECT */, keyMap: problems },
+    { name: "initZero", type: 4 /* BOOLEAN */ },
+    { name: "hideText", type: 4 /* BOOLEAN */ }
+  ]);
+  var State = _State;
+
+  // labs/playground-mlp/src/linechart.ts
+  var d33 = window.d3;
+  var AppendingLineChart = class {
+    constructor(container, lineColors) {
+      __publicField(this, "numLines");
+      __publicField(this, "data", []);
+      __publicField(this, "svg");
+      __publicField(this, "xScale");
+      __publicField(this, "yScale");
+      __publicField(this, "paths");
+      __publicField(this, "lineColors");
+      __publicField(this, "minY", Number.MAX_VALUE);
+      __publicField(this, "maxY", Number.MIN_VALUE);
+      this.lineColors = lineColors;
+      this.numLines = lineColors.length;
+      let node = container.node();
+      let totalWidth = node.offsetWidth;
+      let totalHeight = node.offsetHeight;
+      let margin = { top: 2, right: 0, bottom: 2, left: 2 };
+      let width = totalWidth - margin.left - margin.right;
+      let height = totalHeight - margin.top - margin.bottom;
+      this.xScale = d33.scale.linear().domain([0, 0]).range([0, width]);
+      this.yScale = d33.scale.linear().domain([0, 0]).range([height, 0]);
+      this.svg = container.append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+      this.paths = new Array(this.numLines);
+      for (let i = 0; i < this.numLines; i++) {
+        this.paths[i] = this.svg.append("path").attr("class", "line").style({
+          "fill": "none",
+          "stroke": lineColors[i],
+          "stroke-width": "1.5px"
+        });
+      }
+    }
+    reset() {
+      this.data = [];
+      this.redraw();
+      this.minY = Number.MAX_VALUE;
+      this.maxY = Number.MIN_VALUE;
+    }
+    addDataPoint(dataPoint) {
+      if (dataPoint.length !== this.numLines) {
+        throw Error("Length of dataPoint must equal number of lines");
+      }
+      dataPoint.forEach((y) => {
+        this.minY = Math.min(this.minY, y);
+        this.maxY = Math.max(this.maxY, y);
+      });
+      this.data.push({ x: this.data.length + 1, y: dataPoint });
+      this.redraw();
+    }
+    redraw() {
+      this.xScale.domain([1, this.data.length]);
+      this.yScale.domain([this.minY, this.maxY]);
+      let getPathMap = (lineIndex) => {
+        return d33.svg.line().x((d) => this.xScale(d.x)).y((d) => this.yScale(d.y[lineIndex]));
+      };
+      for (let i = 0; i < this.numLines; i++) {
+        this.paths[i].datum(this.data).attr("d", getPathMap(i));
+      }
+    }
+  };
+
+  // labs/playground-mlp/src/playground.ts
+  var d34 = window.d3;
+  var mainWidth;
+  d34.select(".more button").on("click", function() {
+    let position = 800;
+    d34.transition().duration(1e3).tween("scroll", scrollTween(position));
+  });
+  function scrollTween(offset) {
+    return function() {
+      let i = d34.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+      return function(t) {
+        scrollTo(0, i(t));
+      };
+    };
+  }
+  var RECT_SIZE = 30;
+  var BIAS_SIZE = 5;
+  var NUM_SAMPLES_CLASSIFY = 500;
+  var NUM_SAMPLES_REGRESS = 1200;
+  var DENSITY = 100;
+  var INPUTS = {
+    "x": { f: (x, y) => x, label: "X_1" },
+    "y": { f: (x, y) => y, label: "X_2" },
+    "xSquared": { f: (x, y) => x * x, label: "X_1^2" },
+    "ySquared": { f: (x, y) => y * y, label: "X_2^2" },
+    "xTimesY": { f: (x, y) => x * y, label: "X_1X_2" },
+    "sinX": { f: (x, y) => Math.sin(x), label: "sin(X_1)" },
+    "sinY": { f: (x, y) => Math.sin(y), label: "sin(X_2)" }
+  };
+  var HIDABLE_CONTROLS = [
+    ["\u663E\u793A\u6D4B\u8BD5\u6570\u636E", "showTestData"],
+    ["\u8F93\u51FA\u79BB\u6563\u5316", "discretize"],
+    ["\u64AD\u653E\u6309\u94AE", "playButton"],
+    ["\u5355\u6B65\u6309\u94AE", "stepButton"],
+    ["\u91CD\u7F6E\u6309\u94AE", "resetButton"],
+    ["\u5B66\u4E60\u7387", "learningRate"],
+    ["\u6FC0\u6D3B\u51FD\u6570", "activation"],
+    ["\u6B63\u5219\u5316", "regularization"],
+    ["\u6B63\u5219\u5316\u7CFB\u6570", "regularizationRate"],
+    ["\u4EFB\u52A1\u7C7B\u578B", "problem"],
+    ["\u6570\u636E\u96C6", "dataset"],
+    ["\u8BAD\u7EC3\u96C6\u5360\u6BD4", "percTrainData"],
+    ["\u566A\u58F0", "noise"],
+    ["\u6279\u91CF\u5927\u5C0F", "batchSize"],
+    ["\u9690\u85CF\u5C42\u6570\u91CF", "numHiddenLayers"]
+  ];
+  var Player = class {
+    constructor() {
+      __publicField(this, "timerIndex", 0);
+      __publicField(this, "isPlaying", false);
+      __publicField(this, "callback", null);
+    }
+    /** Plays/pauses the player. */
+    playOrPause() {
+      if (this.isPlaying) {
+        this.isPlaying = false;
+        this.pause();
+      } else {
+        this.isPlaying = true;
+        if (iter === 0) {
+          simulationStarted();
+        }
+        this.play();
+      }
+    }
+    onPlayPause(callback) {
+      this.callback = callback;
+    }
+    play() {
+      this.pause();
+      this.isPlaying = true;
+      if (this.callback) {
+        this.callback(this.isPlaying);
+      }
+      this.start(this.timerIndex);
+    }
+    pause() {
+      this.timerIndex++;
+      this.isPlaying = false;
+      if (this.callback) {
+        this.callback(this.isPlaying);
+      }
+    }
+    start(localTimerIndex) {
+      d34.timer(() => {
+        if (localTimerIndex < this.timerIndex) {
+          return true;
+        }
+        oneStep();
+        return false;
+      }, 0);
+    }
+  };
+  var state = State.deserializeState();
+  state.getHiddenProps().forEach((prop) => {
+    if (prop in INPUTS) {
+      delete INPUTS[prop];
+    }
+  });
+  var boundary = {};
+  var selectedNodeId = null;
+  var xDomain = [-6, 6];
+  var heatMap = new HeatMap(
+    300,
+    DENSITY,
+    xDomain,
+    xDomain,
+    d34.select("#heatmap"),
+    { showAxes: true }
+  );
+  var linkWidthScale = d34.scale.linear().domain([0, 5]).range([1, 10]).clamp(true);
+  var colorScale = d34.scale.linear().domain([-1, 0, 1]).range(["#f59322", "#e8eaeb", "#0877bd"]).clamp(true);
+  var iter = 0;
+  var trainData = [];
+  var testData = [];
+  var network = null;
+  var networkType = "mlp";
+  var lossTrain = 0;
+  var lossTest = 0;
+  var player = new Player();
+  var lineChart = new AppendingLineChart(
+    d34.select("#linechart"),
+    ["#777", "black"]
+  );
+  function makeGUI() {
+    d34.select("#reset-button").on("click", () => {
+      reset();
+      userHasInteracted();
+      d34.select("#play-pause-button");
+    });
+    d34.select("#play-pause-button").on("click", function() {
+      userHasInteracted();
+      player.playOrPause();
+    });
+    player.onPlayPause((isPlaying) => {
+      d34.select("#play-pause-button").classed("playing", isPlaying);
+    });
+    d34.select("#next-step-button").on("click", () => {
+      player.pause();
+      userHasInteracted();
+      if (iter === 0) {
+        simulationStarted();
+      }
+      oneStep();
+    });
+    d34.select("#data-regen-button").on("click", () => {
+      generateData();
+      parametersChanged = true;
+    });
+    d34.select("#network-type").on("change", function() {
+      const value = this.value;
+      if (value !== "mlp") return;
+      networkType = value;
+      reset();
+    });
+    let dataThumbnails = d34.selectAll("canvas[data-dataset]");
+    dataThumbnails.on("click", function() {
+      let newDataset = datasets[this.dataset.dataset];
+      if (newDataset === state.dataset) {
+        return;
+      }
+      state.dataset = newDataset;
+      dataThumbnails.classed("selected", false);
+      d34.select(this).classed("selected", true);
+      generateData();
+      parametersChanged = true;
+      reset();
+    });
+    let datasetKey = getKeyFromValue(datasets, state.dataset);
+    d34.select(`canvas[data-dataset=${datasetKey}]`).classed("selected", true);
+    let regDataThumbnails = d34.selectAll("canvas[data-regDataset]");
+    regDataThumbnails.on("click", function() {
+      let newDataset = regDatasets[this.dataset.regdataset];
+      if (newDataset === state.regDataset) {
+        return;
+      }
+      state.regDataset = newDataset;
+      regDataThumbnails.classed("selected", false);
+      d34.select(this).classed("selected", true);
+      generateData();
+      parametersChanged = true;
+      reset();
+    });
+    let regDatasetKey = getKeyFromValue(regDatasets, state.regDataset);
+    d34.select(`canvas[data-regDataset=${regDatasetKey}]`).classed("selected", true);
+    d34.select("#add-layers").on("click", () => {
+      if (state.numHiddenLayers >= 6) {
+        return;
+      }
+      state.networkShape[state.numHiddenLayers] = 2;
+      state.numHiddenLayers++;
+      parametersChanged = true;
+      reset();
+    });
+    d34.select("#remove-layers").on("click", () => {
+      if (state.numHiddenLayers <= 0) {
+        return;
+      }
+      state.numHiddenLayers--;
+      state.networkShape.splice(state.numHiddenLayers);
+      parametersChanged = true;
+      reset();
+    });
+    let showTestData = d34.select("#show-test-data").on("change", function() {
+      state.showTestData = this.checked;
+      state.serialize();
+      userHasInteracted();
+      heatMap.updateTestPoints(state.showTestData ? testData : []);
+    });
+    showTestData.property("checked", state.showTestData);
+    let discretize = d34.select("#discretize").on("change", function() {
+      state.discretize = this.checked;
+      state.serialize();
+      userHasInteracted();
+      updateUI();
+    });
+    discretize.property("checked", state.discretize);
+    let percTrain = d34.select("#percTrainData").on("input", function() {
+      state.percTrainData = this.value;
+      d34.select("label[for='percTrainData'] .value").text(this.value);
+      generateData();
+      parametersChanged = true;
+      reset();
+    });
+    percTrain.property("value", state.percTrainData);
+    d34.select("label[for='percTrainData'] .value").text(state.percTrainData);
+    let noise = d34.select("#noise").on("input", function() {
+      state.noise = this.value;
+      d34.select("label[for='noise'] .value").text(this.value);
+      generateData();
+      parametersChanged = true;
+      reset();
+    });
+    let currentMax = parseInt(noise.property("max"));
+    if (state.noise > currentMax) {
+      if (state.noise <= 80) {
+        noise.property("max", state.noise);
+      } else {
+        state.noise = 50;
+      }
+    } else if (state.noise < 0) {
+      state.noise = 0;
+    }
+    noise.property("value", state.noise);
+    d34.select("label[for='noise'] .value").text(state.noise);
+    let batchSize = d34.select("#batchSize").on("input", function() {
+      state.batchSize = this.value;
+      d34.select("label[for='batchSize'] .value").text(this.value);
+      parametersChanged = true;
+      reset();
+    });
+    batchSize.property("value", state.batchSize);
+    d34.select("label[for='batchSize'] .value").text(state.batchSize);
+    let activationDropdown = d34.select("#activations").on("change", function() {
+      state.activation = activations[this.value];
+      parametersChanged = true;
+      reset();
+    });
+    activationDropdown.property(
+      "value",
+      getKeyFromValue(activations, state.activation)
+    );
+    let learningRate = d34.select("#learningRate").on("change", function() {
+      state.learningRate = +this.value;
+      state.serialize();
+      userHasInteracted();
+      parametersChanged = true;
+    });
+    learningRate.property("value", state.learningRate);
+    let regularDropdown = d34.select("#regularizations").on(
+      "change",
+      function() {
+        state.regularization = regularizations[this.value];
+        parametersChanged = true;
+        reset();
+      }
+    );
+    regularDropdown.property(
+      "value",
+      getKeyFromValue(regularizations, state.regularization)
+    );
+    let regularRate = d34.select("#regularRate").on("change", function() {
+      state.regularizationRate = +this.value;
+      parametersChanged = true;
+      reset();
+    });
+    regularRate.property("value", state.regularizationRate);
+    let problem = d34.select("#problem").on("change", function() {
+      state.problem = problems[this.value];
+      generateData();
+      drawDatasetThumbnails();
+      parametersChanged = true;
+      reset();
+    });
+    problem.property("value", getKeyFromValue(problems, state.problem));
+    let x = d34.scale.linear().domain([-1, 1]).range([0, 144]);
+    let xAxis = d34.svg.axis().scale(x).orient("bottom").tickValues([-1, 0, 1]).tickFormat(d34.format("d"));
+    d34.select("#colormap g.core").append("g").attr("class", "x axis").attr("transform", "translate(0,10)").call(xAxis);
+    window.addEventListener("resize", () => {
+      let newWidth = document.querySelector("#main-part").getBoundingClientRect().width;
+      if (newWidth !== mainWidth) {
+        mainWidth = newWidth;
+        drawNetwork(network);
+        updateUI(true);
+      }
+    });
+    if (state.hideText) {
+      d34.select("#article-text").style("display", "none");
+      d34.select("div.more").style("display", "none");
+      d34.select("header").style("display", "none");
+    }
+  }
+  function updateBiasesUI(network2) {
+    forEachNode(network2, true, (node) => {
+      d34.select(`rect#bias-${node.id}`).style("fill", colorScale(node.bias));
+    });
+  }
+  function updateWeightsUI(network2, container) {
+    for (let layerIdx = 1; layerIdx < network2.length; layerIdx++) {
+      let currentLayer = network2[layerIdx];
+      for (let i = 0; i < currentLayer.length; i++) {
+        let node = currentLayer[i];
+        for (let j = 0; j < node.inputLinks.length; j++) {
+          let link = node.inputLinks[j];
+          container.select(`#link${link.source.id}-${link.dest.id}`).style({
+            "stroke-dashoffset": -iter / 3,
+            "stroke-width": linkWidthScale(Math.abs(link.weight)),
+            "stroke": colorScale(link.weight)
+          }).datum(link);
+        }
+      }
+    }
+  }
+  function drawNode(cx, cy, nodeId, isInput, container, node) {
+    let x = cx - RECT_SIZE / 2;
+    let y = cy - RECT_SIZE / 2;
+    let nodeGroup = container.append("g").attr({
+      "class": "node",
+      "id": `node${nodeId}`,
+      "transform": `translate(${x},${y})`
+    });
+    nodeGroup.append("rect").attr({
+      x: 0,
+      y: 0,
+      width: RECT_SIZE,
+      height: RECT_SIZE
+    });
+    let activeOrNotClass = state[nodeId] ? "active" : "inactive";
+    if (isInput) {
+      let label = INPUTS[nodeId].label != null ? INPUTS[nodeId].label : nodeId;
+      let text = nodeGroup.append("text").attr({
+        class: "main-label",
+        x: -10,
+        y: RECT_SIZE / 2,
+        "text-anchor": "end"
+      });
+      if (/[_^]/.test(label)) {
+        let myRe = /(.*?)([_^])(.)/g;
+        let myArray;
+        let lastIndex;
+        while ((myArray = myRe.exec(label)) != null) {
+          lastIndex = myRe.lastIndex;
+          let prefix = myArray[1];
+          let sep = myArray[2];
+          let suffix = myArray[3];
+          if (prefix) {
+            text.append("tspan").text(prefix);
+          }
+          text.append("tspan").attr("baseline-shift", sep === "_" ? "sub" : "super").style("font-size", "9px").text(suffix);
+        }
+        if (label.substring(lastIndex)) {
+          text.append("tspan").text(label.substring(lastIndex));
+        }
+      } else {
+        text.append("tspan").text(label);
+      }
+      nodeGroup.classed(activeOrNotClass, true);
+    }
+    if (!isInput) {
+      nodeGroup.append("rect").attr({
+        id: `bias-${nodeId}`,
+        x: -BIAS_SIZE - 2,
+        y: RECT_SIZE - BIAS_SIZE + 3,
+        width: BIAS_SIZE,
+        height: BIAS_SIZE
+      }).on("mouseenter", function() {
+        updateHoverCard(0 /* BIAS */, node, d34.mouse(container.node()));
+      }).on("mouseleave", function() {
+        updateHoverCard(null);
+      });
+    }
+    let div = d34.select("#network").insert("div", ":first-child").attr({
+      "id": `canvas-${nodeId}`,
+      "class": "canvas"
+    }).style({
+      position: "absolute",
+      left: `${x + 3}px`,
+      top: `${y + 3}px`
+    }).on("mouseenter", function() {
+      selectedNodeId = nodeId;
+      div.classed("hovered", true);
+      nodeGroup.classed("hovered", true);
+      updateDecisionBoundary(network, false);
+      heatMap.updateBackground(boundary[nodeId], state.discretize);
+    }).on("mouseleave", function() {
+      selectedNodeId = null;
+      div.classed("hovered", false);
+      nodeGroup.classed("hovered", false);
+      updateDecisionBoundary(network, false);
+      heatMap.updateBackground(
+        boundary[getOutputNode(network).id],
+        state.discretize
+      );
+    });
+    if (isInput) {
+      div.on("click", function() {
+        state[nodeId] = !state[nodeId];
+        parametersChanged = true;
+        reset();
+      });
+      div.style("cursor", "pointer");
+    }
+    if (isInput) {
+      div.classed(activeOrNotClass, true);
+    }
+    let nodeHeatMap = new HeatMap(
+      RECT_SIZE,
+      DENSITY / 10,
+      xDomain,
+      xDomain,
+      div,
+      { noSvg: true }
+    );
+    div.datum({ heatmap: nodeHeatMap, id: nodeId });
+  }
+  function drawNetwork(network2) {
+    let svg = d34.select("#svg");
+    svg.select("g.core").remove();
+    d34.select("#network").selectAll("div.canvas").remove();
+    d34.select("#network").selectAll("div.plus-minus-neurons").remove();
+    let padding = 3;
+    let co = d34.select(".column.output").node();
+    let cf = d34.select(".column.features").node();
+    let width = co.offsetLeft - cf.offsetLeft;
+    svg.attr("width", width);
+    let node2coord = {};
+    let container = svg.append("g").classed("core", true).attr("transform", `translate(${padding},${padding})`);
+    let numLayers = network2.length;
+    let featureWidth = 118;
+    let layerScale = d34.scale.ordinal().domain(d34.range(1, numLayers - 1)).rangePoints([featureWidth, width - RECT_SIZE], 0.7);
+    let nodeIndexScale = (nodeIndex) => nodeIndex * (RECT_SIZE + 25);
+    let calloutThumb = d34.select(".callout.thumbnail").style("display", "none");
+    let calloutWeights = d34.select(".callout.weights").style("display", "none");
+    let idWithCallout = null;
+    let targetIdWithCallout = null;
+    let cx = RECT_SIZE / 2 + 50;
+    let nodeIds = Object.keys(INPUTS);
+    let maxY = nodeIndexScale(nodeIds.length);
+    nodeIds.forEach((nodeId, i) => {
+      let cy2 = nodeIndexScale(i) + RECT_SIZE / 2;
+      node2coord[nodeId] = { cx, cy: cy2 };
+      drawNode(cx, cy2, nodeId, true, container);
+    });
+    for (let layerIdx = 1; layerIdx < numLayers - 1; layerIdx++) {
+      let numNodes = network2[layerIdx].length;
+      let cx2 = layerScale(layerIdx) + RECT_SIZE / 2;
+      maxY = Math.max(maxY, nodeIndexScale(numNodes));
+      addPlusMinusControl(layerScale(layerIdx), layerIdx);
+      for (let i = 0; i < numNodes; i++) {
+        let node2 = network2[layerIdx][i];
+        let cy2 = nodeIndexScale(i) + RECT_SIZE / 2;
+        node2coord[node2.id] = { cx: cx2, cy: cy2 };
+        drawNode(cx2, cy2, node2.id, false, container, node2);
+        let numNodes2 = network2[layerIdx].length;
+        let nextNumNodes = network2[layerIdx + 1].length;
+        if (idWithCallout == null && i === numNodes2 - 1 && nextNumNodes <= numNodes2) {
+          calloutThumb.style({
+            display: null,
+            top: `${20 + 3 + cy2}px`,
+            left: `${cx2}px`
+          });
+          idWithCallout = node2.id;
+        }
+        for (let j = 0; j < node2.inputLinks.length; j++) {
+          let link = node2.inputLinks[j];
+          let path = drawLink(
+            link,
+            node2coord,
+            network2,
+            container,
+            j === 0,
+            j,
+            node2.inputLinks.length
+          ).node();
+          let prevLayer = network2[layerIdx - 1];
+          let lastNodePrevLayer = prevLayer[prevLayer.length - 1];
+          if (targetIdWithCallout == null && i === numNodes2 - 1 && link.source.id === lastNodePrevLayer.id && (link.source.id !== idWithCallout || numLayers <= 5) && link.dest.id !== idWithCallout && prevLayer.length >= numNodes2) {
+            let midPoint = path.getPointAtLength(path.getTotalLength() * 0.7);
+            calloutWeights.style({
+              display: null,
+              top: `${midPoint.y + 5}px`,
+              left: `${midPoint.x + 3}px`
+            });
+            targetIdWithCallout = link.dest.id;
+          }
+        }
+      }
+    }
+    cx = width + RECT_SIZE / 2;
+    let node = network2[numLayers - 1][0];
+    let cy = nodeIndexScale(0) + RECT_SIZE / 2;
+    node2coord[node.id] = { cx, cy };
+    for (let i = 0; i < node.inputLinks.length; i++) {
+      let link = node.inputLinks[i];
+      drawLink(
+        link,
+        node2coord,
+        network2,
+        container,
+        i === 0,
+        i,
+        node.inputLinks.length
+      );
+    }
+    svg.attr("height", maxY);
+    let height = Math.max(
+      getRelativeHeight(calloutThumb),
+      getRelativeHeight(calloutWeights),
+      getRelativeHeight(d34.select("#network"))
+    );
+    d34.select(".column.features").style("height", height + "px");
+  }
+  function getRelativeHeight(selection) {
+    let node = selection.node();
+    return node.offsetHeight + node.offsetTop;
+  }
+  function addPlusMinusControl(x, layerIdx) {
+    let div = d34.select("#network").append("div").classed("plus-minus-neurons", true).style("left", `${x - 10}px`);
+    let i = layerIdx - 1;
+    let firstRow = div.append("div").attr("class", `ui-numNodes${layerIdx}`);
+    firstRow.append("button").attr("class", "mdl-button mdl-js-button mdl-button--icon").on("click", () => {
+      let numNeurons = state.networkShape[i];
+      if (numNeurons >= 8) {
+        return;
+      }
+      state.networkShape[i]++;
+      parametersChanged = true;
+      reset();
+    }).append("i").attr("class", "material-icons").text("add");
+    firstRow.append("button").attr("class", "mdl-button mdl-js-button mdl-button--icon").on("click", () => {
+      let numNeurons = state.networkShape[i];
+      if (numNeurons <= 1) {
+        return;
+      }
+      state.networkShape[i]--;
+      parametersChanged = true;
+      reset();
+    }).append("i").attr("class", "material-icons").text("remove");
+    let suffix = state.networkShape[i] > 1 ? "s" : "";
+    div.append("div").text(
+      state.networkShape[i] + " neuron" + suffix
+    );
+  }
+  function updateHoverCard(type, nodeOrLink, coordinates) {
+    let hovercard = d34.select("#hovercard");
+    if (type == null) {
+      hovercard.style("display", "none");
+      d34.select("#svg").on("click", null);
+      return;
+    }
+    d34.select("#svg").on("click", () => {
+      hovercard.select(".value").style("display", "none");
+      let input = hovercard.select("input");
+      input.style("display", null);
+      input.on("input", function() {
+        if (this.value != null && this.value !== "") {
+          if (type === 1 /* WEIGHT */) {
+            nodeOrLink.weight = +this.value;
+          } else {
+            nodeOrLink.bias = +this.value;
+          }
+          updateUI();
+        }
+      });
+      input.on("keypress", () => {
+        if (d34.event.keyCode === 13) {
+          updateHoverCard(type, nodeOrLink, coordinates);
+        }
+      });
+      input.node().focus();
+    });
+    let value = type === 1 /* WEIGHT */ ? nodeOrLink.weight : nodeOrLink.bias;
+    let name = type === 1 /* WEIGHT */ ? "\u6743\u91CD" : "\u504F\u7F6E";
+    hovercard.style({
+      "left": `${coordinates[0] + 20}px`,
+      "top": `${coordinates[1]}px`,
+      "display": "block"
+    });
+    hovercard.select(".type").text(name);
+    hovercard.select(".value").style("display", null).text(value.toPrecision(2));
+    hovercard.select("input").property("value", value.toPrecision(2)).style("display", "none");
+  }
+  function drawLink(input, node2coord, network2, container, isFirst, index, length) {
+    let line = container.insert("path", ":first-child");
+    let source = node2coord[input.source.id];
+    let dest = node2coord[input.dest.id];
+    let datum = {
+      source: {
+        y: source.cx + RECT_SIZE / 2 + 2,
+        x: source.cy
+      },
+      target: {
+        y: dest.cx - RECT_SIZE / 2,
+        x: dest.cy + (index - (length - 1) / 2) / length * 12
+      }
+    };
+    let diagonal = d34.svg.diagonal().projection((d) => [d.y, d.x]);
+    line.attr({
+      "marker-start": "url(#markerArrow)",
+      class: "link",
+      id: "link" + input.source.id + "-" + input.dest.id,
+      d: diagonal(datum, 0)
+    });
+    container.append("path").attr("d", diagonal(datum, 0)).attr("class", "link-hover").on("mouseenter", function() {
+      updateHoverCard(1 /* WEIGHT */, input, d34.mouse(this));
+    }).on("mouseleave", function() {
+      updateHoverCard(null);
+    });
+    return line;
+  }
+  function updateDecisionBoundary(network2, firstTime) {
+    if (firstTime) {
+      boundary = {};
+      forEachNode(network2, true, (node) => {
+        boundary[node.id] = new Array(DENSITY);
+      });
+      for (let nodeId in INPUTS) {
+        boundary[nodeId] = new Array(DENSITY);
+      }
+    }
+    let xScale = d34.scale.linear().domain([0, DENSITY - 1]).range(xDomain);
+    let yScale = d34.scale.linear().domain([DENSITY - 1, 0]).range(xDomain);
+    let i = 0, j = 0;
+    for (i = 0; i < DENSITY; i++) {
+      if (firstTime) {
+        forEachNode(network2, true, (node) => {
+          boundary[node.id][i] = new Array(DENSITY);
+        });
+        for (let nodeId in INPUTS) {
+          boundary[nodeId][i] = new Array(DENSITY);
+        }
+      }
+      for (j = 0; j < DENSITY; j++) {
+        let x = xScale(i);
+        let y = yScale(j);
+        let input = constructInput(x, y);
+        forwardProp(network2, input);
+        forEachNode(network2, true, (node) => {
+          boundary[node.id][i][j] = node.output;
+        });
+        if (firstTime) {
+          for (let nodeId in INPUTS) {
+            boundary[nodeId][i][j] = INPUTS[nodeId].f(x, y);
+          }
+        }
+      }
+    }
+  }
+  function getLoss2(network2, dataPoints) {
+    return getLoss(network2, dataPoints, (p) => constructInput(p.x, p.y));
+  }
+  function updateUI(firstStep = false) {
+    updateWeightsUI(network, d34.select("g.core"));
+    updateBiasesUI(network);
+    updateDecisionBoundary(network, firstStep);
+    let selectedId = selectedNodeId != null ? selectedNodeId : getOutputNode(network).id;
+    heatMap.updateBackground(boundary[selectedId], state.discretize);
+    d34.select("#network").selectAll("div.canvas").each(function(data) {
+      data.heatmap.updateBackground(
+        reduceMatrix(boundary[data.id], 10),
+        state.discretize
+      );
+    });
+    function zeroPad(n) {
+      let pad = "000000";
+      return (pad + n).slice(-pad.length);
+    }
+    function addCommas(s) {
+      return s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function humanReadable(n) {
+      return n.toFixed(3);
+    }
+    d34.select("#loss-train").text(humanReadable(lossTrain));
+    d34.select("#loss-test").text(humanReadable(lossTest));
+    d34.select("#iter-number").text(addCommas(zeroPad(iter)));
+    lineChart.addDataPoint([lossTrain, lossTest]);
+  }
+  function constructInputIds() {
+    let result = [];
+    for (let inputName in INPUTS) {
+      if (state[inputName]) {
+        result.push(inputName);
+      }
+    }
+    return result;
+  }
+  function constructInput(x, y) {
+    let input = [];
+    for (let inputName in INPUTS) {
+      if (state[inputName]) {
+        input.push(INPUTS[inputName].f(x, y));
+      }
+    }
+    return input;
+  }
+  function oneStep() {
+    iter++;
+    trainEpoch(
+      network,
+      trainData,
+      state.batchSize,
+      state.learningRate,
+      state.regularization,
+      state.regularizationRate,
+      (p) => constructInput(p.x, p.y)
+    );
+    lossTrain = getLoss2(network, trainData);
+    lossTest = getLoss2(network, testData);
+    updateUI();
+  }
+  function getOutputWeights(network2) {
+    let weights = [];
+    for (let layerIdx = 0; layerIdx < network2.length - 1; layerIdx++) {
+      let currentLayer = network2[layerIdx];
+      for (let i = 0; i < currentLayer.length; i++) {
+        let node = currentLayer[i];
+        for (let j = 0; j < node.outputs.length; j++) {
+          let output = node.outputs[j];
+          weights.push(output.weight);
+        }
+      }
+    }
+    return weights;
+  }
+  function reset(onStartup = false) {
+    lineChart.reset();
+    state.serialize();
+    if (!onStartup) {
+      userHasInteracted();
+    }
+    player.pause();
+    let suffix = state.numHiddenLayers !== 1 ? "s" : "";
+    d34.select("#layers-label").text("\u9690\u85CF\u5C42");
+    d34.select("#num-layers").text(state.numHiddenLayers);
+    iter = 0;
+    let numInputs = constructInput(0, 0).length;
+    let shape = [numInputs].concat(state.networkShape).concat([1]);
+    let outputActivation = state.problem === 1 /* REGRESSION */ ? Activations.LINEAR : Activations.TANH;
+    network = buildNetwork(
+      shape,
+      state.activation,
+      outputActivation,
+      state.regularization,
+      constructInputIds(),
+      state.initZero
+    );
+    lossTrain = getLoss2(network, trainData);
+    lossTest = getLoss2(network, testData);
+    drawNetwork(network);
+    updateUI(true);
+  }
+  function initTutorial() {
+    if (state.tutorial == null || state.tutorial === "" || state.hideText) {
+      return;
+    }
+    d34.selectAll("article div.l--body").remove();
+    let tutorial = d34.select("article").append("div").attr("class", "l--body");
+    d34.html(`tutorials/${state.tutorial}.html`, (err, htmlFragment) => {
+      if (err) {
+        throw err;
+      }
+      tutorial.node().appendChild(htmlFragment);
+      let title = tutorial.select("title");
+      if (title.size()) {
+        d34.select("header h1").style({
+          "margin-top": "20px",
+          "margin-bottom": "20px"
+        }).text(title.text());
+        document.title = title.text();
+      }
+    });
+  }
+  function drawDatasetThumbnails() {
+    function renderThumbnail(canvas, dataGenerator) {
+      let w = 100;
+      let h = 100;
+      canvas.setAttribute("width", w);
+      canvas.setAttribute("height", h);
+      let context = canvas.getContext("2d");
+      let data = dataGenerator(200, 0);
+      data.forEach(function(d) {
+        context.fillStyle = colorScale(d.label);
+        context.fillRect(w * (d.x + 6) / 12, h * (d.y + 6) / 12, 4, 4);
+      });
+      d34.select(canvas.parentNode).style("display", null);
+    }
+    d34.selectAll(".dataset").style("display", "none");
+    if (state.problem === 0 /* CLASSIFICATION */) {
+      for (let dataset in datasets) {
+        let canvas = document.querySelector(`canvas[data-dataset=${dataset}]`);
+        let dataGenerator = datasets[dataset];
+        renderThumbnail(canvas, dataGenerator);
+      }
+    }
+    if (state.problem === 1 /* REGRESSION */) {
+      for (let regDataset in regDatasets) {
+        let canvas = document.querySelector(`canvas[data-regDataset=${regDataset}]`);
+        let dataGenerator = regDatasets[regDataset];
+        renderThumbnail(canvas, dataGenerator);
+      }
+    }
+  }
+  function hideControls() {
+    let hiddenProps = state.getHiddenProps();
+    hiddenProps.forEach((prop) => {
+      let controls = d34.selectAll(`.ui-${prop}`);
+      if (controls.size() === 0) {
+        console.warn(`0 html elements found with class .ui-${prop}`);
+      }
+      controls.style("display", "none");
+    });
+    let hideControls2 = d34.select(".hide-controls");
+    HIDABLE_CONTROLS.forEach(([text, id]) => {
+      let label = hideControls2.append("label").attr("class", "mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect");
+      let input = label.append("input").attr({
+        type: "checkbox",
+        class: "mdl-checkbox__input"
+      });
+      if (hiddenProps.indexOf(id) === -1) {
+        input.attr("checked", "true");
+      }
+      input.on("change", function() {
+        state.setHideProperty(id, !this.checked);
+        state.serialize();
+        userHasInteracted();
+        d34.select(".hide-controls-link").attr("href", window.location.href);
+      });
+      label.append("span").attr("class", "mdl-checkbox__label label").text(text);
+    });
+    d34.select(".hide-controls-link").attr("href", window.location.href);
+  }
+  function generateData(firstTime = false) {
+    if (!firstTime) {
+      state.seed = Math.random().toFixed(5);
+      state.serialize();
+      userHasInteracted();
+    }
+    Math.seedrandom(state.seed);
+    let numSamples = state.problem === 1 /* REGRESSION */ ? NUM_SAMPLES_REGRESS : NUM_SAMPLES_CLASSIFY;
+    let generator = state.problem === 0 /* CLASSIFICATION */ ? state.dataset : state.regDataset;
+    let data = generator(numSamples, state.noise / 100);
+    shuffle(data);
+    let splitIndex = Math.floor(data.length * state.percTrainData / 100);
+    trainData = data.slice(0, splitIndex);
+    testData = data.slice(splitIndex);
+    heatMap.updatePoints(trainData);
+    heatMap.updateTestPoints(state.showTestData ? testData : []);
+  }
+  var firstInteraction = true;
+  var parametersChanged = false;
+  function userHasInteracted() {
+    if (!firstInteraction) {
+      return;
+    }
+    firstInteraction = false;
+    let page = "index";
+    if (state.tutorial != null && state.tutorial !== "") {
+      page = `/v/tutorials/${state.tutorial}`;
+    }
+    ga("set", "page", page);
+    ga("send", "pageview", { "sessionControl": "start" });
+  }
+  function simulationStarted() {
+    ga("send", {
+      hitType: "event",
+      eventCategory: "Starting Simulation",
+      eventAction: parametersChanged ? "changed" : "unchanged",
+      eventLabel: state.tutorial == null ? "" : state.tutorial
+    });
+    parametersChanged = false;
+  }
+  drawDatasetThumbnails();
+  initTutorial();
+  makeGUI();
+  generateData(true);
+  reset(true);
+  hideControls();
+  window.__PG = {
+    /** 静默训练若干轮：只更新权重与损失，不重画决策边界 */
+    quietTrain: (epochs) => {
+      for (let i = 0; i < epochs; i++) {
+        trainEpoch(
+          network,
+          trainData,
+          state.batchSize,
+          state.learningRate,
+          state.regularization,
+          state.regularizationRate,
+          (p) => constructInput(p.x, p.y)
+        );
+      }
+      lossTrain = getLoss2(network, trainData);
+      lossTest = getLoss2(network, testData);
+      return { train: lossTrain, test: lossTest };
+    },
+    /** 引擎信息：哪套实现、什么头、多少参数 */
+    engine: () => engineInfo(network),
+    /** 单点前向，返回显示用输出（二分类是 2p-1 ∈ [-1,1]） */
+    forward: (x, y) => forwardProp(network, constructInput(x, y)),
+    /** 测试集（x, y, label） */
+    testPoints: () => testData.map((p) => ({ x: p.x, y: p.y, label: p.label })),
+    features: () => constructInputIds(),
+    state: () => state,
+    /** 连线权重与引擎参数是否真的绑在一起（自检） */
+    linkBinding: () => ({
+      link: firstLinkWeight(network),
+      param: paramValue(network, "W" + (network.length - 2), 0)
+    }),
+    setLink: (v) => setFirstLinkWeight(network, v)
+  };
+})();
 
 </script>
 </body>
