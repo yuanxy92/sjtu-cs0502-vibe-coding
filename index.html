@@ -757,11 +757,11 @@
           <span class="course-project-card__main">
             <span class="course-project-card__meta"><span data-language-heading="nn-tools" data-zh="计算机科学导论 · 神经网络" data-en="Introduction to CS · Neural networks">Introduction to CS · Neural networks</span></span>
             <strong data-language-heading="nn-tools" data-zh="神经网络游乐场与讲解器" data-en="Neural Network Playground &amp; Explainers">Neural Network Playground &amp; Explainers</strong>
-            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="zh" hidden>一个入口，三件动手的事：自己调一个多层感知机，再逐层打开卷积网络与 Transformer。</span>
-            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="en">One card, three hands-on tools: tune a multilayer perceptron yourself, then open up convolutional networks and Transformers layer by layer.</span>
+            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="zh" hidden>一个入口，四件动手的事：自己调一个多层感知机，再逐层打开卷积网络、Transformer 与循环网络的反向传播。</span>
+            <span class="course-project-card__summary" data-language-content="nn-tools" data-language="en">One card, four hands-on tools: tune a multilayer perceptron yourself, then open up convolutional networks, Transformers and the backward pass of a recurrent network.</span>
           </span>
           <span class="course-project-card__action" aria-hidden="true">
-            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="nn-tools" data-zh="展开三个工具" data-en="Open the three tools">Open the three tools</span>
+            <span class="course-project-card__action-copy course-project-card__action-copy--open" data-language-heading="nn-tools" data-zh="展开四个工具" data-en="Open the four tools">Open the four tools</span>
             <span class="course-project-card__action-copy course-project-card__action-copy--close" data-language-heading="nn-tools" data-zh="收起" data-en="Close">Close</span>
             <span class="course-project-card__chevron"><i class="fas fa-chevron-down"></i></span>
           </span>
@@ -773,8 +773,8 @@
           </div>
           <div class="course-project-note">
             <i class="fas fa-project-diagram" aria-hidden="true"></i>
-            <p data-language-content="nn-tools" data-language="zh" hidden>游乐场用课程自研引擎（中文、离线可用）；两个讲解器改编自 poloclub 的 CNN Explainer 与 Transformer Explainer（MIT 许可），我们做了本地部署、去统计与加载稳定性处理。交互部分保留，讲解文字未译。</p>
-            <p data-language-content="nn-tools" data-language="en">The playground runs on the course's own engine (in Chinese, works offline). The two explainers are adapted from poloclub's CNN Explainer and Transformer Explainer (MIT licence), locally deployed with analytics removed and a more robust model download. The interaction is kept; the prose is not translated.</p>
+            <p data-language-content="nn-tools" data-language="zh" hidden>游乐场用课程自研引擎（中文、离线可用）；三个讲解器分别改编自 poloclub 的 CNN Explainer 与 Transformer Explainer（MIT），以及 RNN Dynamics Visualizer（Apache-2.0）。均为本地部署、去统计与加载稳定性处理：交互部分保留，讲解文字未译。</p>
+            <p data-language-content="nn-tools" data-language="en">The playground runs on the course's own engine (in Chinese, works offline). The three explainers are adapted from poloclub's CNN Explainer and Transformer Explainer (MIT licence) and from RNN Dynamics Visualizer (Apache-2.0). All are locally deployed with analytics removed and a more robust model download: the interaction is kept, the prose is not translated.</p>
           </div>
           <div class="course-video-chapters" aria-label="Neural network tools">
             <a class="course-video-chapter" href="./projects/playground-mlp/index.html">
@@ -804,6 +804,16 @@
                 <strong data-language-content="nn-tools" data-language="en">Transformer Explainer</strong>
                 <small data-language-content="nn-tools" data-language="zh" hidden>写一句话看它逐词生成，点开注意力权重与 Q/K/V（首次打开需下载约 630MB 模型）</small>
                 <small data-language-content="nn-tools" data-language="en">Write a sentence, watch it generate token by token; tap into attention weights and Q/K/V (~630 MB model on the first visit)</small>
+              </span>
+              <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+            <a class="course-video-chapter" href="./projects/rnn-explainer/index.html">
+              <span class="course-video-chapter__number">04</span>
+              <span class="course-video-chapter__content">
+                <strong data-language-content="nn-tools" data-language="zh" hidden>循环网络讲解器</strong>
+                <strong data-language-content="nn-tools" data-language="en">RNN Explainer</strong>
+                <small data-language-content="nn-tools" data-language="zh" hidden>把 BPTT 摊开：看梯度往回传时怎么衰减或爆炸，谱半径 ρ 一眼看懂</small>
+                <small data-language-content="nn-tools" data-language="en">Unroll BPTT: watch gradients decay or explode as they travel back, with the spectral radius ρ as the verdict</small>
               </span>
               <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
             </a>

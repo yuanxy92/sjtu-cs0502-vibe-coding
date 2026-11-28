@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RNN Interactive Visualizer & Backpropagation Simulator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23116a72'/%3E%3Ctext x='32' y='41' fill='white' font-family='Arial,sans-serif' font-size='25' font-weight='700' text-anchor='middle'%3ECS%3C/text%3E%3C/svg%3E" />
+    <meta name="description" content="Interactive visualizer for Recurrent Neural Networks (RNN) showing hidden state transitions, weight matrix transformations, real-time parameter tweaking, and Backpropagation Through Time (BPTT)." />
+    <meta property="og:title" content="RNN Interactive Visualizer & Backpropagation Simulator" />
+    <meta property="og:description" content="Interactive visualizer for Recurrent Neural Networks (RNN) showing hidden state transitions, weight matrix transformations, real-time parameter tweaking, and Backpropagation Through Time (BPTT)." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="./assets/index-COhru9Ri.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BRk3WBpt.css">
+  
+    <style>
+      /* 课程横幅：与「神经网络游乐场」「数据可视化实验室」同一套样式 */
+      :root { --course-accent: #0b6e4f; }
+      .course-banner {
+        background: linear-gradient(180deg, #f4f8f6 0%, #ffffff 100%);
+        border-bottom: 1px solid #dfe7e3;
+        padding: 22px 0 18px 0;
+      }
+      .course-banner .container { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+      .course-banner h1 {
+        font-size: 30px; font-weight: 500; margin: 0 0 8px 0; color: #14322a; letter-spacing: .5px;
+      }
+      .course-banner h1 b { color: var(--course-accent); font-weight: 700; }
+      .course-banner p { margin: 4px 0; color: #3c5a50; font-size: 15px; line-height: 1.7; }
+      .course-banner .course-meta { font-size: 13px; color: #6b857c; margin-top: 10px; }
+      .course-banner .course-meta a { color: var(--course-accent); }
+
+      .course-attribution {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+        display: flex; gap: 14px; align-items: center; justify-content: center;
+        flex-wrap: wrap;
+        padding: 7px 14px; font-size: 12.5px; line-height: 1.5;
+        background: rgba(255, 255, 255, .94); color: #556;
+        border-top: 1px solid rgba(0, 0, 0, .08);
+      }
+      .course-attribution a { color: #1a6fb5; }
+      .course-attribution .sep { color: #bbb; }
+
+      /* 上游 header 一行放不下，Reset 按钮会溢出视口 54px —— 允许换行 */
+      #root header { flex-wrap: wrap; row-gap: 10px; }
+      /* 底部署名条是 fixed，给内容留出等高的空位，避免遮住滑块 */
+      #root { padding-bottom: 52px; }
+    </style>
+
+  </head>
+  <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div class="course-banner">
+      <div class="container">
+        <h1>把 <b>BPTT</b> 一步步摊开看</h1>
+        <p>同一个循环单元在时间上展开成一串计算：前向一遍看隐藏状态怎么走，
+           反向一遍看梯度怎么往回传——梯度为什么会消失、为什么会爆炸，
+           由复数平面上那个谱半径 ρ(W<sub>hh</sub>) 一锤定音。</p>
+        <p class="course-meta">
+          计算机科学导论 · 循环神经网络 ｜
+          <a href="../../index.html">← 返回课程主页</a> ｜
+          改编自 RNN Dynamics Visualizer（Apache-2.0）
+        </p>
+      </div>
+    </div>
+
+    <div id="root"></div>
+  
+    <div class="course-attribution">
+      <a href="../../index.html">← 返回课程主页</a>
+      <span class="sep">|</span>
+      <span>本页改编自 <a href="https://github.com/snerur/RNN-Visualization" target="_blank" rel="noopener">RNN Dynamics Visualizer</a>
+        （原作者 Sridhar Nerur，Apache-2.0 许可），课程教学使用，谨致谢意。</span>
+    </div>
+
+  </body>
+</html>
+
