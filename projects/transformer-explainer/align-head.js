@@ -48,6 +48,7 @@
       });
       if (!centers) return;
 
+      var firstTop = null;
       Array.prototype.forEach.call(cells, function (cell, i) {
         var b = cell.getBoundingClientRect();
         var delta = centers[i] - (b.top + b.height / 2);
@@ -58,7 +59,22 @@
         applied.set(cell, next);
         cell.style.transform = 'translateY(' + next.toFixed(2) + 'px)';
         moved++;
+        if (firstTop === null) firstTop = b.top + next;
       });
+
+      // 标题「Query」也跟着第一行走，否则词挪走后标题会孤零零留在上面
+      var title = column.querySelector('.title');
+      if (title && firstTop !== null) {
+        var colTop = column.getBoundingClientRect().top;
+        var baseTop = parseFloat(getComputedStyle(title).top) || 0; // 上游给的 top:-1.7rem
+        var want = firstTop - colTop - title.offsetHeight - 4 - baseTop;
+        var cur = parseFloat(title.dataset.alignTop || 'NaN');
+        if (!(Math.abs(want - cur) < EPS)) {
+          title.dataset.alignTop = String(want);
+          title.style.transform = 'translate(-50%, ' + want.toFixed(2) + 'px)';
+        }
+      }
+
       if (moved) stats.ok++;
     });
 
