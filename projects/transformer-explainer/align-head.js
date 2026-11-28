@@ -97,8 +97,10 @@
   function schedule() {
     // 用 setTimeout 而不是 requestAnimationFrame：标签页在后台时 rAF 会被挂起，
     // 对齐就不会生效（讲堂大屏/切走的标签页都会踩到）。
+    // 延迟 300ms：上游的转场动画期间 DOM 一直在变，等它安静下来再动手，
+    // 免得跟动画抢位置、把动画搞乱。
     window.clearTimeout(schedule.timer);
-    schedule.timer = window.setTimeout(alignOnce, 40);
+    schedule.timer = window.setTimeout(alignOnce, 300);
   }
 
   function start() {
